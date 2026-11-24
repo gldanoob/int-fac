@@ -94,3 +94,5 @@ Class numbers and seed orders above were checked separately on the small example
 ## Parallel follow-up
 
 The [parallel research handoff](swarm-research.md) contains the arbitrary-input divisor-coefficient reduction, the exact-order reduction, the shared class-group collision experiment, a smoothness cutoff bound, and a Lean-checked cost inequality for regrouping the pinned clique network. It includes the source links and commands for reproducing the checks.
+
+The [second parallel search](swarm-round-2.md) gives an equal-order elliptic-curve split, a batch algorithm for multiplicative-order probes, explicit limits on curve schedules and digit representations, and a carry-free CRT construction with an open join-cost bound. The [PARI/GP checks](swarm-round-2.gp) reproduce the principal finite results.
