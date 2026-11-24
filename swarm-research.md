@@ -1,0 +1,127 @@
+# Parallel search for a faster deterministic factorization bound
+
+November 24, 2026. Four agents investigated discrete logarithms, class groups, smooth relations, and the clique reduction. The coordinating pass checked the small examples, proved a multiplier extension of the sieve bound, and compared generic derandomization to the linked repository's Fourier obstruction. All complete worst-case bounds found here still fall short of a new leaderboard entry. The target is a single deterministic algorithm for the smallest prime factor of every binary integer $N\ge2$. [Scoring rules](https://bigospeedrun.com/integer-factoring) · [Reference repository](https://github.com/1337isnot1337/integer-factoring)
+
+The [divisor-coefficient reduction](#recovering-the-smallest-factor-from-characteristic-q-divisor-coefficients) gives an arbitrary-input decoder with polynomial-size levels. Computing its requested scalar is the main open algorithmic step on that route.
+
+## Reproduce the local checks
+
+Run from this directory with PARI/GP and Lean 4. The host's installed Lean binary is also available at the path in the [main README](README.md).
+
+~~~sh
+lean RawClique.lean
+gp -fq swarm-checks.gp <<'GP'
+print(checkSharedPowers())
+print(checkSieve())
+print(checkOrderRoutes())
+GP
+~~~
+
+Expected GP output is `[20, 68, 105, 112, 113]`, `[572, 275, 225]` and `[[1308, 436], 29]`. The [GP source](swarm-checks.gp) includes assertions for the individual witnesses. The [Lean source](RawClique.lean) checks the arithmetic lower bound from explicit cost hypotheses. Its application to the pinned gate definitions was checked by hand.
+
+## Equal squares shared across prime-form seeds
+
+Use the discriminant family in the main README, with $N$ odd, squarefree, composite and $N\equiv3\bmod4$. For every split-prime seed $g_q$, compute $g_q^{\pm k}$ for $1\le k\le K$. Keep the identity and place every root in a common table keyed by its square. Two distinct reduced roots with the same square give a nonidentity involution and hence a split. For $s$ seeds the cost is $O(sK)$ group operations and stored forms, plus deterministic sorting or ordered-map costs on $O(b)$-bit keys. A finite miss carries no certificate of primality.
+
+For $N=24823$, the prime-11 seed to the fifth power is $(43,17,146)$. The prime-2 seed is $(2,1,3103)$. Their common square is $(4,-3,1552)$ and their quotient is $(86,69,86)$, which yields $103\cdot241$. The two seeds have orders 58 and 29 respectively. This uses an odd-order seed as the second root. The older single-seed witness took 29 squarings on the prime-11 seed. Maximum exponent and total work across seeds are different measurements.
+
+| Maximum exponent | 1 | 2 | 4 | 5 | 8 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Splits on the 120-input sweep, seed primes up to 19 | 20 | 68 | 105 | 112 | 113 |
+
+The sweep uses all distinct primes $101\le p<q\le211$ with $pq\equiv3\bmod4$. Seven inputs were missed at radius 8. One has an empty seed list and the other six have only odd-order seeds. For $17947$, the larger base including 23 gives $g_7^2/g_{23}=(67,3,67)$ and the divisor 131.
+
+### Removing a known part of the odd order
+
+For a seed of order $2^em$, $m$ odd, let $A$ be the odd part of $\operatorname{lcm}(1,\ldots,B)$ with $B\ge1$. Set $h=g^A$ and $\rho=m/\gcd(m,A)$. Compute $A$ or apply its known prime-power factors successively. Its bit length is $O(B)$. For trial parameters $s,L$, form $z=h^{2^s}$. Compare the baby powers $z^{2j}$, $0\le j<L$, with the giant powers $z^{2(i+1)L-1}$, $0\le i<L$. The positive differences are all odd numbers through $2L^2-1$. A match occurs precisely if $s\ge e$ and $\rho\le2L^2-1$. Its odd difference $d$ is divisible by $\rho$. Then $h^d$ has order exactly $2^e$ and squaring down gives an involution if $e>0$.
+
+Trial widths $s=L=1,2,4,\ldots$ give $O(B+e+\sqrt{\rho})$ group operations **per seed**, with $O(L)$ table entries in a trial, plus the costs of constructing the exponent, bookkeeping and comparison. Interleaving this with the original orbit walk at $B=1$ gives $O(e+\min\{\sqrt m,\operatorname{ord}_m(2)\})$ per even-order seed. Baby-step/giant-step and odd exponents in order computation are classical. A uniform bound on residual order or on a useful cross-seed collision is still needed. On the abstract orders $2^e(2^r-1)$ for $e\ge1,r\ge2$, any single-seed multiplication/inversion schedule outputting the involution must reach absolute exponent at least $2^{e-1}(2^r-1)$. Each multiplication at most doubles the largest absolute exponent. This requires at least $e+r-1$ multiplications and says nothing about which class groups arise in a worst-case arithmetic family. [Sutherland, *Order Computations in Generic Groups*](https://math.mit.edu/~drew/sutherland-phd.pdf)
+
+## How small a quadratic-sieve factor base can be
+
+Take distinct primes $\sqrt X\le p<q\le\sqrt{2X}$ and $N=pq$. For each input try $x=\lceil\sqrt N\rceil+j$ for $0\le j<H$. Accept $x^2-N=d^2u$ with $u$ $B$-smooth. This even allows an unbounded square cofactor. Write $\ell=\log\log X$, $S=\log X/\ell^\alpha$, $H=\lfloor\exp(CS)\rfloor$, $B=\exp(D\ell^{1+\alpha})$ for fixed positive $C,D,\alpha$. Use natural logarithms in this section. The fraction of this family producing at least one row is at most
+$$
+\exp\!\big((C-1/(2D)+o(1))S\big).
+$$
+In particular it tends to zero when $2CD<1$. At a candidate score of $0.6$, any $\log B=o((\log b)^{1.6})$ is too small for this single-polynomial scan with any fixed $C$. This includes every fixed polynomial cutoff in bit length $b$. It leaves room for much larger bases, polynomial changes, and schemes combining distinct large-prime cofactors across rows.
+
+**Counting proof.** Every value $m=x^2-N$ is positive and at most $M=4\sqrt X H$ for large $X$. Only $O(\sqrt X)$ different $x$ can occur over the family. A pair $(x,m)$ identifies at most one $N$. For $1/2<\sigma<1$, the number of admissible $m\le M$ is at most
+$$
+M^\sigma\zeta(2\sigma)\prod_{p\le B}(1-p^{-\sigma})^{-1}.
+$$
+This follows by summing $(M/d^2u)^\sigma$ over all representations, allowing repeats. Take $t=(\ell-\sqrt\ell)/\log B$, $\sigma=1-t$. Then $t\sim1/(D\ell^\alpha)$, $\zeta(2\sigma)=O(1)$, and the logarithm of the Euler product is $O(B^t(1+\log B))=o(S)$ by the harmonic-sum bound. The prime number theorem gives $\asymp X/(\log X)^2$ inputs. Substitution proves the bound. [Lichtman–Pomerance on Rankin's bound](https://math.dartmouth.edu/~carlp/smoothfinal.pdf) · [Pomerance on quadratic-sieve relations](https://math.dartmouth.edu/~carlp/PDF/qs08.pdf)
+
+**Extension to multipliers.** For a common menu of $\le\exp(\lambda S)$ positive integers $k\le\exp(\kappa S)$, scan the same $H$ offsets above $\sqrt{kN}$ and test $x^2-kN$. For large $X$ each $k<p$, so $kN$ is nonsquare. At fixed $k$ there are $O(\sqrt{kX})$ possible $x$ and $M=O(\sqrt{kX}H)$. Substitution in the same bound costs an extra $k^{1-t/2}$ per multiplier. The resulting exponent coefficient is at most $C+\lambda+\kappa-1/(2D)+o(1)$. In particular a polynomial-in-$b$ menu of polynomial-in-$b$ multipliers costs $o(1)$ on this scale. The bound covers adaptive selection within the common menu. Multipliers unrestricted across inputs require a bound on their union.
+
+**Finite check.** At $N=136225291=10007\cdot13613$ and $B=31$, the first accepted offset is 129 and its value is 3,038,310. Across the 572 pairs $10000\le p<10100$, $13500\le q\le14000$, 275 inputs had no fully smooth row in their first 64 offsets and 225 had none even with square cofactors. These counts were independently reproduced in Python and GP.
+
+## What regrouping can save in the pinned clique construction
+
+The pinned endpoint counts divisors having a prescribed prefix and recovers the least nontrivial divisor bit by bit. Its parameter $r=2^{\lfloor\ell/2\rfloor}=\Theta(\sqrt{\log b})$ discounts a common-width evaluator charge. With $P$ clique vertices and largest pair width $L$, the explicit padding exponent includes $\lfloor P^2L/r\rfloor+1$. The source endpoint is `IntegerFactoring.HalfAppendix.sqrtLogLog_factoring`. [Pinned Lean endpoint](https://github.com/1337isnot1337/integer-factoring/blob/e91442d3162cae7f775e008efb2ea998c4478344/formal-appendix/HalfTheorem.lean) · [Prefix evaluator](https://github.com/1337isnot1337/integer-factoring/blob/e91442d3162cae7f775e008efb2ea998c4478344/formal-appendix/PrefixEvaluator.lean) · [Pad](https://github.com/1337isnot1337/integer-factoring/blob/e91442d3162cae7f775e008efb2ea998c4478344/formal/HalfPad.lean)
+
+For an arbitrary partition of the original gates, let $E$ be the log base two of the largest raw local setting count, and $W$ the total width of raw crossing messages before padding. Write $A=2S$ for the width of each of the `mid` and `ib` layers. Every pair across these two layers communicates, using $f=8S^2+1$ bits. Each `ib` setting consists of $A$ independent raw residues modulo $M=2^{8S^2}+1$. Let $t$ be the maximum number of `ib` gates in any one group. The group attaining that maximum alone gives $E\ge At\log_2M$. Each `mid` sends at least $A-t$ messages outside its group, so $W\ge fA(A-t)$. Thus $E+W\ge32S^4\ge8b$. Since $2W\le P^2L$, the larger charged exponent $\max(E,P^2L/r)$ is at least $16b/(2+r)$. This applies to exhaustive raw enumeration and concatenated raw messages with the pinned schedule. Exploiting correlations before enumeration or changing the evaluator would change the hypotheses. [Pinned gate settings and links](https://github.com/IsaacRudich/SubexponentialDeterministicFactoring/blob/c91cc3f4947caca8977e81a5d14244f73b5ae2b1/FactoringAux/MulNet.lean#L92-L145) · [Constructor](https://github.com/1337isnot1337/integer-factoring/blob/e91442d3162cae7f775e008efb2ea998c4478344/research/half-top-constructor.md)
+
+One target for score $0.6$ is a uniform replacement for the evaluator's coefficient $e_\ell=O(2^{-\ell/2})$ by $O(2^{-3\ell/5})$, preserving its remaining size and machine-cost hypotheses and adjusting the pad accordingly. The present central-piece channel widths already exceed the corresponding width allowance by a linear term. [Evaluator interface](https://github.com/anthropics/formal-math/blob/16a5ce41304fcdaea4e0be7c132e1c361dc26da5/eth/proof/statements/AppRunningTimeStatement.lean) · [Central-piece audit](https://github.com/1337isnot1337/integer-factoring/blob/e91442d3162cae7f775e008efb2ea998c4478344/research/half-evaluator-audit.md)
+
+## Exact orders and the discrete-log direction
+
+Let $b$ be the input bit length, $K=\lceil(b(\log_2 b)^2)^{1/3}\rceil$ and $B=2^K$. Define $Q(b)$ as the maximum bit cost of finding the exact multiplicative order of a **prime** base $a\le B$ coprime to an unfactored odd modulus of at most $b$ bits. The following oracle reduction costs $O(b^2 Q(b))+2^{O(K)}$. It combines order accumulation with the deterministic recovery in §8 of Źrałek. [Źrałek, Theorem 8.1 and Lemmas 8.3–8.5](https://arxiv.org/pdf/0707.4102)
+
+1. Strip primes through $B$ with multiplicity. On the remaining odd modulus $m>1$, start with $E=1$. For each prime $a\le B$, query its order only if $a^E\ne1\bmod m$, and take the lcm. Each query at least doubles $E$, which divides $\varphi(m)<m$. Hence at most $b$ queries suffice. At the end $E$ annihilates every base through $B$, including composite bases by multiplicativity.
+2. Factor the odd part of $E$ by the same procedure. It is at most $\varphi(m)/2<m/2$, as $\varphi(m)$ is even and the odd part divides it. There is only one such recursive call per level. Its depth is at most $b$. The factored $E$ works for every divisor $d$ of this level's modulus.
+3. On each cofactor compute exact orders of all the bases prescribed by Źrałek for that cofactor, including composite bases. Starting with $E$, remove prime divisors by modular powering. For each resulting order $r$ test $\gcd(a^{r/l}-1,d)$ at every prime $l\mid r$. A proper gcd splits $d$. If there is no witness, every prime dividing $d$ is 1 modulo the lcm $H$ of the prescribed orders. Źrałek's §8 recovery either finds a divisor by scanning $1+jH$ or reconstructs it by factoring the base-$H$ digit polynomial. The original use of factored $\varphi(m)$ to obtain factored orders is supplied here by factored $E$. Try the bounded cases and verify proposed divisors. Every split at this level reuses $E$, without opening a new chain of order queries. The base cutoff dominates $L_d[1/3,1]$ and the remaining work over all levels fits $2^{O(K)}$, absorbing polynomial factors. Handle small inputs and primality deterministically.
+
+A discrete-log routine that returns the **least nonnegative** $x$ satisfying $a^x=a^{-1}\bmod m$ without being supplied the order gives $r=x+1$, also when $r=1$. A routine whose input includes the group order does not fill this role. Conversely, given a fast general factorizer, factor $m$, compute and factor $\varphi(m)$, then remove redundant prime powers to recover the order. Thus for fixed logarithmic-saving scores the small-base exact-order problem is an equivalent target up to the costs above. This does not establish such an equivalence for all discrete-log instances. Plain baby-step/giant-step with order bounded by $2^b$ costs $2^{b/2}\operatorname{poly}(b)$. [Harvey–Hittmeir on deterministic order searches](https://arxiv.org/pdf/2601.11131)
+
+At $m=13694761$ and illustrative cutoff 3, the orders are 1308 and 436. Only the first base needs a query. All five prime-divisor gcd tests are 1. Yet $m=1+6H+8H^2$ with $H=1308$, and $1+6X+8X^2=(1+2X)(1+4X)$ recovers $2617\cdot5233$. The agent also compared its small-input procedure with trial division through 4096. The local GP check certifies the orders, gcds and digit example.
+
+## Two derandomization checks
+
+**Padding gives a conditional benchmark.** Put $u=\lceil\sqrt{b\lceil\log_2(b+1)\rceil}\rceil$. Encode a bit query for the smallest prime factor together with exactly $2^u$ unary padding symbols. Reject malformed inputs, checking the claimed padding by its length. On valid inputs Lenstra–Pomerance computes the exact answer in expected time polynomial in the padded length. Hence the padded bit language lies in ZPP. If $\mathrm P=\mathrm{ZPP}$, constructing and deterministically deciding the $b$ padded queries costs $2^{O(\sqrt{b\log b})}$ in total. Impagliazzo–Wigderson's exponential circuit-hardness hypothesis for E would suffice through $\mathrm P=\mathrm{BPP}$. More generally a deterministic padded-language time of $2^{O((\log n)^2/(\log\log n)^{1+\alpha})}$ at padded length $n$ suffices for $2^{O(b/(\log b)^\alpha)}$ factoring. These are conditional translations of known theorems. [Lenstra–Pomerance](https://cr.yp.to/bib/1992/lenstra.pdf) · [Impagliazzo–Wigderson](https://doi.org/10.1145/258533.258590)
+
+**Sparse powers can sample characters of an unknown-period orbit.** Suppose the period of $g$ is at most $H$ and consider all nonprincipal characters of $\langle g\rangle$. For a uniform integer $v$ with $d=\lceil\log_2(16H)\rceil$ bits, the absolute character mean of $g^v$ is at most $H/2^d$ by a geometric sum. A character of $g^v$ is a product of $d$ unit phases, one per binary digit. Apply the Gopalan–Kane–Meka Fourier-shape generator at constant error $1/8$. Its seed length $s_0=O(\log(2d)(\log\log(4d))^2)$ gives a base multiset with bias at most $1/4$, simultaneously for all these characters. The algorithm needs the bound $H$ alone. [Gopalan–Kane–Meka, Theorem 1.1](https://cseweb.ucsd.edu/~dakane/CShapes.pdf)
+
+To reach bias $\epsilon$, walk $t=O(\log(2/\epsilon))$ steps on an explicit constant-degree expander on the seed indices, outputting the sum of the visited exponents. Pad the seed length to be even and use a lazy, constant-power square-grid expander with second absolute eigenvalue $\le1/8$. If $P=J+E$ is its normalized transition matrix, $J$ the uniform projection and $D$ the diagonal of character phases, then $\|PDP\|\le1/4+2/8+1/64<1$. In the stationary walk expectation, disjoint blocks $PDP$ give exponential decay in $t$ because all intervening factors have norm at most 1. The deterministic enumeration uses $s_0+O(\log(2/\epsilon))$ bits of index, counting an initial seed and constant-degree edge choices. Each resulting exponent has $O(\log H+\log t)$ bits. This gives sparse candidate exponents and allows a common additive offset. [Gabber–Galil expander construction](https://doi.org/10.1016/0022-0000(81)90040-4)
+
+For a real orbit function $F$ nonpositive off the desired event, with mean $\mu>0$ and normalized nonprincipal Fourier mass $A=\sum_{\chi\ne1}|\widehat F(\chi)|$, bias $\epsilon$ ensures a hit whenever $\epsilon A<\mu$. This makes the missing arithmetic estimate explicit. The linked repository already exhibits an ambient class-group distribution and a translate missing its smooth set, with bias $\epsilon_*=2^{-b/64+o(b)}$ along its discriminant family under the report's character estimate. The same missed translate forces $A/\mu\ge1/\epsilon_*$ for **every** real positive-mean function nonpositive off that set on the ambient group, by Fourier inversion. Changing the indicator to a signed minorant cannot solve this particular ambient obstruction. A bound on the actual target orbit, or a different test implying a useful relation, would need its own proof. Even a smooth hit needs a rank or factor-extraction argument. [Upstream missed-translate calculation, §5](https://github.com/1337isnot1337/integer-factoring/blob/main/research/smooth-set-fourier-norm.md) · [Upstream target-cycle normalization](https://github.com/1337isnot1337/integer-factoring/blob/main/research/window-orbit-normalization.md)
+
+## Recovering the smallest factor from characteristic-q divisor coefficients
+
+The linked project treats a characteristic-two field component on promised semiprimes. Its integral faithful-character coefficient also suggests the following different oracle. For a level prime $q\equiv3\bmod4$, $q\ge7$, $q\nmid N$, fix a primitive root $g$ and write $\chi(g)=\zeta_{q-1}$. Request the **unnormalized integral** coefficient $\sum_{d\mid N}\chi(d)$ reduced in $\mathbb F_q$ under the specified reduction homomorphism $\zeta_{q-1}\mapsto g^j$, where $\gcd(j,q-1)=1$. The ring map exists because $g^j$ is a primitive $(q-1)$-st root. Its answer is precisely $\sigma_j(N)=\sum_{d\mid N}d^j\bmod q$. This interface requires the requested embedding at the original, unfactored input and levels up to the stated bound. A provider for a fixed characteristic-two component supplies different data. [Upstream semiprime interface](https://github.com/1337isnot1337/integer-factoring/blob/7217aabb912774660df857a61466e8ca12c34c36/research/semiprime-single-field.md) · [Integral weight-one coefficient](https://github.com/1337isnot1337/integer-factoring/blob/main/research/weight-one-divisor-coefficients.md)
+
+**Semiprimes.** For distinct primes $p,r$ with $N=pr$, the single choice $j=1$ gives $p+r\equiv\sigma_1(N)-N-1\bmod q$. Once the CRT product exceeds $N$, the sum is known exactly and the quadratic with product $N$ recovers both primes. The agent checked all 300 products of two distinct primes below 98 using literal divisors, including 3,312 coprime level evaluations. The repository's characteristic-two method recovers squared residues by a different calculation.
+
+**Arbitrary integers.** Suppose each requested scalar costs at most $\operatorname{poly}(b,q)(F(b)+1)$ bit operations for $b$-bit $N$ and the levels needed below. Then the least prime factor is computable deterministically in
+$$
+2^{O(b/\log b)}(F(b)+1)
+$$
+bit operations. For instance a scalar engine with saving exponent $0.6$ would retain that exponent end to end. A preliminary trial-division step sharpens this to $2^{O(\sqrt b)}(F(b)+1)$ when the provider handles levels up to $2^{O(\sqrt b)}$. For scores through 1, a provider restricted to polynomial-size levels suffices with the additive cost below. The decoder is explicit. The required engine is open.
+
+The upstream project already uses odd divisor moments on the squared divisor nodes, Hankel reconstruction and root isolation for arbitrary inputs. The variant here obtains those moments from selectable characteristic-$q$ reductions of the weight-one coefficient, and decides a threshold directly by testing a matrix for positive definiteness. If starting from the normalized coefficient of upstream equation (3b), undo the normalization by multiplying by $N^{j(q+1)/4}\bmod q$. A single value already reduced at another root does not permit that root to be changed. [Upstream moment decoder and roughness bound](https://github.com/1337isnot1337/integer-factoring/blob/1b331929bb774ae8dcb8f50cdd10a3243b7c649f/research/divisor-moment-recovery.md) · [Normalization formula](https://github.com/1337isnot1337/integer-factoring/blob/1b331929bb774ae8dcb8f50cdd10a3243b7c649f/research/sparse-faithful-character.md)
+
+1. **Bound the number of moments.** Write $U$ for an upper bound on the number of divisors $\tau(N)$. There are at most $\sqrt b$ primes at most $\sqrt b$, each with exponent at most $b$, contributing a factor $(b+1)^{\sqrt b}$ to $\tau(N)$. Above $\sqrt b$ the sum of the exponents is at most $2b/\log_2 b$, and $e+1\le2^e$. Thus an explicit $U=2^{O(b/\log b)}$ suffices. For small inputs take a fixed finite cutoff.
+2. **Get exact odd power sums.** For each needed odd $j=O(U)$, use distinct primes $q\equiv-1\bmod4j$. Then $\gcd(q-1,j)=1$ as $j$ is odd. Accumulate CRT residues until the product exceeds $N^{j+1}\ge\sigma_j(N)$. Only $t=O(bj+1)$ primes are required since each is at least 2. Enough such primes of size $\operatorname{poly}(b,U)$ exist unconditionally. To see this, take an auxiliary prime $L>t+b+4j+8$ of comparable size, and for each nonzero residue modulo $L$ combine it by CRT with $-1\bmod4j$. Each reduced class modulo $4jL$ has a prime $\ll(4jL)^{C}$ by Linnik. The primes in different classes are distinct. Discard primes below 7 and the at most $b$ that divide $N$. Enumerating the progression, finding primitive roots and performing CRT costs polynomial time in $b,U$, apart from the provider. This argument does not require factoring $N$. [Least-prime-in-progression bound](https://doi.org/10.4064/aa150-1-4)
+3. **Remove the divisor 1.** Set $m_h=\sigma_{2h+1}(N)-1$. For $D=\{d>1:d\mid N\}$ this is $\sum_{d\in D}d(d^2)^h$. Define $H_0[i,k]=m_{i+k}$ and $H_1[i,k]=m_{i+k+1}$ with indices starting at zero. Successive leading determinants of $H_0$ are positive up to size $s=|D|$ and zero at size $s+1$. This follows by writing $H_0=V\operatorname{diag}(d)V^\top$ for the Vandermonde matrix $V[i,d]=(d^2)^i$. Distinct positive divisors give distinct nodes, including on prime powers. Thus the decoder can compute the first singular size without knowing $s$ in advance.
+4. **Test a divisor threshold.** Take both matrices at size $s$, making $V$ square and invertible. For any positive integer $Y$,
+$$
+2H_1-(2Y^2+1)H_0
+=V\operatorname{diag}\big(d(2d^2-2Y^2-1)\big)V^\top .
+$$
+The diagonal never vanishes and is positive exactly at $d>Y$. The matrix is positive definite precisely when all divisors in $D$ exceed $Y$. Compute this by exact leading principal determinants and binary-search $1<d\le N$. The least divisor found is prime. The entries have $O(Ub)$ bits. Determinants of order at most $U$ have polynomial bit length by Hadamard's bound and are computable in polynomial bit time by exact elimination. All queries, matrix work and the search therefore fit the stated bound. No root-finding or cross-level pairing is needed.
+
+**Tradeoff for the levels.** In ascending order, trial-divide through $2^t$, returning the first factor found. If none divides $N$, the sum of its prime exponents is at most $b/t$ and $\tau(N)\le2^{b/t}$. The total cost becomes $2^{O(t)}\operatorname{poly}(b)+2^{O(b/t)}\operatorname{poly}(b)(F(b)+1)$, with levels at most $\operatorname{poly}(b,2^{b/t})$. Choosing $t=\lceil\sqrt b\rceil$ gives the sharper multiplicative bound above. Choosing $t=\lceil b/\log_2(b+1)\rceil$ makes every required level polynomial in $b$ and gives $2^{O(b/\log b)}+\operatorname{poly}(b)(F(b)+1)$. Thus the oracle target for score $0.6$ only needs polynomial-size levels.
+
+The GP decoder takes a scalar callback. Its test callback constructs the formal character value from supplied divisors by discrete logs in $\mathbb F_q^\times$. Each of the 63 inputs from 2 through 64 was recovered, including primes, prime powers and products with repeated factors. This is an end-to-end test of reconstruction and level selection. It supplies no timing evidence for evaluating the scalar without the divisors.
+
+~~~sh
+gp -fq swarm-checks.gp <<'GP'
+print(checkMoments())
+GP
+~~~
+
+Expected output is 63.
+
+## Additional order-search checks
+
+The odd-difference criterion was checked on all 478 split-prime seeds of the 120-input sweep, with $A=15$, $0\le s\le6$ and $1\le L\le4$. A separate $s=6,L=8$ run split 113 inputs. The function `checkOddDifferences()` returns $[13384,113]$. At $N=32231$ and seed 5, the odd difference is the composite 121, and the ambiguous form $(90,13,90)$ gives 167. On the 24,823 example with $A=1,s=1,L=4$, one explicit schedule uses 17 compositions including squarings and the final identity check. Form $z=g^2$, then $z^2,z^4,z^6,z^7,z^8$. The giant probes $z^{15},z^{23},z^{31}$ give $z^{31}=z^2$. Building $g^{29}$ along exponents $2,3,6,7,14,28,29$ and squaring it completes the count. The check measures one seed and excludes table and bit costs.
+
