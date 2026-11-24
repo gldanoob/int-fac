@@ -37,6 +37,8 @@ These are different oracle contracts. In the bounds below, $L_N[1/3,c]=\exp((c+o
 | One multiple $U$ of $\varphi(N)$ with $0<U<N^2$, for distinct primes $N=pq$ of equal bit length | Coron–May give deterministic factor recovery in $O((\log N)^9)$ time. Their Theorem 3 is stated using $U=ed-1$ and its proof needs only $U$ and $N$. An exponent known to annihilate one element supplies a multiple of that element's order, which can be smaller than $\varphi(N)$. [Theorem 3 and proof, §4](https://www.crypto-uni.lu/jscoron/publications/equivdet.pdf#page=4) |
 | Only $N$ and a target $1\le D<N-1$, with $N\ge3$ | Harvey–Hittmeir's Theorem 1.1 gives either a unit of order **greater than** $D$ or a proper divisor, without a power-of-$N$ lower threshold on $D$. For non-small $D$ its bit cost is $O(\sqrt D\log D\log N/\sqrt{\log\log D})$. A lower bound on a chosen unit's order does not give the order of a prescribed base. [2026 preprint, Theorem 1.1](https://arxiv.org/pdf/2601.11131#page=3) |
 
+The [Hurwitz residue reduction](hurwitz-residues.md#one-large-index-and-quarter-bit-precision-suffice) recovers arbitrary factorizations using one large three-square or raw form count per twist at quarter-bit precision. It combines the published Hurwitz product formula with univariate small-root reconstruction.
+
 ## Existing coefficient and lattice decoders
 
 | Given information | What the source already recovers |
@@ -52,6 +54,8 @@ These are different oracle contracts. In the bounds below, $L_N[1/3,c]=\exp((c+o
 The [quadratic-order reduction](quadratic-order-reduction.md) gives a fixed-size primitive-form certificate for nonfundamental discriminants and the transfer from class-number multiples to complete factoring.
 
 The [CRT and oracle follow-up](order-and-crt-reductions.md) gives Boneh’s polynomial construction for lists of residues, a quantitative error tolerance, and further published cases for divisor sums, elliptic curves and high-multiplicity divisors.
+
+The [multiplier analysis](twisted-square-witnesses.md) compares Lehman, SQUFOF, CFRAC and the published Lenstra–Pomerance twists. The [prime-power construction](prime-power-witnesses.md) reaches large reduced coefficients with a known short square witness.
 
 ## Multiplication networks and known failed transfers
 

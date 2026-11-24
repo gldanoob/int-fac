@@ -8,6 +8,9 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
+| [Low bits of Hurwitz class numbers](research/hurwitz-residues.md#one-large-index-and-quarter-bit-precision-suffice) | All-input reduction to the low bits of a positive three-square count, including repeated prime factors |
+| [Twisted represented squares](research/twisted-square-witnesses.md) | Sharp count of inputs covered by small coefficients, roots pooled across multipliers, and a CFRAC failure family |
+| [Prime-form powers and second witnesses](research/prime-power-witnesses.md) | A guaranteed large leading coefficient, a short witness and the gcd detected by each secant |
 | [Represented squares and their height](research/represented-square-height.md) | A 120-input experiment and an infinite family missed by the bounded first-square search |
 | [Factoring from quadratic-order class numbers](research/quadratic-order-reduction.md) | All-input reduction, unknown conductors, and primitive-form counting certificates |
 | [Class-group walks and finite tape covers](research/class-group-walks.md) | Lenstra–Pomerance derandomization, smooth relations, and equal-square witnesses |
@@ -21,6 +24,7 @@ Start with the [known-results index](research/known-results.md), including the [
 | Direction | What the current result still needs |
 | --- | --- |
 | [Lenstra–Pomerance derandomization](research/round-3.md#why-endpoint-mixing-alone-does-not-derandomize-lenstrapomerance) | An efficient exponent schedule covering useful lifts within a fixed class and parity |
+| [Three-square counts](research/hurwitz-residues.md#one-large-index-and-quarter-bit-precision-suffice) | A faster evaluator for the lowest $\lceil b/4\rceil+1$ bits of the count at the chosen square multiples. |
 | [Genus characters](research/quadratic-order-reduction.md#small-split-primes-for-every-negative-order-discriminant) | Small split prime forms cover the two-primary subgroup for every negative order discriminant. The remaining cost is computing their projections. |
 | [Class-group relations](research/round-3.md#mixed-relations-can-recover-several-deep-roots-at-once) | A uniform way to find short relations of sufficient rank |
 | [Multiplicative orders](research/round-3.md#splitting-from-an-unfactored-global-order-multiple) | An affordable global relation with a small residual exponent |
@@ -35,4 +39,4 @@ Run from the repository root with Lean 4 and PARI/GP installed. The checked vers
 make check
 ~~~
 
-The check uses the installed elan stable binary when available and otherwise uses Lean on the search path. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements, together with existence and uniqueness of primitive-form certificates. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
+The check uses the installed elan stable binary when available and otherwise uses Lean on the search path. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements, together with existence and uniqueness of primitive-form certificates and the three conic secant identities. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.

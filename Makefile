@@ -7,4 +7,5 @@ check:
 	"$(LEAN)" formal/RawClique.lean
 	"$(LEAN)" formal/OrderQueries.lean
 	"$(LEAN)" formal/PrimitiveCertificate.lean
+	"$(LEAN)" formal/Secant.lean
 	@printf '%s\n' 'iferr(read("experiments/check.gp"), err, print(err); quit(1))' | "$(GP)" -fq

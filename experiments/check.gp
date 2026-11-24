@@ -1,7 +1,10 @@
 read("experiments/round-1.gp");
 read("experiments/round-3.gp");
 read("experiments/primitive-forms.gp");
-read("experiments/represented-squares.gp");
+read("experiments/seed-powers.gp");
+read("experiments/twisted-convergents.gp");
+read("experiments/hurwitz-residues.gp");
+read("experiments/hurwitz-prefixes.gp");
 
 if(checkWalks() != [120,108,111,113], error("square walks"));
 if(checkSharedPowers() != [20,68,105,112,113], error("shared powers"));
@@ -36,4 +39,11 @@ if(checkFieldDecoder() != [54,54,57,60,53,54,53,0],error("field decoder levels")
 if(checkPrimitiveForms() != 200, error("primitive form sweep"));
 checkRepresentedSquares();
 checkNearSquareObstruction();
+if(checkSeedPowers() != [7863,8,[120,110,118,119]], error("seed powers"));
+checkTwistedConvergents();
+checkHurwitzResidues();
+checkHurwitzPrefixes();
+checkOddHurwitzRoots();
+checkHurwitzSigns();
+if(checkHurwitzSplits() != 5, error("quarter-bit end-to-end splits"));
 print("PARI/GP checks passed");
