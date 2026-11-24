@@ -1,5 +1,5 @@
-\\ Run from the workspace root with gp -fq swarm-checks.gp.
-read("square-walk.gp");
+\\ Run from the workspace root with gp -fq experiments/round-1.gp.
+read("experiments/square-walk.gp");
 
 sharedPowerFactor(n, primeBound, radius) = {
   my(identity = Qfb(1, 1, (1+n)/4), bySquare = Map());

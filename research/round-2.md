@@ -1,6 +1,6 @@
 # Second parallel search
 
-Work on November 24, 2026. The target is a deterministic bound below $2^{O(b/\sqrt{\log b})}$ on every $b$-bit input in the sense of improving the logarithmic saving exponent. The [first search](swarm-research.md) describes the coefficient and order computations that would suffice. This round examines methods of performing them. No improved all-input exponent has been established here. [Leaderboard and model](https://bigospeedrun.com/integer-factoring)
+Work on November 24, 2026. The target is a deterministic bound below $2^{O(b/\sqrt{\log b})}$ on every $b$-bit input in the sense of improving the logarithmic saving exponent. The [first search](round-1.md) describes the coefficient and order computations that would suffice. This round examines methods of performing them. No improved all-input exponent has been established here. [Leaderboard and model](https://bigospeedrun.com/integer-factoring)
 
 ## Results inherited from the reference repository
 
@@ -73,10 +73,10 @@ The rank concerns the all-index scalar and explicit linear interfaces. A program
 | 7 | 5 | 41 | 32768 | 39 | 41 |
 | 7 | 1 | 83 | 131072 | 44 | 83 |
 
-Use the [GP checks](swarm-round-2.gp) from this directory.
+Use the [GP checks](../experiments/round-2.gp) from the repository root.
 
 ~~~sh
-gp -fq swarm-round-2.gp <<'GP'
+gp -fq experiments/round-2.gp <<'GP'
 print(coefficientCut(13,7,1))
 print(coefficientCut(41,7,5))
 print(coefficientCut(83,7,1))
@@ -133,7 +133,7 @@ At $N=3000026000051$, the lattice agent counted 577352, 6228, 508 and 142 surviv
 ## Reproduce the checks
 
 ~~~sh
-gp -fq swarm-round-2.gp <<'GP'
+gp -fq experiments/round-2.gp <<'GP'
 print(checkEqualOrders())
 print(checkTwists())
 print(checkAdaptiveTwists())
@@ -198,7 +198,7 @@ For odd $K$ coprime to $N$, consider the unjoined graph $(u,v)$ of unit residues
 For the fully constrained positive graph $xy=N$ over integers, distinct factor pairs also have infeasible midpoints, by strict convexity of $N/x$. For $N$ the product of the first $k$ primes this gives $d+\log_2 J\ge k=\Theta(b/\log b)$. Even restricting both factors to $[N^{0.49},N^{0.51}]$ changes the count by only a $1-o(1)$ factor as $k\to\infty$. A uniformly random divisor has mean log equal to $(\log N)/2$ and variance $\tfrac14\sum_{p\mid N}(\log p)^2=O(b\log b)$, so Chebyshev's inequality applies. At $k=16$ the exact finite count in that interval is 3,870 out of 65,536. A semiprime has only two nontrivial ordered pairs, and a factoring procedure needs to return only one factor. Neither midpoint bound is a running-time lower bound.
 
 ~~~sh
-gp -fq swarm-round-2.gp <<'GP'
+gp -fq experiments/round-2.gp <<'GP'
 print(checkDeepRoot())
 print(checkFaithfulCut())
 print(checkEventRanks(1))

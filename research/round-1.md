@@ -6,18 +6,18 @@ The [divisor-coefficient reduction](#recovering-the-smallest-factor-from-charact
 
 ## Reproduce the local checks
 
-Run from this directory with PARI/GP and Lean 4. The host's installed Lean binary is also available at the path in the [main README](README.md).
+Run from the repository root with PARI/GP and Lean 4. The [early experiment notes](class-group-walks.md#reproduce-the-checks) give the installed Lean binary path on the original machine.
 
 ~~~sh
-lean RawClique.lean
-gp -fq swarm-checks.gp <<'GP'
+lean formal/RawClique.lean
+gp -fq experiments/round-1.gp <<'GP'
 print(checkSharedPowers())
 print(checkSieve())
 print(checkOrderRoutes())
 GP
 ~~~
 
-Expected GP output is `[20, 68, 105, 112, 113]`, `[572, 275, 225]` and `[[1308, 436], 29]`. The [GP source](swarm-checks.gp) includes assertions for the individual witnesses. The [Lean source](RawClique.lean) checks the arithmetic lower bound from explicit cost hypotheses. Its application to the pinned gate definitions was checked by hand.
+Expected GP output is `[20, 68, 105, 112, 113]`, `[572, 275, 225]` and `[[1308, 436], 29]`. The [GP source](../experiments/round-1.gp) includes assertions for the individual witnesses. The [Lean source](../formal/RawClique.lean) checks the arithmetic lower bound from explicit cost hypotheses. Its application to the pinned gate definitions was checked by hand.
 
 ## Equal squares shared across prime-form seeds
 
@@ -114,7 +114,7 @@ The diagonal never vanishes and is positive exactly at $d>Y$. The matrix is posi
 The GP decoder takes a scalar callback. Its test callback constructs the formal character value from supplied divisors by discrete logs in $\mathbb F_q^\times$. Each of the 63 inputs from 2 through 64 was recovered, including primes, prime powers and products with repeated factors. This is an end-to-end test of reconstruction and level selection. It supplies no timing evidence for evaluating the scalar without the divisors.
 
 ~~~sh
-gp -fq swarm-checks.gp <<'GP'
+gp -fq experiments/round-1.gp <<'GP'
 print(checkMoments())
 GP
 ~~~

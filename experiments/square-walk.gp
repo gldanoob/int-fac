@@ -1,4 +1,4 @@
-\\ Load with gp -fq square-walk.gp and run checkWalks().
+\\ Load with gp -fq experiments/square-walk.gp and run checkWalks().
 \\ Experiments assume n is odd, squarefree and congruent to 3 modulo 4.
 \\ For an odd fundamental discriminant -n, a nonidentity ambiguous form splits n.
 ambiguousDivisor(n, z) = {
