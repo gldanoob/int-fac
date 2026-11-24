@@ -5,4 +5,5 @@ GP ?= gp
 check:
 	"$(LEAN)" formal/TapeCover.lean
 	"$(LEAN)" formal/RawClique.lean
+	"$(LEAN)" formal/OrderQueries.lean
 	@printf '%s\n' 'iferr(read("experiments/check.gp"), err, print(err); quit(1))' | "$(GP)" -fq

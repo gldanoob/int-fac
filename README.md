@@ -4,7 +4,7 @@ This repository investigates algorithms that return the smallest prime factor of
 
 ## Research
 
-Start with the [known-results index](research/known-results.md). Before deriving a lemma or running a new sweep, check the published theorem and the latest upstream correction for that question. Record the exact input, assumptions, guarantee and source next to any remaining gap.
+Start with the [known-results index](research/known-results.md) and the [order-oracle and CRT reductions](research/order-and-crt-reductions.md). Before deriving a lemma or running a new sweep, check the published theorem and the latest upstream correction for that question. Record the exact input, assumptions, guarantee and source next to any remaining gap.
 
 | Report | Starting points |
 | --- | --- |
@@ -19,6 +19,7 @@ Start with the [known-results index](research/known-results.md). Before deriving
 | Direction | What the current result still needs |
 | --- | --- |
 | [Lenstra–Pomerance derandomization](research/round-3.md#why-endpoint-mixing-alone-does-not-derandomize-lenstrapomerance) | An efficient exponent schedule covering useful lifts within a fixed class and parity |
+| [Genus characters](research/class-group-walks.md#small-split-primes-already-cover-the-two-primary-part) | Small split prime forms give even-order seeds for fundamental negative discriminants with nontrivial genus quotient. Computing the two-primary projections is the remaining cost. |
 | [Class-group relations](research/round-3.md#mixed-relations-can-recover-several-deep-roots-at-once) | A uniform way to find short relations of sufficient rank |
 | [Multiplicative orders](research/round-3.md#splitting-from-an-unfactored-global-order-multiple) | An affordable global relation with a small residual exponent |
 | [Divisor coefficients](research/round-3.md#two-upstream-field-evaluations-per-level-suffice-for-triprimes) | A fast way to evaluate the supplied character sums on the original composite input |
@@ -32,4 +33,4 @@ Run from the repository root with Lean 4 and PARI/GP installed. The checked vers
 make check
 ~~~
 
-The check uses the installed elan stable binary when available and otherwise uses Lean on the search path. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover and raw clique-cost statements. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
+The check uses the installed elan stable binary when available and otherwise uses Lean on the search path. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
