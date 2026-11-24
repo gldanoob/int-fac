@@ -10,8 +10,17 @@ This repository investigates algorithms that return the smallest prime factor of
 | [First parallel search](research/round-1.md) | Discrete logs and multiplicative orders, divisor moments, and the clique evaluator |
 | [Second parallel search](research/round-2.md) | Elliptic-curve splits, coefficient rank, bounded products, and order searches |
 | [Applications of upstream lemmas](research/round-2.md#further-tests-against-upstream-results) | Deep roots, normalized coefficients, and deterministic probes on two archived cycles |
+| [Third parallel search](research/round-3.md) | Bounded CRT joins, Lenstra–Pomerance relation lifts, class-number windows, and global order multiples |
 
-The [open computations](research/round-2.md#open-computations) identify the outstanding algorithmic steps and the hypotheses each would need.
+## Open problems by topic
+
+| Direction | What the current result still needs |
+| --- | --- |
+| [Lenstra–Pomerance derandomization](research/round-3.md#why-endpoint-mixing-alone-does-not-derandomize-lenstrapomerance) | An efficient exponent schedule covering useful lifts within a fixed class and parity |
+| [Class-group relations](research/round-3.md#mixed-relations-can-recover-several-deep-roots-at-once) | A uniform way to find short relations of sufficient rank |
+| [Multiplicative orders](research/round-3.md#splitting-from-an-unfactored-global-order-multiple) | An affordable global relation with a small residual exponent |
+| [Divisor coefficients](research/round-3.md#two-upstream-field-evaluations-per-level-suffice-for-triprimes) | A fast way to evaluate the supplied character sums on the original composite input |
+| [Multiplication networks](research/round-3.md#explicit-crt-joins-remain-large-inside-balanced-operand-boxes) | A symbolic join or cross-subtree pruning rule with a bound on intermediate work |
 
 ## Reproduce the results
 

@@ -1,5 +1,5 @@
 read("experiments/round-1.gp");
-read("experiments/round-2.gp");
+read("experiments/round-3.gp");
 
 if(checkWalks() != [120,108,111,113], error("square walks"));
 if(checkSharedPowers() != [20,68,105,112,113], error("shared powers"));
@@ -21,4 +21,14 @@ checkDeepRoot();
 checkFaithfulCut();
 checkEventRanks(1);
 if(checkConvexCuts() != [360,24,5400,65,65536,3870], error("convex cuts"));
+if(checkTriprimes() != 560, error("triprime reconstruction"));
+checkBoxJoins();
+checkClassInterval();
+checkLPFibers();
+if(checkGlobalOrders() != [11828,11056], error("global orders"));
+checkMixedRoots();
+checkBlindStrides();
+if(checkRankTwo() != [2304,2052], error("rank two subgroup splits"));
+checkFieldWitnesses();
+if(checkFieldDecoder() != [54,54,57,60,53,54,53,0],error("field decoder levels"));
 print("PARI/GP checks passed");
