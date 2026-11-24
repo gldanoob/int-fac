@@ -259,3 +259,123 @@ checkRectangles() = {
   );
   tested
 };
+
+\\ Look for an odd annihilator K*(a+2*j) with 0 <= j < W, without a class order.
+oddWindow(h,K,a,W) = {
+  if(K<1 || K%2!=1 || a<1 || a%2!=1 || W<1,error("invalid odd window"));
+  my(x=h^K,s=sqrtint(W-1)+1, baby=Map(), z=x^0, step=x^-2);
+  for(r=0,s-1,
+    if(!mapisdefined(baby,Vec(z)),mapput(baby,Vec(z),r));
+    z*=step
+  );
+  my(giant=x^a, jump=x^(2*s), r);
+  for(i=0,(W-1)\s,
+    if(mapisdefined(baby,Vec(giant),&r) && i*s+r<W,
+      return(K*(a+2*(i*s+r)))
+    );
+    giant*=jump
+  );
+  0
+};
+
+checkDeepRoot() = {
+  my(N=14111, D=-4*N, L=logint(-D,2)+1, g=qfbred(qfbprimeform(D,3)));
+  my(h=g^(2^L), M=oddWindow(h,1,87,6));
+  if(M!=95 || oddWindow(h,1,89,3)!=0,error("incorrect shifted search"));
+  my(c=lift(1/Mod(2^(2*L),M)), z=h^c, w=g*(z^(2^L))^-1, t=w^4);
+  if(z^(2^(2*L))!=h || (g^M)^4!=t || t^2!=g^0 || t==g^0,error("root projection"));
+  my(v=Vec(t));
+  if(v!=[103,0,137] || v[1]*v[3]!=N,error("factor witness"));
+  [M,c,Vec(z),Vec(w),v]
+};
+
+
+
+checkFaithfulCut() = {
+  my(p=13,q=7,W=210,Q=32768,low=vector(p,i,1+W*p*(i-1)), high=vector(p));
+  my(w=ffgen(ffinit(2,2,'t),'w), eta=vector(6,i,w^znlog(Mod(i,7),Mod(3,7),6)));
+  for(j=1,p,
+    my(c=chinese([Mod(low[j],Q)/p^2, Mod(3,q), Mod(1,p)]), ell=lift(c));
+    while(!isprime(ell),ell+=c.mod);
+    high[j]=(p^2*ell-low[j])/Q
+  );
+  my(raw=matrix(p,p), normalized=matrix(p,p), largest=0);
+  for(i=1,p,for(j=1,p,
+    my(n=Q*high[j]+low[i],v=0*w);
+    if(n<1 || gcd(n,W)!=1,error("roughness promise"));
+    fordiv(n,d,v+=eta[d%q]);
+    raw[i,j]=v; normalized[i,j]=eta[n%q]^-2*v;
+    largest=max(largest,n)
+  ));
+  if(raw!=(1+w)*matid(p) || normalized!=matid(p),error("field coefficient"));
+  [Q,largest,matrank(normalized)]
+};
+
+
+
+\\ 0->1 event positions derived from the pinned upstream orbit, in traversal order.
+\\ Verify the exact Fourier ranks via integral energies at each character order.
+eventGap(e,h,t) = {
+  my(v=vecsort(vector(#e,i,(t*e[i])%h)));
+  vecmax(vector(#v,j,if(j==#v,h+v[1],v[j+1])-v[j]))
+};
+
+checkEventRanks(full=0) = {
+  my(h=198850, events=[[673,1354,2620,3298,19968,20646,21915,22589,23264,23945,
+    25890,42561,43234,43915,45858,46536,63210,63888,65153,65827,
+    66503,67183,69128,85803,86476,87157,88423,89096,89775,90455,
+    108395,109069,109744,110425,111693,112366,113047,129718,131661,132334,
+    133013,133693,134962,135638,152310,152986,154931,155604,156285,172960,
+    174903,175576,176255,176935,178200,178876,195552,196228,197496,198169,
+    198842],
+    [3830,4005,7839,8017,11847,12028,15856,16040,19692,19867,
+    23700,23879,27709,27890,31717,35729,39562,39740,43571,43752,
+    47579,51591,55424,55602,59433,63441,67453,71464,71962,75294,
+    79303,83314,87823,91156,95165,99176,99674,103683,107694,111026,
+    115534,119543,123554,126888,127386,131395,135403,139415,143246,143426,
+    147255,151263,155098,155275,159106,159286,163115,167123,170958,171135,
+    174967,175146,178975,179158,182810,182984,186818,186995,190827,191007,
+    194835,195018,198844]], rows=List(), ds=divisors(h));
+  for(i=1,#events,
+    my(e=events[i], energy=Map(), rk=0, d=if(i==1,10,25));
+    for(j=1,#ds,
+      my(m=ds[j],cnt=vector(m));
+      for(k=1,#e,cnt[1+e[k]%m]++);
+      my(v=m*(cnt*cnt~));
+      fordiv(m,t,if(t<m,v-=mapget(energy,t)));
+      if(v<0,error("negative energy"));
+      mapput(energy,m,v);
+      if(v,rk+=eulerphi(m))
+    );
+    my(gap=eventGap(e,h,1));
+    listput(rows,[#e,rk,gap,#Set(vector(#e,j,e[j]%d))])
+  );
+  rows=Vec(rows);
+  if(rows!=[[61,198850,17940,10],[73,198850,4509,25]],error("upstream events"));
+  my(best=vector(2,i,eventGap(events[i],h,if(i==1,53,953))), joint=vector(2,i,eventGap(events[i],h,157)));
+  if(best!=[4541,3886] || joint!=[5047,6336],error("strided gaps"));
+  if(full,
+    my(opt=[h,h,h], count=0);
+    for(t=1,h/2,if(gcd(t,h)!=1,next());
+      count++;
+      my(g1=eventGap(events[1],h,t),g2=eventGap(events[2],h,t));
+      opt=[min(opt[1],g1),min(opt[2],g2),min(opt[3],max(g1,g2))]
+    );
+    if(opt!=[4541,3886,6336] || count!=38400,error("unit stride optimum"))
+  );
+  [rows,best,joint]
+};
+
+checkConvexCuts() = {
+  my(K=675,n=77,t=45,u=select(x->gcd(x,K)==1,vector(K,i,i)), M=#u);
+  my(inv=vector(M,i,lift(Mod(n,K)/u[i])), compatible=0);
+  for(i=1,M,for(j=1,M,
+    my(ok=((u[i]+u[j])*(inv[i]+inv[j])-4*n)%K==0);
+    if(ok != ((u[i]-u[j])%t==0),error("midpoint classes"));
+    compatible+=ok
+  ));
+  my(P=prod(i=1,16,prime(i)), small=P^49, large=P^51, ds=divisors(P));
+  my(balanced=0);
+  for(i=1,#ds,my(v=ds[i]^100); if(small<=v && v<=large,balanced++));
+  [M,eulerphi(t),compatible,logint(P,2)+1,#ds,balanced]
+};
