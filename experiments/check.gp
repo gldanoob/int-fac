@@ -1,5 +1,7 @@
 read("experiments/round-1.gp");
 read("experiments/round-3.gp");
+read("experiments/primitive-forms.gp");
+read("experiments/represented-squares.gp");
 
 if(checkWalks() != [120,108,111,113], error("square walks"));
 if(checkSharedPowers() != [20,68,105,112,113], error("shared powers"));
@@ -31,4 +33,7 @@ checkBlindStrides();
 if(checkRankTwo() != [2304,2052], error("rank two subgroup splits"));
 checkFieldWitnesses();
 if(checkFieldDecoder() != [54,54,57,60,53,54,53,0],error("field decoder levels"));
+if(checkPrimitiveForms() != 200, error("primitive form sweep"));
+checkRepresentedSquares();
+checkNearSquareObstruction();
 print("PARI/GP checks passed");
