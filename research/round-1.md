@@ -73,6 +73,8 @@ Let $b$ be the input bit length, $K=\lceil(b(\log_2 b)^2)^{1/3}\rceil$ and $B=2^
 
 A discrete-log routine that returns the **least nonnegative** $x$ satisfying $a^x=a^{-1}\bmod m$ without being supplied the order gives $r=x+1$, also when $r=1$. A routine whose input includes the group order does not fill this role. Conversely, given a fast general factorizer, factor $m$, compute and factor $\varphi(m)$, then remove redundant prime powers to recover the order. Thus for fixed logarithmic-saving scores the small-base exact-order problem is an equivalent target up to the costs above. This does not establish such an equivalence for all discrete-log instances. Plain baby-step/giant-step with order bounded by $2^b$ costs $2^{b/2}\operatorname{poly}(b)$. [Harvey–Hittmeir on deterministic order searches](https://arxiv.org/pdf/2601.11131)
 
+Pomykała–Źrałek already give a deterministic subexponential reduction for an oracle accepting arbitrary unit bases and returning any logarithm below their bound. The exact query contract and modulus bound are in the [source index](known-results.md#totients-and-multiplicative-orders). [Published result](https://link.springer.com/article/10.1007/s00037-012-0037-5)
+
 At $m=13694761$ and illustrative cutoff 3, the orders are 1308 and 436. Only the first base needs a query. All five prime-divisor gcd tests are 1. Yet $m=1+6H+8H^2$ with $H=1308$, and $1+6X+8X^2=(1+2X)(1+4X)$ recovers $2617\cdot5233$. The agent also compared its small-input procedure with trial division through 4096. The local GP check certifies the orders, gcds and digit example.
 
 ## Two derandomization checks

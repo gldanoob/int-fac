@@ -29,6 +29,8 @@ For $b$-bit inputs, the top leaderboard entry reports a Lean-verified determinis
 
 Lenstra–Pomerance gives an unconditional randomized algorithm for complete factorization with expected running time $e^{(1+o(1))\sqrt{\ln N\ln\ln N}}$ on each input. The proposed use of GRH is conditional. No accepted proof of GRH was identified, and it would imply ordinary RH, which Clay lists as open. [Lenstra–Pomerance](https://cr.yp.to/bib/1992/lenstra.pdf) · [Clay Mathematics Institute](https://www.claymath.org/millennium-problems/)
 
+The recent result used upstream is the quasi-Riemann theorem of Cureton–Thorner for $\Re(s)>31/32$. The upstream generator argument imports that strip with effective estimates. The [known-results index](known-results.md#class-groups-and-the-recent-zero-free-theorem) gives the source statements and distinguishes them from GRH.
+
 ## Finite tape cover
 
 Let $T(b)$ bound the expected runtime for each input of length $b$. Markov's inequality gives a success probability of at least $1/2$ when a run is stopped after $2T(b)$ steps (round the cap up). A bounded run with a fair-bit tape needs only a finite prefix. A list of $b+1$ independent tapes misses any fixed input with probability at most $2^{-(b+1)}$. A union bound over at most $2^b$ inputs leaves probability at most $1/2$ of missing any input. One list per length therefore works.

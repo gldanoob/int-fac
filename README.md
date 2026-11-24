@@ -4,6 +4,8 @@ This repository investigates algorithms that return the smallest prime factor of
 
 ## Research
 
+Start with the [known-results index](research/known-results.md). Before deriving a lemma or running a new sweep, check the published theorem and the latest upstream correction for that question. Record the exact input, assumptions, guarantee and source next to any remaining gap.
+
 | Report | Starting points |
 | --- | --- |
 | [Class-group walks and finite tape covers](research/class-group-walks.md) | Lenstra–Pomerance derandomization, smooth relations, and equal-square witnesses |
