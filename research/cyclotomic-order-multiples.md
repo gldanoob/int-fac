@@ -112,6 +112,31 @@ Stopping the doubling search at height $(\log\log X)^{1/b}$, up to a constant fa
 
 Under the uniform Dedekind zero-free strip used above, Frei–Sofos–Widmer's classwise interval upper bound holds already when $X\gg_\delta(\log |D_F|)^{1/\delta}(\log\log |D_F|)^{2/\delta}$. The same proof then replaces $\log\log X$ by $\log X$ in the uniform bound. Beyond height $O_k((\log X)^{1/b})$, the fraction reaching any further box is $O_{k,\delta}(X^{-a''})$ for some $a''>0$. The worst-case height proved above bounds the remaining number of tests by a polynomial in $\log X$, giving $O_{k,\delta}(1)$ mean polynomial tests for the full search including its trial-division step. [Frei–Sofos–Widmer, Corollary 1.2](https://arxiv.org/html/2610.18491v2#S1.SS1)
 
+### An unconditional bound using higher moments
+
+An unconditional cutoff of height $(\log\log X)^{O_k(1)}$ can in fact make the missed fraction $O_{k,A}((\log X)^{-A})$ for **every** fixed $A>0$, with the same cutoff exponent for all $A$. For any fixed $\varepsilon>0$, a cutoff of height $(\log X)^\varepsilon$ gives the stronger bound $\exp(-c_{k,\varepsilon}(\log\log X)^2)$. The mean number of tests stays $O_{k,C}(1)$ through any height $(\log X)^C$ for fixed $C>0$.
+
+Write $W=\log X$. Use $m\le W^D$ fields for fixed $D>0$, and let $h=\lfloor d_k\log W\rfloor$ with $d_k=1/(16\log(k2^k))$. A compositum $E$ of at most $2h$ of their normal fields has degree $n_E\le(k2^k)^{2h}\le W^{1/8}$ and $\log |D_E|\ll_k n_E h\log(2m)$ by the same tower bound. Thus $\log |D_E|\le W^{1/4}$ for sufficiently large $X$ depending on $k,D$. All primes in $[X,2X]$ also avoid the listed ramification primes and polynomial discriminants, which are bounded by a fixed power of $m$. Put $Q=\exp(W^{1/4})$. If $\zeta_E$ has a real zero $\beta>1-c/\log Q$ for sufficiently small absolute $c\le1/4$, Stark's normal-field threshold $1-1/(4\log |D_E|)$ puts that zero in a quadratic subfield. Its primitive Dirichlet character has conductor at most $|D_E|\le Q$ by the discriminant tower formula. Landau–Page gives at most one such character among *all* these subcomposita. If its field occurs, the corresponding quadratic character on the full direct product is nontrivial on some factor $i$. Every subcompositum omitting $L_i$ is fixed by that factor, so none can contain the exceptional quadratic field. Omit coordinate $i$ in the moment estimate. [Stark, Lemma 8](https://doi.org/10.1007/BF01405166) · [Ford–Green–Konyagin–Maynard–Tao, Lemma 7.1](https://arxiv.org/pdf/1412.5029#page=32)
+
+For each nonempty remaining subcompositum, $\log(|D_E|n_E^{n_E})=O(W^{1/4})$, so Thorner–Zaman's effective Chebotarev Theorem 1.1 applies at $x=X,2X$. It gives the principal and possible exceptional terms with relative error
+
+$$
+O\!\left(\exp\!\left(-\frac{c'W}{\log(|D_E|n_E^{n_E})}\right)+
+         \exp\!\left(-c'\sqrt{W/n_E}\right)\right).
+$$
+
+Any remaining exceptional zero satisfies $1-\beta\ge c/\log Q$, so its logarithmic-integral term relative to $\operatorname{Li}(x)$ is $O(\exp(-c'W/\log Q))$. The interval count therefore equals the class's group proportion times $\operatorname{Li}(2X)-\operatorname{Li}(X)$ with relative error $O(\exp(-W^{1/4}))$. The class proportion is at least $1/n_E$, so including the lower endpoint adds relative error $O(n_E W/X)$. Summing the interval counts over classes gives the same relative estimate for the total, which normalizes the class counts to probabilities. Under two independent prime draws, the product class probabilities have relative error of the same order. The diagonal has probability $1/\#\{p\in[X,2X]\}=O(W/X)$, so conditioning on distinct primes changes the expectation of any function bounded in absolute value by one by $O(W/X)$. [Thorner–Zaman, Theorem 1.1](https://msp.org/ant/2019/13-5/ant-v13-n5-p02-s.pdf#page=3)
+
+Let $Y_i$ indicate success of the sufficient Frobenius test in field $i$, let $r\ge m-1$ count the retained coordinates, and write $Z=r^{-1}\sum_i(Y_i-c_k)$. Every term of the expansion of $Z^{2h}$ uses at most $2h$ coordinates and has magnitude at most one before the common normalization. Summing it against the product class probabilities and conditioning on distinct primes gives its independent Bernoulli expectation with absolute error $O(\exp(-W^{1/4}))$. There are $r^{2h}$ terms and the normalization is $r^{-2h}$, so the whole moment has the same absolute error. In the independent model, integrating the Hoeffding tail $2\exp(-2rt^2)$ for $|Z|\ge t$ bounds the moment by $2\,h!/(2r)^h\le(h/r)^h$. If the box misses, all the retained $Y_i$ vanish and $|Z|=c_k$. Applying Markov's inequality, using $r\ge m/2$ and $c_k^{-2h}=\exp(O_k(\log W))$, gives a missed fraction of at most
+
+$$
+\left(\frac{2h}{c_k^2m}\right)^h+\exp(-W^{1/5})\qquad(m\ge 2).
+$$
+
+Write the height bound for the family as $O_k(m^{s_k})$ with $s_k>0$. Taking $m=\lceil(\log W)^2\rceil$ gives height $O_k((\log W)^{2s_k})$ and first term $\exp(-\Omega_k(\log W\log\log W))$. For cutoff $W^\varepsilon$, take $m=\lfloor W^{\varepsilon/(2s_k)}\rfloor$. Its witness height is $O_k(W^{\varepsilon/2})$ and the first term is $\exp(-\Omega_{k,\varepsilon}((\log W)^2))$. In the doubling search, round up the first cutoff by at most a factor of two and use the last full box at height at most $W^\varepsilon$ for the second cutoff.
+
+For the mean through height $W^C$, the earlier uniform bound gives $O_k(1)$ mean tests up to the crossover at height $O_k((\log W)^{1/b})$. Rounds between the crossover and the first cutoff cost at most a power of $\log W$ in total and occur on a fraction $O_k(W^{-a'})$. Rounds above the first cutoff cost at most $O_k(W^{Ck})$ and occur on a fraction smaller than every inverse power of $W$. The bounds hold when the supplied multiple is chosen separately for each ordered pair.
+
 ## A lower bound on the search height
 
 For each fixed odd $k\ge3$ and arbitrarily large $N=pq$, the polynomial search needs height at least $c_k(\log N)^{1/k}$, even when $M=\Phi_k(p)$ exactly and $\gcd(M,N)=1$. This concerns the coefficient search above. With a promise of exact equality an integer root search in $\Phi_k$ would itself recover $p$.
