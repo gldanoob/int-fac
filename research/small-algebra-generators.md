@@ -43,6 +43,8 @@ For $M=a\Phi_k(p)$ this decides which of two regimes applies mathematically. Whe
 
 These conclusions describe the actual field batched gcd. The box consists of elements in a fixed field, and a field test uses multiple modular powers. The results assume the supplied exponent. Computing a useful such exponent from an unrestricted integer remains open.
 
+Choosing the fields from cubic characters of the public integer gives a sharp worst-multiplier mean of two field tests in the cyclic-character model. [Public branching algorithm and cutoff](public-cubic-characters.md)
+
 ### Finite group checks
 
 Exact prime-quotient rank tests counted the primes where the radius-one and radius-two power-basis boxes generated the whole unit group. Each row uses all 2,692 primes from 1,009 through 26,000. The last column includes the scalar units before testing generation.
