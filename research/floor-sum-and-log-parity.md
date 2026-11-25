@@ -82,6 +82,27 @@ If $q=kp+h$ and $k$ is known, then $4kn+h^2=(2kp+h)^2$ and the square root direc
 
 A lattice search evaluates every center under the supplied promise $aq\equiv h\pmod{p^r}$, $\gcd(h,n)=1$, by recovering the factors first. Its deterministic cost is $n^{1/(4(r+1))}$ times polynomial overhead, and is polynomial for $p\ge n^{1/(r+1)}/\operatorname{poly}(b)$. This applies to arbitrary dyadic centers and to coefficients of either sign. At short centers the table above can give the bit directly. [Cofactor congruence and proof](hidden-divisor-lattices.md#a-congruence-on-the-complementary-factor)
 
+### Which remainders determine the bit
+
+At a dyadic center $c$ the remainder-only table is exhaustive. Set $g=\gcd(H,2c)$ and $d=H/g$. Under $p\ge16c/g$ and $2q>H$, exactly $d=1,2,3,6$ force a constant answer from $H,c$. The mixed bit is one at $1,6$ and zero at $2,3$. At $c=1$ the resulting list of $H$ is exactly $1,2,3,4,6,12$.
+
+For $d>6$ the unit 1 is in the outer quarters. If every unit were there, every $\cos(2\pi a/d)$ at a unit residue would be positive, and the terms at $\pm1$ alone would sum to more than one. But the Ramanujan sum over the units is $\mu(d)\in\{-1,0,1\}$ by inclusion–exclusion. A unit on a quarter boundary occurs only at $d=4$. The smaller moduli are checked directly, including the two choices of $p\bmod4$ at that boundary. [Ramanujan, *On certain trigonometrical sums*](https://ramanujan.sirinudi.org/Volumes/published/ram21.pdf)
+
+Both outcomes in every nonconstant case occur at arbitrarily large actual prime pairs, even after fixing $N$ to **any unit class modulo any fixed multiple $J$ of $H$**. Indeed the numerator of the grid point is $a\equiv\operatorname{sgn}(h)(2c/g)v\bmod d$. Its multiplier is invertible. Lift the desired class of $v$ to a unit modulo $H$, and take $p\equiv-v^{-1}\bmod H$. Lift $p$ to a unit class modulo $J$. Dirichlet gives arbitrarily large primes there. For each such $p>J$, prescribe $q\equiv h\bmod p$ and $q\equiv\eta p^{-1}\bmod J$ for the desired unit $\eta$. CRT and Dirichlet give arbitrarily large $q>p$. The exact perturbation above preserves the intended bit. This obstruction concerns a fixed congruence lookup.
+
+There are direct evaluators with **unbounded** supplied $H$. If $p<q$ and $H^2\le4N$, the second size condition follows from $q>\sqrt N$. Trial division through $\lceil16c/g\rceil$ establishes the first or finds a factor. The block search above costs $O(\sqrt{1+c/g}\,\mathrm{poly}(\log N))$. For $A=2^s$, $s\ge2$, the following centered floor parities require trial division only through 16. Here $c\le\lfloor N/4\rfloor$ and the subtracted center term is as in the centered identity.
+
+| Supplied $H$ | $c=A/4$ | $c=A/2$ | $c=A$ |
+|---|---:|---:|---:|
+| $A$ | 1 | 0 | 0 |
+| $3A$ | 0 | 1 | 1 |
+
+The three cutoffs $16c/g$ are $8,8,16$. The centers can scale with the supplied congruence representative. When the primes are balanced, a supplied representative already permits the earlier lattice method to recover the factors. These rows evaluate the bit directly without estimating the factor ratio.
+
+A further promise gives consecutive nonconstant answers. Let $H=2^s$, $3\le E\le s-1$, $H^2\le4N$, and suppose $k=(q-h)/p\equiv\kappa\bmod 2^{E+1}$ is in a supplied odd class. Then $p^2\equiv N\kappa^{-1}\bmod 2^{E+1}$. Lift square roots one binary digit at a time. There are at most four at each level, and reduction modulo $2^E$ gives $\{p,-p\}$. For any representative $b$ of either class, the mixed bit at each of the $E-2$ centers $c=2^{s-e-1}$, $3\le e\le E$, is the outer-quarter bit of $(b^{-1}\bmod2^e)/2^e$. The unknown sign preserves this predicate. Trial division through eight handles all small factors. For $\kappa=1\bmod16$ the centered floor parity at $H/16$ is exactly $((N\bmod16)-1)/8$. At the following quarter-boundary center the sign of the recovered residue can matter. If $E$ reaches a quarter of the input's bit length, trying both low-bit residues already yields polynomial-time factoring by Coppersmith. [Coppersmith, Theorem 5](https://www.di.ens.fr/~fouque/ens-rennes/coppersmith.pdf#page=21)
+
+The replay checks 2,000 unit grids, actual prime-pair witnesses for every $H\le80$ at $c=1$, and both answers in 34 fixed public residue classes. It also checks the three-column table against mixed roots and literal floor sums, and the binary lifting at multipliers of at least 16,000,001. [Remainder and branch checks](../experiments/remainder-branches.py)
+
 A different one-bit oracle compares the magnitude of a complete Kloosterman sum to a fixed threshold. It suffices for deterministic polynomial-time recovery with arbitrary prime multiplicities at one padded square modulus. [Threshold reduction](kloosterman-threshold.md)
 
 At the original square modulus, the exact sign of the sum is the parity of one quarter-interval comparison per prime-power component. Polynomially many nonadaptive sign queries suffice for complete factoring when there are $O(\log b)$ components. For arbitrary $b$-bit inputs, the reduction takes $2^{O(\sqrt b)}$ work and queries. [Original-modulus sign theorem](kloosterman-localization.md#sign-decoding-with-logarithmically-many-prime-factors)
