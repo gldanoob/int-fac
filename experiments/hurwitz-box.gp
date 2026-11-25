@@ -61,3 +61,47 @@ checkHurwitzBox() = {
   );
   [moduli,splits]
 };
+
+\\ Return [circular cap, translated first quadrant] at squared-norm offset level*A-1.
+planarDiskCounts(n, lo, hi, level) = {
+  my(s=4*n^2+1, A=s^2+1, cy=n*A/2, cx=-s*cy, r2=cx^2+cy^2+level*A-1);
+  my(m=n*s+lo+hi, d=lo*hi+1, w=m^2+n^2, delta=d-m*cx+n*cy);
+  my(disc=w*r2-delta^2, cap=0, quadrant=0, top=s*hi+n);
+
+  \\ Cap m*x-n*y >= d. Both horizontal disk extrema lie outside the cut,
+  \\ so the chord endpoints give the full x projection, even for a singleton.
+  if(delta <= 0 || m^2*r2 >= delta^2, error("cap projection ",[n,lo,hi,level]));
+  if(disc >= 0,
+    my(base=w*cx+m*delta, span=sqrtint(n^2*disc));
+    for(x=ceil((base-span)/w), (base+span)\w,
+      my(dy=sqrtint(r2-(x-cx)^2));
+      cap += max(0, min(cy+dy,(m*x-d)\n) - (cy-dy) + 1)
+    )
+  );
+
+  \\ Quadrant x >= lo, y <= top. The center lies above top and left of lo.
+  for(x=lo, cx+sqrtint(r2-(cy-top)^2),
+    quadrant += top - cy + sqrtint(r2-(x-cx)^2) + 1
+  );
+  [cap,quadrant]
+};
+
+\\ From the repo root: read("experiments/hurwitz-box.gp"); checkPlanarDiskParity()
+checkPlanarDiskParity() = {
+  my(moduli=0, intervals=0);
+  if(planarDiskCounts(105,2,52,1) != [198,56233694] ||
+     planarDiskCounts(105,2,52,2) != [201,56233697], error("planar disk counts at n=105"));
+  forstep(n=3, 143, 2,
+    for(lo=1, n\2,
+      my(roots=0);
+      for(hi=lo, n\2,
+        roots += (hi^2%n == 1);
+        my(shell=planarDiskCounts(n,lo,hi,2)-planarDiskCounts(n,lo,hi,1));
+        if(shell != [roots,roots], error("planar shell ",[n,lo,hi,shell,roots]));
+        intervals++
+      )
+    );
+    moduli++
+  );
+  [moduli,intervals]
+};

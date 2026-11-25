@@ -8,8 +8,8 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
-| [Polynomial overhead for three-square queries](research/hurwitz-polynomial-reductions.md) | Complete factoring from quarter-bit counts on small composite twists or residues modulo small primes on prime twists |
-| [Parity of clipped counts](research/box-count-parity.md) | A split from one-bit counts of three-square points in boxes or reduced forms at a fixed leading coefficient |
+| [Polynomial overhead for three-square queries](research/hurwitz-polynomial-reductions.md) | Complete factoring from quarter-bit counts on small composite twists or the parity of remainders modulo small odd primes on prime twists |
+| [Parity of clipped counts](research/box-count-parity.md) | A split from one-bit counts in planar disks in the fixed quadrant, three-square boxes, or slices of reduced forms |
 | [Low bits of Hurwitz class numbers](research/hurwitz-residues.md#one-large-index-and-quarter-bit-precision-suffice) | All-input reduction to the low bits of a positive three-square count, including repeated prime factors |
 | [Twisted represented squares](research/twisted-square-witnesses.md) | Sharp count of inputs covered by small coefficients, roots pooled across multipliers, and a CFRAC failure family |
 | [Prime-form powers and second witnesses](research/prime-power-witnesses.md) | A guaranteed large leading coefficient, a short witness and the gcd detected by each secant |
