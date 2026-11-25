@@ -1,0 +1,14 @@
+C3 (1, 1, 1) elements 1 rank 2 square probabilities u=1,2,3 1/4 1/16 1/64
+C3 (3,) elements 2 rank 0 square probabilities u=1,2,3 1 1 1
+S3 (1, 1, 1) elements 1 rank 2 square probabilities u=1,2,3 1/4 1/16 1/64
+S3 (1, 2) elements 3 rank 1 square probabilities u=1,2,3 1/2 1/4 1/8
+S3 (3,) elements 2 rank 0 square probabilities u=1,2,3 1 1 1
+C5 (1, 1, 1, 1, 1) elements 1 rank 4 square probabilities u=1,2,3 1/16 1/256 1/4096
+C5 (5,) elements 4 rank 0 square probabilities u=1,2,3 1 1 1
+S5 (1, 1, 1, 1, 1) elements 1 rank 4 square probabilities u=1,2,3 1/16 1/256 1/4096
+S5 (1, 1, 1, 2) elements 10 rank 1 square probabilities u=1,2,3 1/2 1/4 1/8
+S5 (1, 1, 3) elements 20 rank 2 square probabilities u=1,2,3 1/4 1/16 1/64
+S5 (1, 2, 2) elements 15 rank 2 square probabilities u=1,2,3 1/4 1/16 1/64
+S5 (1, 4) elements 30 rank 1 square probabilities u=1,2,3 1/2 1/4 1/8
+S5 (2, 3) elements 20 rank 1 square probabilities u=1,2,3 1/2 1/4 1/8
+S5 (5,) elements 24 rank 0 square probabilities u=1,2,3 1 1 1
