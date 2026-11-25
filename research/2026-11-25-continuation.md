@@ -4,6 +4,8 @@ The starting point was the [08:00 handoff](2026-11-25-0800-handoff.md) and its [
 
 Building on Cogentic's relation extractor, the [deterministic two-thirds deduction](cogentic-deterministic-two-thirds.md) and its [audit](cogentic-two-thirds-audit.md) give a paper argument for $\exp(O(b^{2/3}(\log b)^{1/3}))$ worst-case time. [Direct order splitting](cogentic-dense-exponents.md) removes the subgroup-index assembly. [Finite-coin sampling](cogentic-finite-coins.md) identifies the search that still needs a uniform shortcut. The linked randomized method has a separate [smooth-screen and sparse-matrix refinement](cogentic-smoothness-screen.md).
 
+The [executable two-field search](cogentic-quadratic-order.md) split 87 of 90 separate semiprimes with factor-base cutoff 71 below all input factors, compared with 24 using identical marks. The [worst-case workspace calculation](cogentic-extractor-space.md) gives a separate time–space tradeoff for the high-degree proof. The [projective interpolation bound](projective-norm-interpolation.md) quantifies the norm sizes forced by the choice of evaluation point.
+
 For a uniform integer in $X<N\le2X$ the [sharper mean-time proof](sharp-elliptic-mean.md) gives $\exp((1+o(1))\sqrt{\ln X\,\ln\ln X})$ bit operations for complete deterministic factorization. The same bound holds on balanced prime pairs at product scale $X$. A [quadratic-extension search](quadratic-elliptic-partners.md) lowers the common-divisor partner threshold to $P^2$ outside a subexponential set of prime characteristics. The class-number estimates and matching examples for adversarial trace subsets are in [least Legendre mass](vertical-trace-subsets.md). These are paper bounds with separate finite replays.
 
 | Question | Finding |

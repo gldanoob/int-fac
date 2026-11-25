@@ -1,0 +1,19 @@
+# Projective height bounds for rational-side norm relations
+
+Let \(F\in\mathbb Z[X,Y]\) be homogeneous of degree \(d\ge1\) and let \(0\ne F(m,n)\equiv0\pmod N\). If \(|F(a,b)|\le Y_0\), then **at most \(d\) distinct rational projective points** can simultaneously satisfy
+\[
+       |m b-n a|<\left(\frac{N}{(d+1)Y_0}\right)^{1/d}.
+\]
+Use primitive integer representatives of the marked points. These hypotheses include homogeneous norms of the form \(b^d f(a/b)\) at a rational modular root. In particular, enlarging the permitted mark denominators or translating the entire grid cannot by itself place more than \(d\) small-norm marks in progressions of a smaller determinant. Cogentic's univariate perturbation at \((a,1)\) uses \(|m-a|\) in the evaluation modulus. [Cogentic, Lemmas 7.3, 8.1 and 9.4](https://github.com/google-research/google-research/blob/4a7bc8ab0bc770e71a259b7966c500496b99010a/cogentic_research_papers/deterministic_factoring_l34/paper.pdf)
+
+Indeed let \(z_i=(a_i,b_i)\), \(0\le i\le d\), be distinct projective points, and write \([z,z']\) for the determinant. The forms \(\prod_{j\ne i}[z,z_j]/[z_i,z_j]\) are a Lagrange basis of the \((d+1)\)-dimensional vector space of homogeneous degree-\(d\) binary forms over \(\mathbb Q\). Hence
+\[
+     F(m,n)=\sum_{i=0}^d F(z_i)\prod_{j\ne i}\frac{[(m,n),z_j]}{[z_i,z_j]}.
+\]
+Each denominator determinant is a nonzero integer. With \(R=\max_j|[(m,n),z_j]|\), taking absolute values gives \(N\le(d+1)Y_0R^d\). This includes points at infinity. For integer marks \((a_i,1)\) ordered by increasing \(a_i\) and integer target \((m,1)\), the denominator of the \(i\)th basis value has magnitude at least \(i!(d-i)!\), giving the stronger \(N\,d!\le Y_0(2R)^d\).
+
+The exceptional count of \(d\) can occur even with a primitive irreducible polynomial and a composite input. For \(f(T)=1+59(T-1)(T-2)(T-3)(T-4)\), the reciprocal polynomial is Eisenstein at 59. Here \(f(5)=1417=13\cdot109\), all four marked values are 1, and all four determinants are at most 4, with \(5\cdot 4^4<1417\). In the two-thirds schedule \(d\sim x(L/\log L)^{1/3}\), \(L=\log N\), \(V=L^{2/3}(\log L)^{1/3}\) and \(\log Y_0=O(V)\); the bound forces \(\log |mb-na|\ge (1/x+o(1))V\) at all but \(d\) small-norm marks. The conclusion concerns progressions retaining the full determinant factor. More general perturbations can mix several residue classes, and the bound gives no lower bound on factoring time.
+
+There is also a restriction on canceling rational residues by short balanced products over the integers. Suppose \(|a|,|b|\le A\), \(b>0\), \(\gcd(a,b)=1\) for every available mark, and \(\gcd(m,n)=1\), \(mn\ne0\). If \(\max(|m|,|n|)>2(2A)^k\), then each product of \(k\) integers \(mb-na\), with repetition allowed, determines its multiset of marks. To see this, subtract the two polynomials \(\prod_{i=1}^k(b_iT-a_i)\) and \(\prod_{i=1}^k(b'_iT-a'_i)\) from a claimed collision. Their difference has coefficients of magnitude at most \(2(2A)^k\) by the coefficient \(\ell^1\) bound. If this difference is nonzero, remove any power of \(T\) and apply the rational-root theorem at \(m/n\). The numerator divides the nonzero constant term, and the denominator divides the leading coefficient, contradicting the height condition. Unique factorization and the primitive positive-leading-coefficient convention recover exactly the multiset when the two polynomials agree. The claim is about exact equality of rational-side integers. Congruences modulo \(N\) can supply useful collisions without an integer equality.
+
+The [exact replay](../experiments/projective-norm-interpolation.py) verifies 720 general homogeneous interpolations, 720 integer-grid factorial bounds, the irreducible quartic example, and 145,162 balanced products across sixteen small combinations of heights and product lengths.
