@@ -163,6 +163,8 @@ For uniformity take the first $m$ markers, all $O(m\log(2m))$. All cubic generat
 
 Five fixtures check a shortest projected generator by enumerating the bounded binary quadratic form, verify both valuations at 3, certify the quartic group order, and compare the cubic signs with quartic cycle types at eligible primes through 997. For $\ell=53$ the cubic is $X^3-24X^2+172X-372$. With $p=7$, both $q=13$ (mixed split) and $q=19$ (quadratic component) return the actual proper gcd 7 at exponent $105\Phi_3(7)$. For the five fields together the local tests guarantee a split on 9,293 of the 17,822 ordered distinct pairs of eligible primes in $[1000,2000]$. [PARI/GP construction and direct gcd checks](../experiments/cubic-s4-markers.gp)
 
+For odd prime indices and bounded extra multipliers there is an exact limiting answer. On almost every balanced ordered pair the successful polynomials are precisely the nonpure degree-$k$ probes irreducible at the covered prime. The statement holds simultaneously for all extra multipliers up to $A$ when $A\log(2H)=o(\log X)$. [One-prime density theorem and finite replay](prime-index-miss-density.md)
+
 ## A lower bound on the search height
 
 For each fixed odd $k\ge3$ and arbitrarily large $N=pq$, the polynomial search needs height at least $c_k(\log N)^{1/k}$, even when $M=\Phi_k(p)$ exactly and $\gcd(M,N)=1$. This concerns the coefficient search above. With a promise of exact equality an integer root search in $\Phi_k$ would itself recover $p$.
