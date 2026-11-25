@@ -61,3 +61,15 @@ multiply_divisor(point,m,f,n) = {
   for(i=1,#bits,r=cantor(r,r,f,n); if(bits[i],r=cantor(r,point,f,n)));
   r;
 }
+
+composite_gcd(F,a,d,s,n) = {
+  my(one=Mod(1,n),a0=a*one,d0=d*one, mono=d0^5*subst(F,x,x/d0));
+  my(hit=0);
+  iferr(multiply_divisor([one*x-d0*a0,d0^3],s,mono,n),err,
+    if(errname(err)!="e_USER",error(err));
+    my(payload=component(err,1));
+    if(#payload!=2 || payload[1]!="factor ",error(err));
+    hit=payload[2];
+  );
+  hit;
+}

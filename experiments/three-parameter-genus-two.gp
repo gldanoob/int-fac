@@ -65,18 +65,6 @@ charts(p) = {
   [good,negative,affine];
 }
 
-composite_gcd(F,a,d,s,n) = {
-  my(one=Mod(1,n),a0=a*one,d0=d*one, mono=d0^5*subst(F,x,x/d0));
-  my(hit=0);
-  iferr(multiply_divisor([one*x-d0*a0,d0^3],s,mono,n),err,
-    if(errname(err)!="e_USER",error(err));
-    my(payload=component(err,1));
-    if(#payload!=2 || payload[1]!="factor ",error(err));
-    hit=payload[2];
-  );
-  hit;
-}
-
 blind(n) = {
   my(s=1,b=logint(n,2)+1,fs=[2,3,5,7,11,13]);
   forprime(l=3,13,s*=l^logint(4*n^2,l));
