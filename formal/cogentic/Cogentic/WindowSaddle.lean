@@ -1852,6 +1852,54 @@ theorem saddle_pair_covariance_bernoulli {ι : Type*} [DecidableEq ι]
     exact (mul_le_mul pr diff (abs_nonneg _) (by norm_num)).trans_eq (by dsimp [δ,V]; ring)
   exact (abs_sub_le _ (ratio*(1-h*k/V)) _).trans (add_le_add base last)
 
+/-- A displacement of the true conditional logarithmic center has a
+    proportional effect on the exact central mass even below the scale
+    of the Edgeworth truncation error. -/
+theorem omitted_mass_lipschitz {ι : Type*} [DecidableEq ι] (J D : Finset ι)
+    (r ell : ι → ℝ) (H a b : ℝ) (hH : 0 < H)
+    (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1) :
+    |omittedMass J D r ell H a-omittedMass J D r ell H b| ≤ 2*|a-b|/H^2 := by
+  let F := omittedCharacteristic J D r ell
+  let g := fun (s t : ℝ) => (phase (s*t)*F t).re
+  have fc : Continuous F := by
+    unfold F omittedCharacteristic
+    apply continuous_finsetProd
+    intro p _
+    by_cases h : p ∈ D <;> simp [h,centeredFactor,phase] <;> fun_prop
+  have gc (s : ℝ) : Continuous (g s) :=
+    Complex.continuous_re.comp ((by unfold phase; fun_prop :
+      Continuous (fun t : ℝ => phase (s*t))).mul fc)
+  have fn (t : ℝ) : ‖F t‖ ≤ 1 := by
+    dsimp only [F,omittedCharacteristic]
+    rw [norm_prod]
+    apply Finset.prod_le_one (fun p hp => norm_nonneg _)
+    intro p hp
+    split
+    · exact (norm_phase _).le
+    · exact norm_centeredFactor_le_one _ _ (hr p hp) (hr' p hp)
+  have ht : 0 ≤ 1/H := (one_div_pos.mpr hH).le
+  have bd (t : ℝ) (mem : t ∈ Set.uIoc (-(1/H)) (1/H)) : ‖g a t-g b t‖ ≤ |a-b|/H := by
+    rw [Set.uIoc_of_le (by linarith)] at mem
+    have tsmall := abs_le.mpr ⟨mem.1.le,mem.2⟩
+    have step : ‖phase ((a-b)*t)-1‖ ≤ |(a-b)*t| := by
+      simpa only [phase,Real.norm_eq_abs] using @Real.norm_exp_I_mul_ofReal_sub_one_le ((a-b)*t)
+    dsimp only [g]
+    rw [Real.norm_eq_abs,← Complex.sub_re,← sub_mul]
+    apply (Complex.abs_re_le_norm _).trans
+    rw [norm_mul,show a*t=((a-b)*t)+(b*t) by ring,phase_add,
+      show phase ((a-b)*t)*phase (b*t)-phase (b*t)=(phase ((a-b)*t)-1)*phase (b*t) by ring,
+      norm_mul,norm_phase,mul_one]
+    apply (mul_le_mul step (fn t) (norm_nonneg _) (abs_nonneg _)).trans
+    rw [mul_one,abs_mul,div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left (by simpa only [one_div] using tsmall) (abs_nonneg _)
+  change |(∫ t in -(1/H)..1/H, g a t)-(∫ t in -(1/H)..1/H,g b t)| ≤ _
+  rw [← intervalIntegral.integral_sub ((gc a).intervalIntegrable ..) ((gc b).intervalIntegrable ..),
+    ← Real.norm_eq_abs]
+  apply (intervalIntegral.norm_integral_le_of_norm_le_const bd).trans_eq
+  rw [abs_of_nonneg (by linarith : 0 ≤ 1/H - -(1/H))]
+  ring
+
+
 end
 
 end Cogentic.Window

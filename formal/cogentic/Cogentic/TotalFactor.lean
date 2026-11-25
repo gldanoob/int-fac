@@ -73,6 +73,20 @@ theorem tryDivisor_succeeds {n : ℕ} (hn : 2 ≤ n) (bases : List ℕ)
     exact saturated_splitter hn (big.trans (Nat.le_mul_of_pos_right _ idxPos)) (gt p pp pn)
       (gt q qp qn) neq pn qn (sat p pp pn) (sat q qp qn) bases gen
 
+/-- On every sufficiently large surviving input, coverage alone forces the
+concrete splitter to return a divisor. The dyadic prime-count guard follows
+from the critical-line theorem at the selected integer scale. -/
+theorem tryDivisor_of_coverage (line : DirichletLZerosOnLine) :
+    ∃ n₀ : ℕ, ∀ n ≥ n₀, ∀ (hn : 2 ≤ n) (bases : List ℕ), generatesUnits n bases →
+      ¬n.Prime → ¬2 ∣ n → ¬IsPrimePow n →
+      presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n) = none →
+      (Fixed.parameters candidate n).Covers n → tryDivisor n hn bases ≠ none := by
+  obtain ⟨β,count⟩ := dyadic_count_from_critical_line line
+  obtain ⟨n₀,grow⟩ := Fixed.parameters_grow candidate β
+  exact ⟨n₀,fun n large hn bases gen composite odd npp absent covers =>
+    tryDivisor_succeeds hn bases gen odd npp (count _ (grow n large))
+      (covers composite odd npp absent)⟩
+
 /-- Fixed program with explicit trial division on a search miss. Inputs up to
     eight bits skip parameter construction altogether. -/
 def totalStep (k n : ℕ) (hn : 2 ≤ n)

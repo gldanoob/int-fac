@@ -242,6 +242,45 @@ theorem pivot_free_columns_span {ν : Type*} (A : Matrix ι κ ℤ) (pick : ι �
 
 
 omit [Fintype ι] [DecidableEq ι] [DecidableEq κ] in
+theorem select_clean_unit_columns_in_basis {K₁ K₂ α β J ν : Type*} [Field K₁] [Field K₂]
+    [NumberField K₁] [NumberField K₂] [Fintype α] [Fintype β] [Fintype ν] [DecidableEq ν]
+    (basis : Module.Basis ν ℤ (UnitClass K₁ × UnitClass K₂))
+    (σ₁ : α → K₁ →+* ℝ) (σ₂ : β → K₂ →+* ℝ) (a : κ → ℤ) (V : Matrix ι κ ℤ)
+    (f₁ f₂ : Polynomial ℤ) (θ₁ : K₁) (θ₂ : K₂)
+    (root₁ : f₁.eval₂ (Int.castRingHom K₁) θ₁ = 0)
+    (root₂ : f₂.eval₂ (Int.castRingHom K₂) θ₂ = 0)
+    (rows₁ : AffineMarkRows f₁ a V) (rows₂ : AffineMarkRows f₂ a V)
+    (top : ι) (intercept : ∀ j, V top j = 1) (A : ℝ) (hA : 0 < A)
+    (H : Matrix ν (α ⊕ β) ℝ) (D : J → κ → ℤ)
+    (null : ∀ k i, ∑ j, V i j * D k j = 0)
+    (span : let U := H * markLogs σ₁ σ₂ (fun j => (a j : K₁)-θ₁) (fun j => (a j : K₂)-θ₂) A
+            Submodule.span ℝ (Set.range (fun k => U *ᵥ (fun j => (D k j : ℝ)))) = ⊤) :
+    ∃ (free : ν → J) (u₁ : ν → (𝓞 K₁)ˣ)
+      (u₂ : ν → (𝓞 K₂)ˣ),
+      (∀ k, (u₁ k : K₁) = ∏ j, ((a j : K₁)-θ₁)^(D (free k) j)) ∧
+      (∀ k, (u₂ k : K₂) = ∏ j, ((a j : K₂)-θ₂)^(D (free k) j)) ∧
+      (basis.toMatrix (fun k => (unitClass (u₁ k), unitClass (u₂ k)))).det ≠ 0 := by
+  classical
+  let a₁ (j) := (a j : K₁)-θ₁
+  let a₂ (j) := (a j : K₂)-θ₂
+  let U := H * markLogs σ₁ σ₂ a₁ a₂ A
+  have pair (k : J) : ∃ (u₁ : (𝓞 K₁)ˣ) (u₂ : (𝓞 K₂)ˣ),
+      (u₁ : K₁) = ∏ j, (a₁ j)^(D k j) ∧ (u₂ : K₂) = ∏ j, (a₂ j)^(D k j) := by
+    obtain ⟨p,hp⟩ := rows₁.neutral_unit θ₁ root₁ top intercept _ (null k)
+    obtain ⟨q,hq⟩ := rows₂.neutral_unit θ₂ root₂ top intercept _ (null k)
+    exact ⟨p,q,hp,hq⟩
+  choose p q hp hq using pair
+  let obs := observeUnitPair σ₁ σ₂ H
+  have obs_eq (k : J) : obs (unitClass (p k), unitClass (q k)) = U *ᵥ (fun j => (D k j : ℝ)) := by
+    have balance : ∑ j, D k j = 0 := by simpa [intercept] using null k top
+    exact observed_unit_relations σ₁ σ₂ a₁ a₂ (rows₁.nonzero_marks θ₁ root₁)
+      (rows₂.nonzero_marks θ₂ root₂) A hA H _ balance _ _ (hp k) (hq k)
+  obtain ⟨free, det⟩ := integer_minor_of_real_span basis
+    (fun k => (unitClass (p k), unitClass (q k))) obs (by simpa only [obs_eq] using span)
+  exact ⟨free,fun k => p (free k),fun k => q (free k),fun k => hp (free k),fun k => hq (free k),det⟩
+
+omit [Fintype ι] [DecidableEq ι] [DecidableEq κ] in
+/-- Specialization to the canonical paired Dirichlet basis. -/
 theorem select_clean_unit_columns {K₁ K₂ α β J : Type*} [Field K₁] [Field K₂]
     [NumberField K₁] [NumberField K₂] [Fintype α] [Fintype β]
     (σ₁ : α → K₁ →+* ℝ) (σ₂ : β → K₂ →+* ℝ) (a : κ → ℤ) (V : Matrix ι κ ℤ)
@@ -259,24 +298,8 @@ theorem select_clean_unit_columns {K₁ K₂ α β J : Type*} [Field K₁] [Fiel
       (∀ k, (u₁ k : K₁) = ∏ j, ((a j : K₁)-θ₁)^(D (free k) j)) ∧
       (∀ k, (u₂ k : K₂) = ∏ j, ((a j : K₂)-θ₂)^(D (free k) j)) ∧
       ((pairedUnitBasis K₁ K₂).toMatrix (fun k => (unitClass (u₁ k), unitClass (u₂ k)))).det ≠ 0 := by
-  classical
-  let a₁ (j) := (a j : K₁)-θ₁
-  let a₂ (j) := (a j : K₂)-θ₂
-  let U := H * markLogs σ₁ σ₂ a₁ a₂ A
-  have pair (k : J) : ∃ (u₁ : (𝓞 K₁)ˣ) (u₂ : (𝓞 K₂)ˣ),
-      (u₁ : K₁) = ∏ j, (a₁ j)^(D k j) ∧ (u₂ : K₂) = ∏ j, (a₂ j)^(D k j) := by
-    obtain ⟨p,hp⟩ := rows₁.neutral_unit θ₁ root₁ top intercept _ (null k)
-    obtain ⟨q,hq⟩ := rows₂.neutral_unit θ₂ root₂ top intercept _ (null k)
-    exact ⟨p,q,hp,hq⟩
-  choose p q hp hq using pair
-  let obs := observeUnitPair σ₁ σ₂ H
-  have obs_eq (k : J) : obs (unitClass (p k), unitClass (q k)) = U *ᵥ (fun j => (D k j : ℝ)) := by
-    have balance : ∑ j, D k j = 0 := by simpa [intercept] using null k top
-    exact observed_unit_relations σ₁ σ₂ a₁ a₂ (rows₁.nonzero_marks θ₁ root₁)
-      (rows₂.nonzero_marks θ₂ root₂) A hA H _ balance _ _ (hp k) (hq k)
-  obtain ⟨free, det⟩ := integer_minor_of_real_span (pairedUnitBasis K₁ K₂)
-    (fun k => (unitClass (p k), unitClass (q k))) obs (by simpa only [obs_eq] using span)
-  exact ⟨free,fun k => p (free k),fun k => q (free k),fun k => hp (free k),fun k => hq (free k),det⟩
+  exact select_clean_unit_columns_in_basis (pairedUnitBasis K₁ K₂) σ₁ σ₂ a V f₁ f₂ θ₁ θ₂ root₁ root₂
+    rows₁ rows₂ top intercept A hA H D null span
 
 /-- The joint Gram supplies both a bounded target solution and independent field
 units among the bounded free columns of the same pivot, in the paired

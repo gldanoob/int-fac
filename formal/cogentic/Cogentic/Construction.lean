@@ -9,7 +9,7 @@ def eval {R : Type*} [Ring R] (x : R) : List R → R
   | [] => 0
   | a::as => a+x*eval x as
 
-private theorem eval_append {R : Type*} [CommRing R] (x : R) (a c : List R) :
+theorem eval_append {R : Type*} [CommRing R] (x : R) (a c : List R) :
     eval x (a++c) = eval x a+x^a.length*eval x c := by
   induction a with
   | nil => simp [eval]

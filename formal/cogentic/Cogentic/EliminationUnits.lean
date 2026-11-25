@@ -26,11 +26,13 @@ private theorem mark_congruence (a b p : ℕ) :
   rw [← ZMod.natCast_eq_natCast_iff', ← ZMod.intCast_zmod_eq_zero_iff_dvd,
     Int.cast_sub, Int.cast_natCast, Int.cast_natCast, sub_eq_zero]
 
-/-- Every prime factor of an actual retained mark has its simple residue row
-in the output list. This connects the integer Horner/mark guards to the
-valuation theorem for an arbitrary root in a number field. -/
-theorem stageOne_affine_rows {s : Input} {rel : Relations} (ok : stageOne s = some rel) (side : Bool) :
-    AffineMarkRows (polynomial (s.coeffs side)) (fun j => (rel.marks.get j : ℤ)) rel.matrix := by
+/-- Each recorded field value is squarefree and smooth, and its normalized
+residue at any dividing prime appears among the clean executable rows. -/
+theorem stageOne_mark_primes {s : Input} {rel : Relations} (ok : stageOne s = some rel) (side : Bool) :
+    let f := polynomial (s.coeffs side)
+    (∀ j : Fin rel.marks.length, SquarefreeSmooth s.base ((f.eval (rel.marks.get j : ℤ)).natAbs)) ∧
+    ∀ p : ℕ, p.Prime → ∀ j : Fin rel.marks.length, (p : ℤ) ∣ f.eval (rel.marks.get j : ℤ) →
+      Row.mk side p (rel.marks.get j % p) ∈ s.clean := by
   classical
   let f := polynomial (s.coeffs side)
   have data (j : Fin rel.marks.length) :=
@@ -59,6 +61,16 @@ theorem stageOne_affine_rows {s : Input} {rel : Relations} (ok : stageOne s = so
     | true =>
       have bad : row ∈ s.badRows := List.mem_filter.mpr ⟨root,hbad⟩
       exact ((data j).2.2.2.2 row bad rfl).elim
+  exact ⟨smooth,listed⟩
+
+/-- Every prime factor of an actual retained mark has its simple residue row
+in the output list. This connects the integer Horner/mark guards to the
+valuation theorem for an arbitrary root in a number field. -/
+theorem stageOne_affine_rows {s : Input} {rel : Relations} (ok : stageOne s = some rel) (side : Bool) :
+    AffineMarkRows (polynomial (s.coeffs side)) (fun j => (rel.marks.get j : ℤ)) rel.matrix := by
+  classical
+  let f := polynomial (s.coeffs side)
+  obtain ⟨smooth,listed⟩ := stageOne_mark_primes ok side
   constructor
   · intro p hp j hd
     have h := (mem_clean.mp (listed p hp j hd)).2.1

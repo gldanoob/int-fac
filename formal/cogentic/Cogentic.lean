@@ -15,6 +15,16 @@ import Cogentic.ArchSolve
 import Cogentic.EliminationUnits
 import Cogentic.Pivot
 import Cogentic.SaddleLocation
+import Cogentic.PrincipalResidue
+import Cogentic.SaddleComparison
+import Cogentic.GaussianJoint
+import Cogentic.ConstructedFields
+import Cogentic.ColumnAccuracy
+import Cogentic.UnitMinor
+import Cogentic.TargetUnits
+import Cogentic.FieldSpecialization
+import Cogentic.VerifiedCandidate
+import Cogentic.SearchScale
 import Lean.Util.CollectAxioms
 
 /-! Fail the build if any of these public deductions acquires an additional axiom. -/
@@ -26,7 +36,18 @@ run_cmd
     ``Cogentic.Window.prime_saddle_exists, ``Cogentic.Window.principal_product_off_center,
     ``Cogentic.Window.principal_euler_frequency_bound, ``Cogentic.Window.saddle_integral_edgeworth,
     ``Cogentic.Window.principal_euler_saddle_mass, ``Cogentic.Window.poisson_exponent_expansion,
-    ``Cogentic.Construction.box_inputGuard, ``Cogentic.computed_field_unit_minor,
+    ``Cogentic.Window.full_principal_mass, ``Cogentic.Window.neighboring_rankin_saddles,
+    ``Cogentic.Window.clean_residue_saddle_input,
+    ``Cogentic.Window.coefficient_fiber_crt, ``Cogentic.Window.polynomial_conditional_probability,
+    ``Cogentic.Window.polynomial_first_probability, ``Cogentic.Window.root_conditioned_joint_probability,
+    ``Cogentic.Construction.box_inputGuard, ``Cogentic.Construction.stageOne_succeeds,
+    ``Cogentic.Construction.constructed_field_places, ``Cogentic.Construction.constructed_mark_logs,
+    ``Cogentic.Construction.constructed_column_accuracy, ``Cogentic.constructed_target_observation,
+    ``Cogentic.Construction.MarkRing.order_from_affine_classes,
+    ``Cogentic.computed_field_unit_minor, ``Cogentic.computed_helmert_unit_minor,
+    ``Cogentic.ArchPrecision.fixed_selected_reconstruction, ``Cogentic.ArchPrecision.projected_mark_precision,
+    ``Cogentic.Concrete.candidate_of_minor, ``Cogentic.Concrete.tryDivisor_of_coverage,
+    ``Cogentic.Concrete.candidate_count_L_two_thirds,
     ``Cogentic.certified_archimedean_reconstruction, ``Cogentic.RootLogs.markLog_error,
     ``Cogentic.Concrete.total_factorization, ``Cogentic.Concrete.tryDivisor_succeeds,
     ``Cogentic.stageTwo_height, ``Cogentic.Concrete.factor_of_box_coverage, ``Cogentic.Concrete.search_with_minor_choices,

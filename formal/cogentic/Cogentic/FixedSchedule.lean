@@ -183,7 +183,7 @@ theorem search_calls_scale {n b : ℕ} (hn : 2 ≤ n) (hb : 0 < b) (attempt : Tr
   have := (scales hb).1
   exact (search_calls hn hb attempt).trans (Nat.pow_le_pow_right (by decide) (by omega))
 
-private theorem degree_le_bits (b : ℕ) : d b ≤ b := by
+theorem degree_le_bits (b : ℕ) : d b ≤ b := by
   have ⟨lo,_⟩ := degree_floor b
   exact (Nat.le_self_pow (by decide : 3 ≠ 0) _).trans
     ((Nat.le_mul_of_pos_right _ (by simp [z])).trans lo)

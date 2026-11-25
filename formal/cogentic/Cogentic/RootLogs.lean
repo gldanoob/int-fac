@@ -111,4 +111,23 @@ theorem markLog_error {A a low bits : ℕ} {t v : ℚ} {x e : ℝ}
     exact (abs_sub_le _ (Real.log z) _).trans (add_le_add val.le diff)
   next _ => cases hit
 
+/-- A root at distance at least twice the guard survives both the midpoint
+test and the dyadic logarithm approximation. -/
+theorem markLog_of_separated {A a low bits : ℕ} {t : ℚ} {x e : ℝ}
+    (near : |(t:ℝ)-x| ≤ e) (prec : e ≤ (1/2:ℝ)^(low+1))
+    (sep : 2*(1/2:ℝ)^(low+1) ≤ |(a:ℝ)/A-x|) :
+    ∃ v, markLog A a t low bits = some v ∧
+      |(v:ℝ)-Real.log (|(a:ℝ)/A-x|)| ≤ (1/2:ℝ)^bits + e/(1/2:ℝ)^(low+1) := by
+  have triangle := abs_sub_le ((a:ℝ)/A) (t:ℝ) x
+  have dist : (1/2:ℝ)^(low+1) ≤ |(a:ℝ)/A-(t:ℝ)| := by linarith
+  have accept : (1/2:ℚ)^(low+1) ≤ |(a:ℚ)/A-t| := by
+    apply (Rat.cast_le (K := ℝ)).mp
+    push_cast
+    exact dist
+  have existsHit : ∃ v, markLog A a t low bits = some v := by
+    unfold markLog
+    rw [if_pos accept]; exact ⟨_,rfl⟩
+  obtain ⟨v,h⟩ := existsHit
+  exact ⟨v,h,markLog_error h near (le_trans (by nlinarith [pow_nonneg (by norm_num : (0:ℝ) ≤ 1/2) (low+1)]) sep)⟩
+
 end Cogentic.RootLogs
