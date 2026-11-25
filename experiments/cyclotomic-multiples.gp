@@ -25,5 +25,7 @@ checkCyclotomicBoxes() = {
   );
   if(splitCyclotomicBox(85,2^8*31*307,2,1)!=[1,0],error("unexpected quadratic split"));
   if(splitCyclotomicBox(17,307,3,1)!=[1,0],error("spurious prime split"));
+  if(splitCyclotomicBox(14489*14503,14489^2+14489+1,3,2)!=[1,0],
+    error("expected the whole height-two box to miss"));
   #cases
 };

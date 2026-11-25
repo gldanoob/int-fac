@@ -90,3 +90,92 @@ for ell, k, g, p, q, expected in [(7, 3, 3, 5, 13, 5), (11, 5, 2, 3, 23, 9)]:
     coefficients = [power[min(c)] - power[0] for c in cosets]
     assert gcd(n, *(v - coefficients[0] for v in coefficients)) == expected
 ~~~
+
+## An interval or residue class for the divisor sum
+
+Suppose only that the single original value $\sigma(N)$ belongs to
+$$
+\{A+Bt:0\le t<H\},\qquad A,B,H\ge1 .
+$$
+Under the same zero-free input, complete factorization costs
+$$
+O(\sqrt H)\,\exp\!\big(O_\delta(\sqrt{b\log b})\big)\,
+\operatorname{poly}(\log(2+A+BH)).
+$$
+In particular an approximation with absolute error at most $E$ gives at most $2\lceil E\rceil+1$ candidates. Knowing a congruence modulo $B$ and an interval of width $W$ gives at most $1+\lfloor W/B\rfloor$ candidates. Bound the searches even on incorrect advice and verify every returned proper divisor. The guarantee applies whenever a candidate is the original divisor sum.
+
+Partition the candidates by $v=v_2(A+Bt)$. Solving $A+Bt\equiv 2^v\bmod 2^{v+1}$ gives one progression of indices $t$ for each nonempty class. Dividing that class by $2^v$ gives odd candidates $a+ci$, $0\le i<h\le H$. There are $O(\log(2+A+BH))$ possible valuations. Use the same trial division, prime indices and search for field elements as in the exact-value algorithm.
+
+For odd prime $k$, fix a generator $\rho$ of $\operatorname{Gal}(K/\mathbb Q)$, and in the proof choose the two Legendre-symbol components at $q$ to be adjacent under $\rho$. For each candidate $\alpha$ compute $g=\alpha/\rho(\alpha)$ modulo $n$. If the norm of $\alpha$ shares a proper factor with $n$, return it. Discard the candidate if its norm is divisible by $n$. Otherwise the inverse exists. For the promised witness, the norm is a unit at $p,q$ and one fixed component of $g$ at $q$ is a nonsquare. At $p$ the true stripped divisor sum kills $g$, since $\alpha$ to that power is scalar. Thus at $p$ some factor of
+$$
+\prod_{i=0}^{h-1}(g^{a+ci}-1)
+$$
+vanishes, while at that component of $q$ **every** factor is nonzero. Taking the gcd of $n$ with all integral coordinates of the product separates the two primes.
+
+To compute the gcd, put $s=\lfloor\sqrt h\rfloor$ and form the monic polynomial
+$$
+F(X)=\prod_{i=0}^{s-1}(X-g^{-ci})
+$$
+over $\mathcal O_K/n\mathcal O_K$. Evaluate it at $g^{a+csj}$ for every complete block, multiply the results, and test the final fewer than $s$ factors directly as part of the same product. This differs from the displayed product by a unit. Monic product and remainder trees give $O(\sqrt h\,\operatorname{poly}(k,\log n,\log(2+A+BH)))$ bit operations with fast polynomial multiplication. For example one can convolve in the outer variable over the full cyclotomic ring by Kronecker substitution and ordinary fast integer multiplication, then reduce in the cyclotomic variable. No division by an evaluated difference is needed. [Related monic product-tree order search](p-plus-one-multiples.md#a-bounded-missing-multiplier)
+
+For $k=2$ use the quadratic norm-one witness from the one-$p+1$ proof. Its orders at the two chosen inert primes have distinct 2-adic valuations. For each candidate class with valuation $v$, apply the same product computation to the exponents $2^j(a+ci)$ for each $0\le j\le v$. At either chosen prime the residue ring is a field. The product vanishes precisely when some $a+ci$ covers the odd order part and $j$ reaches the local 2-adic order valuation. At $p$ the correct class reaches that threshold by $v$. If the product also vanishes at $q$ by $v$, its first vanishing index there differs from the first vanishing index at $p$. This argument includes hits at different progression terms.
+
+This small PARI/GP replay evaluates the block polynomial directly. The cubic example tests a class containing $217=\sigma(325)/2$. In the quadratic example the order at $5$ is $6$, and the order at $13$ is $7$. Exponents $14$ and $18$ give the two hits in the full block. Stripping a factor of two isolates $13$.
+
+~~~gp
+apProductGcd(n,g,a,step,count,degree) = {
+  my(width=sqrtint(count),blocks=count\width, roots=vector(width,i,g^(-step*(i-1))));
+  my(poly=prod(i=1,width,'x-roots[i]), value=g^0);
+  for(j=0,blocks-1, value*=subst(poly,'x,g^(a+step*j*width)));
+  for(t=width*blocks,count-1,value*=g^(a+step*t)-1);
+  my(w=liftall(value));
+  gcd(concat([n],vector(degree,i,polcoef(w,i-1,'y))))
+};
+{
+  my(z=Mod(Mod(1,325)*y,y^3+y^2-2*y-1),g=(1+z)/(z^2-1));
+  if(apProductGcd(325,g,191,2,28,3)!=5,error("cubic progression"));
+  z=Mod(Mod(1,65)*y,y^2-2); g=(1+3*z)/(1-3*z);
+  if(apProductGcd(65,g,10,4,4,2)!=65 || apProductGcd(65,g,5,2,4,2)!=13,
+    error("quadratic progression"));
+}
+~~~
+
+## Consequences using the input alone
+
+*Perfect and multiply perfect numbers.* Since $\sigma(N)/N=\sum_{d\mid N}1/d\le1+\log N$, enumerate the $O(b)$ positive integers $j\le1+\log N$ as possible abundancies, using $jN$ as the supplied value. Run the bounded factorization search for each and, upon complete factorization, compute the actual $\sigma(N)$ by the product formula. Accept exactly when $N\mid\sigma(N)$, or check $\sigma(N)=2N$ when recognizing perfect numbers. This gives deterministic recognition on all inputs and complete factorization on yes-instances in $\exp(O_\delta(\sqrt{b\log b}))$ bit operations. The same reasoning handles an integer interval of offsets about $jN$ by the progression search. Bach–Miller–Shallit gave randomized polynomial-time recognition for these families and for amicable pairs. [Bach–Miller–Shallit, Theorems 7–9](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf#page=9)
+
+*An arbitrary input.* The summatory function $S(x)=\sum_{m\le x}\sigma(m)$ gives the exact value as $S(N)-S(N-1)$. Tulsyan gives a $2^{O(b/\sqrt{\log b})}$ algorithm for $S(x)$ under the stated counting-engine assumptions. Two evaluations followed by the single-value algorithm retain that exponent. Li's analytic algorithm for an isolated divisor summatory value computes the unweighted sum of divisor counts in expected time $N^{9/28+o(1)}$. Bruin's fast modular-form coefficient theorem takes the index in factored form. His Eisenstein-series example explains the factoring problem for an unfactored semiprime index. For balanced $N=pq$, even the elementary approximation $N+1$ misses $\sigma(N)$ by $p+q=\Theta(\sqrt N)$. An uncertainty interval on that scale still costs $N^{1/4}$ in the progression bound. To improve the leaderboard exponent by this route, a sufficient target is an interval or congruence computable in $2^{o(b/\sqrt{\log b})}$ time leaving $H=2^{o(b/\sqrt{\log b})}$ candidates. The sources checked here leave this evaluator open. [Tulsyan, v2](https://hexagonmath.org/pdf/2611.00115v2) · [Li, abstract and Theorem 1](https://arxiv.org/abs/2609.29949) · [Bruin, Theorem 1.1 and Remarks](https://www.numdam.org/item/10.5802/pmb.a-133.pdf#page=2)
+
+*One-bit modular queries.* There is also a nonadaptive reduction of computing $\sigma(N)$ to the parity of its least residue modulo small odd primes on slightly larger inputs. Choose consecutive odd primes $\ell$ until their product exceeds $N^2$. The prime number theorem gives $\ell=O(b)$ and $\sum_\ell\lceil\log_2\ell\rceil=O(b)$. Write $x=\sigma(N)\bmod\ell$, $0\le x<\ell$. For $1\le j\le u=\lceil\log_2\ell\rceil$ use the query at $Nr$ with a prime $r\nmid N$ satisfying $r+1\equiv2^j\bmod\ell$. When $2^j\equiv1\bmod\ell$ use $N$ itself. In the other cases $r$ can be chosen of size $b^{O(1)}$. Indeed choose an auxiliary prime $L>\max(b+2,\ell)$ of size $O(b)$ and impose each possible nonzero residue on $r\bmod L$ along with the given reduced class modulo $\ell$. Linnik's bound yields $L-1$ distinct candidate primes of polynomial size, exceeding the number of prime factors of $N$. Direct enumeration with a gcd finds one. [Xylouris, Theorem 1.1](https://www.impan.pl/shop/publication/transaction/download/product/83078)
+
+By multiplicativity, the query bit is the parity of $2^j x\bmod\ell$, hence the parity of $\lfloor2^j x/\ell\rfloor$. The $u$ bits give $D=\lfloor2^u x/\ell\rfloor$, and $x$ is the only integer in $[\ell D/2^u,\ell(D+1)/2^u)$. CRT recovers $\sigma(N)$ from all $x$. This uses $O(b)$ exact one-bit queries on inputs of at most $b+O(\log b)$ bits. Computing these modular bits at arbitrary composite indices remains a separate cost. Ordinary parity of $\sigma(N)$ has the elementary square-or-twice-square test.
+
+The following GP replay checks the one-bit reconstruction with direct divisor sums supplying the oracle bits. It tests the multiplier coprimality condition, repeated powers, and CRT reconstruction.
+
+~~~gp
+{
+  for(n=2,300,
+    my(ans=Mod(0,1));
+    forprime(ell=3,200,
+      my(u=logint(ell,2)+1,digits=0);
+      for(j=1,u,
+        my(t=(2^j-1)%ell,r=1);
+        if(t,forprime(s=2,100000,
+          if(s%ell==t && n%s,r=s;break));
+          if(r==1,error("multiplier search")));
+        digits=2*digits+(sigma(n*r)%ell)%2
+      );
+      ans=chinese(ans,Mod((ell*digits+2^u-1)\2^u,ell));
+      if(component(ans,1)>n^2,break)
+    );
+    if(lift(ans)!=sigma(n),error("one-bit CRT at ",n))
+  );
+  print("one-bit divisor-sum reconstruction passed for 2 through 300")
+}
+~~~
+
+Even on balanced semiprimes the residue of $N$ alone at a fixed odd prime $\ell$ leaves many possibilities for the modular query. Fix $N\equiv c\ne0\pmod\ell$. Writing $p\equiv x$ and $q\equiv c/x$, we obtain
+$$
+\sigma(pq)\equiv 1+c+x+c/x\pmod\ell.
+$$
+Two nonzero values $x,y$ give the same result exactly when $x=y$ or $xy=c$. The involution $x\mapsto c/x$ has $1+(c/\ell)$ fixed points, so there are exactly $(\ell+(c/\ell))/2$ distinct answers for the full residue, with $(c/\ell)$ the Legendre symbol. All occur for distinct primes $p,q\in(X,2X]$ for every sufficiently large $X$ by the prime number theorem in fixed arithmetic progressions. CRT realizes the choices independently for any fixed finite list of odd primes, even with the residue of $N$ prescribed at every listed prime. This obstruction concerns using only those prescribed residues of the input.
