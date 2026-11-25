@@ -41,7 +41,8 @@ import Cogentic.CellPairMoment
 import Cogentic.DivisorCovariance
 import Cogentic.PolynomialRetained
 import Cogentic.ObservedScalar
-import Cogentic.BoxWitness
+import Cogentic.SmoothFamilies
+import Cogentic.BadRowSlopes
 import Cogentic.PolynomialExceptions
 import Cogentic.MomentRows
 import Cogentic.LogArithmeticCost
@@ -65,6 +66,9 @@ run_cmd
     ``Cogentic.Construction.weighted_pair_gamma, ``Cogentic.Construction.centered_pair_bound,
     ``Cogentic.Construction.centered_cell_pair_moment, ``Cogentic.Construction.PrescribedRows.box_witness,
     ``Cogentic.Construction.PrescribedRows.admission_probability,
+    ``Cogentic.Construction.PrescribedRows.smooth_probability_lower, ``Cogentic.Construction.many_smooth_at_marks,
+    ``Cogentic.Construction.many_smooth_in_grid_cell, ``Cogentic.Marking.avoids_badRows_iff_coprime,
+    ``Cogentic.Construction.one_singular_slope,
     ``Cogentic.Window.fixed_divisibility_covariance, ``Cogentic.Construction.observed_second_scalar,
     ``Cogentic.Construction.PrescribedRows.first_probability, ``Cogentic.Construction.PrescribedRows.second_probability,
     ``Cogentic.Construction.first_polynomial_exceptional, ``Cogentic.Construction.coefficient_outside_weight,
