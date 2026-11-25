@@ -42,3 +42,41 @@ The replay eliminates one sign variable at a time. For a fixed assignment on the
 The quadratic class $[-3]$ is itself in the box. On the $p\equiv2$ branch it is inactive and projecting modulo it is injective on the active span. On the $p\equiv1$ branch it is active and one adds one to the projected rank. On the first branch at least 31 distinct resolvents split. All 8,192 assignments attaining this count have rank 31. Minimizing rank directly gives 28 and 13 on the two respective branches. Thus minimizing the number of splitting conditions and minimizing the degree of a suitable norm field can lead to different character profiles.
 
 Run `python3 -B experiments/cubic-resolvent-profiles.py`. The height-two check exhausts all sign assignments and compares both minima to the elimination algorithm. At height five the replay checks rank witnesses against the original squareclasses. A separate PARI/GP field enumeration using `polredabs` on each irreducible gives 213 distinct cubic fields, four cyclic, and the same 196 nontrivial squareclasses. The computation concerns a finite polynomial family and does not construct a height-five failure for the order search. [Exact replay](../experiments/cubic-resolvent-profiles.py)
+
+## Bounds as the coefficient height grows
+
+Let $r_H(p)$ be the binary rank of the split, nontrivial quadratic resolvent classes from the monic cubic box of height $H$. For all sufficiently large $H$ and all primes outside the polynomial discriminants, the following unconditional bounds hold with absolute implied constants:
+$$
+\begin{array}{c|c}
+p\bmod3 & r_H(p)\\\hline
+2 & \displaystyle\gg H^{6/5}/\log H\\[2pt]
+1 & \displaystyle\gg H^{3/2}/(\log H)^3 .
+\end{array}
+$$
+Thus a degree-one prime condition in a single norm field with abelian Artin data requires field degree at least $2^{\Omega(H^{6/5}/\log H)}$ to force reducibility throughout the box on either branch. Even after fixing any attainable rational congruence profile, the limiting proportion having a root for every cubic is at most $3^{-r}$ when the profile fixes the resolvent signs with active rank $r$. Over the abelian field of the profile, the $r$ independent cyclic order-three coordinates are equidistributed by Chebotarev and all must be trivial. Subdividing a progression by the resolvent signs gives the same uniform branch bound. The density is taken with $H$ fixed and the prime range tending to infinity.
+
+**A small defining polynomial for a cubic field.** If the field discriminant is $D$, the weighted Minkowski lattice has covolume $\sqrt{|D|}$ and the primitive vector 1 has length $\sqrt3$. Orthogonal projection perpendicular to 1 gives a rank-two lattice of covolume $\sqrt{|D|/3}$. A disk of radius $|D|^{1/4}$ has area greater than four times this covolume. Lift a nonzero lattice point in this disk to an algebraic integer. It generates the cubic field and its conjugates are within $2|D|^{1/4}$ of each other. Subtract the nearest integer to a real conjugate. One conjugate then has magnitude at most $1/2$, so the elementary symmetric functions bound the coefficient height of its monic polynomial by $9\sqrt{|D|}$. The same translation gives height $O(R^2)$ for an integral cubic generator whose conjugates all have magnitude at most $R\ge1$. [Martinet on the projected lattice, §5](https://jamartin.perso.math.cnrs.fr/Othertexts/discgeom.pdf)
+
+**Mirror fields for $p\equiv2\pmod3$.** For a large prime $\ell\equiv4a^3\pmod9$, $a\in\{1,-1\}$, choose an even $n=(\ell/4)^{1/3}+O(1)$ strictly above the real cube root with
+$$
+\ell\equiv a+3n\pmod{27},\qquad v_3(4n^3-\ell)=3.
+$$
+The first congruence fixes $n$ modulo nine, with $n\equiv a\pmod3$. On this progression $4n^3\equiv a+3n\pmod{27}$, and adding nine to $n$ changes $4n^3$ by $27n^2\bmod81$. Choose a permissible class modulo 27 and then its even lift modulo 54.
+
+Put $f=X^3+3nX^2-\ell$. Its possible rational roots $\pm1,\pm\ell$ are excluded by $3n+1<\ell$ and reduction modulo $\ell^2$ at the latter two. The polynomial $g(X)=f(a+3X)/27$ is monic integral. Its positive discriminant $\ell(4n^3-\ell)/27$ is prime to three and $O(\ell^{5/3})$. At two, $f$ reduces to the squarefree polynomial $X^3+1$. At a prime $s>3$, total ramification would make $f$ the cube of a linear factor modulo $s$: each conjugate would have the same residue in the degree-one residue field of the unique prime. Comparison of its zero linear coefficient, constant and quadratic coefficients would force $s=\ell$ and $s\mid n$, impossible. All remaining ramification is tame and partial, with discriminant exponent one. At $\ell$ the simple unit root $-3n$ lifts; the remaining monic quadratic reduces to $X^2$ and its constant term has valuation one, so it is Eisenstein. The field discriminant $D$ is therefore positive, odd, squarefree, prime to three and divisible by $\ell$.
+
+The fundamental-discriminant cubic correspondence and Scholz reflection give a cubic field of discriminant $-3D$. Both fields have monic defining polynomials of height $O(\ell^{5/6})$ by the projection bound. For markers $Y<\ell\le2Y$ in the two indicated progressions, every $D=O(Y^{5/3})$ contains just its own marker, since a product of two markers exceeds $Y^2$. At $p\equiv2\pmod3$ the signs of $D$ and $-3D$ are opposite. One split class per pair gives independent vectors by projection onto the marker primes. The prime number theorem in these fixed progressions gives $\gg Y/\log Y$ pairs. Take $Y$ to be a sufficiently small constant times $H^{6/5}$. [Mantilla-Soler, Corollary 4.2 and Theorem 6.8](https://arxiv.org/pdf/1104.4598#page=17)
+
+**Three negative classes for $p\equiv1\pmod3$.** Take primes in $(Y,2Y]$ congruent to one modulo 49. Form disjoint adjacent pairs. Their gaps sum to at most $Y$, so $\gg Y/\log Y$ pairs have gaps $O(\log Y)$ by the prime number theorem in this fixed progression. For such a pair write the primes as $u=m-h$ and $v=m+h$.
+
+For $\ell=u,v$, take $t\equiv10\pmod{49}$ nearest to $3\sqrt\ell$ and $c=t^2-9\ell=O(\sqrt Y)$. Then $c\equiv42\pmod{49}$, and $X^3-3cX-2tc$ is Eisenstein at seven and has discriminant $-3\ell(18c)^2$. Its roots have size $O(\max(\sqrt{|c|},|tc|^{1/3}))=O(Y^{1/3})$, by comparing the leading term with the two others. Translation near its real root gives height $O(Y^{2/3})$.
+
+For the pair use $P=X^3-3h^2X-2mh^2$, of discriminant $-108h^4uv$. Any integral root $z$ would satisfy
+$$
+(z+h)^2(z-2h)=2u h^2 .
+$$
+For large $Y$, the right side has $u$-adic valuation one, so $u\mid z-2h$. The root bound gives $|z|=O(h+(Yh^2)^{1/3})=o(Y)$, forcing $z=2h$, a contradiction. This irreducible polynomial gives the quadratic class $-3uv$ with translated height $O(Y^{2/3}(\log Y)^{4/3})$. The classes $-3u,-3v,-3uv$ have product $-3$ modulo squares. At $p\equiv1\pmod3$ at least one splits. Every choice gives independent vectors across disjoint pairs. Taking $Y$ proportional to $H^{3/2}/(\log H)^2$ with a sufficiently small constant proves the second bound.
+
+An upper bound for the **minimum** active rank on the $p\equiv1$ branch is $O(H^2/\log H)$. All cubic polynomial discriminants have absolute value $O(H^4)$. Choose a quadratic profile making $-1$ and every prime up to the square root of that bound positive, and each larger prime in a discriminant negative. There is at most one such large prime in any discriminant and it occurs to exponent one. All active classes are supported on primes up to $O(H^2)$ and on the sign. The profile is attainable and has $(-3/p)=1$.
+
+The PARI/GP replay certifies four mirror pairs, checks three triples and verifies the Frobenius sign against roots at 150 small-prime instances. At $\ell=1031$ it gives field discriminants $1{,}182{,}557$ and $-3{,}547{,}671$ with monic heights 48 and 106. In the close pair $1{,}000{,}001{,}213$, $1{,}000{,}001{,}311$, the three translated heights are $106{,}612{,}623$, $106{,}542{,}681$ and $853{,}884{,}720$. Run `gp -fq experiments/cubic-resolvent-growth.gp`. [Exact number-field and polynomial checks](../experiments/cubic-resolvent-growth.gp)
