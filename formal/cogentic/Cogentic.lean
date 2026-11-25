@@ -42,7 +42,16 @@ import Cogentic.DivisorCovariance
 import Cogentic.PolynomialRetained
 import Cogentic.ObservedScalar
 import Cogentic.SmoothFamilies
-import Cogentic.BadRowSlopes
+import Cogentic.RetainedNullity
+import Cogentic.JointSmoothBulk
+import Cogentic.BackSubstitutionWork
+import Cogentic.ModularPowerCost
+import Cogentic.BinaryPivotCost
+import Cogentic.AdmissionMoments
+import Cogentic.TwoFieldRetentionLoss
+import Cogentic.NearSmoothUpper
+import Cogentic.NearPairVariance
+import Cogentic.SquareDivisorPairs
 import Cogentic.PolynomialExceptions
 import Cogentic.MomentRows
 import Cogentic.LogArithmeticCost
@@ -68,7 +77,25 @@ run_cmd
     ``Cogentic.Construction.PrescribedRows.admission_probability,
     ``Cogentic.Construction.PrescribedRows.smooth_probability_lower, ``Cogentic.Construction.many_smooth_at_marks,
     ``Cogentic.Construction.many_smooth_in_grid_cell, ``Cogentic.Marking.avoids_badRows_iff_coprime,
-    ``Cogentic.Construction.one_singular_slope,
+    ``Cogentic.Construction.one_singular_slope, ``Cogentic.Construction.boxed_singular_slope_mass,
+    ``Cogentic.Construction.PrescribedRows.boxed_ordinary_singular_loss,
+    ``Cogentic.Construction.PrescribedRows.smooth_probability_margin,
+    ``Cogentic.Construction.PrescribedRows.smooth_probability_avoid,
+    ``Cogentic.Construction.PrescribedRows.joint_smooth_probability,
+    ``Cogentic.Construction.PrescribedRows.joint_bulk_nominal,
+    ``Cogentic.Construction.many_coprime_smooth_at_marks, ``Cogentic.Construction.many_retained_at_marks,
+    ``Cogentic.Construction.cell_retained_kernel, ``Cogentic.Construction.constructed_columns_injective,
+    ``Cogentic.Construction.retained_column_rank_bound, ``Cogentic.Construction.PrescribedRows.smooth_probability_avoid_sharp,
+    ``Cogentic.Construction.PrescribedRows.boxed_ordinary_singular_loss_sharp,
+    ``Cogentic.Construction.PrescribedRows.compatible_iff_listed, ``Cogentic.Construction.twoField_admission_moments,
+    ``Cogentic.Construction.twoField_shared_or_singular_loss, ``Cogentic.Construction.PrescribedRows.joint_smooth_upper,
+    ``Cogentic.Construction.cell_smooth_relative_close, ``Cogentic.Construction.twoField_score_error, ``Cogentic.Construction.twoField_simultaneous_box,
+    ``Cogentic.Construction.fixed_square_prime_loss, ``Cogentic.Construction.cell_near_indicator_covariance,
+    ``Cogentic.BinaryPivot.stageTwo_pivot_gates, ``Cogentic.BinaryModularPower.verify_exponent_iff,
+    ``Cogentic.BinaryModularPower.fermatGuards_spec, ``Cogentic.BinaryModularPower.power_gates,
+    ``Cogentic.BinaryDivision.divide_naturals, ``Cogentic.BinaryDivision.solve_normalization_gates,
+    ``Cogentic.Elimination.solve_forward_remainder_bound, ``Cogentic.Elimination.solve_fill_bits_work,
+    ``Cogentic.Elimination.solve_integer_family_bits,
     ``Cogentic.Window.fixed_divisibility_covariance, ``Cogentic.Construction.observed_second_scalar,
     ``Cogentic.Construction.PrescribedRows.first_probability, ``Cogentic.Construction.PrescribedRows.second_probability,
     ``Cogentic.Construction.first_polynomial_exceptional, ``Cogentic.Construction.coefficient_outside_weight,

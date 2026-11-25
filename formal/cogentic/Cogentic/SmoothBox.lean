@@ -9,8 +9,10 @@ private theorem model_floor (line : DirichletLZerosOnLine) :
       InWindow b Y S → α∈Set.Icc (199/200:ℝ) 1 →
       saddleMean (primeBand b) α=log Y → 0<q →
       (primeBand b\band).card ≤ b^3 →
-      exp (-444*(Fixed.h b:ℝ)) ≤ (q:ℝ)/q.totient*(Y^(α-1)*eulerMass band α)*
-        omittedMass (primeBand b) (primeBand b\band) (primeProbability α) (fun p => log p) (log (Fixed.B b)) 0 := by
+      let F := (q:ℝ)/q.totient*(Y^(α-1)*eulerMass band α)*
+        omittedMass (primeBand b) (primeBand b\band) (primeProbability α) (fun p => log p) (log (Fixed.B b)) 0
+      exp (-444*(Fixed.h b:ℝ)) ≤ F ∧ (1-α)*log (Fixed.B b) ≤ 4*(Fixed.z b:ℝ) ∧
+        exp (-4*(Fixed.h b:ℝ))*(Y^(α-1)*eulerMass band α) ≤ F := by
   obtain ⟨b₁,lower⟩ := fixed_central_mass_lower 3
   obtain ⟨b₂,degrees⟩ := Fixed.degree_grows 50000
   obtain ⟨C,cp,tilt⟩ := fixed_saddle_euler_margin line
@@ -96,19 +98,26 @@ private theorem model_floor (line : DirichletLZerosOnLine) :
   simp only [mul_one,one_mul] at pref
   have main := mul_le_mul pref mc (exp_pos _).le ((exp_pos _).le.trans pref)
   rw [←exp_add,show -440*h+ -4*h = -444*h by ring] at main
-  exact main
+  have pos : 0≤Y^(α-1)*eulerMass band α := mul_nonneg (rpow_nonneg (zero_lt_one.trans_le win.2.1).le _) (eulerMass_pos _ _).le
+  refine ⟨main,lam,?_⟩
+  rw [mul_comm (exp (-4*h))]
+  exact mul_le_mul (le_mul_of_one_le_left pos rc) mc (exp_pos _).le (mul_nonneg (zero_le_one.trans rc) pos)
 
 /-- At every eligible mark, the actual coefficient probability of the
 prescribed smooth event has a uniform positive lower bound. -/
-theorem PrescribedRows.smooth_probability_lower (line : DirichletLZerosOnLine) :
+theorem PrescribedRows.smooth_probability_saddle_floor (line : DirichletLZerosOnLine) :
     ∃ b₀ : ℕ, ∀ {n ell a : ℕ} (R : PrescribedRows n ell),
     let b := n.log2+1
     b₀≤b → 2≤n → ¬n.Prime → ell∈dyadicTargets (Fixed.beta b) →
     presieve n b (Fixed.beta b) (Fixed.A b) (Fixed.rootBase n)=none →
     a∈(construct n ell 0 0 0 0).marks → ∀ side : Bool,
     let pre := R.prefactor a side
-    1/(Fixed.B b:ℝ) ≤ prescribedProbability R side
-      (fun k => supportedValue (sieveBand n ell pre) (R.intercept a side k.1 k.2)) := by
+    let P := prescribedProbability R side
+      (fun k => supportedValue (sieveBand n ell pre) (R.intercept a side k.1 k.2))
+    let y := (exactMean n ell a side:ℝ)/pre
+    let band := (sieveBand n ell pre).filter (fun p => ¬p∣(firstStep n ell a side).natAbs)
+    8/(Fixed.B b:ℝ) ≤ P ∧ ∃ α∈Set.Icc (199/200:ℝ) 1, 0<y ∧ (1-α)*log (Fixed.B b)≤4*(Fixed.z b:ℝ) ∧
+      exp (-4*(Fixed.h b:ℝ))*(y^(α-1)*eulerMass band α) ≤ 8*π*P := by
   obtain ⟨C,cp,b₁,estimate⟩ := first_polynomial_progression line 1 le_rfl
   obtain ⟨b₂,floor⟩ := model_floor line
   obtain ⟨b₃,degree⟩ := Fixed.degree_grows 10004
@@ -154,7 +163,7 @@ theorem PrescribedRows.smooth_probability_lower (line : DirichletLZerosOnLine) :
   have positive : 0<F := fp
   have fit := omitted_card hn big comp target absent ready.prepos ready.prebound
     (Int.natAbs_pos.mpr ready.nonzero) ready.cap
-  have fl := floor b two Y S α band s.natAbs win ha mean (Int.natAbs_pos.mpr ready.nonzero) fit
+  obtain ⟨fl,lam,rel⟩ := floor b two Y S α band s.natAbs win ha mean (Int.natAbs_pos.mpr ready.nonzero) fit
   change exp (-444*(Fixed.h b:ℝ)) ≤ F at fl
   have realEst := (Complex.abs_re_le_norm _).trans model
   simp only [Complex.sub_re,Complex.smul_re,smul_eq_mul,Complex.ofReal_re] at realEst
@@ -167,9 +176,11 @@ theorem PrescribedRows.smooth_probability_lower (line : DirichletLZerosOnLine) :
     linarith only [gbound, mul_neg_of_pos_of_neg (show 0<2*π by positivity) bad,positive]
   change |P-g.re| ≤ 90*exp (-(Fixed.U b:ℝ))*g.re at prob
   have half := (abs_le.mp (prob.trans (mul_le_mul_of_nonneg_right normSmall gn))).1
+  have floorP : F≤8*π*P := by linarith only [gbound,mul_le_mul_of_nonneg_left half (show 0≤4*π by positivity)]
+  refine ⟨?_,α,ha,zero_lt_one.trans_le win.2.1,lam,rel.trans floorP⟩
   have raw : exp (-444*(Fixed.h b:ℝ))/(8*π) ≤ P := by
     apply (div_le_iff₀ (by positivity : 0<8*π)).mpr
-    linarith only [fl,gbound,mul_le_mul_of_nonneg_left half (show 0≤4*π by positivity)]
+    linarith only [fl,floorP]
   apply le_trans _ raw
   let h := (Fixed.h b:ℝ)
   have hpos : 1≤h := by change (1:ℝ)≤(↑(Fixed.h b):ℝ); exact_mod_cast Nat.mul_pos dp (Nat.succ_pos _)
@@ -177,10 +188,40 @@ theorem PrescribedRows.smooth_probability_lower (line : DirichletLZerosOnLine) :
   have logBound : 500*h ≤ log (Fixed.B b) := by
     have eq : log (Fixed.B b) = 1000*h*log 2 := by simp only [h,Fixed.B,Fixed.beta,Nat.cast_pow,Nat.cast_ofNat,log_pow,Nat.cast_mul]
     rw [eq]; nlinarith only [mul_le_mul_of_nonneg_right (show (1/2:ℝ)≤log 2 by linarith [log_two_gt_d9]) (zero_le_one.trans hpos)]
-  have gain : 8*π ≤ exp (-444*h)*(Fixed.B b) := by
+  have gain : 8*(8*π) ≤ exp (-444*h)*(Fixed.B b) := by
+    have hg : (10004:ℝ) ≤ h := by
+      change (10004:ℝ) ≤ (Fixed.h b:ℝ)
+      exact_mod_cast (big.trans (Nat.le_mul_of_pos_right _ (Nat.succ_pos b.log2)) : 10004 ≤ Fixed.h b)
     rw [←exp_log Bp,←exp_add]
-    linarith only [pi_lt_four,add_one_le_exp (-444*h+log (Fixed.B b)),logBound,hpos]
-  exact (div_le_div_iff₀ Bp (by positivity : 0<8*π)).mpr (by simpa only [one_mul] using gain)
+    linarith only [pi_lt_four,add_one_le_exp (-444*h+log (Fixed.B b)),logBound,hg]
+  exact (div_le_div_iff₀ Bp (by positivity : 0<8*π)).mpr gain
+
+theorem PrescribedRows.smooth_probability_margin (line : DirichletLZerosOnLine) :
+    ∃ b₀ : ℕ, ∀ {n ell a : ℕ} (R : PrescribedRows n ell),
+    let b := n.log2+1
+    b₀≤b → 2≤n → ¬n.Prime → ell∈dyadicTargets (Fixed.beta b) →
+    presieve n b (Fixed.beta b) (Fixed.A b) (Fixed.rootBase n)=none →
+    a∈(construct n ell 0 0 0 0).marks → ∀ side : Bool,
+    let pre := R.prefactor a side
+    8/(Fixed.B b:ℝ) ≤ prescribedProbability R side
+      (fun k => supportedValue (sieveBand n ell pre) (R.intercept a side k.1 k.2)) := by
+  obtain ⟨b₀,floor⟩ := PrescribedRows.smooth_probability_saddle_floor line
+  exact ⟨b₀,fun R h hn comp target absent mark side => (floor R h hn comp target absent mark side).1⟩
+
+theorem PrescribedRows.smooth_probability_lower (line : DirichletLZerosOnLine) :
+    ∃ b₀ : ℕ, ∀ {n ell a : ℕ} (R : PrescribedRows n ell),
+    let b := n.log2+1
+    b₀≤b → 2≤n → ¬n.Prime → ell∈dyadicTargets (Fixed.beta b) →
+    presieve n b (Fixed.beta b) (Fixed.A b) (Fixed.rootBase n)=none →
+    a∈(construct n ell 0 0 0 0).marks → ∀ side : Bool,
+    let pre := R.prefactor a side
+    1/(Fixed.B b:ℝ) ≤ prescribedProbability R side
+      (fun k => supportedValue (sieveBand n ell pre) (R.intercept a side k.1 k.2)) := by
+  obtain ⟨b₀,margin⟩ := PrescribedRows.smooth_probability_margin line
+  refine ⟨b₀,?_⟩
+  intro n ell a R b huge hn comp target absent mark side pre
+  exact (div_le_div_of_nonneg_right (by norm_num : (1:ℝ)≤8) (Nat.cast_nonneg _)).trans
+    (margin R huge hn comp target absent mark side)
 
 theorem coefficient_tail_lt_half_mark {b : ℕ} (big : 1000 ≤ b) :
     1216*(Fixed.B b:ℝ)^2*exp (-π*((b:ℝ)^2)^2/2) < 1/(2*(Fixed.B b:ℝ)) := by

@@ -4,22 +4,22 @@ namespace Cogentic.Construction
 open Real Cogentic.Window
 noncomputable section
 
-/-- The signed integer coefficient pair lies in the deterministic nonnegative
+/-- The signed integer coefficient pair lies in the deterministic positive
     enumeration rectangle. -/
 def inCoefficientBox (n : ℕ) (k : ℤ×ℤ) : Prop :=
   let b := n.log2+1
-  0≤k.1 ∧ k.1≤2*(b:ℤ)^2*Fixed.U b*Fixed.A b ∧ 0≤k.2 ∧ k.2≤2*(b:ℤ)^2*Fixed.U b
+  0<k.1 ∧ k.1≤2*(b:ℤ)^2*Fixed.U b*Fixed.A b ∧ 0<k.2 ∧ k.2≤2*(b:ℤ)^2*Fixed.U b
 
 instance (n : ℕ) (k : ℤ×ℤ) : Decidable (inCoefficientBox n k) := by unfold inCoefficientBox; infer_instance
 
 private theorem gaussian_interval (b σ : ℕ) (sb : 2≤σ) :
     let μ := (b:ℝ)^2*σ
     let G := fun j : ℤ => coeffGaussian j μ σ
-    let cut := fun j : ℤ => if (j:ℝ)<0 ∨ 2*μ<(j:ℝ) then G j else 0
+    let cut := fun j : ℤ => if (j:ℝ)≤0 ∨ 2*μ<(j:ℝ) then G j else 0
     Summable G ∧ Summable cut ∧ (∑' j,G j)≤4*σ ∧
       (∑' j,cut j)≤8*(σ:ℝ)*exp (-π*((b:ℝ)^2)^2/2) := by
   let μ := (b:ℝ)^2*σ; let G := fun j : ℤ => coeffGaussian j μ σ
-  let cut := fun j : ℤ => if (j:ℝ)<0 ∨ 2*μ<(j:ℝ) then G j else 0
+  let cut := fun j : ℤ => if (j:ℝ)≤0 ∨ 2*μ<(j:ℝ) then G j else 0
   have sp : 0<(σ:ℝ) := by exact_mod_cast (by omega : 0<σ)
   have hτ : 1≤(σ:ℝ) := by exact_mod_cast (by omega : 1≤σ)
   have pos : 0<∑' j, G j := by
@@ -60,7 +60,7 @@ theorem coefficient_outside_weight (n : ℕ) :
   let σ := U*A
   let g := fun j : ℤ => coeffGaussian j ((b:ℝ)^2*σ) σ
   let h := fun j : ℤ => coeffGaussian j ((b:ℝ)^2*U) U
-  let cut := fun (q : ℕ) (j : ℤ) => (j:ℝ)<0 ∨ 2*((b:ℝ)^2*q)<(j:ℝ)
+  let cut := fun (q : ℕ) (j : ℤ) => (j:ℝ)≤0 ∨ 2*((b:ℝ)^2*q)<(j:ℝ)
   let f := fun j : ℤ => if cut σ j then g j else 0
   let t := fun j : ℤ => if cut U j then h j else 0
   let V := fun k : ℤ×ℤ => f k.1*h k.2+g k.1*t k.2
@@ -93,7 +93,7 @@ theorem coefficient_outside_weight (n : ℕ) :
         apply outside
         dsimp only [cut] at i no
         push_neg at i no
-        change 0≤k.1 ∧ k.1≤2*(b:ℤ)^2*U*A ∧ 0≤k.2 ∧ k.2≤2*(b:ℤ)^2*U
+        change 0<k.1 ∧ k.1≤2*(b:ℤ)^2*U*A ∧ 0<k.2 ∧ k.2≤2*(b:ℤ)^2*U
         exact ⟨by exact_mod_cast i.1,by have bound := i.2; dsimp only [σ] at bound; push_cast at bound; exact_mod_cast (by linarith only [bound] : (k.1:ℝ)≤2*(b:ℝ)^2*U*A),
           by exact_mod_cast no.1,by exact_mod_cast (by linarith only [no.2] : (k.2:ℝ)≤2*(b:ℝ)^2*U)⟩
       next => split <;> nlinarith [mul_nonneg (gn k.1) (hn k.2)]

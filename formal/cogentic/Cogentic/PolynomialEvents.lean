@@ -65,10 +65,10 @@ theorem scalar_event_weight (J : Finset ℕ) (c s z : ℤ) (F K M μ σ Y S : �
 
 /-- The normalized first-coordinate event for an actual compatible seed
     is exactly the scalar character sum estimated by the relative theorem. -/
-theorem PrescribedRows.first_event_weight {n ell a : ℕ} (R : PrescribedRows n ell) (big : 3≤Fixed.d (n.log2+1))
+theorem PrescribedRows.first_event_band_weight {n ell a : ℕ} (R : PrescribedRows n ell) (J : Finset ℕ) (big : 3≤Fixed.d (n.log2+1))
     (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (am : a<Fixed.rootBase n) (side : Bool)
     (u v : ℤ) (ok : R.compatible side u v) :
-    let J := sieveBand n ell (R.prefactor a side); let pre : ℝ := R.prefactor a side
+    let pre : ℝ := R.prefactor a side
     let c := R.intercept a side u v; let s := firstStep n ell a side; let x := u+a*v
     let H : ℝ := R.hitProduct a; let σ := projectionScale n a
     scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre) =
@@ -94,6 +94,16 @@ theorem PrescribedRows.first_event_weight {n ell a : ℕ} (R : PrescribedRows n 
   · rw [signed_center big]; dsimp [F,D]; ring
   · rw [abs_div,abs_of_pos pp,show |D|=_ from abs_slope n ell a side]
     unfold oneWidth; ring
+
+theorem PrescribedRows.first_event_weight {n ell a : ℕ} (R : PrescribedRows n ell) (big : 3≤Fixed.d (n.log2+1))
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (am : a<Fixed.rootBase n) (side : Bool)
+    (u v : ℤ) (ok : R.compatible side u v) :
+    let J := sieveBand n ell (R.prefactor a side); let pre : ℝ := R.prefactor a side
+    let c := R.intercept a side u v; let s := firstStep n ell a side; let x := u+a*v
+    let H : ℝ := R.hitProduct a; let σ := projectionScale n a
+    scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre) =
+      (H/σ*(∑' j : ℤ, if supportedValue J (c+s*j) then coeffGaussian ((x:ℝ)+H*j) (lineCenter n a) σ else 0):ℝ) :=
+  R.first_event_band_weight _ big target am side u v ok
 
 private theorem regression_identity (A U a b x c₀ c₁ F D : ℝ) (vp : 0<(U*A)^2+a^2*U^2) :
     F+D*(c₀+b*c₁)+D*(((U*A)^2+a*b*U^2)/((U*A)^2+a^2*U^2))*(x-(c₀+a*c₁)) =

@@ -94,7 +94,7 @@ theorem exact_center_error {n ell a : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed
   push_cast at cast
   exact cast
 
-private theorem projected_scale_bounds {n a : ℕ} (cap : a ≤ Fixed.A (n.log2+1)) :
+theorem projected_scale_bounds {n a : ℕ} (cap : a ≤ Fixed.A (n.log2+1)) :
     let b := n.log2+1; let U : ℝ := Fixed.U b; let A : ℝ := Fixed.A b
     U*A ≤ projectionScale n a ∧ projectionScale n a ≤ 2*(U*A) := by
   intro b U A

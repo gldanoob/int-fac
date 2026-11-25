@@ -7,7 +7,7 @@ open Finset Real
 
 /-- Averaging the one-mark lower bounds finds one coefficient pair that
 realizes a positive fraction of a finite family in the original box. -/
-private theorem many_events_in_box {n ell : ℕ} (R : PrescribedRows n ell)
+theorem many_events_in_box {n ell : ℕ} (R : PrescribedRows n ell)
     (target : ell ∈ dyadicTargets (Fixed.beta (n.log2+1))) (side : Bool)
     (X : Finset ℕ) (hx : X.Nonempty) (E : ℕ→ℤ×ℤ→Prop) [∀ i, DecidablePred (E i)]
     (big : 1000 ≤ n.log2+1)
@@ -97,8 +97,8 @@ theorem many_smooth_at_marks (line : DirichletLZerosOnLine) :
       (fun a ha => prob Q one hn comp target absent (marks a (sub ha)) s)
     obtain ⟨x,hx,y,hy⟩ := box
     let u := k.1.toNat; let v := k.2.toNat
-    have uu : (u:ℤ)=k.1 := Int.toNat_of_nonneg x
-    have vv : (v:ℤ)=k.2 := Int.toNat_of_nonneg y
+    have uu : (u:ℤ)=k.1 := Int.toNat_of_nonneg x.le
+    have vv : (v:ℤ)=k.2 := Int.toNat_of_nonneg y.le
     have ub : u≤2*b^2*Fixed.U b*Fixed.A b := by exact_mod_cast (uu.trans_le hx)
     have vb : v≤2*b^2*Fixed.U b := by exact_mod_cast (vv.trans_le hy)
     have cp : Q.compatible s u v := by rwa [uu,vv]

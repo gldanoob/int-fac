@@ -2,7 +2,7 @@ import Cogentic.Marking
 
 namespace Cogentic.Marking
 
-private theorem zero_at_mark (cs : List ℤ) (a q : ℕ) :
+theorem zero_at_mark (cs : List ℤ) (a q : ℕ) :
     ((horner ((a%q:ℕ):ZMod q) cs).1=0 ↔ q∣value cs a) ∧
     ((horner ((a%q:ℕ):ZMod q) cs).2=0 ↔ q∣(horner (a:ℤ) cs).2.natAbs) := by
   have cast (f : Polynomial ℤ) :

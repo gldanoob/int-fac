@@ -88,27 +88,25 @@ theorem PrescribedRows.second_probability {n ell a a' : ℕ} (R : PrescribedRows
 
 /-- The actual Gaussian probability of the first prescribed smooth event
     is given by the scalar window, uniformly over all roots and both signs. -/
-theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n ell)
+theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRows n ell)
     (big : 3≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
     (cap : a≤Fixed.A (n.log2+1)) (am : a<Fixed.rootBase n) (side : Bool) :
-    let J := sieveBand n ell (R.prefactor a side); let pre : ℝ := R.prefactor a side
-    let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
-    ∃ u v : ℤ, R.compatible side u v ∧
+    let pre : ℝ := R.prefactor a side
+    ∃ u v : ℤ, R.compatible side u v ∧ ∀ J : Finset ℕ,
+      let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
       let c := R.intercept a side u v; let s := firstStep n ell a side
       let m := (scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
       |prescribedProbability R side E-m| ≤ 90*exp (-(Fixed.U (n.log2+1):ℝ))*m := by
   classical
   let C := {k : ℤ×ℤ // R.compatible side k.1 k.2}
-  let J := sieveBand n ell (R.prefactor a side); let pre : ℝ := R.prefactor a side
+  let pre : ℝ := R.prefactor a side
   let H := R.hitProduct a; let M := prodPrimes (R.miss a)
   let S := projectionScale n a; let T := conditionalScale n a; let μ := (lineCenter n a:ℝ)
-  let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
   obtain ⟨c,r,e,coords,ws,zp,_,events⟩ := R.coefficient_law target side cap
   let x := fun i : ℤ => c+(H:ℤ)*i
   let y := fun i j : ℤ => r i+(M:ℤ)*j
   let k₀ := (e (0,0)).val
   let F := R.intercept a side k₀.1 k₀.2; let s := firstStep n ell a side
-  let good := fun i : ℤ => supportedValue J (F+s*i)
   let W := fun k : ℤ×ℤ => coeffGaussian (x k.1) μ S*coeffGaussian (y k.1 k.2)
     (projectedConditionalCenter n a (x k.1)) T
   have pos (k : ℤ×ℤ) : 0≤W k := mul_nonneg (exp_pos _).le (exp_pos _).le
@@ -116,6 +114,10 @@ theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n e
   have cc (k : ℤ×ℤ) : (e k).val=(x k.1-a*y k.1 k.2,y k.1 k.2) := coords _ _
   have orig : k₀.1+a*k₀.2=c := by dsimp [k₀]; rw [cc]; simp [x]
   have ok : R.compatible side k₀.1 k₀.2 := (e (0,0)).property
+  refine ⟨k₀.1,k₀.2,ok,?_⟩
+  intro J
+  let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
+  let good := fun i : ℤ => supportedValue J (F+s*i)
   have wb (k : ℤ×ℤ) : coefficientWeight n (e k).val=W k := by rw [cc]; exact coefficient_weight_projection ..
   have Z := (e.tsum_eq (fun k : C => coefficientWeight n k.val)).symm.trans (tsum_congr wb)
   have eq (i j : ℤ) : R.intercept a side (x i-a*y i j) (y i j)=F+s*i := by
@@ -136,7 +138,7 @@ theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n e
       (fun k => by dsimp only [V]; split <;> first | exact pos k | rfl) Wsum
     calc _=(∑' k, V k) := tsum_congr (fun k => by simp only [V,E,good,eq])
          _= _ := by rw [vs.tsum_prod]; apply tsum_congr; intro i; by_cases g : good i <;> simp [V,g]
-  have sm := R.first_event_weight big target am side k₀.1 k₀.2 ok
+  have sm := R.first_event_band_weight J big target am side k₀.1 k₀.2 ok
   rw [orig] at sm
   let m := (scalarMass J F s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
   have mEq : m=(H:ℝ)/S*(∑' i : ℤ,if good i then coeffGaussian ((c:ℝ)+(H:ℝ)*i) μ S else 0) := by
@@ -148,12 +150,23 @@ theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n e
     hp mp bounds.1 bounds.2.1 good
   have sp : 0<S := by dsimp [S,projectionScale,Fixed.A,Fixed.U]; positivity
   have mn : 0 ≤ m := by rw [mEq]; exact mul_nonneg (div_nonneg hp.le sp.le) (tsum_nonneg (fun i => by split <;> first | exact (exp_pos _).le | rfl))
-  refine ⟨k₀.1,k₀.2,ok,?_⟩
   change |prescribedProbability R side E-m|≤90*exp (-(Fixed.U (n.log2+1):ℝ))*m
   rw [unpack]
   apply le_trans _ (mul_le_mul_of_nonneg_right bounds.2.2.1 mn)
   rw [mEq]
   simpa only [W,x,y,Int.cast_add,Int.cast_mul,Int.cast_natCast] using marg
+
+theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n ell)
+    (big : 3≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (cap : a≤Fixed.A (n.log2+1)) (am : a<Fixed.rootBase n) (side : Bool) :
+    let J := sieveBand n ell (R.prefactor a side); let pre : ℝ := R.prefactor a side
+    let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
+    ∃ u v : ℤ, R.compatible side u v ∧
+      let c := R.intercept a side u v; let s := firstStep n ell a side
+      let m := (scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
+      |prescribedProbability R side E-m| ≤ 90*exp (-(Fixed.U (n.log2+1):ℝ))*m := by
+  obtain ⟨u,v,ok,estimate⟩ := R.first_band_probability big target cap am side
+  exact ⟨u,v,ok,estimate _⟩
 
 end
 end Cogentic.Construction

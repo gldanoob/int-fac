@@ -3,14 +3,20 @@ import Cogentic.PolynomialEvents
 namespace Cogentic.Construction
 open Real Cogentic.Window
 
+theorem horner_eval_int (x : ℤ) (f : List ℤ) : (Marking.horner x f).1=eval x f := by
+  induction f with
+  | nil => rfl
+  | cons c cs ih => simp only [Marking.horner,eval,ih,Int.cast_id]
+
 /-- Inside the actual finite search box the signed affine extension agrees
     exactly with the absolute integer value accepted by Step 1. -/
-theorem signed_box_value {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d (n.log2+1))
+theorem signed_box_value_size {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d (n.log2+1))
     (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (cap : a≤Fixed.A (n.log2+1))
     (grid : onGrid (Fixed.d (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.invWidth (n.log2+1)) a)
     (box : let b := n.log2+1; u≤2*b^2*Fixed.U b*Fixed.A b ∧ v≤2*b^2*Fixed.U b) (side : Bool) :
     let p := construct n ell u v u v; let f := if side then p.second else p.first
-    markSign n a side*affineValue n ell a side ((u:ℤ)+a*v)=(Marking.value f a:ℤ) := by
+    markSign n a side*affineValue n ell a side ((u:ℤ)+a*v)=(Marking.value f a:ℤ) ∧
+      Fixed.A (n.log2+1)<Marking.value f a := by
   let b := n.log2+1; let A := Fixed.A b; let d := Fixed.d b; let h := Fixed.h b
   let amp : ℚ := leadingCoefficient n*(A:ℚ)^d; let y := affineValue n ell a side ((u:ℤ)+a*v)
   let p := construct n ell u v u v; let f := if side then p.second else p.first
@@ -21,11 +27,7 @@ theorem signed_box_value {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d
     cases side <;> assumption
   have val : (Marking.value f a:ℤ)=|y| := by
     unfold Marking.value
-    have horner (l : List ℤ) : (Marking.horner (a:ℤ) l).1=eval (a:ℤ) l := by
-      induction l with
-      | nil => rfl
-      | cons c cs ih => simp only [Marking.horner,eval,ih,Int.cast_id]
-    rw [horner,eq,Int.natCast_natAbs]
+    rw [horner_eval_int,eq,Int.natCast_natAbs]
   have err := normalized_error hn big target side box ((a:ℚ)/A)
     (by rw [abs_of_nonneg (by positivity)]; exact (div_le_one (by exact_mod_cast ap)).mpr (by exact_mod_cast cap))
   have raw : |(y:ℚ)-amp*idealAt n a side|≤amp/(Fixed.K₁ b) := by
@@ -42,6 +44,39 @@ theorem signed_box_value {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d
     exact one_div_le_one_div_of_le (by positivity) (pow_le_pow_right₀ (by norm_num) (by omega))
   have sign := mul_le_mul_of_nonneg_left (width.trans size) amp₀
   rw [←mul_div_assoc,mul_one] at sign
+  have hp : 0<h := Nat.mul_pos (Fixed.degree_pos (Nat.succ_pos _)) (Nat.succ_pos _)
+  have kp : (0:ℚ)<Fixed.K₁ b := by dsimp only [Fixed.K₁]; positivity
+  have gap : (2:ℚ)/(Fixed.K₁ b) ≤ |idealAt n a side| := by
+    apply le_trans _ size
+    rw [div_pow,one_pow]
+    apply (div_le_div_iff₀ kp (by positivity)).mpr
+    simpa only [one_mul] using (show (2:ℚ)*2^(4*h) ≤ Fixed.K₁ b by
+      exact_mod_cast (show 2*2^(4*h) ≤ Fixed.K₁ b by
+        change 2^1*2^(4*h)≤2^(100*h)
+        rw [←pow_add]; exact Nat.pow_le_pow_right (by decide) (by omega)))
+  have half := Nat.div_pos (Nat.le_of_dvd (primorial_pos d)
+    (Nat.prime_two.dvd_primorial_iff.mpr (show 2≤d by dsimp only [d,b]; omega))) (by decide)
+  have lead : 1≤leadingCoefficient n := Nat.mul_pos half (Nat.pow_pos (by decide))
+  have KA : Fixed.K₁ b<A := Nat.pow_lt_pow_right (by decide : 1<2) (by change 100*h<10000*h; omega)
+  have bigAmp : (A:ℚ)*(Fixed.K₁ b:ℚ) < amp := by
+    have apow := Nat.pow_le_pow_right ap (show 2≤d by dsimp only [d,b]; omega)
+    have sq : A*Fixed.K₁ b < leadingCoefficient n*A^d := calc
+      _ < A*A := Nat.mul_lt_mul_of_pos_left KA ap
+      _ ≤ A^d := by simpa only [pow_two] using apow
+      _ ≤ _ := Nat.le_mul_of_pos_left _ lead
+    dsimp only [amp]; exact_mod_cast sq
+  have g := mul_le_mul_of_nonneg_left gap amp₀
+  rw [←abs_of_nonneg amp₀,←abs_mul] at g
+  rw [abs_of_nonneg amp₀,show amp*(2/(Fixed.K₁ b:ℚ))=2*(amp/(Fixed.K₁ b)) by ring] at g
+  have tri := abs_sub_abs_le_abs_sub (amp*idealAt n a side) (y:ℚ)
+  rw [abs_sub_comm] at tri
+  have valQ := congrArg (fun k : ℤ => (k:ℚ)) val
+  push_cast at valQ
+  have bigger : (A:ℚ)<(Marking.value f a:ℚ) := by
+    rw [valQ]
+    have below := (lt_div_iff₀ kp).mpr bigAmp
+    linarith only [raw,tri,g,below]
+  refine ⟨?_,by exact_mod_cast bigger⟩
   change markSign n a side*y=(Marking.value f a:ℤ)
   rw [val]
   unfold markSign
@@ -54,6 +89,14 @@ theorem signed_box_value {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d
     rw [abs_of_nonneg (le_of_not_gt pos)] at sign
     have yn : 0≤(y:ℚ) := by linarith [(abs_le.mp raw).1]
     rw [one_mul,abs_of_nonneg (by exact_mod_cast yn)]
+
+theorem signed_box_value {n ell a u v : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d (n.log2+1))
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (cap : a≤Fixed.A (n.log2+1))
+    (grid : onGrid (Fixed.d (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.invWidth (n.log2+1)) a)
+    (box : let b := n.log2+1; u≤2*b^2*Fixed.U b*Fixed.A b ∧ v≤2*b^2*Fixed.U b) (side : Bool) :
+    let p := construct n ell u v u v; let f := if side then p.second else p.first
+    markSign n a side*affineValue n ell a side ((u:ℤ)+a*v)=(Marking.value f a:ℤ) := by
+  exact (signed_box_value_size hn big target cap grid box side).1
 
 /-- A band prime of a surviving input passes the additional leading-
     coefficient and input-modulus filters used by the executable marker. -/
