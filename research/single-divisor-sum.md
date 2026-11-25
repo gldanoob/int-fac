@@ -155,37 +155,14 @@ for ell, k, g, p, q, expected in [(7, 3, 3, 5, 13, 5), (11, 5, 2, 3, 23, 9)]:
     assert gcd(n, *(v - coefficients[0] for v in coefficients)) == expected
 ~~~
 
-The following exact replay recovers the full radical's totient ratio after denominator cancellation, then recovers a proper prefix at a gap. The latter prefix contains two primes. Its exponent splits their product by the ordinary chain of squarings.
+The [continued-fraction GP replay](../experiments/sigma-tail.gp) accepts only $m$ and its divisor sum. It tries convergents in order, using primality tests, integer roots and the [existing chain of squarings](../experiments/lucas-carmichael.gp) with prime bases through 31 to recover a certified prime from a denominator dividing $m$. The small fixtures strip every recovered prime power. On $53^{28}59^{30}107^{36}$ the factor $53$ cancels from the full ratio, giving the composite denominator $59\cdot107$. On $53^{28}59^{30}(2^{31}-1)^{36}$ the first successful denominator is the proper prefix $53\cdot59$. The finite base cutoff bounds the experiment.
 
-~~~python
-from fractions import Fraction
-from math import gcd, prod
+Run the optional sweep from the repository root in GP. It checks the complete recovery of all 2,240 inputs obtained by choosing three of seven primes and assigning each one of four multiplicities from 27 through 256.
 
-def convergents(a, b):
-    h0, h1, k0, k1 = 0, 1, 1, 0
-    while b:
-        t, rem = divmod(a, b)
-        h0, h1, k0, k1 = h1, t*h1 + h0, k1, t*k1 + k0
-        yield Fraction(h1, k1)
-        a, b = b, rem
-
-def tail_data(powers):
-    return (prod(p**e for p, e in powers),
-            prod((p**(e+1) - 1) // (p - 1) for p, e in powers))
-
-n, sigma = tail_data([(37, 10), (149, 12)])
-full = Fraction(144, 149)
-assert full in convergents(n, sigma)
-assert n * full == 36 * 37**9 * 148 * 149**11
-
-n, sigma = tail_data([(53, 28), (59, 30), (2147483647, 36)])
-prefix = Fraction(52*58, 53*59)
-assert prefix in convergents(n, sigma)
-d = prefix.denominator
-exponent = n * prefix.numerator // d
-odd = exponent // (exponent & -exponent)
-assert gcd(pow(2, odd, d) - 1, d) in (53, 59) or (
-    gcd(pow(2, 2*odd, d) - 1, d) in (53, 59))
+~~~gp
+read("experiments/lucas-carmichael.gp");
+read("experiments/sigma-tail.gp");
+if(checkSigmaTailSweep()!=2240,error("divisor-sum sweep"));
 ~~~
 
 ## An interval or residue class for the divisor sum
