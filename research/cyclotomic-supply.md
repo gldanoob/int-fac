@@ -63,6 +63,34 @@ The obstruction also applies at the time scale of the factoring benchmark. Keep 
 
 Indeed set $b=\log X$, $Y=\max(2,Y_0,D)b^5$. Then $Y=X^{o(1)}$. The proof above bounds the expected logarithm of the entire $Y$-smooth part of $\Phi_k(p)$ by $O_k(\log Y)+O_k(Yb^2/\sqrt X)$. By Markov it is at most $\sqrt{b\log Y}=o(b)$ outside a set of density $o(1)$. The large-prime union bound for primes dividing the content or the primitive polynomial value is $O_k(Db^2(1/Y+1/X))=o(1)$. Thus the part above $Y$ survives in full, and its logarithm is $\log\Phi_k(p)-o(b)$. The same proof handles the other prime and the fixed finite list of indices. It leaves open exponents constructed from input-specific arithmetic beyond membership in a prescribed list and methods exploiting orders of individual elements.
 
+### Simultaneously growing cyclotomic indices
+
+The same conclusion holds simultaneously for **every** $1\le k\le K$ with $K=X^{o(1)}$. Both $K$ and the polynomial schedule may depend on $X$. On a fraction tending to one of the balanced pairs,
+$$
+\max_{1\le k\le K,\ t=p,q}
+\frac{\log\gcd(\Phi_k(t),P_X(pq))}{\log\Phi_k(t)}=o(1),
+$$
+and every residual has a prime factor exceeding any prescribed $Y_0=X^{o(1)}$. In particular a deterministic subexponential budget for precomputing a polynomial list and choosing indices, by itself, does not supply a small residual on all inputs.
+
+Set $Z=\max(2,Y_0,K^2(D+1))b^5=X^{o(1)}$, where $b=\log X$ and $D\ge1$ bounds the total degree and log absolute content. First control the full $Z$-smooth part of $\Phi_k(p)$. At primes $\ell\nmid k$, all roots of $\Phi_k$ are simple and have exact order $k$ modulo $\ell$. Thus $\ell\equiv1\bmod k$ is necessary and each prime power has at most $\varphi(k)$ roots. If $\ell\mid k$, write $k=k'\ell^j$ with $\ell\nmid k'$. At an odd such $\ell$, any root implies that the order of $p$ modulo $\ell$ is $k'$, by reducing the cyclotomic identity modulo $\ell$. Lifting the exponent in $p^{k'\ell^j}-1$ and subtracting the valuation at $k'\ell^{j-1}$ gives exactly one factor of $\ell$ in the quotient, of which $\Phi_k(p)$ is a divisor. At $\ell=2$ a root requires $k'=1$, and $p^{2^{j-1}}+1$ is $2\bmod8$ for $j\ge2$. Hence the ramified-prime contribution is at most $\log k$, except for $k=2,\ell=2$, which we include in the simple one-root estimates for $X+1$.
+
+If a simple-root contribution at $\ell\le Z$ has $\ell^{v_\ell(\Phi_k(p))}>X^{1/4}$, its first power $d$ crossing $X^{1/4}$ already has this divisibility. For each $\ell,k$ that power admits at most $O(\varphi(k)(X^{3/4}+1))$ integers $p$ in the interval. Summing over $\ell,k$ and dividing by the number of primes shows this happens anywhere with probability $O(K^2 Z b X^{-1/4})=o(1)$.
+
+Let $S_k$ sum $\log\ell$ for the remaining simple prime powers dividing $\Phi_k(p)$, truncated at $X^{1/4}$, with $\ell\le Z$. Uniformly in $k$,
+$$
+\mathbb E S_k^2 \ll (\log Z+\log^2(2k))^2 .
+$$
+For distinct primes the lcm of two truncated powers is at most $\sqrt X$. CRT and interval Brun–Titchmarsh bound their joint divisibility probability by $O(\varphi(k)^2/(\varphi(d_1)\varphi(d_2)))$. For two powers of the same prime, the larger one suffices. Summing $\sum_{a\ge1}(2a-1)/\varphi(\ell^a)\ll1/\ell$ bounds the diagonal contribution by $O(\varphi(k)\sum (\log\ell)^2/\ell)$ over eligible primes. The required first-power estimate is
+$$
+\varphi(k)\sum_{\ell\le Z,\ \ell\equiv1\bmod k}\frac{\log\ell}{\ell}
+\ll \log Z+\log^2(2k).
+$$
+Up to $k^2$, sum over integers $1+jk$ using $\varphi(k)\le k$. Above $k^2$, Brun–Titchmarsh gives $\pi(t;k,1)\ll t/(\varphi(k)\log t)$, and partial summation gives the bound. The exception at 2 costs an absolute constant. This proves the second moment since the diagonal has only one additional factor of at most $\log Z$. [Montgomery–Vaughan, Theorem 2](https://personal.science.psu.edu/rcv4/personal/Publications/large_sieve.pdf#page=3)
+
+Now $\log\Phi_k(p)\ge\varphi(k)\log(p-1)$ from the distances to its complex roots. The elementary bound $\varphi(k)\gg k^{3/4}$ follows from $1-1/\ell\ge\ell^{-1/4}$ for primes $\ell\ge5$, treating 2 and 3 with an absolute constant. Summing the second moments of $(S_k+\log(2k))/\log\Phi_k(p)$ over $k\le K$ gives $O((1+\log Z)^2/b^2)=o(1)$ because $\sum_k(1+\log^4(2k))/\varphi(k)^2$ converges. Markov bounds the maximum simultaneously by a quantity tending to zero outside a set of vanishing density.
+
+Finally, a content prime $\ell>Z$ divides some $\Phi_k(p)$ at at most $O(K^2(X/Z+1))$ integers $p$ per prime, by the finite-field root bound. Outside the content, condition on $p$. Across all indices the product of the $\Phi_k(p)$ has logarithm $O(K^2 b)$ by $\Phi_k(p)\le(p+1)^{\varphi(k)}$. Each of its large prime divisors leaves at most $D(X/Z+1)$ possible integers $q$ with $P_X(pq)\equiv0\bmod\ell$. Both union bounds together cost $O(DK^2b^2(1/Z+1/X))=o(1)$ in probability. Thus every tested cyclotomic value retains its full part above $Z$ on the good pairs. The argument applies to both prime positions and survives exclusion of the diagonal.
+
 ## Reproduce two finite checks
 
 From the repository root, run the following PARI/GP block. It constructs the least $q$ for three choices of $p$, then supplies only $N,N^2+N+1$ to the degree-three search. In the balanced sample it counts pairs satisfying all 36 bounds for three exponents, six indices, and both prime factors. The threshold 48 is an example for this finite interval.
