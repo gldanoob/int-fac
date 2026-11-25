@@ -69,7 +69,8 @@ import Cogentic.MinorVerificationWork
 import Cogentic.BinaryMaskCost
 import Cogentic.SharedInsertionProfile
 import Cogentic.PooledResidueMoment
-import Cogentic.DistinctPrimeGram
+import Cogentic.OrdinaryBranchMasks
+import Cogentic.RetainedOverlapEnvelope
 import Cogentic.SamePrimeBlocks
 import Cogentic.SimultaneousScoreBudget
 import Cogentic.IndexCapCost
@@ -137,6 +138,7 @@ run_cmd
     ``Cogentic.Concrete.all_minor_verification_gates, ``Cogentic.Concrete.constructed_minor_width,
     ``Cogentic.BinaryPerturbation.fixed_pair, ``Cogentic.BinaryCofactor.fixed_markModulus, ``Cogentic.Concrete.measured_search_L_two_thirds,
     ``Cogentic.Construction.pooled_residue_score_second, ``Cogentic.Construction.common_weight_cell_profiles, ``Cogentic.Construction.constructor_cell_insertion_total_variation, ``Cogentic.Construction.common_weight_second_transfer,
+    ``Cogentic.Construction.kept_common_overlap_envelope, ``Cogentic.Construction.retained_same_prime_covariance, ``Cogentic.Construction.prescribed_pair_branch_partition, ``Cogentic.Construction.ordinary_target_branch_masks, ``Cogentic.Construction.PrescribedRows.hitProduct_on_pair_branch,
     ``Cogentic.Construction.insertion_distinct_prime_overlap, ``Cogentic.Construction.actual_mark_insertion_variation, ``Cogentic.Concrete.exhaustive_verification_gates, ``Cogentic.BinaryResidues.fixed_residue_enumeration, ``Cogentic.BinaryMaskCost.fixed_mask,
     ``Cogentic.Construction.fullBandInsertion_saddle_change,
     ``Cogentic.Companion.split_of_dense_box_hits, ``Cogentic.Companion.split_of_box_rank, ``Cogentic.powerDivisor_of_power,
