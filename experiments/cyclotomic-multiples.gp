@@ -76,3 +76,21 @@ checkCyclotomicBoxes() = {
   );
   #cases
 };
+
+\\ Full literal replay of the paired prime fixture, run separately from the short suite.
+checkPairedCubicBox() = {
+  my(p=6084388588251393175949014831974809464878988981873524433296636149705472126228033846765094966948306381241202554123411329885625010620107179169204903755828305152002656663883006164524890783784495797287893897299470691099307821589062112551267917849389881473232572705776810417034411846396054733096171549395692124907933051518339601012116141589912350864829150453272222185860216041431078831);
+  my(q=4704869673295731713181971977184059697407460815763858831161872607085570402482602581183078166359659999593227930833501443872769517591);
+  my(n=p*q,m=p^2+p+1,hits=0);
+  if(!isprime(p) || !isprime(q) || p%3!=1 || q%3!=1 ||
+     m%(q^2+q+1) || gcd(m,q*(q^2-1))!=3,error("paired prime assumptions"));
+  if(splitCyclotomicBox(n,m,3,4)!=[1,0],error("paired height-four split"));
+  if(splitCyclotomicBox(n,m,3,5)!=[q,x^3-4*x^2-5*x-5],error("paired height-five witness"));
+  forvec(c=vector(3,i,[-4,4]),
+    if(c[2] || c[3],
+      my(f=x^3+Polrev(c),a=#polrootsmod(f,p)==0,b=#polrootsmod(f,q)==0);
+      if(a!=b,error("paired inertness mismatch ",f));
+      hits+=a));
+  if(hits!=78,error("paired inertness count ",hits));
+  hits
+};
