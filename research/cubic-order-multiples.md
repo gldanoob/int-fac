@@ -65,6 +65,14 @@ One way to separate two primes that are both $2\bmod3$ would be to choose a cycl
 
 For the second search, the quotient of two component Legendre symbols is a nontrivial character on residue units at the split prime. A full generating set of residue units would necessarily contain a separating witness. One possible construction would lift small prime-ideal generators of the ray class group, enumerate relations in the ordinary ideal class group, and include the images of global units. To turn this into a time bound one needs uniform estimates for the varying conductor, uniform bit complexity for computing generators of principal ideals and units in the varying cubic field, and a search executable without knowing either prime. The fixed-field theorem above avoids all three requirements; the subsequent proof handles them by showing that an exhaustive polynomial search contains a witness.
 
+## One fixed witness for three quarters of the split primes
+
+Fix this conductor-seven field and take $\alpha=3+\theta$, of norm $29$. For any fixed inert prime $p\ne 29$, let $q$ vary over primes that split completely in $K$. A relative density $3/4$ of those $q$ give $\alpha$ mixed quadratic signs in the three components modulo $q$. For every such $q$ and every positive multiple $M$ of $H_p$, the single gcd $G(M/2^{v_2(M)})$ splits $pq$. Indeed $H_p$ is odd, so the power is scalar at $p$. Raising to an odd power preserves the mixed signs at $q$, which preclude a scalar. Here density refers to the limit as $q$ varies for a fixed field and element. It supplies no guarantee for a specified split $q$.
+
+To compute the density, let $\alpha_1,\alpha_2,\alpha_3$ be the Galois conjugates of $\alpha$. Its principal ideal is a prime of norm $29$. Since $29\equiv1\bmod 7$, its three conjugates are the distinct primes of $K$ over $29$. Valuation modulo two at these primes gives the three coordinate vectors, proving that the $\alpha_i$ are independent in $K^\times/K^{\times2}$. Thus $L=K(\sqrt{\alpha_1},\sqrt{\alpha_2},\sqrt{\alpha_3})$ is Galois over $\mathbb Q$ with $\operatorname{Gal}(L/K)\cong\{\pm1\}^3$. At an unramified split $q$ away from $2\cdot29$, the three residue signs are the Frobenius sign vector at a prime over $q$, up to permutation. Mixed signs form a union of conjugacy classes of size six in the subgroup of size eight. Chebotarev gives relative density $6/8$ among split primes, or density $1/4$ among all rational primes.
+
+The same argument gives mixed signs at relative density $1-2^{1-k}$ for any fixed Galois field of degree $k\ge2$. Choose an auxiliary rational prime splitting completely and, by the ideal Chinese remainder theorem, an integral element of valuation exactly one at one prime above it and zero at every other. The $k$ conjugates then have independent square classes. Of the $2^k$ sign vectors, only the two constant vectors lack mixed signs. The cubic factoring assertion uses in addition the odd projective exponent $H_p$ at the fixed inert prime.
+
 ## PARI/GP replay
 
 From the repository root, extract the GP block and run it directly.
@@ -107,6 +115,13 @@ checkfixture() =
   );
   m = H(5)*H(17);
   if(gcd(85,m) != 1 || scalargcd(85,m) != 85, error("common exponent"));
+  my(qs=[13,41,197],signs=[[-1,-1,1],[-1,-1,-1],[1,1,1]]);
+  for(i=1,#qs,
+    q=qs[i];
+    my(v=Vec(apply(t->kronecker(lift(t)+3,q),polrootsmod(f,q))));
+    if(v!=signs[i],error("conjugate signs at q=",q))
+  );
+  if(scalargcd(5*13,m)!=5,error("fixed mixed-sign witness"));
   print("OK: forward, reverse (inert and split), common-exponent obstruction");
 }
 iferr(checkfixture(), err, print(err); quit(1));

@@ -78,6 +78,15 @@ Choose an odd prime $q\equiv2\pmod M$ by also requiring $q\equiv1\pmod4$. Linnik
 
 For the quantitative bound, the box has $O_k(T^k)$ polynomials. Adjoining their roots gives degree at most $O_k(1)(k!)^{O_k(T^k)}$. Each root has all conjugates bounded by $1+T$. In a tower adjoining the roots one at a time, each relative field discriminant divides that of the order obtained by adjoining the root. Every conjugate of the relative polynomial discriminant is bounded by $(2+2T)^{k(k-1)}$ from the root differences. The tower discriminant formula consequently gives $\log |D_F|\le [F:\mathbb Q] O_k(1+T^k\log(2T))$. Apply the same uniform Chebotarev interval bound above to choose $p>T$ with $\log p=O_{k,\delta}(T^k)$. Then $\log N=O_{k,\delta}(T^k)$ by the bound for $q$. Taking $T$ to infinity proves the assertion, with the constant depending also on the fixed zero-free strip. As an illustration, the entire height-two quadratic and cubic box misses $N=210133967=14489\cdot14503$ at $M=209945611=\Phi_3(14489)$.
 
+The cubic search can have minimum coefficient height exactly four. Take
+
+$$
+p=5667905425817027078359952011480794959255287699625520230463791431884359,
+\qquad q=p+168,\qquad N=pq,\qquad M=p^2+p+1.
+$$
+
+Both integers are prime and $\gcd(M,q(q^6-1))=1$. At height three all $7^2+7^3=392$ monic quadratics and cubics give a trivial gcd. At height four $X^3-4X^2-3X-4$ gives the proper divisor $p$. The regression tests primality, the coprimality condition, and both boxes directly by modular polynomial arithmetic. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)
+
 ## Finite checks
 
 The height-one regression runs the polynomial search on indices $3,4,5,6$. It splits $85$ with $M=2^8\cdot31\cdot307$, handles a repeated prime in $2057=11^2\cdot17$, and splits $55$ even though the successful polynomial gives the identity at the full exponent. The quartic field example $N=235$, $M=26$ has $f=X^4+47X^3-164X^2+47X+1$. In its quotient $X^{13}=141+220X+115X^3\pmod{235}$, giving the factor $5$. At $47$ the roots $13,18,29,34$ have signs $-,+,-,+$. These are finite arithmetic checks. The uniform witness bound is a paper proof. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)

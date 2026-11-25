@@ -27,5 +27,11 @@ checkCyclotomicBoxes() = {
   if(splitCyclotomicBox(17,307,3,1)!=[1,0],error("spurious prime split"));
   if(splitCyclotomicBox(14489*14503,14489^2+14489+1,3,2)!=[1,0],
     error("expected the whole height-two box to miss"));
+  my(p=5667905425817027078359952011480794959255287699625520230463791431884359);
+  my(q=p+168,m=p^2+p+1);
+  if(!isprime(p) || !isprime(q) || gcd(m,q*(q^6-1))!=1,
+    error("height-three prime certificate"));
+  if(splitCyclotomicBox(p*q,m,3,3)!=[1,0],error("expected the whole height-three box to miss"));
+  if(splitCyclotomicBox(p*q,m,3,4)!=[p,x^3-4*x^2-3*x-4],error("height-four witness"));
   #cases
 };
