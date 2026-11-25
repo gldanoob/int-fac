@@ -176,4 +176,68 @@ theorem decode_eq {n r : Int} (hn : 0 < n) (hodd : n%2=1)
       simp [h]
       omega
 
+/-- An odd square on the short-center progression lies at least one modulus above the even square. -/
+theorem odd_square_separation {n b z m : Int} (hn : 0 < n) (hb : b^2 < n)
+    (he : b % 2 = 0) (ho : z % 2 = 1) (progression : z^2 = b^2 + m*n) :
+    n + b^2 ≤ z^2 := by
+  have oddSquare : z^2 % 2 = 1 := by simp [Int.pow_succ, Int.mul_emod, ho]
+  have evenSquare : b^2 % 2 = 0 := by simp [Int.pow_succ, Int.mul_emod, he]
+  have sq := Int.sq_nonneg z
+  by_cases neg : m < 0
+  · have bound := Int.mul_le_mul_of_nonneg_right (show m ≤ -1 by omega) (show 0 ≤ n by omega)
+    grind
+  · have mpos : 1 ≤ m := by
+      apply Classical.byContradiction
+      intro bad
+      have zero : m = 0 := by omega
+      simp [zero] at progression
+      omega
+    have bound := Int.mul_le_mul_of_nonneg_right mpos (show 0 ≤ n by omega)
+    grind
+
+/-- A positive centered carry at distance k gives exactly a shifted two-generator semigroup. -/
+theorem carry_semigroup {u v k : Int} (hu : 0 ≤ u) (hv : 0 ≤ v)
+    (hk : 2*k < (2*u+1)*(2*v+1)) :
+    (∃ h l : Int, 0 ≤ h ∧ h ≤ u ∧ 0 ≤ l ∧ l ≤ v ∧
+      k + h*(2*v+1) + l*(2*u+1) = (2*u+1)*(2*v+1)) ↔
+    (∃ i j : Int, 0 ≤ i ∧ 0 ≤ j ∧ k = u+v+1 + i*(2*v+1) + j*(2*u+1)) := by
+  constructor
+  · rintro ⟨h, l, hlo, hhi, llo, lhi, eq⟩
+    exact ⟨u-h, v-l, by omega, by omega, by grind⟩
+  · rintro ⟨i, j, ilo, jlo, eq⟩
+    have ip := Int.mul_nonneg ilo (show 0 ≤ 2*v+1 by omega)
+    have jp := Int.mul_nonneg jlo (show 0 ≤ 2*u+1 by omega)
+    have ui : i ≤ u := by
+      apply Classical.byContradiction
+      intro bad
+      have bound := Int.mul_le_mul_of_nonneg_right (show u ≤ i by omega) (show 0 ≤ 2*v+1 by omega)
+      grind
+    have vj : j ≤ v := by
+      apply Classical.byContradiction
+      intro bad
+      have bound := Int.mul_le_mul_of_nonneg_right (show v ≤ j by omega) (show 0 ≤ 2*u+1 by omega)
+      grind
+    exact ⟨u-i, v-j, by omega, by omega, by omega, by omega, by grind⟩
+
+
+/-- The first centered carry for odd orders 2u+1 and 2v+1 is their half-sum. -/
+theorem first_carry {u v : Int} (hu : 1 ≤ u) (hv : 1 ≤ v) :
+    (2*(u+v+1) < (2*u+1)*(2*v+1)) ∧
+    (u+v+1) + u*(2*v+1) + v*(2*u+1) = (2*u+1)*(2*v+1) ∧
+    ∀ k h l : Int, 0 ≤ h → h ≤ u → 0 ≤ l → l ≤ v →
+      k + h*(2*v+1) + l*(2*u+1) = (2*u+1)*(2*v+1) → u+v+1 ≤ k := by
+  have pos := Int.mul_pos (show 0 < u by omega) (show 0 < v by omega)
+  refine ⟨by grind, by grind, ?_⟩
+  intro k h l _ hhi _ lhi eq
+  have left := Int.mul_le_mul_of_nonneg_right hhi (show 0 ≤ 2*v+1 by omega)
+  have right := Int.mul_le_mul_of_nonneg_right lhi (show 0 ≤ 2*u+1 by omega)
+  grind
+
+/-- Recover the totient once the signed excess in the square-modulus count is bounded. -/
+theorem negative_count_round {n totient negative excess : Int} (hn : 0 < n)
+    (lo : 0 ≤ excess) (hi : excess < n) (count : 2*negative + excess = n*totient) :
+    (2*negative + n-1)/n = totient := by
+  apply (Int.ediv_eq_iff_of_pos hn).mpr
+  grind
+
 end CenteredFloor

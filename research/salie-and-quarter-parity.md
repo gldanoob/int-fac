@@ -45,6 +45,8 @@ $$
 $$
 In fact $8t_*<Q$ since $U\ge9$, $V\ge25$, and $t_*$ is a unit by coprimality and $7\nmid n$. For a unit $t<Q/8$ we have $B=4t$; the two positive odd integers $B-z,B+z$ have sum $8t<Q$ and product divisible by $Q$. They share no prime divisor of $Q$ since $\gcd(2B,Q)=1$. Hence they must be $uU$ and $vV$ in some order for positive odd $u,v$. Conversely such a pair gives an odd $z$ by taking half the absolute difference, and it gives the mixed root because each summand is below $Q$. Both square blocks are one modulo eight. Therefore $u+v\equiv0\pmod8$, and the smallest possible weighted sum is $7U+V$, obtained by putting as much weight as possible on the smaller block. This proves the formula. From a supplied $t_*$ the quadratic $7U^2-8t_*U+Q=0$ recovers the blocks. If $7\mid n$, ordinary division already identifies one of the two prime types. Finding the first sign change efficiently from $n$ is a separate problem.
 
+Lean verifies the integer square separation behind the short-center margin, the equivalence between a centered carry and the shifted semigroup, its minimum and the final totient rounding identity. The character sum and density statements have paper proofs. [Lean theorems](../formal/CenteredFloor.lean)
+
 The finite replay compares 6,746 literal twisted sums at odd moduli through 181 against exact root enumeration. It compares the integer sign test at all 2,708 two-prime unit inputs in that sweep and checks 106 centered floor sums by direct integer summation. Nine square-modulus fixtures verify the first negative frequency, including inputs with repeated prime factors. Run `python3 -B experiments/salie-quarter.py`. [Independent finite checks](../experiments/salie-quarter.py)
 
 ## A comparison that works without the factors
