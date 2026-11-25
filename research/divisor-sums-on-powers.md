@@ -1,8 +1,33 @@
 # Complete factorization from a short block of divisor sums
 
-Let $N\ge2$ have $b$ binary digits. A deterministic algorithm recovers its complete prime factorization in polynomial bit time from **$O(b/\log b)$ consecutive ordinary divisor sums $\sigma(N^j)$**. The exponents $j$ are $O(b/\log b)$ and are chosen from $N$ before any answers arrive. Each queried integer and each answer has $O(b^2/\log b)$ bits. The proof uses integer and rational arithmetic and has no zero-free hypothesis. Producing these divisor sums on unrestricted inputs remains open here.
+Let $N\ge2$ have $b$ binary digits. A deterministic algorithm recovers its complete prime factorization in polynomial bit time from **$O(b/\log b)$ consecutive ordinary divisor sums $\sigma(N^j)$**. The exponents $j$ are $O(b/\log b)$ and are chosen from $N$ before any answers arrive. Each queried integer and each answer has $O(b^2/\log b)$ bits. The proof uses integer and rational arithmetic and has no zero-free hypothesis. One compressed answer at a single public power also recovers the exact totient and gives complete factoring via Miller’s Dirichlet-based reduction. Producing these divisor sums on unrestricted inputs remains open here.
 
 For comparison, Bach, Miller and Shallit give a randomized polynomial-time algorithm with a single original value $\sigma(N)$. Morain, Renault and Smith obtain deterministic results under size conditions for one original divisor sum. The [intersection-lattice reduction](hidden-divisor-lattices.md) gives an independent unconditional algorithm with all powers through $3b$. The shifted moment matrices below are related to the matrix pencil used in Prony methods for exponential sums. Here there can be exponentially many subset terms. The proof bounds the signed terms we omit, chooses the binary precision and certifies the recovered integer. [Bach–Miller–Shallit, Theorem 2](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf) · [Morain–Renault–Smith, Theorem 5.4](https://arxiv.org/pdf/1802.08444v2#page=13) · [Fischer et al., generalized eigenvalue methods](https://arxiv.org/abs/2004.10472)
+
+## One compressed divisor sum recovers the totient
+
+For every $b$-bit $N\ge2$, choose $L=\max(16,b^2)$ and the least integer $J\ge1$ with $(L+1)^{J+1}\ge8bN$. Thus $J=O(b/\log b)$. The **single integer**
+$$
+C=\left\lfloor\frac{N^{J+1}}{\sigma(N^J)}\right\rfloor
+$$
+has at most $b$ bits and suffices to determine $\varphi(N)$ exactly in deterministic polynomial time. Alternatively, supply the bit length and the first $b+4$ significant bits of $\sigma(N^J)$, using all its bits if it is shorter. This also suffices and costs $b+O(\log b)$ bits in total. Treating the supplied arithmetic data as an oracle answer, complete deterministic factoring then follows by Miller's reduction. Its small-base bound uses the Dirichlet L-function zero-free statement in the cited independent verification. Computing the totient from the response uses only elementary arithmetic. [Miller, Lemma 5 and Theorem 4](https://www.cs.cmu.edu/~glmiller/Publications/Papers/Mi76.pdf#page=11) · [Dirichlet verification, statement 3](https://math.mit.edu/~drew/grh/) · [Order-multiple reduction](order-and-crt-reductions.md#a-linear-number-of-queries-on-one-cofactor)
+
+Write $N=tm$ by trial-dividing through $L$, with all small prime powers in $t$. Compute $\varphi(t)$ and $R_t=t^{J+1}/\sigma(t^J)$ directly. For $u\ge1$ let $R_u=u^{J+1}/\sigma(u^J)$ and $E_u=1-\varphi(u)/R_u$. Multiplicativity gives $R_N=R_tR_m$. The geometric-series identity gives $R_u\ge\varphi(u)\ge1$ and $R_u\le u$. For the residual, a union bound on the factors of the product gives
+$$
+0\le E_m=1-\prod_{p^e\parallel m}(1-p^{-1-eJ})
+\le b/(L+1)^{J+1}\le1/(8N).
+$$
+Consequently $0\le R_m-\varphi(m)=R_m E_m\le1/8$. If $m=1$, the answer is already $\varphi(t)$. Otherwise $m$ is odd and $\varphi(m)$ is even.
+
+In fact the decoding works for $C=\lfloor\widetilde R_N\rfloor$ whenever $|\widetilde R_N-R_N|<1/4$. The even integer $\varphi(m)$ belongs to
+$$
+\left[\frac{C-1/4}{R_t}-\frac18,\ \frac{C+5/4}{R_t}\right).
+$$
+Its width is at most $13/8<2$, so there is a unique even candidate. Multiply that integer by $\varphi(t)$. For the leading-bit protocol, truncation gives $\widetilde S$ with $|\widetilde S/\sigma(N^J)-1|\le1/(8N)$. Hence $|N^{J+1}/\widetilde S-R_N|\le N/(8N-1)<1/4$, proving the claim for that protocol as well. There are $O(\log b)$ bits of length information because $\sigma(N^J)\le N^J(1+J\log N)$.
+
+With $J=b$ there is a still simpler identity $C=\varphi(N)$ without trial division. Indeed $E_N\le\sum_{n\ge2}n^{-(b+1)}\le2^{-b-1}(1+2/b)\le2^{-b}$ by integral comparison for $b\ge2$. It follows that $0\le R_N-\varphi(N)\le N2^{-b}<1$. The shorter public exponent above uses the small factors to obtain the same information.
+
+The full decoder recovered the totient and factors of all 1,999 inputs from 2 to 2,000 and 64 larger inputs with three primes beyond the trial bound. For example, at $N=43912157131979933002905882398568$ it used $J=8$ and $C=14637732739448786428993195606914$ to recover $\varphi(N)=14636988629364742811360062153344$. The larger checks also used truncated leading bits and perturbations of both signs near the stated limits. [GP reciprocal decoder and fixture](../experiments/sigma-tail.gp)
 
 ## Which integers to request
 

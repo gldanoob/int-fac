@@ -1,18 +1,59 @@
 \\ Read experiments/lucas-carmichael.gp first for lcChain.
 \\ This finite experiment tests the prime bases through 31 on each denominator.
-sigmaDenominatorPrime(d,exponent) = {
+sigmaDenominatorPrime(d,exponent,{bound=31}) = {
   my(p);
   if(isprimepower(d,&p),return(p));
-  forprime(a=2,31,
+  forprime(a=2,min(d-1,bound),
     if(d%a==0,return(a));
     my(g=lcChain(d,exponent,Mod(a,d)));
     if(g>1,
-      p=sigmaDenominatorPrime(g,exponent);
+      p=sigmaDenominatorPrime(g,exponent,bound);
       if(p,return(p));
-      return(sigmaDenominatorPrime(d/g,exponent))
+      return(sigmaDenominatorPrime(d/g,exponent,bound))
     )
   );
   0
+};
+
+sigmaOneExponent(N) = {
+  if(type(N)!="t_INT" || N<2,error("expected an integer at least two"));
+  my(b=logint(N,2)+1,L=max(16,b^2),t=8*b*N,k=logint(t,L+1));
+  max(1,k-((L+1)^k==t))
+};
+
+\\ Given floor(N^(J+1)/sigma(N^J)) at the public exponent above, recover phi(N).
+sigmaOneTotient(N,C) = {
+  my(J=sigmaOneExponent(N),b=logint(N,2)+1,L=max(16,b^2),m=N,phi=1);
+  if(type(C)!="t_INT" || C<0 || C>N,error("invalid reciprocal"));
+  my(scale=1);
+  forprime(p=2,L,
+    if(m==1,break);
+    my(e=valuation(m,p));
+    if(e,
+      my(B=p^e);
+      scale*=B^(J+1)*(p-1)/(p*B^J-1);
+      phi*=B/p*(p-1);m\=B
+    )
+  );
+  if(m>1,
+    my(v=2*ceil(((C-1/4)/scale-1/8)/2));
+    if(v<1 || v>m || v>=(C+5/4)/scale,error("unusable reciprocal"));
+    phi*=v
+  );
+  phi
+};
+
+\\ E also annihilates units modulo each divisor of the original input.
+sigmaOnePowerFactors(N,C) = {
+  my(E=sigmaOneTotient(N,C),m=N,found=List(),phi=1);
+  while(m>1,
+    my(p=sigmaDenominatorPrime(m,E,m));
+    if(!p,error("no factor at the supplied reciprocal"));
+    my(e=valuation(m,p),B=p^e);
+    listput(found,[p,e]);m\=B;phi*=B/p*(p-1)
+  );
+  if(phi!=E,error("inconsistent reciprocal"));
+  vecsort(Vec(found))
 };
 
 \\ Return [certified prime, convergent] or [] if the bounded search misses.
@@ -61,6 +102,10 @@ checkSigmaTail() = {
   checkSigmaTailCase([37,149],[10,12],144/149);
   if(sigmaTailPrime(35,35)!=[] || sigmaDenominatorPrime(59^3,1)!=59,
     error("empty convergent search or prime-power denominator"));
+  my(n=43912157131979933002905882398568,C=14637732739448786428993195606914);
+  if(sigmaOneExponent(n)!=8 || sigmaOneTotient(n,C)!=14636988629364742811360062153344 ||
+     sigmaOnePowerFactors(n,C)!=[[2,3],[3,1],[110543,2],[110587,1],[110629,3]],
+    error("one compressed divisor sum"));
   3
 };
 
