@@ -42,6 +42,10 @@ checkCyclotomicBoxes() = {
     if(k==6 && liftall(Mod(Mod(1,n)*x,hit[2])^m)!=1,
       error("expected the full exponent to give the identity at both primes"))
   );
+  foreach([[2,2,367,373],[4,1,211,223],[6,1,211,223],[8,1,227,233]],v,
+    my(k=v[1],h=v[2],p=v[3],q=v[4],m=subst(polcyclo(k),x,p));
+    if(!isprime(p) || !isprime(q) || q<=p || q>2*p ||
+       splitCyclotomicBox(p*q,m,k,h)!=[1,0],error("balanced even-index miss ",v)));
   if(splitCyclotomicBox(85,2^8*31*307,2,1)!=[1,0],error("unexpected quadratic split"));
   if(splitCyclotomicBox(17,307,3,1)!=[1,0],error("spurious prime split"));
   if(splitCyclotomicBox(14489*14503,14489^2+14489+1,3,2)!=[1,0],
