@@ -121,6 +121,31 @@ twoPrimeRoots(n,m,u,v) = {
 }
 ~~~
 
+### Unconditional recovery with at most three high-multiplicity primes
+
+Suppose $m$ has at most three distinct prime factors and all its exponents are at least $27$. From $m$ and $S=\sigma(m)$ alone, complete deterministic factorization takes polynomial time in $\log m$ without a zero-free hypothesis. Strip primes through $48$, dividing $S$ by the divisor sum of each full power removed. The prefix estimate above with $h=3$ and $T=27$ uses only elementary inequalities. For each residual $m>1$ it supplies a nonempty prefix of the sorted primes, of product $R_i$, satisfying
+$$
+\left|\frac mS-\frac{\varphi(R_i)}{R_i}\right|<\frac1{2R_i^2}.
+$$
+This precision at each residual is also sufficient if it holds at smaller multiplicities. Record prime powers by integer roots and primality testing. At every other residual enumerate the convergents $C/D$ with $C>0$, $D>1$ and $D\mid m$. The proof considers the convergent of the guaranteed prefix. Its denominator is squarefree and contains the largest prefix prime.
+
+Put $W=\gcd(m,D^{\lfloor\log_2 m\rfloor})$. It consists of the full prime powers of $m$ supported on $D$. If $W<m$, one of $W$ and $m/W$ is a power of a single prime, because they are coprime and together have at most three distinct prime factors. If $W=m$ at the guaranteed convergent, $D$ contains all prime factors, so the prefix is the entire radical $R=D$ and $C=\varphi(R)$. Divide $m$ by $R$ as many times as possible, say $e$ times. If the quotient $m'$ exceeds 1, then $1<\gcd(R,m')<R$. This partitions the squarefree radical into two nonempty sets, one of size one. Test both parts for primality. This treats every unequal-multiplicity case.
+
+It remains to split $m=R^e$ with known $R$ and $C=\varphi(R)$. For two distinct primes their sum is $R+1-C$, giving a quadratic. For three distinct primes let $t$ denote their sum. Expanding the totient gives their sum of pairwise products as $t+R-1-C$. Define
+$$
+f_t(X)=X^3-tX^2+(t+R-1-C)X-R,\qquad B_e(X)=\sum_{j=0}^eX^j,
+$$
+$$
+H(t)=\operatorname{Res}_X(f_t(X),B_e(X))-S.
+$$
+At the true $t$ the resultant is the product of $B_e$ at the three primes, so $H(t)=0$. In fact $H$ has degree exactly $e$ and leading coefficient $e+1$. As $t\to+\infty$, the rescaled polynomial $t^{-3}f_t(tX)$ has a simple limiting root at $1$, giving one root $\sim t$. Also $t^{-1}f_t(X)$ tends to $X(1-X)$ on bounded intervals, giving two roots tending to $0$ and $1$. The three factors $B_e$ at these roots are asymptotic to $t^e$, $1$, and $e+1$ respectively. This proves that $H$ is nonzero, including for incorrect positive candidates $R,C$.
+
+One polynomial construction evaluates the Sylvester determinant at the integers $t=0,\ldots,e$ and interpolates. The matrix size is $e+3$ and its entries have $O(\log m+\log(e+1))$ bits. Hadamard's bound and exact interpolation give polynomial bit cost and coefficient size, as $e\le\log_2 m$. For every positive integral root of $H$, find the rational linear factors of $f_t$ and test each candidate prime directly against $m$. Accepting any certified prime divisor, even from an earlier convergent, permits stripping its full power and updating $S$ exactly. At most three such recoveries are needed. The polynomial factorization and integer-root steps use classical deterministic algorithms. [Lenstra–Lenstra–Lovász](https://doi.org/10.1007/BF01457454)
+
+A second consequence covers $m=(pqr)^e$ for $e\ge2$ and $p,q,r\in[P,KP]$ with fixed $K$, including $e=2$. Try every exact exponent $e$ to obtain candidate radicals $R$ by integer roots. For the correct choice, $U\le3P^{-e-1}$ and $R\le K^3P^3$, so $|Rm/S-\varphi(R)|\le RU/(1-U)=O(K^3)$ for $P\ge2$. Try each integer in this bounded interval as $C$ and apply the same cubic resultant. This proof needs only the stated comparability bound or an enumeration of candidate totients in order of distance from $Rm/S$ until the three verified primes are recovered.
+
+The [GP replay](../experiments/sigma-triprime.gp) searches convergents from the supplied $m,S$ and tests all of the cases. For $m=(53\cdot59\cdot67)^{28}$ it extracts the integer root $t=179$ of a degree-28 resultant with leading coefficient 29. Other fixtures recover a prime from a proper prefix, denominator cancellation, unequal valuations and a two-prime residual.
+
 ## Exact arithmetic replay
 
 This Python check verifies the period Gram matrix using traces of roots of unity. It then runs the scalar test on $N=5^2\cdot13$ and $N=3^4\cdot23$ with the respective original divisor sums. The quintic case returns the composite divisor $9$.
