@@ -1,6 +1,7 @@
 """Exact minima for the quadratic resolvents of monic cubics of height five."""
 
-from itertools import product
+from collections import Counter
+from itertools import combinations, product
 
 
 def squareclass(n):
@@ -98,6 +99,21 @@ def keep_minimum(table, span, state):
         table[span] = state
 
 
+def biquadratic_count(active):
+    """Each disjoint zero-sum triple saves one class before pairing."""
+    rows = set(active)
+    triples = [frozenset((x, y, x ^ y)) for x, y in combinations(sorted(rows), 2)
+               if y < x ^ y and x ^ y in rows]
+
+    def packing(remaining):
+        if not remaining:
+            return 0
+        first, *rest = remaining
+        return max(packing(rest), 1 + packing([t for t in rest if first.isdisjoint(t)]))
+
+    return (len(rows) - packing(triples) + 1) // 2
+
+
 def merge_ranks(v, inputs):
     """A state stores the charged internal rank and an attaining sign mask."""
     output = {}
@@ -175,6 +191,14 @@ def check(height):
                     profiles += 1
                 assert (minimum, profiles, len(distinct)) == (31, 8192, 8192)
                 print(f'{profiles} minimum-count profiles, all of rank {minimum}')
+            else:
+                covers = Counter()
+                for signs in optimal_profiles(archive, {}):
+                    active = active_rows(bitmask(j for j, sign in signs.items() if sign))
+                    assert len(active) == minimum == 24
+                    covers[biquadratic_count(active)] += 1
+                assert covers == {11: 4, 12: 8}
+                print(f'minimum-count profiles by biquadratic covering number: {dict(covers)}')
 
 
 if __name__ == '__main__':

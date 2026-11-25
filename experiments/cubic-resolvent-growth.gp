@@ -62,6 +62,19 @@ negativeTriangle(p,q) = {
   print(["negative triangle",p,q,h,discs,F,heights,probe(F,d,1)]);
 };
 
+separateBases() = {
+  my(f=x^3-3*x^2-2,g=x^3-6*x^2-3*x+2,h=x^3-2,counts=[0,0]);
+  if(!issquare(-poldisc(f)) || !issquare(poldisc(g)/3) || !issquare(-poldisc(h)/3),
+    error("wrong quadratic resolvents"));
+  forprime(p=13,100000,
+    if(p%12==1 && #polrootsmod(f,p)==3 && #polrootsmod(g,p)==3,
+      my(n=#polrootsmod(h,p));
+      if(n!=0 && n!=3,error("unexpected uncovered splitting type",p));
+      counts[1+(n==3)]++));
+  if(vecmin(counts)==0,error("missing uncovered Frobenius type"));
+  print(["two separate quadratic Artin conditions, uncovered inert and split",counts]);
+};
+
 positiveMarker(1013);
 positiveMarker(1021);
 positiveMarker(1031);
@@ -69,4 +82,5 @@ positiveMarker(1000003);
 negativeTriangle(10193,10487);
 negativeTriangle(1373,1471);
 negativeTriangle(1000001213,1000001311);
+separateBases();
 quit;

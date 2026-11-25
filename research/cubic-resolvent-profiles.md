@@ -43,6 +43,30 @@ The quadratic class $[-3]$ is itself in the box. On the $p\equiv2$ branch it is 
 
 Run `python3 -B experiments/cubic-resolvent-profiles.py`. The height-two check exhausts all sign assignments and compares both minima to the elimination algorithm. At height five the replay checks rank witnesses against the original squareclasses. A separate PARI/GP field enumeration using `polredabs` on each irreducible gives 213 distinct cubic fields, four cyclic, and the same 196 nontrivial squareclasses. The computation concerns a finite polynomial family and does not construct a height-five failure for the order search. [Exact replay](../experiments/cubic-resolvent-profiles.py)
 
+## Several Galois fields with separate Artin conditions
+
+Let each base field $L_j$ be Galois over $\mathbb Q$. Allow degree-one primes in each $L_j$ with separate abelian Artin conditions, as well as rational congruences. An active quadratic resolvent $K$ is covered if $K\subseteq L_j$ for at least one $j$. Containment in the compositum of several bases can leave it uncovered.
+
+Group the cubic splitting fields by their quadratic resolvent $K$. Write $w_K$ for the dimension over $\mathbb F_3$ of their joint cubic Galois group over $K$. It counts independent cubic extensions with that resolvent. On any attainable fixed profile, the relative density of eligible rational primes that split every cubic above the **uncovered active** resolvents is exactly
+$$
+                         3^{-\sum_K w_K},
+$$
+with the sum over those resolvents. In particular any uncovered active resolvent prevents the prescription from forcing the whole family.
+
+For the proof let $B/\mathbb Q$ be abelian and contain all resolvents and rational congruence data. Over $B$ the joint cubic kernel is the product of the blocks $V_K=\mathbb F_3^{w_K}$. Indeed inversion by a lift of the nontrivial automorphism of $K$ makes each cubic block its own commutator with that lift, so adjoining $B$ preserves its full rank. The quadratic-character projections used above separate the blocks.
+
+Let $R_j$ be the rational normal closure of the abelian extension specifying the Artin condition over $L_j$. Each conjugate is abelian over the same field $L_j$, so $R_j/L_j$ is abelian. Work in one finite Galois extension $E/\mathbb Q$ containing all these fields and cubic closures. Put $H_j=\mathrm{Gal}(E/L_j)$, start with $T_0=\mathrm{Gal}(E/B)$, and take
+$$
+                       T_j=[H_j,[H_j,T_{j-1}]] .
+$$
+All the groups in this recursion are normal over $\mathbb Q$. The inner commutator belongs to both $H_j$ and $T_{j-1}$, hence $T_j$ fixes $R_j$ and every field already fixed by $T_{j-1}$. For an uncovered $K$, some $h\in H_j$ acts on $V_K$ by inversion. Commuting with $h$ sends each projected vector $v$ to $-2v=v$ in characteristic three. Each commutator therefore preserves surjectivity onto $V_K$. Normality and the distinct character projections give simultaneous surjectivity onto their product. The uncovered blocks over $B$ are consequently linearly disjoint from $B\prod_j R_j$ over $B$.
+
+Existence of a suitable prime above a rational prime specifies a conjugacy-stable subset in this last extension. Over each eligible element, every possible value on the uncovered blocks occurs exactly once in their joint extension. The active sign makes the identity the unique value with a root in each cubic. Chebotarev gives the displayed relative density. For covered $K$, one can impose splitting through the abelian extension obtained by adjoining its cubic closures to a base containing $K$, provided the joint prescription is attainable. For bases chosen as composita of active quadratic fields and rational data chosen freely, attainability follows by the coprime-degree argument above. Requiring principal ideals, positive generators or integral norm representations introduces additional compatibility conditions. [Chebotarev density theorem](https://websites.math.leidenuniv.nl/algebra/Lenstra-Chebotarev.pdf) · [Artin reciprocity](https://www.jmilne.org/math/CourseNotes/CFT.pdf)
+
+At height five, the minimum numbers of separate **quadratic** base fields on the two branches are therefore **31** and **24**. The first branch has 8,192 minimizing profiles and the second has 12. There is also an exact count for biquadratic fields on a given profile. Let $t$ be the maximum number of pairwise disjoint triples $a,b,ab$ among the $n$ active classes. The minimum number of quadratic or biquadratic fields covering them is $\lceil(n-t)/2\rceil$. Assign each class to one field in a cover. Every field assigned three classes consumes a whole triple. Conversely pack the triples and pair the leftovers. At all 8,192 first-branch minimum-count profiles the classes are independent and 16 fields suffice. Of the 12 second-branch minimum-count profiles, four require 11 fields and eight require 12.
+
+A finite check uses $L_1=\mathbb Q(i)$ and $L_2=\mathbb Q(\sqrt3)$. Require complete splitting in the closures of $X^3-3X^2-2$ and $X^3-6X^2-3X+2$, respectively. Their quadratic resolvents are $L_1,L_2$. The radical $X^3-2$ has the uncovered resolvent $\mathbb Q(\sqrt{-3})$, which is inside $L_1L_2$. Of the 250 qualifying primes $p\equiv1\pmod{12}$ below 100,000, the radical stays irreducible at 177 and splits at 73. The density theorem gives one third in the limit. [PARI/GP replay](../experiments/cubic-resolvent-growth.gp) · [Height-five cover replay](../experiments/cubic-resolvent-profiles.py)
+
 ## Bounds as the coefficient height grows
 
 Let $r_H(p)$ be the binary rank of the split, nontrivial quadratic resolvent classes from the monic cubic box of height $H$. For all sufficiently large $H$ and all primes outside the polynomial discriminants, the following unconditional bounds hold with absolute implied constants:
