@@ -2,6 +2,8 @@
 
 Let $n$ be odd with exactly two distinct prime divisors, including arbitrary positive multiplicities, and set $Q=n^2$. The complete factorization of $n$ follows from $O(\log n)$ classical Kloosterman sums at modulus $Q$, each given with absolute error at most $n/128$. All arithmetic outside the queries costs polynomial time in $\log n$. The required error is a fixed constant after division by $\sqrt Q$. This gives an alternative to evaluating the [fixed-width floor sums](floor-sum-and-log-parity.md#nonadaptive-queries-for-two-distinct-prime-divisors). Its unknown cost is approximating each sum on an unfactored input.
 
+Exact sign queries at the original square modulus give complete factoring in polynomial time for logarithmically many distinct prime factors, and in deterministic $2^{O(\sqrt b)}$ time and queries for arbitrary prime support, where $b$ is the input bit length. [Proof for sign queries](#sign-decoding-with-logarithmically-many-prime-factors)
+
 For arbitrary prime support, a separate deterministic polynomial-time reduction uses only fixed-threshold comparison bits after adding known prime factors to the base of the square modulus. [All-input threshold reduction](kloosterman-threshold.md)
 
 ## Stationary phase at a square modulus
@@ -75,6 +77,42 @@ At the tag of a desired frequency the translated, weighted samples approximate $
 For a promised bound $R$, the search and trial division to $B=RU+L+1$ are polynomial in $b,T_0/\nu,R$. For the all-input sign bound choose $B=2^{\lceil A\sqrt{b\log_2(2b)}\rceil}$ at the outset and $R=\lfloor b/\log_2 B\rfloor$. For a sufficiently large absolute $A$ this $B$ exceeds $RU+L$, since $\log_2 L=O(1+R\log(2b))$. In the coarse case take $B=2^{\lceil A\sqrt b\rceil}$ and use $\log_2 L=O(1+R)$. Small inputs and $m=1$ are immediate. The padded comparison theorem gives a polynomial all-input reduction with a different oracle. [Padded threshold proof](kloosterman-threshold.md)
 
 The finite sign replay queried the original square modulus and verified all eight, sixteen and eight roots in three fixtures. The bases were $8{,}813{,}740{,}459$, $18{,}359{,}021{,}376{,}097$ and $18{,}094{,}609{,}162{,}327$, respectively. They took 70,488, 92,915 and 92,958 distinct unit sign queries. The third included $2053^2$. Literal inverse sums check both signs at $105^2$. The three larger oracles compute exact local quarter comparisons from the fixture factors. The decoder uses one public dilation, a floating-point FFT and exact root and gcd checks. [Replay with the shared frequency decoder](../experiments/kloosterman-threshold.py)
+
+## Sign decoding with logarithmically many prime factors
+
+For an odd $b$-bit input with at most $R$ distinct prime factors, the exact-sign reduction at the original square modulus takes $2^{O(R)}\operatorname{poly}(b)$ deterministic work and nonadaptive unit queries. Consequently it is polynomial for $R=O(\log b)$. Without a promise on the prime support, the bound is $2^{O(\sqrt b)}$ including trial division. The improvement comes from approximating the sign product on the particular translated sample sets used for phase recovery.
+
+Let $r\le R$ denote the number of residual prime-power components after trial division, $h=R+\lceil\log_2(2+b)\rceil$, and $s(x)=\operatorname{sgn}\cos(2\pi x)$ on the unit circle. We evaluate it only away from its two jumps. Let $s_j$ be its Fejér mean with multiplier $(1-|k|/2^j)_+$ on Fourier mode $k$. Then $s_0=0$. For $j\ge1$ put $\Delta_j=s_j-s_{j-1}$. If $d(x)$ is the circular distance to the nearer jump, there is an absolute $C$ such that
+$$
+\|\widehat{\Delta_j}\|_1\le C,\qquad
+|\Delta_j(x)|\le C2^{-j}/d(x).
+$$
+Indeed the nonzero Fourier coefficients of the square wave are bounded by $1/|k|$. Up to $2^{j-1}$ the multiplier difference is $|k|/2^j$ and the remaining frequencies occupy just the next dyadic interval. For the pointwise estimate the averaging kernel $n^{-1}|\sum_{u=0}^{n-1}e^{2\pi iuy}|^2$ has integral one and is $O(1/(n\|y\|^2))$. Its integral outside distance $d(x)$ is $O(1/(n d(x)))$. Within that distance the square wave is constant. This also proves $s=\sum_{j\ge1}\Delta_j$ at all the required points.
+
+At $x_i=2c_iv/D_i\bmod1$, telescope each square wave and retain only products whose total dyadic level is at most $4U$, where $U=Ah$ and $A$ is a sufficiently large fixed integer. Call the resulting trigonometric polynomial $P(v)$. Pullback to a finite cyclic group adds coefficients that alias to the same mode, so it cannot increase their absolute sum. Counting level tuples gives
+$$
+T=\|\widehat P\|_1\le C^r\binom{4U+r}{r}
+   \le 2^{O((1+\log A)h)} .
+$$
+The proof uses these hidden coordinates to describe $P$. The algorithm evaluates only the original sign. Truncation by the sum of levels is the classical sparse-grid construction. [Smolyak on product quadrature](https://www.mathnet.ru/eng/dan27586) · [Temlyakov on hyperbolic-cross approximation](https://arxiv.org/abs/1412.8647)
+
+Set $u_i=\lfloor\log_2(1/d(x_i))\rfloor$. On $\sum_i u_i\le U$ the discarded terms have total absolute value at most $C_1^r2^{-U}$. Indeed their bound is $(2C)^r2^U\sum_{k>4U}\binom{k+r-1}{r-1}2^{-k}$, and factoring out $2^{-2U}$ leaves at most $(1-2^{-1/2})^{-r}$. The estimate is pointwise on this good set.
+
+To control the complement, let the sample argument have any translate of an $\epsilon$-biased distribution on the cyclic group, with $\epsilon=2^{-2Ah}$. Uniform measure works too. The bad set lies in a union over $v_i\ge0$, $\sum v_i=U$, of rectangles $d(x_i)\le2^{-v_i}$. For a single local grid and radius $\rho=2^{-v_i}$, use the constant one for $\rho\ge1/8$. For smaller $\rho$, majorize the two short intervals by two triangular functions of radius $2\rho$ and height two centered at the jumps. Each unshifted height-one tent has nonnegative Fourier coefficients summing to one, as follows by convolving two equal intervals. Translation and grid restriction keep its coefficient absolute sum at most one. The majorant thus has absolute sum at most four, and its uniform grid mean is $O(\rho)$: when $\rho<1/(4D_i)$ the event is empty and we can use zero, and otherwise the grid-point count gives $O(\rho+1/D_i)=O(\rho)$.
+
+The axes are independent by CRT under uniform measure. The product majorant therefore has mean at most $C_2^r2^{-U}$ and Fourier norm at most $4^r$. Bias increases its expected value by at most $4^r\epsilon$ under any common translation. There are at most $\binom{U+r}{r}$ rectangles. On the bad set use the global estimate $|S-P|\le 1+T$. Combining this with the good-set bound gives
+$$
+\mathbb E |S-P|\le C_1^r2^{-U}
+ +(1+T)\binom{U+r}{r}(C_2^r2^{-U}+4^r\epsilon)
+ \le 2^{-Ah/2}=:\eta
+$$
+for $A$ sufficiently large, since the positive prefactors have log-size $O((1+\log A)h)$. This argument applies to every translate and also to uniform measure. In particular each desired coefficient of $P$ differs from the corresponding coefficient of $S$ by at most $\eta$.
+
+Use the preceding Fejér frequency decoder with a public upper bound $2^{O((1+\log A)h)}$ on $T$ and scale $\nu=2^{-R}$. Its dilation isolation and mesh estimates apply to $P$. For a fixed good dilation and for each shift $u$, the nonnegative weights sum to one, so the expected weighted difference between the sign samples and the samples of $P$ on the row $s+ka+u$ is at most $\eta$ over the second, $\epsilon$-biased translation support. Markov's inequality and a union bound over at most $2b+3$ shifts give probability below $1/4$ of any row exceeding $\nu/512$, increasing $A$ if needed. This bound is independent of the mesh point. The probability of *any* nonunit is at most $(2L+1)(2b+3)r(1/B+\epsilon)$, where $B$ is the trial cutoff: for each prime divisor its divisibility indicator has mean $1/p$ and Fourier norm one. Choose $B=2^{C_3 h}$ with $C_3$ large enough for the $1/B$ term and for $B>L$. The $\epsilon$ term is small because $\log_2 L=O((1+\log A)h)$ whereas $-\log_2\epsilon=2Ah$. Some enumerated translation has all unit samples and all rows within the error allowance. The decoder tries every translation with unit rows. Isolation, mesh and approximation errors together are less than $\nu/64$ at the desired tag, while the desired coefficient has magnitude at least $\nu-\eta$. The anchored phase and exact root checks therefore apply.
+
+Both small-bias enumerations, the mesh, the window and the trial cutoff are $2^{O(h)}$. In the all-input case choose $R=\lceil\sqrt b\rceil$ in advance. Removing primes through the resulting $B$ leaves at most $b/\log_2 B\le R$ prime types, which is all the proof uses. This gives the claimed $2^{O(\sqrt b)}$ bound.
+
+The finite approximation check compares the truncated sign product with exact quarter signs at all 11,025 CRT grid points of local orders 9, 25 and 49. At total levels 4, 8, 12 and 16 the mean absolute errors are 0.821246, 0.294281, 0.056493 and 0.007498. This checks a full small uniform grid. The bound for every translated small-bias support is analytic. [Approximation and decoder replay](../experiments/kloosterman-threshold.py)
 
 ## Replay
 

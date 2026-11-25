@@ -82,7 +82,7 @@ A lattice search evaluates every center under the supplied promise $aq\equiv h\p
 
 A different one-bit oracle compares the magnitude of a complete Kloosterman sum to a fixed threshold. It suffices for deterministic polynomial-time recovery with arbitrary prime multiplicities at one padded square modulus. [Threshold reduction](kloosterman-threshold.md)
 
-At the original square modulus, the exact sign of the sum is the parity of one quarter-interval comparison per prime-power component. For a fixed bound on the number of components, polynomially many nonadaptive sign queries suffice for complete factoring. [Original-modulus sign theorem](kloosterman-localization.md#signs-at-the-original-square-modulus)
+At the original square modulus, the exact sign of the sum is the parity of one quarter-interval comparison per prime-power component. Polynomially many nonadaptive sign queries suffice for complete factoring when there are $O(\log b)$ components. For arbitrary $b$-bit inputs, the reduction takes $2^{O(\sqrt b)}$ work and queries. [Original-modulus sign theorem](kloosterman-localization.md#sign-decoding-with-logarithmically-many-prime-factors)
 
 ## What the floor-sum formulas evaluate
 

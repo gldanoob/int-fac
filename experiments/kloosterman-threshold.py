@@ -160,6 +160,46 @@ def sign_fixture(powers, window):
           f"queries={oracle.cache_info().misses}")
 
 
+def sign_approximation_check():
+    """Compare the total-level truncation with exact quarter signs on a full CRT grid."""
+    levels = (4, 8, 12, 16)
+    squares = (9, 25, 49)
+    increments = []
+    for d in squares:
+        cosines = [[character(k * t, d).real for k in range(d)] for t in range(d)]
+        samples = [[0.0] for _ in range(d)]
+        previous = [0.0] * d
+        for level in range(1, max(levels) + 1):
+            n = 1 << level
+            coefficients = [0.0] * d
+            for k in range(1, n, 2):
+                sign = 1 if k % 4 == 1 else -1
+                coefficients[k % d] += 4 * sign * (1 - k / n) / (math.pi * k)
+            for t, row in enumerate(cosines):
+                value = sum(a * c for a, c in zip(coefficients, row))
+                samples[t].append(value - previous[t])
+                previous[t] = value
+        increments.append(samples)
+
+    errors = [0.0] * len(levels)
+    q = math.prod(squares)
+    for t in range(q):
+        target = 1
+        coefficients = [1.0] + [0.0] * max(levels)
+        for d, samples in zip(squares, increments):
+            residue = t % d
+            if 4 * min(residue, d - residue) > d:
+                target = -target
+            shell = samples[residue]
+            coefficients = [sum(coefficients[i] * shell[k - i] for i in range(k + 1))
+                            for k in range(max(levels) + 1)]
+        for i, level in enumerate(levels):
+            errors[i] += abs(sum(coefficients[:level + 1]) - target) / q
+    assert all(a > b for a, b in zip(errors, errors[1:]))
+    assert errors[-1] < 0.008
+    print(f'total-level sign approximation {levels=} mean errors={[round(e, 6) for e in errors]}')
+
+
 def direct_check():
     def direct(n, frequency):
         q = n * n
@@ -234,6 +274,7 @@ def threshold_fixture(powers, window):
 
 if __name__ == "__main__":
     direct_check()
+    sign_approximation_check()
     sign_fixture((2053, 2063, 2081), 511)
     sign_fixture((2053, 2063, 2081, 2083), 511)
     sign_fixture((2053**2, 2063, 2081), 511)
