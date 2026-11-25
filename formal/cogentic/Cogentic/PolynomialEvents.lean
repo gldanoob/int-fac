@@ -44,35 +44,51 @@ theorem PrescribedRows.signed_intercept {n ell : ℕ} (R : PrescribedRows n ell)
 abbrev supportedValue (J : Finset ℕ) (z : ℤ) : Prop :=
   z∈(squarefreeSupport J).image (fun k : ℕ => (k:ℤ))
 
+/-- Membership of a signed quotient in a finite set of natural values. -/
+abbrev finiteValue (A : Finset ℕ) (z : ℤ) : Prop :=
+  z∈A.image (fun k : ℕ => (k:ℤ))
+
+/-- Scalar Gaussian mass restricted to a finite set of accepted values. -/
+def finiteScalarMass (A : Finset ℕ) (c s : ℤ) (Y S : ℝ) : ℂ :=
+  ((s.natAbs:ℝ)/S * ∑' j : ℤ, if finiteValue A (c+s*j) then
+    coeffGaussian (c+s*j : ℤ) Y S else 0 : ℝ)
+
 /-- Change a normalized Gaussian event from a coefficient coordinate to
     its signed integer evaluation; the affine offset and the full modulus
     scale cancel exactly, for either orientation. -/
-theorem scalar_event_weight (J : Finset ℕ) (c s z : ℤ) (F K M μ σ Y S : ℝ)
+theorem scalar_finite_event_weight (A : Finset ℕ) (c s z : ℤ) (F K M μ σ Y S : ℝ)
     (kn : K≠0) (mp : 0<M) (start : (c:ℝ)=F+K*z) (step : (s:ℝ)=K*M)
     (center : Y=F+K*μ) (width : S=|K| *σ) :
-    scalarMass J c s Y S =
-      (M/σ*(∑' j : ℤ, if supportedValue J (c+s*j) then coeffGaussian ((z:ℝ)+M*j) μ σ else 0):ℝ) := by
+    finiteScalarMass A c s Y S =
+      (M/σ*(∑' j : ℤ, if finiteValue A (c+s*j) then coeffGaussian ((z:ℝ)+M*j) μ σ else 0):ℝ) := by
   classical
   have size : (s.natAbs:ℝ)=|K| *M := by rw [Nat.cast_natAbs,Int.cast_abs,step,abs_mul,abs_of_pos mp]
   have normal : (s.natAbs:ℝ)/S=M/σ := by rw [width,size,mul_div_mul_left _ _ (abs_ne_zero.mpr kn)]
   have weight (j : ℤ) : coeffGaussian (↑(c+s*j:ℤ)) Y S=coeffGaussian ((z:ℝ)+M*j) μ σ := by
     rw [Int.cast_add,Int.cast_mul,start,step,center,width,show F+K*z+K*M*j=F+K*((z:ℝ)+M*j) by ring]
     exact conditional_second_weight kn ..
-  unfold scalarMass
+  unfold finiteScalarMass
   rw [normal]
   congr 2
-  exact tsum_congr (fun j => by simp only [supportedValue,weight j])
+  exact tsum_congr (fun j => by simp only [finiteValue,weight j])
+
+theorem scalar_event_weight (J : Finset ℕ) (c s z : ℤ) (F K M μ σ Y S : ℝ)
+    (kn : K≠0) (mp : 0<M) (start : (c:ℝ)=F+K*z) (step : (s:ℝ)=K*M)
+    (center : Y=F+K*μ) (width : S=|K| *σ) :
+    scalarMass J c s Y S =
+      (M/σ*(∑' j : ℤ, if supportedValue J (c+s*j) then coeffGaussian ((z:ℝ)+M*j) μ σ else 0):ℝ) :=
+  scalar_finite_event_weight (squarefreeSupport J) c s z F K M μ σ Y S kn mp start step center width
 
 /-- The normalized first-coordinate event for an actual compatible seed
     is exactly the scalar character sum estimated by the relative theorem. -/
-theorem PrescribedRows.first_event_band_weight {n ell a : ℕ} (R : PrescribedRows n ell) (J : Finset ℕ) (big : 3≤Fixed.d (n.log2+1))
+theorem PrescribedRows.first_finite_event_weight {n ell a : ℕ} (R : PrescribedRows n ell) (A : Finset ℕ) (big : 3≤Fixed.d (n.log2+1))
     (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (am : a<Fixed.rootBase n) (side : Bool)
     (u v : ℤ) (ok : R.compatible side u v) :
     let pre : ℝ := R.prefactor a side
     let c := R.intercept a side u v; let s := firstStep n ell a side; let x := u+a*v
     let H : ℝ := R.hitProduct a; let σ := projectionScale n a
-    scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre) =
-      (H/σ*(∑' j : ℤ, if supportedValue J (c+s*j) then coeffGaussian ((x:ℝ)+H*j) (lineCenter n a) σ else 0):ℝ) := by
+    finiteScalarMass A c s (exactMean n ell a side/pre) (oneWidth n ell a/pre) =
+      (H/σ*(∑' j : ℤ, if finiteValue A (c+s*j) then coeffGaussian ((x:ℝ)+H*j) (lineCenter n a) σ else 0):ℝ) := by
   let pre : ℝ := R.prefactor a side; let H : ℝ := R.hitProduct a
   let F : ℝ := signedBase n ell a side; let D : ℝ := signedSlope n ell a side
   have pp : 0<pre := by dsimp only [pre]; exact_mod_cast (R.pre_bounds target a side).1
@@ -88,12 +104,22 @@ theorem PrescribedRows.first_event_band_weight {n ell a : ℕ} (R : PrescribedRo
     dsimp [pre,H,D,signedSlope,PrescribedRows.prefactor] at *
     push_cast at hs ⊢
     linear_combination hs
-  apply scalar_event_weight _ _ _ (u+(a:ℤ)*v) (F/pre) (D/pre) H _ _ _ _ (div_ne_zero dn pp.ne') hp
+  apply scalar_finite_event_weight _ _ _ (u+(a:ℤ)*v) (F/pre) (D/pre) H _ _ _ _ (div_ne_zero dn pp.ne') hp
   · rw [R.signed_intercept target a side u v ok]; push_cast; ring
   · field_simp [pp.ne']; linarith only [size]
   · rw [signed_center big]; dsimp [F,D]; ring
   · rw [abs_div,abs_of_pos pp,show |D|=_ from abs_slope n ell a side]
     unfold oneWidth; ring
+
+theorem PrescribedRows.first_event_band_weight {n ell a : ℕ} (R : PrescribedRows n ell) (J : Finset ℕ) (big : 3≤Fixed.d (n.log2+1))
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (am : a<Fixed.rootBase n) (side : Bool)
+    (u v : ℤ) (ok : R.compatible side u v) :
+    let pre : ℝ := R.prefactor a side
+    let c := R.intercept a side u v; let s := firstStep n ell a side; let x := u+a*v
+    let H : ℝ := R.hitProduct a; let σ := projectionScale n a
+    scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre) =
+      (H/σ*(∑' j : ℤ, if supportedValue J (c+s*j) then coeffGaussian ((x:ℝ)+H*j) (lineCenter n a) σ else 0):ℝ) :=
+  R.first_finite_event_weight (squarefreeSupport J) big target am side u v ok
 
 theorem PrescribedRows.first_event_weight {n ell a : ℕ} (R : PrescribedRows n ell) (big : 3≤Fixed.d (n.log2+1))
     (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (am : a<Fixed.rootBase n) (side : Bool)

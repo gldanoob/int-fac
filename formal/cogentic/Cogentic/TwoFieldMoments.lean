@@ -150,40 +150,25 @@ private theorem outside_box_probability {n ell : ℕ} (R : PrescribedRows n ell)
   obtain ⟨_,_,box,out⟩ := R.box_witness target side (fun k => ¬inCoefficientBox n k) lower
   exact out box
 
-/-- A single boxed executable tuple satisfies every requested score tolerance
-if the total normalized mean-square error and the two coefficient tails are
-less than one. The input budget uses only single-field one- and two-event
-probabilities, allowing different mark sets and signed weights for every entry. -/
-theorem twoField_simultaneous_box {ι κ : Type*} {n ell : ℕ} (R T : PrescribedRows n ell)
-    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (J : Finset κ) (X : κ→Finset ι)
-    (w : κ→ι→ℝ) (E F : κ→ι→ℤ×ℤ→Prop) (d δ : κ→ℝ) (dp : ∀ j∈J, 0<δ j) :
+/-- A nonnegative cost with sufficiently small expectation is attained below
+one on an actual positive boxed tuple, including both Gaussian box tails. -/
+theorem twoField_box_of_cost {n ell : ℕ} (R T : PrescribedRows n ell)
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (cf : R.CoeffPoint false × T.CoeffPoint true → ℝ) (budget : ℝ)
+    (nn : ∀ k,0≤cf k) (hs : HasSum (fun k => twoFieldWeight R T k*cf k) budget) :
     let b := n.log2+1
-    let budget := ∑ j ∈ J, (twoFieldSecond R T (X j) (w j) (E j) (F j)-
-      2*d j*twoFieldMean R T (X j) (w j) (E j) (F j)+(d j)^2)/(δ j)^2
     budget+2432*(Fixed.B b:ℝ)^2*exp (-π*((b:ℝ)^2)^2/2)<1 →
-    ∃ u v : ℤ×ℤ, R.compatible false u.1 u.2 ∧ T.compatible true v.1 v.2 ∧
-      inCoefficientBox n u ∧ inCoefficientBox n v ∧
-      ∀ j∈J, |twoFieldScore (X j) (w j) (E j) (F j) u v-d j|<δ j := by
-  intro b budget small
+    ∃ k : R.CoeffPoint false × T.CoeffPoint true,
+      inCoefficientBox n k.1.val ∧ inCoefficientBox n k.2.val ∧ cf k<1 := by
+  intro b small
   let C := R.CoeffPoint false × T.CoeffPoint true
   let W := twoFieldWeight R T
-  let err (j : κ) (k : C) := twoFieldScore (X j) (w j) (E j) (F j) k.1.val k.2.val-d j
-  let term (j : κ) (k : C) := (err j k)^2/(δ j)^2
-  let cf (k : C) := ∑ j ∈ J,term j k
   let out := fun k : ℤ×ℤ => ¬inCoefficientBox n k
   let l (k : C) : ℝ := if out k.1.val then 1 else 0
   let r (k : C) : ℝ := if out k.2.val then 1 else 0
   let cost (k : C) := cf k+l k+r k
   let left := prescribedProbability R false out
   let right := prescribedProbability T true out
-  have hs : HasSum (fun k : C => W k*cf k) budget := by
-    have h := hasSum_sum (s:=J) (fun j _ =>
-      (twoField_score_error R T target (X j) (w j) (E j) (F j) (d j)).div_const ((δ j)^2))
-    apply h.congr_fun
-    intro k
-    dsimp only [cf]
-    rw [Finset.mul_sum]
-    exact Finset.sum_congr rfl (fun _ _ => (mul_div_assoc ..).symm)
   have ls : HasSum (fun k : C => W k*l k) left := by
     simpa only [and_true,prob_true T true target,mul_one] using
       twoField_rectangle R T target out (fun _ => True)
@@ -209,8 +194,7 @@ theorem twoField_simultaneous_box {ι κ : Type*} {n ell : ℕ} (R T : Prescribe
   obtain ⟨k,hk⟩ := cheap
   have leftnn : 0≤l k := by dsimp [l]; split <;> norm_num
   have rightnn : 0≤r k := by dsimp [r]; split <;> norm_num
-  have terms (j : κ) : 0≤term j k := div_nonneg (sq_nonneg _) (sq_nonneg _)
-  have cfn : 0≤cf k := Finset.sum_nonneg (fun i _ => terms i)
+  have cfn := nn k
   change cf k+l k+r k<1 at hk
   have lb : inCoefficientBox n k.1.val := by
     by_contra o
@@ -220,12 +204,60 @@ theorem twoField_simultaneous_box {ι κ : Type*} {n ell : ℕ} (R T : Prescribe
     by_contra o
     have u : r k=1 := if_pos o
     linarith only [hk,u,cfn,leftnn]
-  refine ⟨k.1.val,k.2.val,k.1.property,k.2.property,lb,rb,?_⟩
+  exact ⟨k,lb,rb,by linarith only [hk,leftnn,rightnn]⟩
+
+/-- A single coefficient draw in the search box has total normalized squared
+error below one when the expected energy and the two box tails fit below one. -/
+theorem twoField_simultaneous_box_energy {ι κ : Type*} {n ell : ℕ} (R T : PrescribedRows n ell)
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (J : Finset κ) (X : κ→Finset ι)
+    (w : κ→ι→ℝ) (E F : κ→ι→ℤ×ℤ→Prop) (d δ : κ→ℝ) :
+    let b := n.log2+1
+    let budget := ∑ j ∈ J, (twoFieldSecond R T (X j) (w j) (E j) (F j)-
+      2*d j*twoFieldMean R T (X j) (w j) (E j) (F j)+(d j)^2)/(δ j)^2
+    budget+2432*(Fixed.B b:ℝ)^2*exp (-π*((b:ℝ)^2)^2/2)<1 →
+    ∃ u v : ℤ×ℤ, R.compatible false u.1 u.2 ∧ T.compatible true v.1 v.2 ∧
+      inCoefficientBox n u ∧ inCoefficientBox n v ∧
+      (∑ j∈J,(twoFieldScore (X j) (w j) (E j) (F j) u v-d j)^2/(δ j)^2)<1 := by
+  intro b budget small
+  let C := R.CoeffPoint false × T.CoeffPoint true
+  let W := twoFieldWeight R T
+  let err (j : κ) (k : C) := twoFieldScore (X j) (w j) (E j) (F j) k.1.val k.2.val-d j
+  let term (j : κ) (k : C) := (err j k)^2/(δ j)^2
+  let cf (k : C) := ∑ j ∈ J,term j k
+  have hs : HasSum (fun k : C => W k*cf k) budget := by
+    have h := hasSum_sum (s:=J) (fun j _ =>
+      (twoField_score_error R T target (X j) (w j) (E j) (F j) (d j)).div_const ((δ j)^2))
+    apply h.congr_fun
+    intro k
+    dsimp only [cf]
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl (fun _ _ => (mul_div_assoc ..).symm)
+  obtain ⟨k,lb,rb,good⟩ := twoField_box_of_cost R T target cf budget
+    (fun k => Finset.sum_nonneg (fun i _ => div_nonneg (sq_nonneg _) (sq_nonneg _))) hs small
+  exact ⟨k.1.val,k.2.val,k.1.property,k.2.property,lb,rb,good⟩
+
+/-- A single boxed executable tuple satisfies every requested score tolerance
+if the total normalized mean-square error and the two coefficient tails are
+less than one. The input budget uses only single-field one- and two-event
+probabilities, allowing different mark sets and signed weights for every entry. -/
+theorem twoField_simultaneous_box {ι κ : Type*} {n ell : ℕ} (R T : PrescribedRows n ell)
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (J : Finset κ) (X : κ→Finset ι)
+    (w : κ→ι→ℝ) (E F : κ→ι→ℤ×ℤ→Prop) (d δ : κ→ℝ) (dp : ∀ j∈J, 0<δ j) :
+    let b := n.log2+1
+    let budget := ∑ j ∈ J, (twoFieldSecond R T (X j) (w j) (E j) (F j)-
+      2*d j*twoFieldMean R T (X j) (w j) (E j) (F j)+(d j)^2)/(δ j)^2
+    budget+2432*(Fixed.B b:ℝ)^2*exp (-π*((b:ℝ)^2)^2/2)<1 →
+    ∃ u v : ℤ×ℤ, R.compatible false u.1 u.2 ∧ T.compatible true v.1 v.2 ∧
+      inCoefficientBox n u ∧ inCoefficientBox n v ∧
+      ∀ j∈J, |twoFieldScore (X j) (w j) (E j) (F j) u v-d j|<δ j := by
+  intro b budget small
+  obtain ⟨u,v,ru,tv,bu,bv,energy⟩ := twoField_simultaneous_box_energy R T target J X w E F d δ small
+  refine ⟨u,v,ru,tv,bu,bv,?_⟩
   intro j hj
-  have localCost : term j k≤cf k := Finset.single_le_sum (fun i _ => terms i) hj
-  have smallTerm : term j k<1 := by linarith only [localCost,hk,leftnn,rightnn]
-  have bound := (div_lt_one (sq_pos_of_pos (dp j hj))).mp smallTerm
-  change |err j k|<δ j
+  let err := fun j => twoFieldScore (X j) (w j) (E j) (F j) u v-d j
+  have localCost := Finset.single_le_sum (s:=J) (f:=fun j=>(err j)^2/(δ j)^2)
+    (fun j _ => div_nonneg (sq_nonneg _) (sq_nonneg _)) hj
+  have bound := (div_lt_one (sq_pos_of_pos (dp j hj))).mp (localCost.trans_lt energy)
   apply (sq_lt_sq₀ (abs_nonneg _) (dp j hj).le).mp
   simpa only [sq_abs] using bound
 

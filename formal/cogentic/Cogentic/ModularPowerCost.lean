@@ -38,7 +38,7 @@ def mulMod (d x y : List Bool) : List Bool × ℕ :=
   let rem := reduce d product.1
   (rem.1, product.2+rem.2)
 
-private theorem mulMod_spec (d x y : List Bool) (pos : 0 < value d)
+theorem mulMod_spec (d x y : List Bool) (pos : 0 < value d)
     (hx : x.length≤d.length) (hy : y.length≤d.length) :
     let out := mulMod d x y
     value out.1 = (value x*value y)%value d ∧ out.1.length ≤ d.length ∧
@@ -243,7 +243,7 @@ decreasing_by
   have pos := (nonzero_spec x).1.mp h
   exact (reduce_spec x y pos).1.trans_lt (Nat.mod_lt _ pos)
 
-private theorem gcdBits_spec (x y : List Bool) (W : ℕ) (hx : x.length≤W) (hy : y.length≤W) :
+theorem gcdBits_spec (x y : List Bool) (W : ℕ) (hx : x.length≤W) (hy : y.length≤W) :
     value (gcdBits x y).1=(value x).gcd (value y) ∧ (gcdBits x y).1.length≤W ∧
     (gcdBits x y).2 ≤ (Elimination.gcdWithCount (value x) (value y)).2*
       (W*(20*W+1)+W+1)+(W+1) := by
@@ -281,11 +281,13 @@ theorem gcd_gates (a n W : ℕ) (ha : a.size≤W) (hn : n.size≤W) :
 
 /-- Each Fermat guard in primeCheck counts the coprimality condition as well
 as the modular power and the tests against one. -/
-def fermatGuard (g n : ℕ) : Bool × ℕ :=
+def fermatGuardAt (g n e : ℕ) : Bool × ℕ :=
   let gcd := gcdBits g.bits n.bits
   let cop := isOne gcd.1
-  let ok := checkOne g (n-1) n
+  let ok := checkOne g e n
   (!cop.1 || ok.1,gcd.2+cop.2+ok.2+2)
+
+def fermatGuard (g n : ℕ) := fermatGuardAt g n (n-1)
 
 theorem fermatGuard_spec (g n W : ℕ) (hp : 0<n) (hg : g.size≤W) (hn : n.size≤W) :
     (fermatGuard g n).1=decide (g.Coprime n → ModularPower.powMod g (n-1) n=1) ∧
@@ -306,23 +308,27 @@ theorem fermatGuard_spec (g n W : ℕ) (hp : 0<n) (hg : g.size≤W) (hn : n.size
     have work := pc hp
     omega
 
-def fermatGuards (n : ℕ) : List ℕ → Bool × ℕ
+def fermatGuardsAt (n e : ℕ) : List ℕ → Bool × ℕ
   | [] => (true,0)
   | g::gs =>
-    let test := fermatGuard g n
-    let tail := fermatGuards n gs
+    let test := fermatGuardAt g n e
+    let tail := fermatGuardsAt n e gs
     (test.1 && tail.1,test.2+tail.2+1)
+
+def fermatGuards (n : ℕ) := fermatGuardsAt n (n-1)
 
 theorem fermatGuards_spec (n W : ℕ) (gs : List ℕ) (hp : 0<n) (hn : n.size≤W)
     (bases : ∀ g∈gs, g.size≤W) :
     (fermatGuards n gs).1=gs.all (fun g => decide (g.Coprime n → ModularPower.powMod g (n-1) n=1)) ∧
     (fermatGuards n gs).2 ≤ gs.length*(gcdBudget W+powerBudget W W W+2*W+7) := by
   induction gs with
-  | nil => simp [fermatGuards]
+  | nil => simp [fermatGuards,fermatGuardsAt]
   | cons g gs ih =>
     obtain ⟨v,w⟩ := fermatGuard_spec g n W hp (bases _ (by simp)) hn
     obtain ⟨tv,tw⟩ := ih (fun h hh => bases h (List.mem_cons_of_mem _ hh))
-    simp only [fermatGuards,List.all_cons,v,tv,List.length_cons,true_and]
+    change ((fermatGuard g n).1 && (fermatGuards n gs).1) = _ ∧
+      (fermatGuard g n).2+(fermatGuards n gs).2+1 ≤ _
+    simp only [List.all_cons,v,tv,List.length_cons,true_and]
     rw [Nat.succ_mul]; omega
 
 end Cogentic.BinaryModularPower

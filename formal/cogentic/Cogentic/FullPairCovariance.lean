@@ -25,7 +25,7 @@ private theorem transfer_one_ratio {a b x y e : ℝ} (ap : 0<a) (bp : 0<b) (smal
   simp only [sub_zero] at tri
   exact ⟨yp,clos,by linarith⟩
 
-private theorem transfer_four_ratios (f g : ℝ → ℝ) (h j c e E : ℝ)
+theorem transfer_four_ratios (f g : ℝ → ℝ) (h j c e E : ℝ)
     (small : e ≤ 1/2) (eb : 0≤e) (curv : |c| ≤ 2)
     (pos : ∀ x ∈ ({0,h,j,h+j}:Finset ℝ), 0 < f x)
     (near : ∀ x ∈ ({0,h,j,h+j}:Finset ℝ), |g x/f x-1| ≤ e)
@@ -60,7 +60,7 @@ private theorem transfer_four_ratios (f g : ℝ → ℝ) (h j c e E : ℝ)
            add_le_add_right (abs_sub_le ..) _
        _ ≤ _ := by rw [←sub_mul]; linarith only [ds,pair,d]
 
-private theorem exponential_to_covariance (b : ℕ) {C u : ℝ} (up : 0 < u)
+theorem exponential_to_covariance (b : ℕ) {C u : ℝ} (up : 0 < u)
     (c : C ≤ u) (ui : u ≤ 110*(Fixed.d b:ℝ)) :
     C*exp (-400*(Fixed.z b:ℝ)^2) ≤ 1/u^2 := by
   let z := (Fixed.z b:ℝ)

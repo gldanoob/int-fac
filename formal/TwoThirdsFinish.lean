@@ -92,7 +92,7 @@ def DistinctOrderTwos (n : Nat) (gs : List Nat) : Prop :=
     (∀ e, ModularPower.powMod g e p = 1 ↔ op*2^u ∣ e) ∧
     (∀ e, ModularPower.powMod g e q = 1 ↔ oq*2^v ∣ e)
 
-private def splitBase (n m g : Nat) : Option {d // ProperDivisor n d} :=
+def splitBase (n m g : Nat) : Option {d // ProperDivisor n d} :=
   let t := stripTwos m
   match h : OrderCertificate.scan n (ModularPower.powMod g t.2 n) t.1 with
   | none => none

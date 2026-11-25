@@ -86,16 +86,16 @@ theorem PrescribedRows.second_probability {n ell a a' : ℕ} (R : PrescribedRows
   rw [mul_div_mul_left _ _ pn.ne']
   exact prob.2.trans (mul_le_mul_of_nonneg_right bounds.2.2.2 mn)
 
-/-- The actual Gaussian probability of the first prescribed smooth event
+/-- The actual Gaussian probability of the first prescribed finite event
     is given by the scalar window, uniformly over all roots and both signs. -/
-theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRows n ell)
+theorem PrescribedRows.first_finite_probability {n ell a : ℕ} (R : PrescribedRows n ell)
     (big : 3≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
     (cap : a≤Fixed.A (n.log2+1)) (am : a<Fixed.rootBase n) (side : Bool) :
     let pre : ℝ := R.prefactor a side
-    ∃ u v : ℤ, R.compatible side u v ∧ ∀ J : Finset ℕ,
-      let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
+    ∃ u v : ℤ, R.compatible side u v ∧ ∀ A : Finset ℕ,
+      let E := fun k : ℤ×ℤ => finiteValue A (R.intercept a side k.1 k.2)
       let c := R.intercept a side u v; let s := firstStep n ell a side
-      let m := (scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
+      let m := (finiteScalarMass A c s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
       |prescribedProbability R side E-m| ≤ 90*exp (-(Fixed.U (n.log2+1):ℝ))*m := by
   classical
   let C := {k : ℤ×ℤ // R.compatible side k.1 k.2}
@@ -115,9 +115,9 @@ theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRow
   have orig : k₀.1+a*k₀.2=c := by dsimp [k₀]; rw [cc]; simp [x]
   have ok : R.compatible side k₀.1 k₀.2 := (e (0,0)).property
   refine ⟨k₀.1,k₀.2,ok,?_⟩
-  intro J
-  let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
-  let good := fun i : ℤ => supportedValue J (F+s*i)
+  intro A
+  let E := fun k : ℤ×ℤ => finiteValue A (R.intercept a side k.1 k.2)
+  let good := fun i : ℤ => finiteValue A (F+s*i)
   have wb (k : ℤ×ℤ) : coefficientWeight n (e k).val=W k := by rw [cc]; exact coefficient_weight_projection ..
   have Z := (e.tsum_eq (fun k : C => coefficientWeight n k.val)).symm.trans (tsum_congr wb)
   have eq (i j : ℤ) : R.intercept a side (x i-a*y i j) (y i j)=F+s*i := by
@@ -138,9 +138,9 @@ theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRow
       (fun k => by dsimp only [V]; split <;> first | exact pos k | rfl) Wsum
     calc _=(∑' k, V k) := tsum_congr (fun k => by simp only [V,E,good,eq])
          _= _ := by rw [vs.tsum_prod]; apply tsum_congr; intro i; by_cases g : good i <;> simp [V,g]
-  have sm := R.first_event_band_weight J big target am side k₀.1 k₀.2 ok
+  have sm := R.first_finite_event_weight A big target am side k₀.1 k₀.2 ok
   rw [orig] at sm
-  let m := (scalarMass J F s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
+  let m := (finiteScalarMass A F s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
   have mEq : m=(H:ℝ)/S*(∑' i : ℤ,if good i then coeffGaussian ((c:ℝ)+(H:ℝ)*i) μ S else 0) := by
     exact congrArg Complex.re sm
   have bounds := R.probability_scales cap
@@ -155,6 +155,18 @@ theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRow
   apply le_trans _ (mul_le_mul_of_nonneg_right bounds.2.2.1 mn)
   rw [mEq]
   simpa only [W,x,y,Int.cast_add,Int.cast_mul,Int.cast_natCast] using marg
+
+theorem PrescribedRows.first_band_probability {n ell a : ℕ} (R : PrescribedRows n ell)
+    (big : 3≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (cap : a≤Fixed.A (n.log2+1)) (am : a<Fixed.rootBase n) (side : Bool) :
+    let pre : ℝ := R.prefactor a side
+    ∃ u v : ℤ, R.compatible side u v ∧ ∀ J : Finset ℕ,
+      let E := fun k : ℤ×ℤ => supportedValue J (R.intercept a side k.1 k.2)
+      let c := R.intercept a side u v; let s := firstStep n ell a side
+      let m := (scalarMass J c s (exactMean n ell a side/pre) (oneWidth n ell a/pre)).re
+      |prescribedProbability R side E-m| ≤ 90*exp (-(Fixed.U (n.log2+1):ℝ))*m := by
+  obtain ⟨u,v,ok,estimate⟩ := R.first_finite_probability big target cap am side
+  exact ⟨u,v,ok,fun J => estimate (squarefreeSupport J)⟩
 
 theorem PrescribedRows.first_probability {n ell a : ℕ} (R : PrescribedRows n ell)
     (big : 3≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))

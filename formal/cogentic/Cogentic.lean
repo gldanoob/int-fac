@@ -45,12 +45,17 @@ import Cogentic.SmoothFamilies
 import Cogentic.RetainedNullity
 import Cogentic.JointSmoothBulk
 import Cogentic.BackSubstitutionWork
-import Cogentic.ModularPowerCost
+import Cogentic.SplitterCost
+import Cogentic.SaturationCost
+import Cogentic.ForcedPairCurvature
 import Cogentic.BinaryPivotCost
 import Cogentic.AdmissionMoments
 import Cogentic.TwoFieldRetentionLoss
-import Cogentic.NearSmoothUpper
-import Cogentic.NearPairVariance
+import Cogentic.RetainedCellSelection
+import Cogentic.SamePrimeBlocks
+import Cogentic.SimultaneousScoreBudget
+import Cogentic.IndexCapCost
+import Cogentic.RetainedScoreLoss
 import Cogentic.SquareDivisorPairs
 import Cogentic.PolynomialExceptions
 import Cogentic.MomentRows
@@ -91,6 +96,20 @@ run_cmd
     ``Cogentic.Construction.twoField_shared_or_singular_loss, ``Cogentic.Construction.PrescribedRows.joint_smooth_upper,
     ``Cogentic.Construction.cell_smooth_relative_close, ``Cogentic.Construction.twoField_score_error, ``Cogentic.Construction.twoField_simultaneous_box,
     ``Cogentic.Construction.fixed_square_prime_loss, ``Cogentic.Construction.cell_near_indicator_covariance,
+    ``Cogentic.Construction.cell_all_near_normalized_smooth_covariance,
+    ``Cogentic.Construction.PrescribedRows.unit_gcd_on_clean_pair,
+    ``Cogentic.Construction.PrescribedRows.difference_exclusion_loss,
+    ``Cogentic.Construction.PrescribedRows.difference_joint_loss,
+    ``Cogentic.Construction.PrescribedRows.gcd_one_conditional_smooth,
+    ``Cogentic.Construction.PrescribedRows.separated_joint_relative,
+    ``Cogentic.Construction.cell_pair_covariance_approximation,
+    ``Cogentic.Construction.centered_smooth_score_decay, ``Cogentic.Construction.polynomial_retained_cell_scores,
+    ``Cogentic.Construction.admitted_rejection_budget, ``Cogentic.Construction.rejected_score_loss, ``Cogentic.Construction.twoField_admission_probability,
+    ``Cogentic.Construction.ordinary_gram_simultaneous_box, ``Cogentic.Construction.ordinary_gram_schedule_budget,
+    ``Cogentic.Construction.ordinary_rows_per_prime, ``Cogentic.Construction.same_prime_gram_error,
+    ``Cogentic.Construction.PrescribedRows.first_residue_probability, ``Cogentic.Construction.forced_marginal_ratio, ``Cogentic.Construction.forced_pair_curvature, ``Cogentic.BinarySaturation.driver_saturation,
+    ``Cogentic.BinaryIndexCap.fixed_presieve_with_cap, ``Cogentic.BinarySplitter.driver_primality, ``Cogentic.BinarySplitter.driver_splitter,
+    ``Cogentic.BinarySplitter.driver_budgets_scale,
     ``Cogentic.BinaryPivot.stageTwo_pivot_gates, ``Cogentic.BinaryModularPower.verify_exponent_iff,
     ``Cogentic.BinaryModularPower.fermatGuards_spec, ``Cogentic.BinaryModularPower.power_gates,
     ``Cogentic.BinaryDivision.divide_naturals, ``Cogentic.BinaryDivision.solve_normalization_gates,
