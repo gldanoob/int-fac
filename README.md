@@ -8,6 +8,8 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
+| [One divisor sum for general inputs](research/single-divisor-sum.md) | Complete deterministic factoring from a supplied divisor sum in $\exp(O(\sqrt{b\log b}))$ time under a uniform Dedekind zero-free strip |
+| [Cyclotomic multiples computed from the input](research/cyclotomic-supply.md) | An infinite family covered by $N^2+N+1$, and bounds on the gcds obtained by polynomial exponent lists on balanced semiprimes |
 | [Cyclotomic multiples at any fixed index](research/cyclotomic-order-multiples.md) | A deterministic split from one hidden prime’s cyclotomic multiple, and complete factoring from one divisor sum for bounded prime multiplicities |
 | [Cubic order multiples](research/cubic-order-multiples.md) | A deterministic split from an unfactored multiple of $p^2+p+1$ in specified congruence classes |
 | [Known multiples of one hidden prime’s p+1](research/p-plus-one-multiples.md) | Complete factoring of Lucas–Carmichael numbers, one divisor sum on squarefree inputs, and a square-root search for a missing multiplier |

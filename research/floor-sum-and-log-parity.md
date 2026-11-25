@@ -56,6 +56,20 @@ Read those digits as $W$. The half-open interval $[nW/K,n(W+1)/K)$ contains $r$ 
 - The Euclidean floor-sum recursion for an affine numerator closes because interchanging rows and columns gives another affine threshold. For $at^2/q$ the inverse threshold is $\lceil\sqrt{qy/a}\rceil$ on the positive axis. Even the two-partial-quotient coefficients above retain the factoring reduction. [Affine floor-sum recursion and proof](https://atcoder.jp/contests/practice2/editorial/579)
 - Hiary's Theorem 1.1 evaluates one truncated quadratic exponential sum to inverse-polynomial absolute error at polylogarithmic cost. Writing the congruence indicator as $n^{-1}\sum_{j=0}^{n-1}\exp(2\pi i j(x^2-1)/n)$ introduces $n$ frequencies. Even constant absolute error below $1/2$ per frequency would permit rounding their normalized sum. The outstanding cost is evaluating the frequencies together. Huang–Li's Theorem 1 gives an asymptotic for the incomplete sum of $\lfloor x^2/n\rfloor$ with an error on the square-root scale for interval length comparable to $n$. Extracting the parity requires finer information. [Hiary, Theorem 1.1](https://arxiv.org/pdf/0711.5002#page=2) · [Huang–Li, Theorem 1](https://arxiv.org/pdf/1902.06047#page=2)
 
+## Cost of rounding a nonnegative Fourier approximation
+
+Consider one of the two-prime queries above. Write $m=\lfloor n/4\rfloor$ and let $A$ be the number of $1\le x\le m$ with $x^2\equiv c^2\pmod n$. Each of $\{\pm c\}$ and $\{\pm cr\}$ contributes at most one, so $0\le A\le2$.
+
+Suppose an evaluator replaces the congruence indicator by a real function $K$ on $\mathbb Z/n$ with $K(z)\ge0$ everywhere and $K(0)=1$. It sums $K(x^2-c^2)$ by its $s$ nonzero Fourier coefficients, replaces any $E$ individual summands by their exact indicators, and rounds the result to recover $A$ with absolute error less than $1/2$ before rounding. The frequencies and the corrections may depend on the input and the target. Either a nonzero frequency has a proper gcd with $n$, immediately giving a factor, or
+$$
+ m < 3.9071(s-1)\sqrt n+Es+\tfrac52s.
+$$
+In particular the second case requires $s+E=\Omega(\sqrt n)$ even if evaluating each incomplete Gauss sum costs a single operation.
+
+To prove the inequality, normalize the Fourier coefficients by $1/n$ and write $\mu=\widehat K(0)$. Positivity gives $|\widehat K(j)|\le\mu$, whence $K(z)\le s\mu$ for every $z$ and $1\le s\mu$. Each unit frequency $j$ contributes a translated quadratic Gauss sum of magnitude less than $3.9071\sqrt n$, by Korolev's corollary for the partial sum starting at $x=1$. The translation by $-c^2$ contributes a phase of absolute value one. Thus the corrected estimate is at least $\mu(m-3.9071(s-1)\sqrt n-Es)$. It must also be smaller than $A+1/2\le5/2$. Dividing by $\mu$ proves the bound. It applies to summing a pointwise nonnegative approximation and recovering the integer count by rounding. Direct parity evaluation, signed kernels, and methods combining frequencies without listing them remain open. [Korolev, *On incomplete Gaussian sums*, §1, corollary](https://www.mathnet.ru/links/c311880710d7aa0eba8e347d76690a07/tm3644.pdf#page=2)
+
+For $n=101\cdot103$, the three-frequency example $K(z)=\cos^2(\pi jz/n)$ already shows the effect at every center. For each of $j=1,213$, at least 1,266 of the 2,600 summands exceed $1/2$ at each tested center, while $A$ is one or two. After any 100 individual corrections the estimate still exceeds 583. The replay checks the strict cosine inequality using integer residues.
+
 ## An order multiple from canonical discrete-log parity
 
 Given a unit $u\bmod n$, let $b$ be the bit length of $n$ and $g=u^{2^b}\bmod n$. Write $\operatorname{ord}_n(u)=2^s r$ with $r$ odd. Since $\operatorname{ord}_n(u)<n<2^b$, the element $g$ has order $r$. If $g=1$, return the order multiple $2^b$. Otherwise $r>1$. The oracle input is $(n,g,y)$ with $y\in\langle g\rangle$, and its answer is the parity of the **least nonnegative** exponent $e$ with $g^e=y$. Adding the odd order $r$ to an exponent flips its parity, so the choice of representative matters.
@@ -121,6 +135,16 @@ for n in range(3, 1502, 2):
     assert gcd(r-1,n)*gcd(r+1,n) == n
     cases += 1
 assert (cases, queries) == (393, 1629)
+
+n = 101*103
+near_counts = []
+for frequency in (1, 213):
+    assert gcd(frequency, n) == 1
+    for c in (1, 2, 4, 8, 16, 32):
+        residues = [frequency*(x*x-c*c) % n for x in range(1, n//4+1)]
+        assert residues.count(0) in (1, 2)
+        near_counts.append(sum(4*min(z,n-z) < n for z in residues))
+assert min(near_counts) == 1266
 
 recovered = trivial = 0
 for n in range(3, 300, 2):
