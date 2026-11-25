@@ -113,3 +113,13 @@ checkDualCubicHeightFive() = {
   if(hits!=178,error("dual-order inertness count ",hits));
   hits
 };
+
+checkCyclicCubicProjection() = {
+  my(f=x^3+x^2-2*x-1,beta=Mod(x^2-2,f)/Mod(x,f),g=minpoly(beta));
+  if(g!=x^3-3*x^2-4*x-1 || norm(beta)!=1 || poldisc(g)!=49,error("cyclic projection"));
+  my(roots=polrootsmod(f,13),signs=Set(apply(t->kronecker(lift(subst(lift(beta),x,t)),13),roots)));
+  if(!polisirreducible(Mod(1,5)*g) || signs!=[-1,1],error("projected local signs"));
+  foreach([1,2,3,5,13,31,2^20*3^10*31*157],a,my(m=31*a);
+    if(cyclotomicCoefficientGcd(65,m>>valuation(m,2),g)!=5,error("projected gcd")));
+  g
+};
