@@ -47,10 +47,12 @@ def main():
         blocks += 1
     # Any preassigned list with at most half the domain can occur as the
     # failure set of a dense test, including each list in an advice decoder.
-    lists = [[a, (3*a+1) % 8, (5*a+2) % 8] for a in range(8)]
-    good = [set(range(8)) - set(row) for row in lists]
+    # b=3 test-label bits, k=3 trial bits and s=1. Assign 2^(k-s-1)=2
+    # advice strings to each label and exclude the union of their two lists.
+    lists = [[a % 8, (3*a+1 + a//2) % 8] for a in range(16)]
+    good = [set(range(8)) - set(lists[2*j]) - set(lists[2*j+1]) for j in range(8)]
     assert min(map(len, good)) >= 4
-    obstructions = sum(any(not g.intersection(row) for g in good) for row in lists)
+    obstructions = sum(not good[a//2].intersection(row) for a, row in enumerate(lists))
     assert obstructions == len(lists)
     print(f"256 output events; worst flat-source error {error}; "
           f"{len(exceptions)} dense tests; {blocks} common-master blocks; "

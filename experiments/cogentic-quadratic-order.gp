@@ -32,6 +32,16 @@ norm_entries(a,b,idx,slopes,constants,excluded,primeset) = {
     [[idx,p,root], factors[j][2]]);
 }
 
+rational_partial(value, primeset) = {
+  my(entries=List());
+  for(j=1,#primeset,
+    my(p=primeset[j], v=valuation(value,p));
+    if(v, listput(entries,[[0,p,0],-v]); value/=p^v);
+    if(value==1, break);
+  );
+  [value,Vec(entries)];
+}
+
 quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
   my(m = sqrtint(n), primeset = primes([2,bound]));
   my(constants = vector(2,i,n - m^2 - slopes[i]*m));
@@ -50,10 +60,18 @@ quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
     if(!join_residues,
       if(type(right) == "t_VEC",listput(columns, concat(left,right))),
       \\ One reference per residue spans all differences in that residue class.
+      if(type(left)!="t_VEC" && type(right)!="t_VEC", next);
       label = min(label,n-label);
+      my(rational=[]);
+      if(join_residues==2,
+        my(partial=rational_partial(label,primeset));
+        label=partial[1]; rational=partial[2];
+      );
       for(i = 1, 2,
         my(entry = if(i==1,left,right));
         if(type(entry) != "t_VEC", next);
+        entry=concat(entry,rational);
+        if(join_residues==2 && label==1, listput(columns,entry); next);
         my(reference);
         if(mapisdefined(seen,label,&reference),
           listput(columns,concat(entry,vector(#reference,k,[reference[k][1],-reference[k][2]]))),
@@ -78,15 +96,21 @@ quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
   my(basis = vecextract(M,[1..rowcount],pc), inverse = vecextract(M,pr,pc)^-1);
   for(j = 1, #primeset,
     my(base = primeset[j], rhs = vector(rowcount)~, present = 1);
-    if(base <= 2 || gcd(base,n*discs[1]) != 1, next);
-    my(roots = polrootsmod(x^2 + slopes[1]*x + constants[1],base));
-    if(#roots != 2, next);
-    for(k = 1, 2,
-      my(key = [1,base,lift(roots[k])]);
-      if(!mapisdefined(rows,key), present = 0; break);
-      rhs[mapget(rows,key)] = 1;
+    if(gcd(base,n)!=1, next);
+    if(join_residues==2,
+      my(key=[0,base,0]);
+      if(!mapisdefined(rows,key), next);
+      rhs[mapget(rows,key)]=1,
+      if(base <= 2 || gcd(base,discs[1]) != 1, next);
+      my(roots = polrootsmod(x^2 + slopes[1]*x + constants[1],base));
+      if(#roots != 2, next);
+      for(k = 1, 2,
+        my(key = [1,base,lift(roots[k])]);
+        if(!mapisdefined(rows,key), present = 0; break);
+        rhs[mapget(rows,key)] = 1;
+      );
+      if(!present, next);
     );
-    if(!present, next);
     my(sol = inverse * vecextract(rhs,pr));
     if(basis*sol != rhs, next);
     my(den = denominator(sol), exponent = 12*den);
@@ -105,8 +129,8 @@ probe(n, height, bound, {join_residues=0}) = {
   [];
 }
 
-survey(join_residues) = {
-  my(ps=primes([79,149]), total=0, splits=0, cols=0);
+survey(join_residues,{lower=79},{upper=149}) = {
+  my(ps=primes([lower,upper]), total=0, splits=0, cols=0);
   for(i=1,#ps, for(j=i+1,#ps,
     my(n=ps[i]*ps[j]);
     if(n==10403, next);
@@ -133,6 +157,8 @@ replay() = {
   if(#probe(10403,220,71), error("expected unresolved test input"));
   my(joined=probe(10403,220,71,1));
   if(!#joined || joined[5]!=103, error("missing matched-residue certificate"));
-  print(success, " splits at identical marks; matched residues also split 10403");
+  my(partial=probe(25070033,220,71,2));
+  if(!#partial || partial[5]!=5003, error("missing rational-side order certificate"));
+  print(success, " splits at identical marks; residue join splits 10403; rational relations split 25070033");
 }
 if(type(cogentic_as_library) != "t_INT", iferr(replay(),err,print(err);quit(1)));

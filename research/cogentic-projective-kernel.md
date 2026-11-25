@@ -1,0 +1,30 @@
+# Integral lattices and Gaussian weights at primitive projective marks
+
+Let $v_i=(a_i,b_i)\in\mathbb Z^2$, $1\le i\le h$, be primitive and pairwise nonproportional. Allow an infinite projective slope. Let $n\ge h-1$ and let $E:\mathbb Z[X,Y]_n\to\mathbb Z^h$ evaluate homogeneous binary forms of degree $n$ at these marks. Use the ordered coefficient basis $Y^n,XY^{n-1},\ldots,X^n$. The two-coordinate reduction used in Cogentic's integer-valued linear perturbation can be replaced by this full coefficient lattice for rational marks. [Cogentic, Lemmas 7.3, 9.4 and 9.5](https://github.com/google-research/google-research/blob/4a7bc8ab0bc770e71a259b7966c500496b99010a/cogentic_research_papers/deterministic_factoring_l34/paper.pdf#page=31)
+
+Write $\Delta_{ij}=a_i b_j-a_jb_i$. Then
+$$
+ \ker E=\prod_{i=1}^h (b_iX-a_iY)\,\mathbb Z[X,Y]_{n-h},\qquad
+ [\mathbb Z^h:E(\mathbb Z[X,Y]_n)]
+             =\prod_{i<j}|\Delta_{ij}|,                         \tag{1}
+$$
+with zero kernel at $n=h-1$. Indeed, after a unimodular variable change sending $v_1$ to $(1,0)$, vanishing at $v_1$ means divisibility by its primitive linear equation over $\mathbb Z$. Iterate using the remaining marks, since the removed linear factors are nonzero there. Conversely their product vanishes at every mark. For the index, choose an integral linear form $\lambda_1$ with $\lambda_1(v_1)=1$. The fiber with first value $c$ is precisely $c\lambda_1^n+(b_1X-a_1Y)G$. The remaining values are an affine translate of $\operatorname{diag}(\pm\Delta_{1i})_{i>1}$ times the image of the $(n-1)$-degree evaluation map at the remaining marks. Induction proves (1). For two marks the second attainable value at fixed first value $c$ runs through the exact single class $c\lambda_1(v_2)^n$ modulo $|\Delta_{12}|$. The factor $\lambda_1(v_2)$ is a unit modulo this determinant.
+
+Suppose $\|v_i\|_\infty\le A$. Each integral kernel vector in the resulting basis is a coefficient shift of $P=\prod_i(b_iX-a_iY)$. Its basis matrix $B_K$ has operator norm bounded by $\|P\|_1\le (2A)^h$, since it acts by convolution and zero-padding. Giving the coefficient coordinates independent centered discrete Gaussians of common width $W$ (weight $e^{-\pi\|u\|^2/W^2}$), we can condition on any compatible fixed system of linear congruences modulo divisors of $Q$. The resulting coset is $u_*+\Lambda_0$ with $Q\mathbb Z^{n+1}\subseteq\Lambda_0$. At fixed projected values the fiber kernel is $\Lambda=\Lambda_0\cap\ker E$, which contains $Q\ker E$. Its dual in the real kernel is contained in $(Q\ker E)^*$.
+
+Explicitly the dual vectors of $Q\ker E$ are $B_K(B_K^\mathsf T B_K)^{-1}k/Q$, $k\in\mathbb Z^{n+1-h}$. Their norms are at least $\|k\|/(Q(2A)^h)$. Poisson summation on the affine fiber consequently has relative error at most
+$$
+ \left(1+\frac{2e^{-\pi s^2}}{1-e^{-\pi s^2}}\right)^{n+1-h}-1,
+             \qquad s=\frac{W}{Q(2A)^h}.                         \tag{2}
+$$
+The bound is uniform in the translate, since every frequency gets a unit complex phase. The denominator from conditioning on $u_*+\Lambda_0$ has the same bound with $h=0$. In the asymptotic application $s\ge L^3$ and $n=\mathrm{poly}(L)$, giving $O(e^{-c L^6})$. The main probability of an attainable $y$ is the usual continuous Gaussian density in the $h$ real outputs times the covolume of $E(\Lambda_0)$ in $\mathbb R^h$. To see the normalizer, the product of the covolumes of $\Lambda$ and $E(\Lambda_0)$ is $\det(\Lambda_0)\sqrt{\det(EE^\mathsf T)}$. This follows by completing a basis of $\Lambda$ to one of $\Lambda_0$ and projecting its extra vectors to the perpendicular complement of the kernel. Any independent integer centers can be subtracted before applying these formulas. They also hold for unequal widths with the lower bound $W$ replaced by their minimum in (2), after scaling coordinates in the Euclidean norm.
+
+For clarity about prescribed root rows, suppose $h=2$, $n\ge2$, and impose $G(r,1)=c_r\pmod p$ at one finite projective point modulo each prime $p\mid Q$, with $Q$ squarefree. This is the root condition for a perturbed field after subtracting its fixed term and inverting the unit multiplier at $(r,1)$. At fixed two output values, the unconditioned fiber varies by $(b_1X-a_1Y)(b_2X-a_2Y)H(X,Y)$. When neither $v_i$ reduces to $(r:1)$ in $\mathbb P^1(\mathbb F_p)$ this product takes every value modulo $p$ at $(r,1)$. If either mark reduces to that point, its known value determines the root-row constraint, as homogeneity contributes only a nonzero scalar. The argument for one mark is identical. Different primes are independent by CRT applied to the free coefficients. Thus at fixed first value the second output takes one class of step
+$$
+   |\Delta_{12}|\prod_{p:\ v_2\text{ hits its prescribed row},\ v_1\text{ misses}} p
+$$
+whenever the forced congruences are compatible. If a prime hits both rows, only the constraint at the first needs to be imposed. This removes the extra congruence from a prescribed row that misses both marks in a two-coefficient perturbation.
+
+For normalized positive finite marks $t_i=a_i/b_i\in[0,0.8]$, write the real evaluation vector as $b_i^n(1,t_i,\ldots,t_i^n)$. Its Euclidean norm is between $b_i^n$ and $(1-0.8^2)^{-1/2}b_i^n$. In the exterior square the minor from $1,t$ has magnitude $|t_1-t_2|$ and the total norm is $O(|t_1-t_2|)$, because the first derivative of the entire normalized vector has bounded Euclidean norm on $[0,0.8]$. Thus conditioning on the first mark gives real standard-deviation parameter comparable to $W b_2^n|t_1-t_2|$ at the second. These are absolute comparisons at arbitrary $n\ge1$.
+
+The [finite replay](../experiments/cogentic-projective-kernel.py) checks the gcd of all maximal minors for 648 projective evaluation matrices and 972 explicit vanishing-basis vectors, including points at infinity and negative coordinates. It verifies the Poisson relative-error estimate numerically on 147 affine fibers of a rank-one kernel, checks the exact conditioned lattice index for 168 prescribed prime-row systems, and exhausts the affine target-prime transfer on 25 pairs of overlapping slopes.
