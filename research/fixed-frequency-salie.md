@@ -53,6 +53,8 @@ If the exceptional conductor divides $n$ and $\chi(a)=+1$, the choices $e=1$ and
 
 The finite replay constructs prime and prime-square calibrations at 360 inputs, independently checks the full local product, and sees both threshold outcomes. The largest observed absolute log gain error was below $1.21\times10^{-7}$. The finite search uses sequential progression lifts for reproducibility; the runtime bound uses the randomized sampler above. [PARI/GP replay](../experiments/salie-fixed-gap.gp)
 
+At the original modulus, with varying unit frequencies, the same fixed threshold gives a Las Vegas polynomial-time reduction for arbitrary inputs and a deterministic one for bounded prime support. [Unpadded threshold proof and numerical replay](unpadded-magnitude-threshold.md)
+
 ### What the fixed frequency measures on two and three prime blocks
 
 For an odd $n\ge64$ with exactly two prime-power blocks, choose either mixed root $r^2\equiv1\pmod n$. Then

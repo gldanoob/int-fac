@@ -8,6 +8,7 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
+| [An unpadded magnitude threshold](research/unpadded-magnitude-threshold.md) | Complete factoring from threshold-one bits at the original modulus, in expected polynomial time for all inputs and deterministic polynomial time for limited prime support |
 | [A fixed Kloosterman threshold](research/kloosterman-threshold.md) | Complete factoring from nonadaptive gap-comparison bits at one square modulus, with sublinear padding in the input bit length |
 | [Divisor sums on powers of the input](research/divisor-sums-on-powers.md) | Exact totient from leading bits of one $\sigma(N^j)$, and complete factoring from a short block of ordinary divisor sums without analytic input |
 | [Factoring from simultaneous divisibilities](research/hidden-divisor-lattices.md) | Unconditional recovery from bounded cubic multiples on balanced inputs, large prime powers from one divisor sum, and complete factoring from ordinary divisor sums on powers of the input |

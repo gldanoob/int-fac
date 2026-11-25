@@ -8,6 +8,8 @@ Return zero when $|K_M(T)|/M<1-2^{-12}$ and one when $|K_M(T)|/M>1+2^{-12}$. Eit
 
 Conversely, the factorization of $M$ gives a valid gap answer in polynomial time. Thus this fixed-gap problem and complete factoring are equivalent under deterministic polynomial-time reductions. The padding costs $o(b)$ additional bits in the base of the square modulus. A deterministic evaluator taking $2^{O(B/(\log B)^\alpha)}$ on a $B$-bit modulus would give the same exponent $\alpha$ for factoring.
 
+At the original modulus, with varying unit frequencies, the same fixed threshold gives a Las Vegas polynomial-time reduction for arbitrary inputs and a deterministic one for bounded prime support. [Unpadded threshold proof and numerical replay](unpadded-magnitude-threshold.md)
+
 ## Where the prime powers occur in the Fourier transform
 
 At a unit frequency, stationary phase on the classes $u=v+jm$ gives
