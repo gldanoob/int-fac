@@ -8,6 +8,7 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
+| [Cubic order multiples](research/cubic-order-multiples.md) | A deterministic split from an unfactored multiple of $p^2+p+1$ in specified congruence classes |
 | [Known multiples of one hidden prime’s p+1](research/p-plus-one-multiples.md) | Complete factoring of Lucas–Carmichael numbers, one divisor sum on squarefree inputs, and a square-root search for a missing multiplier |
 | [Polynomial overhead for three-square queries](research/hurwitz-polynomial-reductions.md) | Complete factoring from quarter-bit counts on small composite twists or the parity of remainders modulo small odd primes on prime twists |
 | [Quadratic floor-sum and discrete-log parity](research/floor-sum-and-log-parity.md) | Factoring from one floor-sum bit per bisection step or canonical discrete-log parities on prescribed targets |
