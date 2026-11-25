@@ -91,7 +91,78 @@ Now $\log\Phi_k(p)\ge\varphi(k)\log(p-1)$ from the distances to its complex root
 
 Finally, a content prime $\ell>Z$ divides some $\Phi_k(p)$ at at most $O(K^2(X/Z+1))$ integers $p$ per prime, by the finite-field root bound. Outside the content, condition on $p$. Across all indices the product of the $\Phi_k(p)$ has logarithm $O(K^2 b)$ by $\Phi_k(p)\le(p+1)^{\varphi(k)}$. Each of its large prime divisors leaves at most $D(X/Z+1)$ possible integers $q$ with $P_X(pq)\equiv0\bmod\ell$. Both union bounds together cost $O(DK^2b^2(1/Z+1/X))=o(1)$ in probability. Thus every tested cyclotomic value retains its full part above $Z$ on the good pairs. The argument applies to both prime positions and survives exclusion of the diagonal.
 
-## Reproduce two finite checks
+## Exponents that use an integer square root of the input
+
+For each size $X$, choose nonzero polynomials $F_i(U,V)\in\mathbb Z[U,V]$ and positive integer multipliers $a_i\le G$. The choices may vary with $X$. Assume $G,K,Y_0=X^{o(1)}$ and
+$$
+\sum_i\big(1+\deg F_i+\log(2|\operatorname{content}(F_i)|)\big)\le D=X^{o(1)}.
+$$
+At the actual input $N=pq$, evaluate the exponents
+$$
+E_i(N)=F_i(N,\lfloor\sqrt{a_iN}\rfloor).
+$$
+There is a cutoff $Z\ge Y_0$ with $Z=X^{o(1)}$ such that, on a fraction tending to one of balanced prime pairs, every prime $\ell>Z$ dividing any $\Phi_k(t)$, $k\le K$ and $t\in\{p,q\}$, is coprime to **every** $E_i(N)$. The full part above $Z$ therefore survives in the residual even if the algorithm selects entries after seeing the input or multiplies the entries together. Simultaneously the maximum of $\log\gcd(\Phi_k(t),\prod_i E_i(N))/\log\Phi_k(t)$ tends to zero on these pairs. When $G,D,Y_0$ are polynomial in $\log X$ and the indices are fixed, the log gcd is at most $(\log\log X)^2$ on a fraction tending to one.
+
+This covers the residuals $a_iN-(\lfloor\sqrt{a_iN}\rfloor+j_i)^2$ used as candidate exponents, with scheduled integer offsets $j_i$. Lehman's algorithm uses a related square-root window to detect a perfect square and find a factor. Its perfect-square test is outside the exponent divisibility assertion here. [Lehman, *Factoring large integers*](https://doi.org/10.1090/S0025-5718-1974-0340163-2)
+
+**A congruence on one curved graph.** Write $b=\log X$. Put
+$$
+Q=\lceil(D+1)(K+1)^2(1+b)^4\rceil,\qquad H=Q^2,\qquad
+Z=\max(Y_0,16(1+\sqrt G)H).
+$$
+All three parameters are $X^{o(1)}$. Fix $p\in(X,2X]$, $1\le a\le G$, and a prime $\ell>Z$ coprime to $p$ and to the content of a nonzero polynomial $F$. Write $r=\deg F$. The number of integers $v\in(X,2X]$ such that
+$$
+F(pv,\lfloor\sqrt{apv}\rfloor)\equiv0\pmod\ell
+$$
+is $O(rX/Q)$ with an absolute implied constant for sufficiently large $X$. A nonzero constant modulo $\ell$ has no hits.
+
+To see this, partition the interval of integers into blocks of length $H$, with one possibly shorter final block. Let $s$ be the first integer in a block and $g(v)=\sqrt{apv}$. Dirichlet approximation supplies a reduced fraction $u/d$ with $1\le d\le Q$ and $|g'(s)-u/d|\le1/(dQ)$. Throughout the interval $|g'|\le\sqrt G$ and $|g''|\asymp\sqrt a/X$. Taylor's formula puts every integer $d\lfloor g(v)\rfloor-uv$ in an interval of length
+$$
+O(d+H/Q+d\sqrt G\,H^2/X)=O(Q).
+$$
+Thus each block lies on $O(Q)$ parallel lines in the $(v,\lfloor g(v)\rfloor)$ plane.
+
+The polynomial $F(pV,Y)$ is nonzero over $\mathbb F_\ell$. It has at most $r$ distinct nonvertical line factors. Call a rational slope exceptional if its reduction modulo $\ell$ equals the slope of one of them. All possible reduced fractions above satisfy $|u|\le(1+\sqrt G)Q$. Their pairwise cross-determinants have magnitude less than $\ell$, so different fractions give different slopes modulo $\ell$. There are at most $r$ exceptional fractions. For each one, the corresponding block starts must satisfy $|g'(s)-u/d|\le1/Q$. Monotonicity and $|g''|\gg1/X$ restrict those starts to an interval of length $O(X/Q)$. The union of those blocks contains $O(X/Q+H)$ integers per fraction.
+
+On every other block, restricting $F(pV,Y)$ to any of the parallel lines gives a nonzero univariate polynomial of degree at most $r$. Each intercept therefore has at most $r$ hits because the block has fewer than $\ell$ integers. The total from these blocks is $O((X/H+1)Qr)$. Adding the exceptional blocks gives $O(rX/Q)$ since $Q^3=X^{o(1)}$. Related lattice-point estimates use rational tangent slopes for convex curves. Here the elementary block bound also allows arbitrary coefficients of $F$ outside its content. [Huxley, *The rational points close to a curve*](https://www.numdam.org/article/ASNSP_1994_4_21_3_357_0.pdf)
+
+**Application to the cyclotomic values.** There are $O(D)$ primes dividing any content. The preceding finite-field root counts bound the chance that any such prime above $Z$ divides a tested value by $O(DK^2b(1/Z+1/X))=o(1)$. For the other primes, condition on $p$. The product of the cyclotomic values at $p$ across $k\le K$ has $O(K^2 b)$ distinct prime factors and all are coprime to $p$. For each such $\ell>Z$, sum the curved-graph bound over the menu and divide by the $\asymp X/b$ prime candidates for $q$. The probability of any hit is $O(DK^2 b^2/Q)=o(1)$. Exchange $p,q$ and discard the diagonal. The smooth-part estimate above applies at this $Z$, which proves both the relative bound and the sharper fixed-index statement when $Z$ is polynomial in $b$.
+
+**Finite check.** Fix $p=46273$ and $\ell=10111\mid\Phi_3(p)$. For $32768<v\le65536$, use $Q=7$ and the polynomial $(2Y-v-p+2)(Y^2-apv-7)$. Its sole exceptional slope is $1/2$. For $a=1,4,37$, the numbers of hits on ordinary blocks were $0,3,7$, respectively. Exceptional blocks contributed $610,0,0$. The most distinct intercepts in one block were $12,13,13$. This example exercises the need to account for the tangents parallel to a line factor. The following GP block checks the counts with integer arithmetic.
+
+~~~gp
+{
+  my(x0=32768,p=46273,ell=10111,Q=7,H=Q^2);
+  if(!isprime(p)||!isprime(ell)||(p^2+p+1)%ell,error("cubic prime"));
+  foreach([1,4,37],a,
+    my(good=0,bad=0,most=0,direct=0);
+    forstep(v0=x0+1,2*x0,H,
+      my(u,d=0);
+      for(e=1,Q,
+        u=(sqrtint(e^2*a*p\v0)+1)\2;
+        my(w=e^2*Q^2*a*p);
+        if(gcd(u,e)==1 && 4*v0*max(0,u*Q-1)^2<=w && w<=4*v0*(u*Q+1)^2,d=e;break)
+      );
+      if(!d,error("missing slope"));
+      my(lines=Map(),hits=Map());
+      for(v=v0,min(v0+H-1,2*x0),
+        my(y=sqrtint(a*p*v),z=d*y-u*v,nv=0);
+        mapput(lines,z,1);
+        if((2*y-v-p+2)*(y^2-a*p*v-7)%ell==0,
+          mapisdefined(hits,z,&nv); mapput(hits,z,nv+1);
+          if(2*u==d,bad++,good++;if(nv>=3,error("line root bound")))
+        )
+      );
+      most=max(most,#lines)
+    );
+    for(v=x0+1,2*x0,my(y=sqrtint(a*p*v));direct+=((2*y-v-p+2)*(y^2-a*p*v-7)%ell==0));
+    if(direct!=good+bad,error("direct count"));
+    print([a,good,bad,most])
+  )
+}
+~~~
+
+## Reproduce the cubic supply and fixed-list checks
 
 From the repository root, run the following PARI/GP block. It constructs the least $q$ for three choices of $p$, then supplies only $N,N^2+N+1$ to the degree-three search. In the balanced sample it counts pairs satisfying all 36 bounds for three exponents, six indices, and both prime factors. The threshold 48 is an example for this finite interval.
 
