@@ -1,5 +1,7 @@
 read("experiments/round-1.gp");
 read("experiments/round-3.gp");
+read("experiments/trace-residual.gp");
+read("experiments/lucas-carmichael.gp");
 read("experiments/primitive-forms.gp");
 read("experiments/seed-powers.gp");
 read("experiments/twisted-convergents.gp");
@@ -36,6 +38,10 @@ checkBoxJoins();
 checkClassInterval();
 checkLPFibers();
 if(checkGlobalOrders() != [11828,11056], error("global orders"));
+if(checkTraceResidual() != 1872,error("bounded order trace search"));
+if(checkConicBox()!=110,error("bounded conic constructions"));
+checkLucasCarmichael();
+if(checkSigmaQueries()!=7,error("divisor-sum oracle"));
 checkMixedRoots();
 checkBlindStrides();
 if(checkRankTwo() != [2304,2052], error("rank two subgroup splits"));
