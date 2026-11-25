@@ -39,25 +39,98 @@ fixedRemainingLocal(n,d) = {
   v
 };
 
-\\ Return [exact quotient, largest trial candidate in the staged search, used Lehman fallback].
+\\ Monic subproduct and remainder trees over a possibly composite residue ring.
+fixedProductTree(leaves) = {
+  my(layers=List([leaves]),row=leaves);
+  while(#row>1,
+    row=vector((#row+1)\2,i,if(2*i<=#row,row[2*i-1]*row[2*i],row[2*i-1]));
+    listput(layers,row)
+  );
+  Vec(layers)
+};
+
+fixedStripInterval(r,done,Y) = {
+  if(r==1 || done>=Y,return([r,[]]));
+  my(h=sqrtint(Y-done-1)+1,blocks=(Y-done+h-1)\h,unit=Mod(1,r));
+  my(factors=fixedProductTree(vector(h,i,unit*('x+i))),product=factors[#factors][1]);
+  my(tree=fixedProductTree(vector(blocks,i,unit*('x-done-(i-1)*h))),values=[product%tree[#tree][1]]);
+  forstep(k=#tree-1,1,-1,
+    my(nextValues=vector(#tree[k],i,values[(i+1)\2]%tree[k][i]));
+    values=nextValues
+  );
+  my(parts=List());
+  for(i=1,blocks,
+    if(gcd(r,lift(polcoef(values[i],0)))==1,next);
+    for(p=max(2,done+(i-1)*h+1),min(Y,done+i*h),
+      if(r%p==0,my(e=valuation(r,p));r/=p^e;listput(parts,[p,e]))
+    )
+  );
+  [r,Vec(parts)]
+};
+
+fixedPadBound(d,k) = {
+  if(k<24 || k%8,return(0));
+  my(b=(k-16)\8);sqrtint((2^b-1)\d)
+};
+
+\\ A valid recovered outer conductor is an exact certificate for its local contribution.
+fixedPadCertificate(f,d,k,small) = {
+  my(b=(k-16)\8,H=fixedPadBound(d,k));
+  if(!H,return(0));
+  my(xs=[1]);
+  foreach(small,pe,
+    my(old=xs,p=pe[1]);
+    for(e=1,pe[2],xs=concat(xs,select(v->v<=H,old*p^e)))
+  );
+  foreach(xs,n,
+    my(u=d*n^2,s=f\n);
+    if(logint(u,2)+1!=b || (s-1)%(4*u),next);
+    if(!issquare((s-1)\(4*u)),next);
+    my(c=fixedSmallCount(d)*n);
+    foreach(small,pe,if(n%pe[1]==0,c*=fixedLocal(pe[1],valuation(n,pe[1]),d)));
+    return(s*c)
+  );
+  0
+};
+
+\\ Return exact quotient, largest cutoff and strategy (0 enclosure, 1 toy fallback, 2 certified pad).
 fixedMiddleQuotient(M,d,t) = {
   my(f);
   if(d%8!=3 || M%d || !issquare(M/d,&f) || f%2!=1,error("invalid fixed-discriminant index"));
   my(k=logint(M,2)\2);
   if(t<0 || t>k,error("requested digit outside the supported range"));
-  my(step=2^(k-t),lo=fixedSmallCount(d)*f,r=f,done=1,cap=sqrtnint(f,3)+1,Y=min(cap,8));
+  my(step=2^(k-t),lo=fixedSmallCount(d)*f,r=f,done=1,cap=sqrtint(f)+1,Y=min(cap,8));
+  my(H=fixedPadBound(d,k),small=[]);
   while(1,
-    for(p=done+1,Y,
-      if(r%p==0,
-        my(e=valuation(r,p));r/=p^e;lo*=fixedLocal(p,e,d)
-      )
-    );
+    my(strip=fixedStripInterval(r,done,Y));r=strip[1];small=concat(small,strip[2]);
+    foreach(strip[2],pe,lo*=fixedLocal(pe[1],pe[2],d));
     if(r==1,return([floor(lo/step),Y,0]));
     if(r<(Y+1)^2,return([floor(lo*fixedLocal(r,1,d)/step),Y,0]));
     my(h=logint(r,Y+1),hi=floor(lo*((Y+2)/Y)^h));
     if(floor(lo/step)==hi\step,return([hi\step,Y,0]));
-    if(Y==cap,return([floor(lo*fixedRemainingLocal(r,d)/step),Y,1]));
+    if(H && Y>=H,
+      my(c=fixedPadCertificate(f,d,k,small));if(c,return([floor(c/step),Y,2]));
+      H=0
+    );
+    if(f<=65536 && Y>=sqrtnint(f^2,5)+1,return([floor(lo*fixedRemainingLocal(r,d)/step),Y,1]));
+    if(Y==cap,error("residual survived full square-root cutoff"));
     done=Y;Y=min(2*Y,cap)
+  )
+};
+
+fixedPhiSigma(f,t,isSigma) = {
+  my(step=2^(logint(f,2)-t),lo=f,r=f,done=1,Y=8);
+  while(1,
+    my(strip=fixedStripInterval(r,done,Y));r=strip[1];
+    foreach(strip[2],pe,
+      my(p=pe[1],e=pe[2]);
+      lo*=if(isSigma,(p^(e+1)-1)/(p^e*(p-1)),(p-1)/p)
+    );
+    if(r==1,return(floor(lo/step)));
+    if(r<(Y+1)^2,return(floor(lo*if(isSigma,(r+1)/r,(r-1)/r)/step)));
+    my(h=logint(r,Y+1),bound=if(isSigma,lo*((Y+1)/Y)^h,lo*(Y/(Y+1))^h));
+    if(floor(lo/step)==floor(bound/step),return(floor(lo/step)));
+    done=Y;Y*=2
   )
 };
 
@@ -99,6 +172,22 @@ checkFixedDigits() = {
   foreach([3,11,19,35,59],d,
     if(!issquarefree(d) || fixedSmallCount(d)!=3*qfbhclassno(d),error("base count ",d))
   );
+  my(extractions=0,arith=0);
+  for(n=2,1000,
+    my(nF=factor(n),all=vector(matsize(nF)[1],i,[nF[i,1],nF[i,2]]),r=n,done=1);
+    foreach([5,13,40,73],Y,
+      my(strip=fixedStripInterval(r,done,Y),pieces=select(pe->pe[1]>done && pe[1]<=Y,all));
+      if(strip[2]!=pieces || strip[1]*prod(i=1,#pieces,pieces[i][1]^pieces[i][2])!=r,
+        error("factorial block extraction ",[r,done,Y,strip,pieces]));
+      r=strip[1];done=Y;extractions++
+    );
+    foreach([0,min(2,logint(n,2)),logint(n,2)],t,
+      if(fixedPhiSigma(n,t,1)!=sumdiv(n,q,q)\2^(logint(n,2)-t) ||
+         fixedPhiSigma(n,t,0)!=eulerphi(n)\2^(logint(n,2)-t),error("phi/sigma quotient ",[n,t]));
+      arith+=2
+    )
+  );
+  print(["factorial block extractions",extractions,"phi and sigma quotients",arith]);
   my(total=0,fallbacks=0,trial=0);
   foreach([3,11,19,35,59],d,
     forstep(f=1025,2047,2,
@@ -110,20 +199,20 @@ checkFixedDigits() = {
     )
   );
   print(["ordinary exact quotients",total,"fallbacks",fallbacks,"mean trial cutoff",trial/total]);
-  my(pads=0,maxY=0,peak=0,capUsed=0);
+  my(pads=0,maxY=0,peak=0,capUsed=0,certs=0);
   foreach([[3,143],[3,187],[11,143],[19,11^2*13]],pair,
     my(d=pair[1],n=pair[2],u=d*n^2,c=fixedReference(n,d),K=8*(logint(u,2)+1)+16);
     my(lo=fixedFirstPad(u,K),hi=fixedFirstPad(u,K+1)-1);
     for(i=0,31,
       my(j=lo+(hi-lo)*(2*i+1)\64,s=1+4*u*j^2,M=u*s^2);
-      foreach([0,2],t,my(v=fixedMiddleQuotient(M,d,t));
+      foreach([0,2,K],t,my(v=fixedMiddleQuotient(M,d,t));
         if(v[1]!=c*s\2^(K-t),error("padded quotient ",[d,n,i,t]));
-        pads++;maxY=max(maxY,v[2]);capUsed+=v[3];peak=max(peak,logint(M,2)+1)
+        pads++;maxY=max(maxY,v[2]);capUsed+=(v[3]==1);certs+=(v[3]==2);peak=max(peak,logint(M,2)+1)
       )
     )
   );
   print(["direct exact standard-pad quotients",pads,"largest index bits",peak,
-         "largest trial cutoff",maxY,"fallbacks",capUsed]);
+         "largest trial cutoff",maxY,"toy fallbacks",capUsed,"certified pads",certs]);
   my(p=10007,z=17011,n=p*z,lo=sqrtint(n)\2,hi=2*sqrtint(n)+2,calls=0);
   if(!isprime(p) || !isprime(z) || p%3!=2 || z%3!=1,error("mixed semiprime fixture"));
   while(hi-lo>2*sqrtnint(n,4),
