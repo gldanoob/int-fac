@@ -26,6 +26,30 @@ Indeed $9n^2/4-n+1<q\le9n^2/4+1$, and $n\ge3$. The bounding squares are consecut
 
 **Stopping radius.** Stop when $H-L\le2\lfloor\sqrt n\rfloor$. With $c=\lfloor(L+H)/2\rfloor$ the largest possible $|x-c|$ is $\lceil(H-L)/2\rceil\le\lfloor\sqrt n\rfloor$. Apply Coppersmith's **Corollary 1** to the monic quadratic $P(z)=(c+z)^2-1$ modulo the full $n$. It lists all $|z|\le X$ for $X\le n^{1/2}$ in polynomial time at degree two. The corollary reaches the inclusive endpoint by covering the range with translated intervals inside the smaller bound of Theorem 1. Filter the list to $L\le c+z\le H$ and verify the congruence. At least one root survives, and every surviving $x$ has mixed CRT signs, so $1<\gcd(x-1,n)<n$. Halving an initial interval of at most $n/2$ integers down to this diameter takes at most $\tfrac12\log_2 n+O(1)$ queried midpoints per split. Recursing on the factors gives complete factoring. [Coppersmith, §6, Corollary 1, p. 243](https://www.di.ens.fr/~fouque/ens-rennes/coppersmith.pdf#page=11)
 
+## Nonadaptive queries for two distinct prime divisors
+
+Suppose the odd $b$-bit integer $n$ has exactly two distinct prime divisors, with arbitrary positive multiplicities. The complete factorization follows from $\lceil b/2\rceil-1$ floor-sum parity queries chosen before seeing any answers. Every sum uses the same coefficient and interval length. Only the center changes.
+
+**Centered sum.** Fix integers $1\le c\le K$, $0\le m\le n/4$, and put
+$$
+a=K^2n,\qquad q=an+1,\qquad C=Knc,\qquad F(t)=\lfloor at^2/q\rfloor.
+$$
+Then
+$$
+\sum_{t=C-m}^{C+m} F(t)-F(C)
+\equiv \#\{1\le x\le m:x^2\equiv c^2\pmod n\}\pmod 2 .
+$$
+Indeed, $C^2=c^2(q-1)$, so for $1\le x\le m$ the two values $(C\pm x)^2/q$ lie strictly on opposite sides of $c^2$, each at distance less than one. The signed numerators of their deviations are $\pm2Cx+x^2-c^2$. Their signs follow from $x< C$ and $2C>c^2$. Their absolute values are at most $K^2n^2/2+n^2/16+K^2<q$ for $n\ge3$. Since $a/q=(1-1/q)/n$ and $C$ is a multiple of $n$,
+$$
+F(C\pm x)=\frac{C^2\pm2Cx}{n}
+ +\left\lfloor\frac{x^2-(C\pm x)^2/q}{n}\right\rfloor.
+$$
+The integer terms have even sum. The two floors differ precisely when $x^2-c^2$ is divisible by $n$, in which case they differ by one.
+
+**Digit recovery.** Let $r$ be the unique mixed root of one in $[2,\lfloor n/2\rfloor]$. Use $D=\lceil b/2\rceil$, $K=2^D$, $m=\lfloor n/4\rfloor$, and issue the centered query for each $c=2^j$ with $0\le j\le D-2$. The four roots of $c^2$ modulo $n$ are $\pm c,\pm cr$. Remove the known contribution of $\pm c$ from the centered root count. The remaining bit says whether the fractional part of $2^j r/n$ lies in the first or last quarter of $[0,1)$. The odd denominator precludes dyadic ties. The bit is one precisely when binary digits $j+1$ and $j+2$ of $r/n$ are equal. Digit one is zero since $r<n/2$. Successive equalities therefore supply the first $D$ digits.
+
+Read those digits as $W$. The half-open interval $[nW/K,n(W+1)/K)$ contains $r$ and has length $n/K<\sqrt n$. Intersect with $[2,\lfloor n/2\rfloor]$ and use the translated monic quadratic from the preceding section to recover $r$. The gcds of $r-1$ and $r+1$ with $n$ are the two prime-power blocks. Integer roots and primality tests finish the factorization. The equality tests require only polynomial decoding. The coefficient $a/q=[0;n,a]$ has $q<4n^3+1$, and every endpoint has $O(b)$ bits. The upstream interval-count reduction supplies the mixed-root formulation, and Coppersmith supplies the short-interval recovery. The centered identity gives the translated fixed-length queries. The time to evaluate them on an unfactored input remains open. [Upstream quadratic-congruence reduction](https://github.com/1337isnot1337/integer-factoring/blob/1b331929bb774ae8dcb8f50cdd10a3243b7c649f/research/quadratic-congruence-factor-recovery.md) · [Coppersmith, Corollary 1](https://www.di.ens.fr/~fouque/ens-rennes/coppersmith.pdf#page=11)
+
 ## What the floor-sum formulas evaluate
 
 - Schinzel extends Lerch's exact formulas for fractional parts of rational quadratics summed over a **complete** residue system. Corollary 1 expresses the unshifted complete sum in terms of class numbers. Here the individual endpoint $h$ carries the root information. Over a full period $0\le t<q$, pairing $t$ and $q-t$ gives $f(q-t)-f(t)=a(q-2t)$. For odd $q$ the full parity is $a(q-1)/2\bmod2$ (zero in this family since $a$ is then even). For even $q$ the pairs cancel and the parity is $\lfloor aq/4\rfloor\bmod2$ from $t=q/2$. For instance $n=7$ gives $(a,q)=(15,106)$ and odd full-period parity. [Schinzel, *An extension of some formulae of Lerch*, pp. 111–112](https://dml.cz/bitstream/handle/10338.dmlcz/120576/ActaOstrav_10-2002-1_12.pdf)
@@ -50,7 +74,7 @@ The Python command compares the floor sums with direct root counts at every cuto
 
 ~~~sh
 python3 -B - <<'PY'
-from math import gcd
+from math import gcd, isqrt
 
 tails = 0
 for n in range(3, 1502, 2):
@@ -69,6 +93,34 @@ for n in range(3, 1502, 2):
         expected = a*((q-1)//2) if q % 2 else a*q//4
         assert (full - expected) % 2 == 0
 assert tails == 282375
+
+# Every centered sum is evaluated literally. Direct enumeration supplies the reference root.
+cases = queries = 0
+for n in range(3, 1502, 2):
+    roots = [x for x in range(2, n//2+1) if x*x % n == 1]
+    if len(roots) != 1:
+        continue
+    r, = roots
+    D = (n.bit_length()+1)//2
+    K = 1 << D
+    a, m = K*K*n, n//4
+    q = a*n+1
+    digit = word = 0
+    for j in range(D-1):
+        c = 1 << j
+        C = K*n*c
+        total = sum(a*t*t//q for t in range(C-m, C+m+1))
+        rootbit = (total - a*C*C//q) % 2
+        assert rootbit == sum((x*x-c*c) % n == 0 for x in range(1, m+1)) % 2
+        same = rootbit ^ int(min(c % n, (-c) % n) <= m)
+        digit ^= 1 ^ same
+        word = 2*word + digit
+        queries += 1
+    lo, hi = (n*word+K-1)//K, (n*(word+1)-1)//K
+    assert lo <= r <= hi and hi-lo <= isqrt(n)
+    assert gcd(r-1,n)*gcd(r+1,n) == n
+    cases += 1
+assert (cases, queries) == (393, 1629)
 
 recovered = trivial = 0
 for n in range(3, 300, 2):
@@ -93,7 +145,7 @@ for n in range(3, 300, 2):
         assert r == len(logs) and pow(u, r << b, n) == 1
         recovered += 1
 assert (recovered, trivial) == (2479, 369)
-print(tails, recovered, trivial)
+print(tails, cases, queries, recovered, trivial)
 PY
 ~~~
 
