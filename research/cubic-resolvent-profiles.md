@@ -43,7 +43,7 @@ The quadratic class $[-3]$ is itself in the box. On the $p\equiv2$ branch it is 
 
 Run `python3 -B experiments/cubic-resolvent-profiles.py`. The height-two check exhausts all sign assignments and compares both minima to the elimination algorithm. At height five the replay checks rank witnesses against the original squareclasses. A separate PARI/GP field enumeration using `polredabs` on each irreducible gives 213 distinct cubic fields, four cyclic, and the same 196 nontrivial squareclasses. The computation concerns a finite polynomial family and does not construct a height-five failure for the order search. [Exact replay](../experiments/cubic-resolvent-profiles.py)
 
-The exact minimum ranks through height 13 are as follows.
+The exact minimum ranks through height 14 are as follows.
 
 | Height | $p\equiv2\pmod3$ | $p\equiv1\pmod3$ |
 |---:|---:|---:|
@@ -60,10 +60,11 @@ The exact minimum ranks through height 13 are as follows.
 | 11 | 176 | 39 |
 | 12 | 215 | 42 |
 | 13 | 267 | 45 |
+| 14 | 331 | 53 |
 
-The larger computation prunes boundary states by subspace dimension. If $(U,a)$ and $(V,b)$ have boundary spans $U,V$ and previously charged ranks $a,b$, discard the second whenever $a+\dim(U+V)-\dim V\le b$. For every possible later span $W$, the excess $\dim(U+W)-\dim(V+W)$ is bounded by $\dim(U+V+W)-\dim(V+W)\le\dim(U+V)-\dim V$. A sign variable may be fixed before elimination to fit memory. Its coordinate still belongs to the active vectors, so compute the joint span of all residual components before charging the final rank. The native search exhausted 4,096 conditioned assignments on each height-13 branch. Its upper witnesses were checked against a fresh enumeration of the original integer polynomials.
+The larger computation prunes boundary states by subspace dimension. If $(U,a)$ and $(V,b)$ have boundary spans $U,V$ and previously charged ranks $a,b$, discard the second whenever $a+\dim(U+V)-\dim V\le b$. For every possible later span $W$, the excess $\dim(U+W)-\dim(V+W)$ is bounded by $\dim(U+V+W)-\dim(V+W)\le\dim(U+V)-\dim V$. A sign variable may be fixed before elimination to fit memory. Its coordinate still belongs to the active vectors, so compute the joint span of all residual components before charging the final rank. The native search exhausted 4,096 conditioned assignments on each height-13 branch and 65,536 on each height-14 branch. Its upper witnesses were checked against a fresh enumeration of the original integer polynomials.
 
-Run `python3 -B experiments/cubic-rank-frontier.py --verify-only 1 2 3 4 5 6 7 8 9 10 11 12 13` to check all 26 attaining sign profiles. Omit `--verify-only` to recompute the lower bounds with the Python implementation. Its running time increases sharply with height; `--cut` controls how many signs are fixed per subproblem. The four certificate columns give height, residue modulo three, rank and the hexadecimal mask of negative signs in increasing prime order, with $-1$ first. [Exact rank replay](../experiments/cubic-rank-frontier.py) · [Attaining sign profiles](../experiments/cubic-rank-frontier.txt)
+Run `python3 -B experiments/cubic-rank-frontier.py --verify-only 1 2 3 4 5 6 7 8 9 10 11 12 13 14` to check all 28 attaining sign profiles. Omit `--verify-only` to recompute the lower bounds with the Python implementation. Its running time increases sharply with height; `--cut` controls how many signs are fixed per subproblem. The four certificate columns give height, residue modulo three, rank and the hexadecimal mask of negative signs in increasing prime order, with $-1$ first. [Exact rank replay](../experiments/cubic-rank-frontier.py) · [Attaining sign profiles](../experiments/cubic-rank-frontier.txt)
 
 ## Several Galois fields with separate Artin conditions
 

@@ -72,3 +72,23 @@ $$
 Indeed $P^{-1}/\ell+b/P=1+1/(P\ell)$ with both inverses taken in their standard positive residue ranges. The last prime's cosine sign equals $s(2b/P)$ because the phase perturbation $2/(P\ell)$ is smaller than the distance $1/(4P)$ from an odd grid point to a quarter boundary. CRT gives the identity. As $\ell$ varies over primes, $b$ is uniform on units of the fixed modulus $P$. Thus if $P$ has two large prime-power blocks $U,V$, the limiting proportion of negative frequency-one signs on $P\ell$ is exactly the public-comparison error fraction at $P$, namely $1/4+O(1/U+1/V)$. The earlier triangle formula gives the finite-$P$ fraction exactly. In particular all three prime factors can grow along examples with a negative sign at frequency one. [Finite unit-grid formula](salie-and-quarter-parity.md#a-comparison-that-works-without-the-factors)
 
 For $q=1{,}000{,}003$, 24,623 of 36,960 covered prime choices gave the upper magnitude outcome. The integer interval test agreed with the numerical trace at all 42,050 tested two-prime inputs. A separate check of 1,191 prime lifts saw 274 negative signs. [Fixed-frequency replay](../experiments/salie-fixed-frequency.py)
+
+### An exact equality test without the factors
+
+For units $t,u$ at the same odd modulus $n$,
+$$
+              |W_n(t)|=|W_n(u)|\quad\Longleftrightarrow\quad
+                          t^2\equiv u^2\pmod n .
+$$
+The test uses one modular squaring per frequency. There is also a polynomial-time test across different moduli. If $3\parallel n$, replace $(n,t)$ by $(n/3,t/3\bmod(n/3))$, where division denotes multiplication by the modular inverse. Do this for each argument independently, using the unique class at modulus one. Equality of magnitudes holds exactly when the resulting moduli coincide and the resulting squares coincide modulo that modulus.
+
+To see this, write the prime-power blocks of $n$ as $D$. The squared magnitude is a product of positive local units
+$$
+       \alpha_D=2+\zeta_D^{c_D}+\zeta_D^{-c_D},
+       \qquad c_D=4t(n/D)^{-1}\pmod D .
+$$
+They are units because $\Phi_D(-1)=1$ for odd prime powers. The fields $\mathbb Q(\zeta_D)$ have independent Galois actions by CRT. If an automorphism fixes the product, each ratio $\sigma(\alpha_D)/\alpha_D$ lies both in its local field and in the compositum of the others, hence in $\mathbb Q$. This ratio is positive and its power is one by applying the automorphism to finite order, so it equals one. Equality of the two local cosine sums is exactly $\sigma(c_D)\equiv\pm c_D\pmod D$. Thus the stabilizer consists of the independent local signs, proving the same-modulus claim. In particular $|W_n(t)|^2$ generates the compositum of the local maximal real cyclotomic subfields, of exact degree $\varphi(n)/2^{\omega(n)}$. [Cyclotomic field and Galois group background](https://math.ucla.edu/~sharifi/notes/algebra-ch06.html)
+
+This field has odd conductor $n$, except that a single factor of three disappears. Indeed, in any common cyclotomic overfield, lowering an odd prime-power exponent $e\ge2$ by one frees the automorphism $1+p^{e-1}$ on that block, which does not act by a sign. Removing a prime block $p\ge5$ frees a non-sign unit as well. The block $D=3$ has rational local square one. Equivalently, for $3\nmid m$, CRT gives $W_{3m}(t)=-W_m(t/3)$. Equality of nonnegative magnitudes forces equality of their generated fields and hence of their conductors, giving the test across moduli.
+
+In particular **exact neutral coprime padding** $|W_H(u)|=1$ exists only for $H=1,3$. The same holds if one allows any rational squared gain, since the degree formula then equals one. Thus a single exact-gain CRT transfer to frequency one can send only $t\equiv\pm1$ or $t\equiv\pm3^{-1}$ through the simple choices $H^{-1}\equiv\pm t\pmod n$. More generally it can represent that magnitude when $t^2\equiv1$ or $9t^2\equiv1\pmod n$ respectively. The approximate calibration in the previous section avoids this obstruction. A replay compares 2,139 literal unit-phase sums in nine common cyclotomic rings with the equality criterion, including the conductor-three exception. Five exact minimal-polynomial degrees also agree. [Exact algebraic replay](../experiments/salie-fixed-gap.gp)

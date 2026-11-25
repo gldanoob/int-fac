@@ -31,4 +31,21 @@ checkFixedGaps() = {
   if(min(below,above)==0,error("missing outcome"));
   print([cases,below,above,worst,maxbits])
 };
-iferr(checkFixedGaps(),E,print(E);quit(1));quit(0);
+checkExactMagnitudes() = {
+  my(phases=0,degrees=0);
+  foreach([45,63,75,81,105,135,165,315,1155],L,
+    my(z=Mod(x,polcyclo(L)),powers=vector(L,i,z^(i-1)),byKey=Map(),values=List());
+    foreach(divisors(L),n,
+      my(m=if(n%3==0 && n%9,n/3,n),roots=select(r->(r^2-1)%n==0,vector(n,i,i-1)));
+      for(t=1,n,if(gcd(t,n)!=1,next);
+        my(w=sum(i=1,#roots,powers[1+((2*t*roots[i])%n)*(L/n)]),v=lift(w^2));
+        my(u=if(m==1,0,if(m==n,t,lift(Mod(t,m)/3))),key=[m,u^2%m],prev);
+        if(mapisdefined(byKey,key,&prev),if(prev!=v,error("CRT equality")),mapput(byKey,key,v));
+        listput(values,v);phases++;
+        if(t==1 && L==n && n<=105,
+          if(poldegree(minpoly(w^2))!=eulerphi(n)/2^omega(n),error("magnitude degree"));
+          degrees++)));
+    if(#Set(Vec(values))!=#byKey,error("distinct magnitudes collide")));
+  print(["exact cyclotomic unit phases",phases,"minimal polynomial degrees",degrees])
+};
+iferr(checkFixedGaps();checkExactMagnitudes(),E,print(E);quit(1));quit(0);
