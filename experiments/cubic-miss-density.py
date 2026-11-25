@@ -160,6 +160,66 @@ def small_collision_walsh(fields):
     return result
 
 
+def check_small_probe_bounds():
+    """Enumerate subgroups of S3 squared, including every index-two conditioning."""
+    def compose(x, y):
+        flip, shift = divmod(x, 3)
+        other, move = divmod(y, 3)
+        return 3*(flip ^ other) + (shift + (-1)**flip*move) % 3
+
+    table = [[6*compose(x//6, y//6)+compose(x%6, y%6) for y in range(36)]
+             for x in range(36)]
+    trivial = frozenset({0})
+    groups, pending = {trivial}, [trivial]
+    while pending:
+        group = pending.pop()
+        for x in range(36):
+            if x in group:
+                continue
+            generators = [*group, x]
+            known, stack = {0}, [0]
+            while stack:
+                y = stack.pop()
+                for z in generators:
+                    yz = table[y][z]
+                    if yz not in known:
+                        known.add(yz)
+                        stack.append(yz)
+            extension = frozenset(known)
+            if extension not in groups:
+                groups.add(extension)
+                pending.append(extension)
+
+    def law(coset):
+        counts = Counter(((x//6 in (1, 2)), (x%6 in (1, 2))) for x in coset)
+        for mask in range(4):
+            moment = sum(n*(-1)**sum(bit for i, bit in enumerate(bits) if mask & (1 << i))
+                         for bits, n in counts.items())
+            scaled = Fraction(moment*3**mask.bit_count(), len(coset))
+            assert scaled.denominator == 1 and scaled.numerator % 2
+        return {bits: Fraction(n, len(coset)) for bits, n in counts.items()}
+
+    def overlap(left, right):
+        return sum(v*right.get(bits, 0) for bits, v in left.items())
+
+    same, mixed = [], []
+    for group in groups:
+        if not all(any(projection(x) in (1, 2) for x in group)
+                   for projection in (lambda x: x//6, lambda x: x%6)):
+            continue
+        total = law(group)
+        same.append(overlap(total, total))
+        for kernel in groups:
+            if len(kernel)*2 != len(group) or not kernel < group:
+                continue
+            plus, minus = law(kernel), law(group-kernel)
+            same.extend((overlap(plus, plus), overlap(minus, minus)))
+            mixed.append(overlap(plus, minus))
+    assert min(same) == Fraction(25, 81) and min(mixed) == Fraction(1, 9)
+    print(f"{len(groups)} subgroups of S3 squared; {len(same)} same-law and "
+          f"{len(mixed)} mixed-coset checks attain the two-probe bounds.")
+
+
 def main():
     if not __debug__:
         raise RuntimeError("Run without -O so certificate checks are enabled")
@@ -192,6 +252,7 @@ def main():
         print(f"H={H} both orders, branch pairs 11/12/22: "
               + " ".join(f"{float(x):.12g}" for x in collisions))
     if brute:
+        check_small_probe_bounds()
         print("Independent CRT and Walsh checks agree at H=1 and H=2.")
 
 
