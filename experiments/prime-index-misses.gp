@@ -47,9 +47,22 @@ checkCyclicPrefixes(k,conductors) = {
   ["cyclic prefixes",k,eulerphi(Q),counts,eligible,survivors]
 };
 
+checkExactCoveredPair() = {
+  my(smallest=0,example=[],pairs=0,bounds=0);
+  forprime(q=5,2000,forprime(p=q+1,5*q,
+    my(hp=p^2+p+1,hq=q^2+q+1,d=p-q);pairs++;
+    if(gcd(hp,hq)>d*(d^2+3),error("shifted cubic-order gcd"));
+    if(q>d^2+d+1,
+      if(gcd(hp,q*(q^2-1))>d^2*(d+1)^2+3,error("shifted reducible gcd"));bounds++);
+    if(hp%hq==0 && (!smallest || hp/hq<smallest),smallest=hp/hq;example=[q,p])));
+  if(smallest!=19 || example!=[37,163],error("extremal order quotient"));
+  ["shifted orders",pairs,bounds,smallest,example]
+};
+
 run() = {
   my(p3=[1000003,1000033,1000037,1000039,1000081],q3=[1000099,1000117,1000121,1000133,1000151,1000159,1000171]);
   my(p5=[1000000007,1000000009,1000000021],q5=[1000000033,1000000087,1000000093]);
+  print(checkExactCoveredPair());
   print(checkCyclicPrefixes(3,[7,13,19,31]));
   print(checkCyclicPrefixes(5,[11,31,41]));
   my(small=checkPrimeIndexPrediction(3,2,[41,43,47,53],[59,61,67,71,73],[1,3,5]));

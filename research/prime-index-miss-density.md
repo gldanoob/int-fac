@@ -97,6 +97,25 @@ All branches in this table are modulo three. Conditional on the two quadratic si
 
 A certified balanced example reaches height six. Both primes have 488 bits, with $q/p$ between 1.10 and 1.11. Their two cyclotomic values have gcd 13. Supply their least common multiple $M$, which is coprime to $p(p^2-1)q(q^2-1)$. All **1,452** monic quadratic and cubic probes at height five give trivial gcds. Exactly 178 cubics in that box are irreducible at both primes, with matching bits on every cubic. The first height-six split is $p$ at $X^3+3X^2-6X-6$. The example came from matching two primes with the same irreducibility pattern on a prescribed height-five quadratic profile. The certificate tests both primes, the exponent conditions, the complete box and the next witness directly. It uses the two-order multiple above. [Exact primes and PARI/GP replay, `checkDualCubicHeightFive()`](../experiments/cyclotomic-multiples.gp)
 
+### How far apart exact cubic orders must be
+
+Put $H(t)=t^2+t+1$. For distinct primes $p>q\ge5$, if $H(q)\mid H(p)$ then
+$$
+                 H(p)/H(q)\ge19,\qquad p>\sqrt{19}\,q .
+$$
+The integer quotient bound is sharp: $H(163)=19H(37)$. Consequently an exact single supplied order cannot cover both full orders on *any* balanced pair $q<p\le2q$. The balanced height-five example above explicitly uses their least common multiple. This obstruction says nothing about local elements whose projective orders are proper divisors of $H(q)$.
+
+Every prime factor of $H(p)$ is one modulo three except for 3, which has valuation at most one. Indeed $p$ has multiplicative order three modulo such a prime unless $p\equiv1$ there, in which case the prime divides 3. Thus the only integer quotients strictly between 1 and 19 are $3,7,13$. They are all $H(t)$, $t=1,2,3$. In each case $tq<p<(t+1)q$, by comparing $H(t)H(q)$ with $H(tq)$ and $H((t+1)q)$. For the upper comparison their difference in the order $H((t+1)q)-H(t)H(q)$ is $t(q+1)(q-t-1)>0$. Reduction modulo $q$ then gives $(p-t)(p+t+1)\equiv0$. Since $t+1<q$, the only possible primes in that interval would be $t(q+1)$ and $(t+1)(q-1)$, both even. Finally $(2p+1)^2=m(2q+1)^2+3(m-1)$ for the quotient $m$, giving the stated size inequality.
+
+There is also an instance-level bound for very close primes, with no exceptional-density qualification. Write $s=p-q\ne0$. Then
+$$
+ \gcd(H(p),H(q))\le |s|(s^2+3),\qquad
+ \gcd(H(p),q(q^2-1))\le s^2(s+1)^2+3\quad\text{if }q>H(s).
+$$
+The first follows from $H(p)-H(q)=s(2q+s+1)$ and $(2q+1)^2=4H(q)-3$. For the second, $q\nmid H(p)$ because $H(p)\equiv H(s)\bmod q$. The factors from $q-1,q+1$ divide $H(s+1)$ and $H(s-1)$ respectively, whose product is $s^2(s+1)^2+3$.
+
+For the one-order search with $M=aH(p)$, use $E=\max(3,|s|(s^2+3),s^2(s+1)^2+3)$. If $q>H(s)$ and $(1+3B)^{aE}<\min(p,q)$, the height-$B$ probes return exactly $p$ on the nonpure cubics irreducible at $p$. A cubic irreducible at $q$ has projective exponent dividing $H(q)$. Every reducible cubic and quadratic there has projective exponent dividing $q(q^2-1)$ on its unit components. The covered prime's reducible exponent contributes at most $3a$. The integer scalar coefficient argument from the one-order theorem now applies to every probe. In particular this gives a uniform deterministic certificate at fixed height and multiplier for $|p-q|=o((\log q)^{1/4})$. The numerical replay checked the shifted orders at 136,592 prime pairs, including 1,076 pairs satisfying the extra $q>H(s)$ bound. [Shifted gcd and extremal quotient replay](../experiments/prime-index-misses.gp)
+
 ### Optimal fixed probe order for one covered prime
 
 For every odd prime index $k$, a prescribed list of $j$ polynomial probes of degrees at most $k$ misses at least a limiting fraction $k^{-j}$ of the balanced inputs in the one-prime regime above. One fixed infinite list attains equality at **every prefix**. In particular, the optimal limiting mean number of probes through a growing cutoff is $3/2$ for cubics and $5/4$ for quintics. This counts modular polynomial tests, with the same list for every input. An algorithm that chooses its polynomial from the numerical values of $N$ or $M$ is outside this comparison.
