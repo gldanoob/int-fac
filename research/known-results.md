@@ -26,6 +26,8 @@ Gupta–Sikarov–Volkovich's September preprint gives a separate elementary res
 | Lenstra–Pomerance, Theorems 10.3 and 10.5 | Complete factorization has unconditional expected time $\exp((1+o(1))\sqrt{\log N\log\log N})$. Lemma 5.4 and Eq. (5.3) identify the distribution on exponent-vector lifts used to obtain a useful two-torsion class. A proposed deterministic replacement needs to cover that success event. [Relation distribution, §5](https://math.dartmouth.edu/~carlp/PDF/paper85.pdf#page=17) · [Factoring theorem, §10](https://math.dartmouth.edu/~carlp/PDF/paper85.pdf#page=28) |
 | Harvey–Hittmeir, Theorem 1.1 | An unconditional deterministic arithmetic algorithm completely factors $N$ in $O(N^{1/5}\log^{16/5}N/(\log\log N)^{3/5})$ bit operations. This is a comparison point for fifth-root arithmetic searches; the leaderboard's half-rate result is asymptotically faster. [Published theorem](https://doi.org/10.1090/mcom/3708) |
 
+The November 25 Google research release contains two newer paper claims. The deterministic companion gives a proper divisor of every composite in $O(\exp(3(\ln N)^{3/4}))$ bit operations. The linked Las Vegas paper gives complete factorization with per-input expected time $L_N[1/3,105]$ and worst-case deterministic space $L_N[1/3,40]$. The pinned directories provide the two manuscripts and announce separate Lean source releases. [Pinned sources, scope and evidence](cogentic-factoring-papers.md)
+
 ## Relations, smoothness and exponent selection upstream
 
 | Reuse or retire | Exact scope and remaining step |
