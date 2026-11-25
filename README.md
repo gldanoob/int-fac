@@ -8,6 +8,7 @@ Start with the [known-results index](research/known-results.md), including the [
 
 | Report | Starting points |
 | --- | --- |
+| [Factoring from simultaneous divisibilities](research/hidden-divisor-lattices.md) | Unconditional recovery from bounded cubic multiples on balanced inputs, large prime powers from one divisor sum, and complete factoring from ordinary divisor sums on powers of the input |
 | [One divisor sum for general inputs](research/single-divisor-sum.md) | Complete deterministic factoring from a supplied divisor sum in $\exp(O(b^{1/3}(\log b)^{2/3}))$ time under a uniform Dedekind zero-free strip, and polynomial time for bounded prime support |
 | [Cyclotomic multiples computed from the input](research/cyclotomic-supply.md) | An infinite family covered by $N^2+N+1$, and bounds on the gcds obtained by polynomial exponent lists on balanced semiprimes |
 | [Cyclotomic multiples at any fixed index](research/cyclotomic-order-multiples.md) | A deterministic split from one hidden prime’s cyclotomic multiple, and complete factoring from one divisor sum for bounded prime multiplicities |

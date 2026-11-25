@@ -4,6 +4,8 @@ Fix an integer $k\ge3$. Let $N$ have at least two distinct prime divisors, and l
 
 For $k=3$ this removes both congruence restrictions in the [conductor-seven proof](cubic-order-multiples.md). For example, that field is inert at both primes of $85=5\cdot17$, and its projective group at each prime is killed by $31\cdot307$. The new search can split 85 even with that common exponent. The theorem gives a split on the supplied promise. Producing a suitable $M$ from an arbitrary $N$ remains open.
 
+For a balanced semiprime and a polynomially bounded multiple, a different argument removes the analytic hypothesis. In particular, an unfactored multiple of $p^2+p+1$ up to $N^2$ suffices for polynomial-time recovery on balanced pairs. [Intersection lattice and exact replay](hidden-divisor-lattices.md)
+
 ## The search uses integer polynomials
 
 Write $d=M/2^{v_2(M)}$. At heights $T=1,2,4,\ldots$, run both steps.
