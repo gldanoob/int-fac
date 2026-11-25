@@ -14,7 +14,7 @@ squareclass = runpy.run_path(str(HERE / "cubic-resolvent-profiles.py"))["squarec
 
 def block_weights(height):
     run = f'iferr(read("experiments/cubic-radical-ranks.gp");print(cubicRadicalBox({height},1)),E,print(E);quit(1))\n'
-    proc = subprocess.run(["gp", "-s", "256M", "-fq"], cwd=HERE.parent, input=run,
+    proc = subprocess.run(["gp", "-s", "256M", "--default", "threadsize=128M", "-fq"], cwd=HERE.parent, input=run,
                           capture_output=True, text=True, check=True)
     assert not proc.stderr, proc.stderr
     *rows, summary = map(ast.literal_eval, proc.stdout.splitlines())
