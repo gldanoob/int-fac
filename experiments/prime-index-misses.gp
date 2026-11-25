@@ -32,9 +32,26 @@ checkPrimeIndexPrediction(k,height,ps,qs,extras,both=0) = {
   if(!certified || !forced,error("empty certificate test"));
   [k,height,rows,good,certified,exceptions,forced,tests]
 };
+checkCyclicPrefixes(k,conductors) = {
+  my(m=#conductors,F=apply(l->polsubcyclo(l,k),conductors),Q=prod(i=1,m,conductors[i]));
+  my(bad=prod(i=1,m,poldisc(F[i])),counts=vector(m),survivors=vector(m),eligible=0);
+  for(i=1,m,if(polcoef(F[i],k-1)!=1 || !polisirreducible(F[i]),error("Gaussian period")));
+  for(r=1,Q,if(gcd(r,Q)==1,for(i=1,m,my(l=conductors[i]);
+    if(Mod(r,l)^((l-1)/k)!=1,break);counts[i]++)));
+  if(counts!=vector(m,i,eulerphi(Q)/k^i),error("cyclic prefix masses"));
+  forprime(p=1000,20000,if(bad%p==0,next);eligible++;
+    my(miss=1);
+    for(i=1,m,my(l=conductors[i],inert=Mod(p,l)^((l-1)/k)!=1);
+      if(inert!=polisirreducible(Mod(1,p)*F[i]),error("cyclic Frobenius"));
+      miss=miss && !inert;survivors[i]+=miss));
+  ["cyclic prefixes",k,eulerphi(Q),counts,eligible,survivors]
+};
+
 run() = {
   my(p3=[1000003,1000033,1000037,1000039,1000081],q3=[1000099,1000117,1000121,1000133,1000151,1000159,1000171]);
   my(p5=[1000000007,1000000009,1000000021],q5=[1000000033,1000000087,1000000093]);
+  print(checkCyclicPrefixes(3,[7,13,19,31]));
+  print(checkCyclicPrefixes(5,[11,31,41]));
   my(small=checkPrimeIndexPrediction(3,2,[41,43,47,53],[59,61,67,71,73],[1,3,5]));
   if(small[6]!=9,error("small exceptional pairs"));print(small);
   print(checkPrimeIndexPrediction(3,2,p3,q3,[1,2,3,5]));
