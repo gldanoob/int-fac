@@ -1,6 +1,6 @@
 # Deterministic factoring research, November 25 continuation
 
-The starting point was the [08:00 handoff](2026-11-25-0800-handoff.md) and its [later morning results](2026-11-25-handoff/README.md). For unrestricted $b$-bit inputs the leaderboard's deterministic bound is $2^{O(b/\sqrt{\log b})}$. The following results address specific approaches to that bound. [Benchmark and verification](https://bigospeedrun.com/integer-factoring)
+The starting point was the [08:00 handoff](2026-11-25-0800-handoff.md) and its [later morning results](2026-11-25-handoff/README.md). For unrestricted $b$-bit inputs the leaderboard's deterministic bound is $2^{O(b/\sqrt{\log b})}$. Throughout this continuation, ordinary RH and Dirichlet GRH are proved inputs. Sutherland’s independent kernels checked Alpöge’s November 20 proof for every Dirichlet character and modulus. [Verification and exact statements](https://math.mit.edu/~drew/grh/) · [Benchmark and verification](https://bigospeedrun.com/integer-factoring)
 
 | Question | Finding |
 | --- | --- |

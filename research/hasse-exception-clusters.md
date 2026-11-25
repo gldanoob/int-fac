@@ -1,6 +1,6 @@
 # Locating the exceptional Hasse intervals
 
-Under ordinary RH the exceptional primes for the [many-prime Hasse estimate](mean-time-elliptic-factoring.md) in \((P,2P]\) lie in \(\exp(O(\sqrt{\log P\log\log P}))\) intervals of length \(O(\sqrt P)\). The existence proof and the cost of evaluating a single Fourier coefficient leave open how to compute their locations. A finite-dimensional obstruction describes what additional information a deterministic algorithm would need.
+By the verified ordinary RH the exceptional primes for the [many-prime Hasse estimate](mean-time-elliptic-factoring.md) in \((P,2P]\) lie in \(\exp(O(\sqrt{\log P\log\log P}))\) intervals of length \(O(\sqrt P)\). The existence proof and the cost of evaluating a single Fourier coefficient leave open how to compute their locations. A finite-dimensional obstruction describes what additional information a deterministic algorithm would need.
 
 ## Fixed bins and computable coefficients
 

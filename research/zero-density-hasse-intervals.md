@@ -54,7 +54,7 @@ A deterministic algorithm factors every input $N\ge2$ and has arithmetic mean bi
 $$
                  \exp\!\big(O(b^{2/3}(\log(2b))^{4/3})\big)
 $$
-over all $b$-bit integers and over balanced semiprimes $N=pq$ with $P<p,q\le2P$. This deduction only uses classical unconditional theorems. Under ordinary RH the [stronger square-root-exponent mean bound](mean-time-elliptic-factoring.md) applies.
+over all $b$-bit integers and over balanced semiprimes $N=pq$ with $P<p,q\le2P$. This deduction only uses classical unconditional theorems. The verified ordinary RH gives the [stronger square-root-exponent mean bound](mean-time-elliptic-factoring.md).
 
 Set $\sigma=167/200$, $g=999/1000$, $\theta=31/200$. Then $g-3/(2(3\sigma-1))=699/301000>0$ and $1-\sigma-\theta=1/100$. Let $T_b$ denote an upper bound of the displayed subexponential order with a sufficiently large absolute constant. Use the [classical large-sieve conic list](average-conic-signs.md). Its construction, small-factor preprocessing, all conic/mark enumeration overhead and all union factors from pairs of conics fit $T_b$. As in that proof, character exceptions cost at most $T_b$ in the arithmetic mean when using the unconditional factorial fallback.
 

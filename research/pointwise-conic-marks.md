@@ -1,6 +1,6 @@
 # Pointwise rational marks for two quadratic characters
 
-Suppose $p,q\ge13$ are distinct prime divisors of a positive integer $n$ of bit length $b$. Under Dirichlet GRH, for either $s\in\{-1,1\}$ there is a rational number $c>1$ of height $O(b^{10})$ such that
+Suppose $p,q\ge13$ are distinct prime divisors of a positive integer $n$ of bit length $b$. By the verified Dirichlet GRH, for either $s\in\{-1,1\}$ there is a rational number $c>1$ of height $O(b^{10})$ such that
 $$\chi_p(c)=\chi_p(c-1)=s,\qquad\chi_q(c(c-1))=-1.$$
 Both $c,c-1$ reduce to nonzero elements at both primes. A list depending only on $n$ can be constructed in deterministic polynomial time and contains the witnesses for both choices of $s$ and every ordered pair of its prime divisors at least 13. Trial division handles the primes below 13. For balanced semiprimes with both prime factors growing, the required height improves to $O(b^4)$. Alpöge's November 20 result covers the Dirichlet GRH used below, including imprimitive characters. [Alpöge's theorem](https://alpo.ge/remark.pdf) · [Independent kernel checks](https://math.mit.edu/~drew/grh/)
 

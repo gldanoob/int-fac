@@ -6,7 +6,7 @@ $$
  O\!\left(\frac{X\,2^r(\log\log X)^{12}}{\log X}\right).
 $$
 
-Thus for every fixed $\eta>0$ it obtains all the digits down to $k-\lfloor(1-\eta)\log_2\log X\rfloor$ on a density-one set. Under Dirichlet GRH every returned quotient is correct, even at exceptional inputs. The proof counts ordinary indices in an interval. The [middle-bit factoring reduction](middle-three-square-bit.md) makes adaptive queries that depend on previous answers. Its last comparisons take place near deliberately selected thresholds.
+Thus for every fixed $\eta>0$ it obtains all the digits down to $k-\lfloor(1-\eta)\log_2\log X\rfloor$ on a density-one set. By the verified Dirichlet GRH every returned quotient is correct, even at exceptional inputs. The proof counts ordinary indices in an interval. The [middle-bit factoring reduction](middle-three-square-bit.md) makes adaptive queries that depend on previous answers. Its last comparisons take place near deliberately selected thresholds.
 
 ## A calculation from the unfactored index
 
@@ -28,7 +28,7 @@ $$
  e_Q=\frac{6.593\log d+19.321}{\sqrt Q\log Q}
 $$
 
-under Dirichlet GRH. Use $0.7b$ as an upper bound for $\log d$. Enlarge the extremes by a logarithmic margin $E=e_Q+b/(2Q-1)+b^{-2}$ using an upper bound for $e_Q$. The extra $b^{-2}$ is used for the unconditional population result below. For $E<1$ the rational factors $1-E$ and $1/(1-E)$ enclose the required exponential factors. Multiply by $3\sqrt m/\pi$ and the known local corrections. Round the endpoints inward to the nearest possible integer counts, then return the quotient if the interval is nonempty and both endpoints give the same quotient. The trivial interval $[0,m]$ suffices when $E\ge1$ since each pair of first two coordinates determines at most one positive third coordinate. [Bach's weighted estimate, with the weights and constants in Jacobson §3.1](https://cspages.ucalgary.ca/~jacobs/PDF/mthesis.pdf#page=50)
+using the proved Dirichlet GRH. Use $0.7b$ as an upper bound for $\log d$. Enlarge the extremes by a logarithmic margin $E=e_Q+b/(2Q-1)+b^{-2}$ using an upper bound for $e_Q$. The extra $b^{-2}$ is used for the unconditional population result below. For $E<1$ the rational factors $1-E$ and $1/(1-E)$ enclose the required exponential factors. Multiply by $3\sqrt m/\pi$ and the known local corrections. Round the endpoints inward to the nearest possible integer counts, then return the quotient if the interval is nonempty and both endpoints give the same quotient. The trivial interval $[0,m]$ suffices when $E\ge1$ since each pair of first two coordinates determines at most one positive third coordinate. [Bach's weighted estimate, with the weights and constants in Jacobson §3.1](https://cspages.ucalgary.ca/~jacobs/PDF/mthesis.pdf#page=50)
 
 For the asymptotic algorithm set $Q=\max(5000,b^{128})$. The prime products can be computed as exact rationals with polynomial bit cost, since the bit length of the full product is $O(Q\log Q)$. The replay rounds each product outwards on a fixed-point grid. A scale of $2^{b+10\lceil\log_2(2Q)\rceil+100}$ suffices asymptotically. Each single rounding error is at most the reciprocal of the scale and any subsequent product has size $O(\log(2Q))$ by Mertens' product estimate. Each prefix is also $\gg 1/\log(2Q)$. Use integer square roots and rational bounds from Machin's formula for $\pi$. All these operations have polynomial bit cost. The large asymptotic exponent in $Q$ is chosen to give a simple exceptional-set proof.
 

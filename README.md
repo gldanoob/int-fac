@@ -4,7 +4,7 @@ This repository investigates algorithms that return the smallest prime factor of
 
 ## Research
 
-The [November 25 continuation](research/2026-11-25-continuation.md) includes a [complete deterministic factoring algorithm with mean cost $\exp(O(\sqrt{b\log b}))$](research/mean-time-elliptic-factoring.md) over all $b$-bit inputs. A shrinking zero-free region for ordinary zeta suffices for this bound. Classical unconditional results give [mean time $\exp(O(b^{2/3}(\log b)^{4/3}))$](research/zero-density-hasse-intervals.md). The [two-cut crossing bound](research/euclidean-crossing-barrier.md) rules out the proposed exact crossing seed for a stronger worst-case algorithm.
+The [November 25 continuation](research/2026-11-25-continuation.md) includes a [complete deterministic factoring algorithm with mean cost $\exp(O(\sqrt{b\log b}))$](research/mean-time-elliptic-factoring.md) over all $b$-bit inputs. Alpöge’s proved ordinary RH gives this mean bound. His Dirichlet GRH theorem also supplies the pointwise character witnesses. Sutherland independently verified both statements, including all Dirichlet characters and moduli. [Kernel verification](https://math.mit.edu/~drew/grh/) Classical unconditional results give [mean time $\exp(O(b^{2/3}(\log b)^{4/3}))$](research/zero-density-hasse-intervals.md). The [two-cut crossing bound](research/euclidean-crossing-barrier.md) rules out the proposed exact crossing seed for a stronger worst-case algorithm.
 
 The [November 25 morning handoff](research/2026-11-25-handoff/README.md) collects the average-time reductions, the exact height-five counterexample, the complete height-six search data and the remaining proof obligations.
 

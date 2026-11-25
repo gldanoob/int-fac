@@ -1,6 +1,6 @@
 # Quadratic signs for the elliptic search on average
 
-The deterministic [mean-time factoring bound](mean-time-elliptic-factoring.md) requires only ordinary RH. Its use of a least prime in a Dirichlet coset can be replaced by the classical multiplicative large sieve and a larger, explicitly enumerable list of rational conics. All failures of the new list can be charged to the actual factorial-search cost. The original [pointwise theorem](pointwise-conic-marks.md) gives a polynomial-size list for every pair with Dirichlet GRH.
+The deterministic [mean-time factoring bound](mean-time-elliptic-factoring.md) follows from proved ordinary RH and the classical multiplicative large sieve. The proof replaces a least-prime-in-a-coset step with a larger, explicitly enumerable list of rational conics. All failures of the new list can be charged to the actual factorial-search cost. The original [pointwise theorem](pointwise-conic-marks.md) gives a polynomial-size list for every pair with Dirichlet GRH.
 
 ## A small exceptional list of characters
 
