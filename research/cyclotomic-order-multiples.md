@@ -166,6 +166,8 @@ $$
 
 The two primality tests and the identity $\gcd(M,q(q^6-1))=1$ pass. All $9^2+9^3=810$ polynomials at height four give a trivial gcd on $pq$, and $X^3-4X^2-5X-5$ gives $p$ at height five. The search screened 1,033,296 probable primes in its final progression before finding this candidate. The certificate replays only the resulting primes and polynomial boxes. [Exact GP regression](../experiments/cyclotomic-multiples.gp)
 
+At height five the quadratic resolvents also give an exact obstruction to constructing the next hard example by prescribing degree-one primes in one norm field and abelian Artin data. The minimum field degrees are $2^{28}$ and $2^{13}$ on the two prime residue classes modulo three. [Degree theorem and exact sign-profile replay](cubic-resolvent-profiles.md)
+
 ## Finite checks
 
 The height-one regression runs the polynomial search on indices $3,4,5,6$. It splits $85$ with $M=2^8\cdot31\cdot307$, handles a repeated prime in $2057=11^2\cdot17$, and splits $55$ even though the successful polynomial gives the identity at the full exponent. The quartic field example $N=235$, $M=26$ has $f=X^4+47X^3-164X^2+47X+1$. In its quotient $X^{13}=141+220X+115X^3\pmod{235}$, giving the factor $5$. At $47$ the roots $13,18,29,34$ have signs $-,+,-,+$. These are finite arithmetic checks. The uniform witness bound is a paper proof. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)
