@@ -52,6 +52,8 @@ Read those digits as $W$. The half-open interval $[nW/K,n(W+1)/K)$ contains $r$ 
 
 The Lean proof checks the symmetric pair and the complete centered sum for all integers satisfying the stated bounds, including radius zero. It also proves that the outer-quarter predicate gives adjacent-bit equality and that decoding $j$ such answers yields $\lfloor 2^{j+1}r/n\rfloor$ when the first digit is zero. Run `make check` at the repository root. [CenteredFloor.lean](../formal/CenteredFloor.lean)
 
+At each of these centers a single Jacobi-twisted Salié sum at modulus $n$ gives the same bit by comparison with a public cosine. At $16c^2<n$, absolute error below one in the raw sum suffices for the exact floor parity. [Comparison formula and separation bound](salie-and-quarter-parity.md#the-shifted-comparison-at-one-dyadic-center)
+
 On balanced semiprimes, predicting the first informative bit with a fixed advantage over one half requires reading a linear number of input bits, even when the larger prime is supplied. The result allows adaptive bit positions and unrestricted computation between reads. [Bit-probe bound and exact finite classifier](centered-bit-probes.md)
 
 ### Evaluation under a small-remainder promise

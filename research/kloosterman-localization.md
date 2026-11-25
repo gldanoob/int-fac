@@ -6,6 +6,8 @@ Exact sign queries at the original square modulus give complete factoring in pol
 
 For arbitrary prime support, a separate deterministic polynomial-time reduction uses only fixed-threshold comparison bits after adding known prime factors to the base of the square modulus. [All-input threshold reduction](kloosterman-threshold.md)
 
+A Jacobi twist gives the same stationary-root signal at the input modulus itself. For two prime types a difference-of-squares test evaluates all low-frequency signs directly, and the first negative frequency of the square-modulus sum has an exact formula in the two blocks. [Salié identity and first sign change](salie-and-quarter-parity.md)
+
 ## Stationary phase at a square modulus
 
 For a unit $t\bmod n$, define $e_Q(z)=\exp(2\pi iz/Q)$ and
