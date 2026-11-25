@@ -1,7 +1,7 @@
 """Check reduction to frequency one using integer signs and local cosines."""
 
 from functools import lru_cache
-from math import cos, gcd, log, pi, prod
+from math import cos, gcd, isqrt, log, pi, prod
 
 
 def strip_three(n):
@@ -79,6 +79,45 @@ def trace(n, t):
     return sign, log_magnitude
 
 
+def check_fixed_frequency_distribution():
+    limit = 1000003
+    sieve = bytearray([1]) * (limit + 1)
+    sieve[:2] = b"\0\0"
+    for d in range(2, isqrt(limit) + 1):
+        if sieve[d]:
+            sieve[d*d::d] = bytes((limit - d*d)//d + 1)
+    primes = [p for p in range(2, limit + 1) if sieve[p]]
+    for q in (1009, 10007, 100003, limit):
+        total = above = 0
+        for p in primes:
+            if p >= q:
+                break
+            if 2*p <= q:
+                continue
+            n = p*q
+            root = 2*p*pow(p, -1, q) - 1
+            z = 2*root % n
+            inside = 3*min(z, n-z) < n
+            magnitude = abs(2*cos(4*pi/n) + 2*cos(2*pi*z/n))
+            assert inside == (magnitude > 1)
+            total += 1
+            above += inside
+        print(f"q={q}, {above}/{total} fixed-frequency magnitudes above one")
+    count = negative = 0
+    for p in (11, 9*25, 101*103, 7*11*13):
+        for r in primes:
+            if r >= 2000:
+                break
+            if r <= 8 or gcd(p, r) != 1:
+                continue
+            b = pow(r, -1, p)
+            fixed, _ = trace(p*r, 1)
+            assert fixed == trace(p, b)[0]*local_sign(2*b, p)
+            count += 1
+            negative += fixed < 0
+    print(f"{count} prime lifts, {negative} negative fixed-frequency signs")
+
+
 def main():
     cases = [(n, t) for n in range(3, 260, 2) for t in range(1, n) if gcd(n, t) == 1]
     # These force the first odd representative near the modulus, with large 3-adic valuations.
@@ -113,3 +152,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    check_fixed_frequency_distribution()

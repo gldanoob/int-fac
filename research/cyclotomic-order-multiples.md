@@ -165,6 +165,8 @@ Five fixtures check a shortest projected generator by enumerating the bounded bi
 
 For odd prime indices and bounded extra multipliers there is an exact limiting answer. On almost every balanced ordered pair the successful polynomials are precisely the nonpure degree-$k$ probes irreducible at the covered prime. The statement holds simultaneously for all extra multipliers up to $A$ when $A\log(2H)=o(\log X)$. [One-prime density theorem and finite replay](prime-index-miss-density.md)
 
+At index four, the exact-input search has a smaller sufficient family. The same reciprocal shape gives a two-parameter search under the uniform strip for arbitrary supplied multiples. [Quartic criterion, search bound and exact densities](quartic-order-multiples.md)
+
 ## A lower bound on the search height
 
 For each fixed odd $k\ge3$ and arbitrarily large $N=pq$, the polynomial search needs height at least $c_k(\log N)^{1/k}$, even when $M=\Phi_k(p)$ exactly and $\gcd(M,N)=1$. This concerns the coefficient search above. With a promise of exact equality an integer root search in $\Phi_k$ would itself recover $p$.
