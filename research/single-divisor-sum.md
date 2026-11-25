@@ -2,9 +2,9 @@
 
 Let $b=\max(3,\lceil\log_2(N+1)\rceil)$. Given $N\ge2$ and the single integer $M=\sigma(N)$ in binary, there is a deterministic algorithm returning the complete prime factorization of $N$ in
 $$
-\exp\!\left(O_\delta\big(\sqrt{b\log b}\big)\right)
+\exp\!\left(O_\delta\big(b^{1/3}(\log b)^{2/3}\big)\right)
 $$
-bit operations. The analytic input is a fixed $0<\delta\le1/2$ such that the Dedekind zeta functions used below have no zeros in $\Re(s)>1-\delta$. Cureton–Thorner report this for all number fields with $\delta=1/32$. All bounds below keep their dependence on the varying cyclotomic index. Computing the supplied divisor sum from $N$ remains outside the bound. [Cureton–Thorner, Theorem 1.1](https://hexagonmath.org/pdf/2610.00200v2#page=3)
+bit operations. The analytic input is a fixed $0<\delta\le1/2$ such that the Dedekind zeta functions used below have no zeros in $\Re(s)>1-\delta$. Cureton–Thorner report this for all number fields with $\delta=1/32$. All bounds below keep their dependence on the varying cyclotomic index. For any fixed bound on the number of distinct prime factors, the running time is polynomial in $b$, allowing arbitrary multiplicities. Computing the supplied divisor sum from $N$ remains outside these bounds. [Cureton–Thorner, Theorem 1.1](https://hexagonmath.org/pdf/2610.00200v2#page=3)
 
 Bach–Miller–Shallit proved randomized polynomial-time complete factorization from the same single value. Their general algorithm guesses a prime multiplicity and varies a polynomial of corresponding degree. Bach–Shallit subsequently gave randomized splitting from a cyclotomic multiple. Źrałek's deterministic cyclotomic result has fixed-field and smoothness conditions. The [fixed-index splitting proof](cyclotomic-order-multiples.md) in this repository gives polynomial time for bounded prime multiplicities. The estimate here handles unbounded multiplicities. Publication priority for this deterministic bound is unverified. [Bach–Miller–Shallit, Theorem 2 and §4](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf) · [Bach–Shallit](https://doi.org/10.1090/S0025-5718-1989-0947467-1) · [Źrałek, Theorem 5.5](https://arxiv.org/pdf/0707.4102#page=11)
 
@@ -51,11 +51,75 @@ For $k=2$ use the [one-$p+1$ splitting algorithm](p-plus-one-multiples.md#two-sm
 
 ## Complete factorization with the original value
 
-Choose $T=\max(2,\lfloor\sqrt{b/\log b}\rfloor)$. Trial divide $N$ through $\lceil 2^{b/T}\rceil$, removing all powers of every prime found. For every remaining prime $p$ with original multiplicity $a=v_p(N)$ we have $a<T$, since $p^a\le N<2^b$. Select any prime $k\mid a+1$. Then $k\le T$ and
+Take an integer cutoff $2\le T\le b$. Each original prime $p^e\parallel N$ with $e<T$ has a prime $k\mid e+1$ for which
 $$
-\Phi_k(p)\mid (1+p+\cdots+p^a)\mid M .
+k\le T,\qquad \Phi_k(p)\mid(1+p+\cdots+p^e)\mid M .
 $$
-For each residual composite with at least two distinct prime divisors, try the prime indices up to $T$. At least one succeeds. Use the original $M$ throughout the recursion, since the divisibility above depends only on the original multiplicity. Overlap between the prime factors of the two children preserves the promise. Test primes and handle prime powers by integer roots. The tree has $O(b)$ nodes and each search costs $b^{O_\delta(T)}$. Together with trial division this gives the stated bound. When all original multiplicities are bounded by a fixed $E$, one can skip the initial $2^{b/T}$ trial division and use $T=E+1$ directly for polynomial time.
+At each composite node try every prime $k\le T$ up to the effective search bounds above. Recurse on both children of any proper split. Record prime leaves, recognize powers of a single prime by integer roots and primality tests, and stop a branch after all its bounded searches fail. This takes $b^{O_\delta(T)}$ bit operations over $O(b)$ nodes. A prime of original exponent $e<T$ cannot occur in a stopped branch, since any second prime there would guarantee a split. The children of a gcd split may share prime divisors. Remove the **full original power** of every discovered prime from $N$ when forming the residual $m$. Dividing $M$ by the product of the divisor sums of these original powers gives $S=\sigma(m)$. This accounts for overlapping branches exactly. If all original exponents are bounded by $E$, setting $T=E+1$ (capped at $b$) already finishes in polynomial time for fixed $E$.
+
+For arbitrary inputs first remove all primes through $Y$, with
+$$
+Y=2^{\left\lceil(\lceil\log_2(8b)\rceil+2\lceil b/T\rceil)/(T+1)\right\rceil}.
+$$
+Include these primes among the recorded divisors. If $m>1$ remains after the bounded searches, write $R=\operatorname{rad}(m)=\prod_{p\mid m}p$. Every $p^e\parallel m$ has $e\ge T$, so $R^T\le m<2^b$. With $U=\sum_{p^e\parallel m}p^{-e-1}$ we have $U<bY^{-T-1}\le1/(8R^2)$. Euler's products give
+$$
+\frac{m}{S}=\frac{\varphi(R)}{R}\prod_{p^e\parallel m}(1-p^{-e-1})^{-1},
+\qquad
+0<\frac{m}{S}-\frac{\varphi(R)}{R}\le\frac{U}{1-U}<\frac{1}{2R^2}.
+$$
+Here $\prod(1-u_j)\ge1-\sum u_j$. By Legendre's continued-fraction criterion the reduced form $C/D$ of $\varphi(R)/R$ occurs among the convergents of the known $m/S$, because $D\le R$. Enumerate all $O(b)$ convergents, retaining those with $D\mid m$. For each positive $C$ try $mC/D$ as a common exponent in Miller's bounded deterministic factorization algorithm. For the true convergent the exponent is exactly $\varphi(m)$, which works on every divisor of $m$. Verify all proposed factors by integer division and primality testing. The same fixed zero-free strip yields Miller's polynomial witness bound via quadratic character prescribed signs and the Chebotarev estimate above. [Miller, Lemmas 2A, 2B and 5](https://www.cs.cmu.edu/~glmiller/Publications/Papers/Mi76.pdf#page=11)
+
+The trial division costs $2^{O(1+b/T^2+(\log b)/T)}\operatorname{poly}(b)$ bit operations. Choosing $T=\max(2,\lceil (b/\log b)^{1/3}\rceil)$ balances this with $b^{O_\delta(T)}$ and proves the cube-root bound. For comparison, Źrałek recovers a factorization at the same subexponential scale using a chain of numerical totient queries. Harvey–Hittmeir find all $r$-power divisors from $N$ alone in $N^{1/(4r)}\operatorname{poly}(b)$ time. Morain–Renault–Smith give continued-fraction recovery from one $\sigma(N)$ for certain squarefree inputs with separated prime factors. [Źrałek, Corollary 8.2](https://arxiv.org/pdf/0707.4102#page=18) · [Harvey–Hittmeir, Theorem 1.1](https://doi.org/10.1007/s40993-022-00387-w) · [Morain–Renault–Smith, Theorem 5.5](https://arxiv.org/pdf/1802.08444#page=13)
+
+## A bounded number of distinct primes
+
+Suppose $\omega(N)\le h$. Trial divide only through $16h$, then use the same bounded searches with $T=\min(b,3^h)$. When $T=b$ every original exponent is smaller than $T$. Otherwise every prime of the residual $m$ exceeds $16h$ and has exponent at least $T=3^h$. These two properties persist after stripping any collection of its prime powers.
+
+Order the residual primes $p_1<\cdots<p_s$, where $s\le h$, and put $R_j=p_1\cdots p_j$. Choose the first $i$ such that $i=s$ or $p_{i+1}>16hR_i^2$. Before this index, $R_{j+1}\le16hR_j^3$, whence
+$$
+R_i\le(16h)^{(3^{i-1}-1)/2}p_1^{3^{i-1}},\qquad
+R_i^2\le p_1^{3^i-1}.
+$$
+In particular $U\le h p_1^{-T-1}<1/(16R_i^2)$. Passing from $\varphi(R_i)/R_i$ to $\varphi(R_s)/R_s$ changes the value by at most $\sum_{j>i}1/p_j<1/(16R_i^2)$, with zero change for $i=s$. Thus
+$$
+\left|\frac m{\sigma(m)}-\frac{\varphi(R_i)}{R_i}\right|
+\le \frac{U}{1-U}+\sum_{j>i}\frac1{p_j}<\frac1{2R_i^2}.
+$$
+The reduced prefix fraction $C/D=\varphi(R_i)/R_i$ is a convergent. Its denominator divides $R_i$, and $p_i\mid D$ since $p_i$ exceeds every integer $p_j-1$ for $j\le i$. Moreover $E=mC/D=(m/R_i)\varphi(R_i)$ is a multiple of every $p-1$ for $p\mid D$. As $D$ is squarefree, $\lambda(D)\mid E$.
+
+Try each convergent with $D>1$, $D\mid m$, and $C>0$. Run bounded Miller factorization of $D$ with exponent $mC/D$, accepting any certified prime divisor of $m$. The guaranteed convergent yields at least $p_i$ if used for complete factorization of $D$. Strip the full power of a recovered prime, divide $\sigma(m)$ by its divisor sum and repeat. There are at most $h$ iterations, each polynomial in $b$. The initial searches give a total time of $b^{O_\delta(3^h)}$ for fixed $h$, without an upper bound on any prime multiplicity.
+
+### Two prime divisors by integer polynomial arithmetic
+
+For $N=p^u q^v$ with distinct primes, the single exact divisor sum admits an elementary deterministic polynomial-time decoder without an analytic hypothesis. Try all positive $u,v\le b$ and set
+$$
+B(X)=1+X+\cdots+X^u,\quad A(X)=MX^u-NB(X),\quad C(X)=X^u(M-B(X)).
+$$
+For the true multiplicities, $M(q-1)=B(p)(q^{v+1}-1)$ and $p^u q^v=N$ give $A(p)q=C(p)$. Consequently $p$ is an integer root of
+$$
+P(X)=X^u C(X)^v-N A(X)^v.
+$$
+The first term has degree $u+2uv$ and the second has degree at most $uv$, so the polynomial is nonzero for every guess. Its coefficients have polynomial bit length by direct expansion. List rational linear factors over $\mathbb Q$ using deterministic polynomial factorization and test their positive integer roots by divisibility and primality. Strip the full power of each prime found. On the promised inputs the other block is a prime power. The argument also covers equal multiplicities. The classical polynomial-factorization theorem applies to binary integer coefficients. [Lenstra–Lenstra–Lovász](https://doi.org/10.1007/BF01457454)
+
+The following PARI/GP check exercises the integral-root identity for six exponent values at each prime and independently extracts the two hidden primes from a divisor sum by trying exponent pairs.
+
+~~~gp
+twoPrimeRoots(n,m,u,v) = {
+  my(b=sum(i=0,u,x^i),a=m*x^u-n*b,c=x^u*(m-b));
+  nfroots(,x^u*c^v-n*a^v)
+};
+{
+  for(u=1,6,for(v=1,6,
+    my(n=11^u*17^v);
+    if(!setsearch(Set(twoPrimeRoots(n,sigma(n),u,v)),11),error("two-prime identity"))));
+  my(n=4084101,m=sigma(n),hits=List());
+  for(u=1,logint(n,2),for(v=1,logint(n,2),
+    foreach(twoPrimeRoots(n,m,u,v),r,
+      if(denominator(r)==1 && r>1 && n%r==0 && isprime(r),listput(hits,r)));
+    if(#Set(Vec(hits))==2,break(2))));
+  if(Set(Vec(hits))!=Vec(factor(n)[,1]),error("unknown multiplicities"));
+}
+~~~
 
 ## Exact arithmetic replay
 
@@ -91,6 +155,39 @@ for ell, k, g, p, q, expected in [(7, 3, 3, 5, 13, 5), (11, 5, 2, 3, 23, 9)]:
     assert gcd(n, *(v - coefficients[0] for v in coefficients)) == expected
 ~~~
 
+The following exact replay recovers the full radical's totient ratio after denominator cancellation, then recovers a proper prefix at a gap. The latter prefix contains two primes. Its exponent splits their product by the ordinary chain of squarings.
+
+~~~python
+from fractions import Fraction
+from math import gcd, prod
+
+def convergents(a, b):
+    h0, h1, k0, k1 = 0, 1, 1, 0
+    while b:
+        t, rem = divmod(a, b)
+        h0, h1, k0, k1 = h1, t*h1 + h0, k1, t*k1 + k0
+        yield Fraction(h1, k1)
+        a, b = b, rem
+
+def tail_data(powers):
+    return (prod(p**e for p, e in powers),
+            prod((p**(e+1) - 1) // (p - 1) for p, e in powers))
+
+n, sigma = tail_data([(37, 10), (149, 12)])
+full = Fraction(144, 149)
+assert full in convergents(n, sigma)
+assert n * full == 36 * 37**9 * 148 * 149**11
+
+n, sigma = tail_data([(53, 28), (59, 30), (2147483647, 36)])
+prefix = Fraction(52*58, 53*59)
+assert prefix in convergents(n, sigma)
+d = prefix.denominator
+exponent = n * prefix.numerator // d
+odd = exponent // (exponent & -exponent)
+assert gcd(pow(2, odd, d) - 1, d) in (53, 59) or (
+    gcd(pow(2, 2*odd, d) - 1, d) in (53, 59))
+~~~
+
 ## An interval or residue class for the divisor sum
 
 Suppose only that the single original value $\sigma(N)$ belongs to
@@ -104,7 +201,7 @@ O(\sqrt H)\,\exp\!\big(O_\delta(\sqrt{b\log b})\big)\,
 $$
 In particular an approximation with absolute error at most $E$ gives at most $2\lceil E\rceil+1$ candidates. Knowing a congruence modulo $B$ and an interval of width $W$ gives at most $1+\lfloor W/B\rfloor$ candidates. Bound the searches even on incorrect advice and verify every returned proper divisor. The guarantee applies whenever a candidate is the original divisor sum.
 
-Partition the candidates by $v=v_2(A+Bt)$. Solving $A+Bt\equiv 2^v\bmod 2^{v+1}$ gives one progression of indices $t$ for each nonempty class. Dividing that class by $2^v$ gives odd candidates $a+ci$, $0\le i<h\le H$. There are $O(\log(2+A+BH))$ possible valuations. Use the same trial division, prime indices and search for field elements as in the exact-value algorithm.
+Partition the candidates by $v=v_2(A+Bt)$. Solving $A+Bt\equiv 2^v\bmod 2^{v+1}$ gives one progression of indices $t$ for each nonempty class. Dividing that class by $2^v$ gives odd candidates $a+ci$, $0\le i<h\le H$. There are $O(\log(2+A+BH))$ possible valuations. For this progression bound use $T=\max(2,\lfloor\sqrt{b/\log b}\rfloor)$ and trial divide through $\lceil 2^{b/T}\rceil$. Every remaining prime has original exponent $e<T$, since $p^e\le N<2^b$. The bounded searches over prime indices through $T$ therefore suffice at every composite node containing two distinct primes. The procedure below searches all exponent candidates in each valuation class.
 
 For odd prime $k$, fix a generator $\rho$ of $\operatorname{Gal}(K/\mathbb Q)$, and in the proof choose the two Legendre-symbol components at $q$ to be adjacent under $\rho$. For each candidate $\alpha$ compute $g=\alpha/\rho(\alpha)$ modulo $n$. If the norm of $\alpha$ shares a proper factor with $n$, return it. Discard the candidate if its norm is divisible by $n$. Otherwise the inverse exists. For the promised witness, the norm is a unit at $p,q$ and one fixed component of $g$ at $q$ is a nonsquare. At $p$ the true stripped divisor sum kills $g$, since $\alpha$ to that power is scalar. Thus at $p$ some factor of
 $$
@@ -119,6 +216,13 @@ $$
 over $\mathcal O_K/n\mathcal O_K$. Evaluate it at $g^{a+csj}$ for every complete block, multiply the results, and test the final fewer than $s$ factors directly as part of the same product. This differs from the displayed product by a unit. Monic product and remainder trees give $O(\sqrt h\,\operatorname{poly}(k,\log n,\log(2+A+BH)))$ bit operations with fast polynomial multiplication. For example one can convolve in the outer variable over the full cyclotomic ring by Kronecker substitution and ordinary fast integer multiplication, then reduce in the cyclotomic variable. No division by an evaluated difference is needed. [Related monic product-tree order search](p-plus-one-multiples.md#a-bounded-missing-multiplier)
 
 For $k=2$ use the quadratic norm-one witness from the one-$p+1$ proof. Its orders at the two chosen inert primes have distinct 2-adic valuations. For each candidate class with valuation $v$, apply the same product computation to the exponents $2^j(a+ci)$ for each $0\le j\le v$. At either chosen prime the residue ring is a field. The product vanishes precisely when some $a+ci$ covers the odd order part and $j$ reaches the local 2-adic order valuation. At $p$ the correct class reaches that threshold by $v$. If the product also vanishes at $q$ by $v$, its first vanishing index there differs from the first vanishing index at $p$. This argument includes hits at different progression terms.
+
+An alternative bound for the progression is
+$$
+\left(\sqrt H\,\exp\!\big(O_\delta(b^{1/3}(\log b)^{2/3})\big)+H\right)
+\operatorname{poly}(b,\log(2+A+BH)).
+$$
+Use the cube-root choice of $T,Y$ for the searches above. The correct candidate still guarantees every split needed to remove all original exponents below $T$. Once the search tree stops, strip the full powers of the discovered primes as in the exact algorithm. Among the $H$ original candidates, try each divisible by the product of their divisor sums, applying continued-fraction recovery to the resulting residual candidate in polynomial time. The true value completes factorization. For $H\le\exp(O(b^{1/3}(\log b)^{2/3}))$ the overall bound retains the cube-root scale.
 
 This small PARI/GP replay evaluates the block polynomial directly. The cubic example tests a class containing $217=\sigma(325)/2$. In the quadratic example the order at $5$ is $6$, and the order at $13$ is $7$. Exponents $14$ and $18$ give the two hits in the full block. Stripping a factor of two isolates $13$.
 
@@ -142,7 +246,7 @@ apProductGcd(n,g,a,step,count,degree) = {
 
 ## Consequences using the input alone
 
-*Perfect and multiply perfect numbers.* Since $\sigma(N)/N=\sum_{d\mid N}1/d\le1+\log N$, enumerate the $O(b)$ positive integers $j\le1+\log N$ as possible abundancies, using $jN$ as the supplied value. Run the bounded factorization search for each and, upon complete factorization, compute the actual $\sigma(N)$ by the product formula. Accept exactly when $N\mid\sigma(N)$, or check $\sigma(N)=2N$ when recognizing perfect numbers. This gives deterministic recognition on all inputs and complete factorization on yes-instances in $\exp(O_\delta(\sqrt{b\log b}))$ bit operations. The same reasoning handles an integer interval of offsets about $jN$ by the progression search. Bach–Miller–Shallit gave randomized polynomial-time recognition for these families and for amicable pairs. [Bach–Miller–Shallit, Theorems 7–9](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf#page=9)
+*Perfect and multiply perfect numbers.* Since $\sigma(N)/N=\sum_{d\mid N}1/d\le1+\log N$, enumerate the $O(b)$ positive integers $j\le1+\log N$ as possible abundancies, using $jN$ as the supplied value. Run the bounded factorization search for each and, upon complete factorization, compute the actual $\sigma(N)$ by the product formula. Accept exactly when $N\mid\sigma(N)$, or check $\sigma(N)=2N$ when recognizing perfect numbers. This gives deterministic recognition on all inputs and complete factorization on yes-instances in $\exp(O_\delta(b^{1/3}(\log b)^{2/3}))$ bit operations. The same reasoning handles an integer interval of offsets about $jN$ by the progression search. Bach–Miller–Shallit gave randomized polynomial-time recognition for these families and for amicable pairs. [Bach–Miller–Shallit, Theorems 7–9](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf#page=9)
 
 *An arbitrary input.* The summatory function $S(x)=\sum_{m\le x}\sigma(m)$ gives the exact value as $S(N)-S(N-1)$. Tulsyan gives a $2^{O(b/\sqrt{\log b})}$ algorithm for $S(x)$ under the stated counting-engine assumptions. Two evaluations followed by the single-value algorithm retain that exponent. Li's analytic algorithm for an isolated divisor summatory value computes the unweighted sum of divisor counts in expected time $N^{9/28+o(1)}$. Bruin's fast modular-form coefficient theorem takes the index in factored form. His Eisenstein-series example explains the factoring problem for an unfactored semiprime index. For balanced $N=pq$, even the elementary approximation $N+1$ misses $\sigma(N)$ by $p+q=\Theta(\sqrt N)$. An uncertainty interval on that scale still costs $N^{1/4}$ in the progression bound. To improve the leaderboard exponent by this route, a sufficient target is an interval or congruence computable in $2^{o(b/\sqrt{\log b})}$ time leaving $H=2^{o(b/\sqrt{\log b})}$ candidates. The sources checked here leave this evaluator open. [Tulsyan, v2](https://hexagonmath.org/pdf/2611.00115v2) · [Li, abstract and Theorem 1](https://arxiv.org/abs/2609.29949) · [Bruin, Theorem 1.1 and Remarks](https://www.numdam.org/item/10.5802/pmb.a-133.pdf#page=2)
 
