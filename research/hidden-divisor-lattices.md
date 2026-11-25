@@ -1,6 +1,6 @@
 # Recovering a prime from simultaneous divisibilities
 
-Let $N$ have $b$ bits. There are three unconditional deterministic polynomial-time consequences of the same univariate lattice construction.
+Let $N$ have $b$ bits. The following unconditional deterministic polynomial-time recoveries use the same univariate lattice construction.
 
 - From one multiple $M$ of $\Phi_k(p)$ for an unknown prime divisor $p$, recover $p$ when $p\ge\sqrt N/b^C$ and $M\le N^{\varphi(k)} b^C$, for fixed $k\ge2$ and $C$. In particular a multiple of $p^2+p+1$ up to $N^2 b^C$ suffices for balanced semiprimes. The public inputs may share prime factors. The [cyclotomic field search](cyclotomic-order-multiples.md) covers arbitrary positive multiples under its stated zero-free strip.
 - From the single integer $\sigma(N)$, recover every full prime power $p^e\parallel N$ of size at least $\sqrt N/b^C$, for fixed $C$. A remaining cofactor may contain arbitrarily many distinct primes. The [single-value report](single-divisor-sum.md) gives bounds for other multiplicity patterns.
@@ -69,3 +69,23 @@ By the prime number theorem, for all sufficiently large $b$ the interval $(b,3b]
 ## Exact arithmetic replay
 
 The GP fixture intersects two integer lattices at public moduli with a common factor. The true divisors there are 1,001 and 1,003, which are coprime. A second fixture uses $N=1031^2\cdot659\cdot1613$ and its exact divisor sum to recover the prime 1,031 in an interval with 129 offsets. Its cubic fixture uses $N=3{,}067{,}526{,}838{,}329$ and a supplied multiple $M=1{,}042{,}291{,}580{,}848{,}973{,}061$. With 160,001 offsets the combined first LLL vector gives the prime $1{,}004{,}323$. Its scaled coefficient sum is below the forced divisor bound, certifying vanishing over the entire interval for qualifying roots. Each local first vector by itself misses. With four ordinary divisor sums on powers of a three-prime integer, the final fixture recovers 1,013 and checks the shortness inequality again. It uses the sum of dual lattices to compute the intersection exactly. The fixture uses small lattice parameters for speed. The dimension in the general theorem is larger. [GP replay](../experiments/hidden-divisor-lattice.gp)
+
+## A congruence on the complementary factor
+
+Let $N=pq$ with $1<p<N$. Supply a polynomial $F\in\mathbb Z[X]$ of degree $d\ge1$ whose constant term is coprime to $N$, and a positive integer $r$. Suppose $p^r\mid F(q)$. There is an unconditional deterministic algorithm that finds a proper divisor in
+$$
+N^{d/(4(d+r))}\,\operatorname{poly}(b,d,r,\operatorname{bits}(F))
+$$
+bit operations. If $p\ge N^{d/(d+r)}/b^C$ for a fixed supplied $C$, the algorithm takes polynomial time. The factors can be composite. On semiprimes this computes the complete factorization and thus every centered quadratic floor-sum query by CRT.
+
+In particular, take the **fixed** polynomial $F=X^2+X+1$. Every semiprime with $p\mid q^2+q+1$ can be factored from $N$ alone in $N^{1/6}\operatorname{poly}(b)$ bit operations. With $p^2\mid q^2+q+1$ the exponent is $1/8$, and for balanced semiprimes satisfying this stronger promise the bound is polynomial. The linear case $F=aX-h$ covers $aq\equiv h\pmod{p^r}$ whenever $\gcd(h,N)=1$. It costs $N^{1/(4(r+1))}$ times polynomial overhead, including when the supplied coefficients are large. These times apply on the stated congruence families.
+
+**Proof.** Put $s=d+r$, $M=N^s$, and reverse the polynomial with a scale factor:
+$$
+G(W)=W^d F(N/W)=\sum_{j=0}^d F_j N^j W^{d-j}.
+$$
+Its leading coefficient $F_0$ is a unit modulo $M$. Make it monic modulo $M$ by multiplying by that unit's inverse and lifting its coefficients. At $W=p$, the original evaluation is $p^dF(q)$, so $p^s$ divides both $G(p)$ and $M$. In the bin $2^i\le p<2^{i+1}$, the one-modulus lattice above with $A=2^{si}$ guarantees a search radius of at least $2^{si^2/(db)}/8$. This is the classical univariate small-root theorem for an unknown divisor, applied to the reversed cofactor polynomial. [Cohn–Heninger, Theorem 1.1](https://arxiv.org/pdf/1008.1284#page=2) · [Explicit radius and integer lattice](#a-lattice-for-overlapping-public-moduli)
+
+Cover the bin with intervals of integer radius $R=2^{\min(i,\lfloor si^2/(db)\rfloor-3)}$ when the exponent is nonnegative. Check individual integers otherwise. In either case the number of windows is $O(1+2^{i-si^2/(db)})$. Complete the square to see $i-si^2/(db)\le db/(4s)$. Summing over the $O(b)$ bins gives the first bound, since $b\le1+\log_2 N$. Check every candidate by division and direct substitution in $F$. Under the size promise keep only bins with $(2^{i+1}b^C)^s\ge N^d$. Below $db/s$, the exponent loss in a kept bin is $i(1-si/(db))\le db/s-i=O_C(\log b)$. Above $db/s$ it is nonpositive. This proves the polynomial bound. Harvey–Hittmeir use a related division into intervals to list $r$-power divisors of a supplied integer. Here the divisible value $F(q)$ itself is unknown. [Harvey–Hittmeir, Theorem 1.1 and §3](https://arxiv.org/abs/2202.12401)
+
+The GP replay searches every bin from the bottom. For $N=1{,}710{,}075{,}463$ it recovers $p=32869$ from the cubic-order congruence at $r=1$. For $N=33{,}331{,}923{,}011$ it recovers $p=2029$ at $r=2$. The linear fixture uses $a=1234577$, $h=44285$ and returns $65537$ from $N=12{,}885{,}426{,}181$. Each recovery used a positive-radius lattice call. Direct divisor enumeration also agreed on all 2,124 cases with $4\le N\le180$, $1\le r\le3$, and $F=X+1,X-1,X^2+X+1,11X^3+3X-1$. Of these, 308 had a qualifying proper divisor. [Integer implementation and fixtures](../experiments/hidden-divisor-lattice.gp)

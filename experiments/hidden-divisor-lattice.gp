@@ -39,6 +39,27 @@ hiddenDivisorRoots(P, rows, radius) = {
   Vec(roots)
 };
 
+\\ Find w dividing N such that w^r divides f(N/w), scanning all dyadic bins.
+cofactorCongruenceDivisor(N, f, r) = {
+  my(d=poldegree(f),s=d+r,x=variable(f));
+  if(type(N)!="t_INT" || N<2 || type(r)!="t_INT" || r<1 || d<1 ||
+     denominator(f)!=1 || gcd(polcoef(f,0),N)!=1,error("invalid cofactor congruence"));
+  my(b=logint(N,2)+1,M=N^s,g=sum(j=0,d,polcoef(f,j)*N^j*x^(d-j)));
+  my(u=lift(Mod(pollead(g),M)^-1));
+  g=x^d+sum(j=0,d-1,(u*polcoef(g,j)%M)*x^j);
+  for(i=1,b-1,
+    my(P=2^i,e=(s*i^2)\(d*b)-3,R=if(e>=0,2^min(i,e),0));
+    forstep(lo=P,min(N-1,2*P-1),2*R+1,
+      my(c=lo+R,roots=if(R,zncoppersmith(subst(g,x,x+c),M,R,P^s),[0]));
+      foreach(roots,z,
+        my(w=c+z);
+        if(w>1 && w<N && N%w==0 && subst(f,x,N/w)%w^r==0,return(w))
+      )
+    )
+  );
+  0
+};
+
 checkHiddenDivisorLattice() = {
   my(x='x, a=12012, b=12036, f=x+1001-3, g=x^2+1003-9);
   my(rows=[[f,a,1,1001],[g,b,1,1003]]);
@@ -78,5 +99,9 @@ checkHiddenDivisorLattice() = {
   my(poly3=hiddenDivisorShortPolynomial(rows3,16,r3));
   if(vecsum(abs(vector(16,j,polcoef(poly3,j-1)*r3^(j-1)))) >=prod(i=1,4,rows3[i][4]^ts[i]) || hiddenDivisorRoots(poly3,rows3,r3)!=[7],
     error("divisor sums on powers fixture"));
+  foreach([[1710075463,x^2+x+1,1,32869],[33331923011,x^2+x+1,2,2029],
+           [12885426181,1234577*x-44285,1,65537],[35,x+1,2,0]],test,
+    if(cofactorCongruenceDivisor(test[1],test[2],test[3])!=test[4],error("cofactor congruence"))
+  );
   found
 };
