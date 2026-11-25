@@ -57,7 +57,7 @@ def gap (m a : List Bool) : List Bool × ℕ :=
   let out := selectDigits w down.borrow (!down.borrow) up.digits down.digits
   (out.1,down.gates+up.gates+out.2+1)
 
-private theorem gap_spec (m a : List Bool) :
+theorem gap_spec (m a : List Bool) :
     value (gap m a).1=((value a:ℤ)-value m).natAbs ∧
     (gap m a).1.length=max m.length a.length ∧ (gap m a).2=17*(max m.length a.length)+1 := by
   let w := max m.length a.length
@@ -251,6 +251,36 @@ theorem fixed_presieve {n : ℕ} (hn : 2≤n) :
       change 2^20*(2^(10000*s))^4≤_
       rw [←pow_mul,←pow_add]
       exact Nat.pow_le_pow_right (by decide) (by omega)
+
+/-- Reuse the divisor scan as a primality test on the small integers in the factor base. -/
+def trialPrime (n : List Bool) (fuel : List Unit) : Bool × ℕ :=
+  let r := scan n (fun a=>(a,0)) fuel [false,true]
+  (r.1.isNone,r.2+1)
+
+theorem trialPrime_spec (n : List Bool) (fuel : List Unit) (two : 2 ≤ value n)
+    (enough : value n ≤ fuel.length+1) (w : ℕ) (nw : n.length ≤ w) (fw : 2+fuel.length ≤ w) :
+    (trialPrime n fuel).1 = decide (value n).Prime ∧ (trialPrime n fuel).2 ≤ fuel.length*visitBudget w+1 := by
+  obtain ⟨out,work⟩ := scan_spec n (by omega) w nw (fun a=>(a,0)) id
+    (fun a ha=>⟨rfl,ha,Nat.zero_le _⟩) fuel [false,true] fw
+  change _ = (List.range' 2 fuel.length).findSome? (fun j=>factor (value n) j) at out
+  refine ⟨?_,Nat.add_le_add_right work 1⟩
+  change (scan n (fun a=>(a,0)) fuel [false,true]).1.isNone = _
+  rw [← Option.isNone_map (f:=value), out]
+  by_cases hp : (value n).Prime
+  · have no (j : ℕ) : factor (value n) j = none := by
+      rcases (Nat.dvd_prime hp).mp (Nat.gcd_dvd_left (value n) j) with h|h <;> simp [factor,h]
+    simp [no,hp]
+  · have hit : (List.range' 2 fuel.length).findSome? (fun j=>factor (value n) j) ≠ none := by
+      let q := (value n).minFac
+      have q2 : 1<q := (Nat.minFac_prime (by omega : value n ≠ 1)).one_lt
+      have qn : q<value n := (Nat.not_prime_iff_minFac_lt two).mp hp
+      have dvd : q∣value n := Nat.minFac_dvd _
+      intro miss
+      have atQ := List.findSome?_eq_none_iff.mp miss q (List.mem_range'_1.mpr ⟨q2,by omega⟩)
+      simp [factor,Nat.gcd_eq_right dvd,q2,qn] at atQ
+    obtain ⟨a,found⟩ := Option.ne_none_iff_exists'.mp hit
+    rw [found]
+    simp [hp]
 
 end Cogentic.BinaryPresieve
 

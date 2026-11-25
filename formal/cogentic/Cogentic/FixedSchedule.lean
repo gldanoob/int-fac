@@ -64,7 +64,7 @@ theorem degree_grows (k : ℕ) : ∃ b₀, ∀ b ≥ b₀, k ≤ d b := by
     _ ≤ 2^b.log2 := square_le_two_pow _ j4
     _ ≤ b := Nat.log2_self_le hb.ne'
 
-private theorem digits_floor {n k bits lo : ℕ} (low : lo^k ≤ n) (top : n < (lo+2^bits)^k) :
+theorem digits_floor {n k bits lo : ℕ} (low : lo^k ≤ n) (top : n < (lo+2^bits)^k) :
     let r := rootDigits n k bits lo
     r^k ≤ n ∧ n < (r+1)^k ∧ r < lo+2^bits := by
   induction bits generalizing lo with
@@ -148,7 +148,7 @@ theorem index_bound {b : ℕ} (hb : 0 < b) : indexCap b (beta b) ≤ 2^(beta b +
   rw [indexCap, Nat.pow_add]
   exact Nat.mul_le_mul_left _ (Nat.pow_le_pow_right (by decide) quotient)
 
-private theorem target_card (b : ℕ) : (dyadicTargets (beta b)).card ≤ B b := by
+theorem target_card (b : ℕ) : (dyadicTargets (beta b)).card ≤ B b := by
   have subset : dyadicTargets (beta b) ⊆ Finset.Icc 1 (B b) := by
     intro a ha
     have mem := mem_dyadicTargets.mp ha

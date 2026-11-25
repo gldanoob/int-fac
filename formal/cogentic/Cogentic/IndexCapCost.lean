@@ -11,7 +11,7 @@ def count : List Bool → List Bool × ℕ
     let next := addDigits prev.1.length prev.1 [] true
     (next.1,prev.2+next.2+1)
 
-private theorem count_spec (xs : List Bool) : value (count xs).1=xs.length ∧
+theorem count_spec (xs : List Bool) : value (count xs).1=xs.length ∧
     (count xs).1.length=xs.length ∧ (count xs).2≤(3*xs.length+1)*xs.length := by
   induction xs with
   | nil => simp [count,value]
@@ -52,7 +52,7 @@ def build (b β : List Bool) : List Bool × ℕ :=
   let result := canonical (powerWord fuel.1)
   (result.1,six.2+prev.gates+can.2+l.2+top.2+q.gates+e.2+fuel.2+2*(fuel.1.length+1)+result.2)
 
-private theorem qlen (d x : List Bool) : (divide d x).quotient.length=x.length := by
+theorem quotient_length (d x : List Bool) : (divide d x).quotient.length=x.length := by
   induction x with | nil => rfl | cons b xs ih => simp [divide,ih]
 
 theorem build_spec (b β : List Bool) (hb : 0<value b) (hp : 0<value β) :
@@ -113,7 +113,7 @@ theorem build_spec (b β : List Bool) (hb : 0<value b) (hp : 0<value β) :
   have sixW : six.1.length≤2*s := by unfold s; omega
   have lW : l.1.length≤2*s := ll ▸ clen'.trans sixW
   have tW : top.1.length≤5*s := tl.trans (by omega)
-  have wW : w≤5*s := by dsimp only [w]; rw [show q.quotient.length=top.1.length from qlen ..]; exact max_le (by omega) tW
+  have wW : w≤5*s := by dsimp only [w]; rw [show q.quotient.length=top.1.length from quotient_length ..]; exact max_le (by omega) tW
   have c₁ : six.2≤16*s^2 := sc.trans (calc
       _ ≤ s*(s+5*(s+2*s)) := by gcongr <;> omega
       _ = _ := by ring)

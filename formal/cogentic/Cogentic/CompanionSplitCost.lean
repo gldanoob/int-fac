@@ -72,11 +72,9 @@ theorem splitter_cost {n M : ℕ} (hn : 64 ≤ n) (hM : 1 ≤ M) {C₁ A D : ℝ
       exact mul_le_mul const expbound (exp_pos _).le (exp_pos _).le
     _ = _ := by rw [← exp_add,← exp_add,← exp_add]; congr 1; ring
 
-/-- The actual double-exponential cap proved for the saturated search output
-implies the logarithmic exponent-size hypothesis of the companion splitter. -/
-theorem log_of_saturated_bound {n M : ℕ} (hn : 64 ≤ n) (hM : 0 < M)
-    (bound : M ≤ 2^(2^(2017*TwoThirdsCost.scale (n.log2+1)))) :
-    log M ≤ exp (131105 * scale n) := by
+/-- Convert the integer loop budget to the natural-logarithm two-thirds scale. -/
+theorem binary_scale_le {n : ℕ} (hn : 64 ≤ n) :
+    (TwoThirdsCost.scale (n.log2+1) : ℝ) ≤ 65 * scale n := by
   let b := n.log2+1
   have bp : 0 < b := Nat.succ_pos _
   have rounded : TwoThirdsCost.scale b ≤ 13*Fixed.v b := by
@@ -88,9 +86,19 @@ theorem log_of_saturated_bound {n M : ℕ} (hn : 64 ≤ n) (hM : 0 < M)
   have vr := Concrete.two_thirds_scale (log_large hn)
   change (Fixed.v b:ℝ) ≤ 5*(log n)^(2/3:ℝ)*(log (log n))^(1/3:ℝ) at vr
   have sr : (TwoThirdsCost.scale b:ℝ) ≤ 13*(Fixed.v b:ℝ) := by exact_mod_cast rounded
+  dsimp [scale]
+  linarith
+
+/-- The actual double-exponential cap proved for the saturated search output
+implies the logarithmic exponent-size hypothesis of the companion splitter. -/
+theorem log_of_saturated_bound {n M : ℕ} (hn : 64 ≤ n) (hM : 0 < M)
+    (bound : M ≤ 2^(2^(2017*TwoThirdsCost.scale (n.log2+1)))) :
+    log M ≤ exp (131105 * scale n) := by
+  let b := n.log2+1
+  have sr := binary_scale_le hn
   let k := 2017*TwoThirdsCost.scale b
   have kb : (k:ℝ) ≤ 131105 * scale n := by
-    dsimp [k,scale]; push_cast; nlinarith
+    dsimp [k,b]; push_cast; linarith
   have logTwo : log 2 ≤ 1 := by linarith [log_le_sub_one_of_pos (by norm_num : (0:ℝ)<2)]
   have hlog := log_le_log (by exact_mod_cast hM : (0:ℝ)<M)
     (by exact_mod_cast bound : (M:ℝ) ≤ (2:ℝ)^((2:ℕ)^k))

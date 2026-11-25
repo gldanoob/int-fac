@@ -57,6 +57,19 @@ import Cogentic.CellAtomVariation
 import Cogentic.SealedSquareSupport
 import Cogentic.CompanionFactorization
 import Cogentic.UpstreamExponentBridge
+import Cogentic.ProtectedRank
+import Cogentic.AnnihilatorExtraction
+import Cogentic.CenteredResidueContrast
+import Cogentic.ExhaustiveMarkCost
+import Cogentic.PowerScanCost
+import Cogentic.CandidateMarkConstruction
+import Cogentic.FactorBaseCost
+import Cogentic.LocalFactorizationCost
+import Cogentic.MinorVerificationWork
+import Cogentic.BinaryMaskCost
+import Cogentic.SharedInsertionProfile
+import Cogentic.PooledResidueMoment
+import Cogentic.DistinctPrimeGram
 import Cogentic.SamePrimeBlocks
 import Cogentic.SimultaneousScoreBudget
 import Cogentic.IndexCapCost
@@ -111,7 +124,22 @@ run_cmd
     ``Cogentic.Construction.unrestricted_all_cells_rank,
     ``Cogentic.SealedSquareSupport.square_fibers_of_failed_gcd_scan,
     ``Cogentic.SealedSquareSupport.blind_decoder_on_small_support,
-    ``Cogentic.Companion.split_of_box_rank, ``Cogentic.powerDivisor_of_power,
+    ``Cogentic.Construction.protected_target_cells_rank, ``Cogentic.Construction.retained_arch_energy,
+    ``Cogentic.Construction.exists_retained_arch_rank, ``Cogentic.Construction.exists_protected_rank,
+    ``Cogentic.Construction.pooled_residue_class_contrast, ``Cogentic.Construction.hit_smooth_marginal_ratio,
+    ``Cogentic.Construction.saddle_pointwise_error_frobenius_floor, ``Cogentic.Companion.factor_tree_of_local_bounds,
+    ``Cogentic.BinaryFactorBase.fixed_factorBase, ``Cogentic.CandidateMarks.constructed_base_eq,
+    ``Cogentic.CandidateMarks.fixed_checked_stage, ``Cogentic.Construction.centered_residue_score_second, ``Cogentic.annihilator_criterion,
+    ``Cogentic.boxHit_of_annihilator, ``Cogentic.Companion.factorization_of_dense_box_hits,
+    ``Cogentic.BinaryTargets.fixed_targets, ``Cogentic.BinaryCollector.fixed_collector,
+    ``Cogentic.BinaryPowerScan.driver_root_setup, ``Cogentic.CandidateRuntime.fixed_rows_and_marks,
+    ``Cogentic.Concrete.exhaustive_mark_L_two_thirds, ``Cogentic.BinaryReconstruction.verified_proposal_spec,
+    ``Cogentic.Concrete.all_minor_verification_gates, ``Cogentic.Concrete.constructed_minor_width,
+    ``Cogentic.BinaryPerturbation.fixed_pair, ``Cogentic.BinaryCofactor.fixed_markModulus, ``Cogentic.Concrete.measured_search_L_two_thirds,
+    ``Cogentic.Construction.pooled_residue_score_second, ``Cogentic.Construction.common_weight_cell_profiles, ``Cogentic.Construction.constructor_cell_insertion_total_variation, ``Cogentic.Construction.common_weight_second_transfer,
+    ``Cogentic.Construction.insertion_distinct_prime_overlap, ``Cogentic.Construction.actual_mark_insertion_variation, ``Cogentic.Concrete.exhaustive_verification_gates, ``Cogentic.BinaryResidues.fixed_residue_enumeration, ``Cogentic.BinaryMaskCost.fixed_mask,
+    ``Cogentic.Construction.fullBandInsertion_saddle_change,
+    ``Cogentic.Companion.split_of_dense_box_hits, ``Cogentic.Companion.split_of_box_rank, ``Cogentic.powerDivisor_of_power,
     ``Cogentic.Companion.factorization_of_box_rank, ``Cogentic.Companion.step_of_search_hit,
     ``Cogentic.CompanionSplitCost.splitter_cost_of_saturated_bound,
     ``Cogentic.CompanionFactorCost.recursive_factorization_cost, ``Cogentic.finish_companion_output,

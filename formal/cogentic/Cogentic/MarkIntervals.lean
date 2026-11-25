@@ -18,10 +18,12 @@ private theorem cell_scale (b : ℕ) : cellMarkCount b*Fixed.invWidth b = Fixed.
   dsimp [cellMarkCount,Fixed.invWidth,Fixed.A]
   rw [←Nat.pow_add]; congr 1; ring
 
-theorem fixed_grid_interval {b : ℕ} (hd : 1 ≤ Fixed.d b) (cell : Option (Bool × Fin (Fixed.d b))) :
+theorem fixed_grid_interval_bounds {b : ℕ} (hd : 1 ≤ Fixed.d b) (cell : Option (Bool × Fin (Fixed.d b))) :
     let lo := firstCellMark b cell
     let M := cellMarkCount b
-    ∀ x ∈ Ico lo (lo+M), 1 ≤ x ∧ x ≤ Fixed.A b ∧ onGrid (Fixed.d b) (Fixed.A b) (Fixed.invWidth b) x := by
+    ∀ x ∈ Ico lo (lo+M),
+      (gridCellLeft b cell ≤ (x:ℚ)/Fixed.A b ∧ (x:ℚ)/Fixed.A b ≤ gridCellLeft b cell+(Fixed.invWidth b:ℚ)⁻¹) ∧
+      1 ≤ x ∧ x ≤ Fixed.A b ∧ onGrid (Fixed.d b) (Fixed.A b) (Fixed.invWidth b) x := by
   intro lo M x mem
   let a := (Fixed.A b:ℚ)
   let W := Fixed.invWidth b
@@ -59,7 +61,7 @@ theorem fixed_grid_interval {b : ℕ} (hd : 1 ≤ Fixed.d b) (cell : Option (Boo
   have xpos : 0 < (x:ℚ) := (mul_pos ap left.1).trans_le (low.trans xloQ)
   have xA : (x:ℚ) ≤ a := by simpa using (div_le_iff₀ ap).mp (top.trans left.2)
   change (x:ℚ) ≤ (Fixed.A b:ℚ) at xA
-  refine ⟨by exact_mod_cast xpos,by exact_mod_cast xA,?_⟩
+  refine ⟨⟨bot,top⟩,by exact_mod_cast xpos,by exact_mod_cast xA,?_⟩
   simp only [onGrid,Bool.or_eq_true,decide_eq_true_eq,List.any_eq_true,List.mem_append]
   cases cell with
   | none => exact Or.inl ⟨bot,top⟩
@@ -72,6 +74,12 @@ theorem fixed_grid_interval {b : ℕ} (hd : 1 ≤ Fixed.d b) (cell : Option (Boo
     · change (x:ℚ)/a ≤ center _ side j.val+2*w
       change (x:ℚ)/a ≤ center _ side j.val+w+w at top
       linarith
+
+theorem fixed_grid_interval {b : ℕ} (hd : 1 ≤ Fixed.d b) (cell : Option (Bool × Fin (Fixed.d b))) :
+    let lo := firstCellMark b cell
+    let M := cellMarkCount b
+    ∀ x ∈ Ico lo (lo+M), 1 ≤ x ∧ x ≤ Fixed.A b ∧ onGrid (Fixed.d b) (Fixed.A b) (Fixed.invWidth b) x :=
+  fun x hx => (fixed_grid_interval_bounds hd cell x hx).2
 
 /-- Every eligible class of modulus at most B⁴ contains constructor
 marks, with a uniform count, in every one of the 2d+1 nominal cells. -/

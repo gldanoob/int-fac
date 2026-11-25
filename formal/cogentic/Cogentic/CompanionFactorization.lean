@@ -25,13 +25,11 @@ search incurs no companion call. -/
 def backendWork (split : Splitter) (k n : ℕ) : ℕ :=
   if h : ReachesSearch k n then splitterWork split n h.1 else 0
 
-/-- Complete factorization by the guarded driver with the companion backend.
-The supplied front charge covers the other local operations. Full rank is only
-required where the executable gates reach the fixed search. -/
-theorem factorization_of_box_rank (line : DirichletLZerosOnLine)
+/-- The guarded factorizer accepts any sufficiently large set of verified targets. -/
+theorem factorization_of_dense_box_hits (line : DirichletLZerosOnLine)
     (split : Splitter) {C₁ A : ℝ} (hc : 0 ≤ C₁) (ha : 0 ≤ A) (spec : SplitterSpec split C₁ A) :
     ∃ (k : ℕ) (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))),
-    (∀ᶠ n : ℕ in atTop, ReachesSearch k n → ∀ ell ∈ dyadicTargets (Fixed.beta (n.log2+1)), BoxHasRank n ell) →
+    (∀ᶠ n : ℕ in atTop, ReachesSearch k n → DenseBoxHits n) →
     ∀ (frontWork : ℕ → ℕ) (D : ℝ), 0 ≤ D → (∀ᶠ n : ℕ in atTop, (frontWork n : ℝ) ≤ exp (D*scale n)) →
     ∀ ε : ℝ, 0 < ε → ∃ n₀ : ℕ,
       (∀ n ≥ n₀, ∀ h : ReachesSearch k n, tryDivisorWith n h.1 (fun m => (split n m).1) ≠ none) ∧
@@ -49,15 +47,14 @@ theorem factorization_of_box_rank (line : DirichletLZerosOnLine)
   refine ⟨k,gen,?_⟩
   intro ranks frontWork D hD front ε he
   let T := max D (C₁+12*A+131117)
-  obtain ⟨n₁,splitBound⟩ := split_of_box_rank line split hc ha spec
   have onSearch : ∀ᶠ n : ℕ in atTop, ∀ h : ReachesSearch k n,
       tryDivisorWith n h.1 (fun m => (split n m).1) ≠ none ∧
       (splitterWork split n h.1 : ℝ) ≤ exp ((C₁+12*A+131117)*scale n) := by
-    filter_upwards [ranks,eventually_ge_atTop n₁] with n rank large h
+    filter_upwards [ranks,eventually_ge_atTop 64] with n rank large h
     have comp : ¬n.Prime := fun prime => by
       have yes := (primeCheck_correct _ _ (gen n h.1)).mpr prime
       simp [h.2.2.1] at yes
-    exact splitBound n large h.1 comp h.2.2.2.2.1 h.2.2.2.2.2 (rank h)
+    exact split_of_dense_box_hits split hc ha spec large h.1 comp h.2.2.2.2.1 (rank h)
   have logs : Tendsto (fun n : ℕ => log n) atTop atTop := tendsto_log_atTop.comp tendsto_natCast_atTop_atTop
   have growth := (tendsto_rpow_atTop (by norm_num : (0:ℝ)<2/3)).comp logs
   have εpos : 0<ε/2 := by linarith
@@ -90,6 +87,37 @@ theorem factorization_of_box_rank (line : DirichletLZerosOnLine)
   intro large
   have cost := ((results n large).2 tree).2.2.2
   rwa [show T+ε/2+ε/2 = T+ε by ring] at cost
+
+/-- Complete factorization by the guarded driver with the companion backend.
+The supplied front charge covers the other local operations. Full rank is only
+required where the executable gates reach the fixed search. -/
+theorem factorization_of_box_rank (line : DirichletLZerosOnLine)
+    (split : Splitter) {C₁ A : ℝ} (hc : 0 ≤ C₁) (ha : 0 ≤ A) (spec : SplitterSpec split C₁ A) :
+    ∃ (k : ℕ) (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))),
+    (∀ᶠ n : ℕ in atTop, ReachesSearch k n → ∀ ell ∈ dyadicTargets (Fixed.beta (n.log2+1)), BoxHasRank n ell) →
+    ∀ (frontWork : ℕ → ℕ) (D : ℝ), 0 ≤ D → (∀ᶠ n : ℕ in atTop, (frontWork n : ℝ) ≤ exp (D*scale n)) →
+    ∀ ε : ℝ, 0 < ε → ∃ n₀ : ℕ,
+      (∀ n ≥ n₀, ∀ h : ReachesSearch k n, tryDivisorWith n h.1 (fun m => (split n m).1) ≠ none) ∧
+      ∀ n (hn : 2 ≤ n),
+        let tree := factor (fun a h => totalStepWith (fun x hx _ => tryDivisorWith x hx (fun m => (split x m).1))
+          k a h (gen a h)) n hn
+        tree.factors.prod = n ∧ (∀ p ∈ tree.factors, p.Prime) ∧
+        (∀ p, p.Prime → ∀ j, p^j ∣ n ↔ j ≤ tree.factors.count p) ∧
+        (n₀ ≤ n → (tree.work (fun a => frontWork a + backendWork split k a) : ℝ) ≤
+          exp ((max D (C₁+12*A+131117) + ε) * scale n)) := by
+  obtain ⟨k,gen,finish⟩ := factorization_of_dense_box_hits line split hc ha spec
+  obtain ⟨b₀,grow⟩ := Fixed.degree_grows 130000
+  refine ⟨k,gen,fun ranks=>finish ?_⟩
+  obtain ⟨n₁,dense⟩ := dense_of_all_hits line
+  filter_upwards [ranks,eventually_ge_atTop (2^b₀),eventually_ge_atTop n₁] with n rank large enough gate
+  apply dense n enough
+  intro ell ht
+  have hn := gate.1
+  have bits := (Nat.le_log2 (show n≠0 by omega)).mpr large
+  have composite : ¬n.Prime := fun hp=>by
+    have yes := (primeCheck_correct _ _ (gen n hn)).mpr hp
+    simp [gate.2.2.1] at yes
+  exact witness_of_box_rank hn (grow _ (by omega)) composite ht gate.2.2.2.2.2 (rank gate ell ht)
 
 end Cogentic.Companion
 
