@@ -4,7 +4,7 @@ import Cogentic.GaussianErrorBudget
 namespace Cogentic.Window
 open Real
 
-private theorem log_scale_le {b : ℕ} (hb : 0 < b) (hd : 16 ≤ Fixed.d b) :
+theorem log_scale_le {b : ℕ} (hb : 0 < b) (hd : 16 ≤ Fixed.d b) :
     (Fixed.z b:ℝ) ≤ 16*log (Fixed.d b) := by
   have raw := binary_log_degree b hb hd
   have logs := log_le_log (by positivity : (0:ℝ)<2^(Fixed.z b))

@@ -164,6 +164,31 @@ theorem inserted_tilted_mass (J : Finset ℕ) (p : ℕ) (hp : p ∈ J) (prime : 
        _ = _ := by field_simp
 
 
+/-- When both evaluation marks coincide modulo their prescribed prime,
+    after dividing out that prime, at most one first-coordinate residue
+    fails the second unit test. Both sides use actual integer values. -/
+theorem diagonal_forced_bad_residue (p : ℕ) (prime : p.Prime) (a b f K M : ℤ)
+    (equal : (p:ℤ) ∣ b-a) (coefficient : ¬(p:ℤ) ∣ K) (pre : ¬(p:ℤ) ∣ M) :
+    ∃ c : ZMod p, ∀ x w n : ℤ, M*n=f+K*(x+(b-a)*w) →
+      ((p:ℤ) ∣ n ↔ (x:ZMod p)=c) := by
+  let : Fact p.Prime := ⟨prime⟩
+  have unit : (K:ZMod p) ≠ 0 := fun h => coefficient ((ZMod.intCast_zmod_eq_zero_iff_dvd ..).mp h)
+  have uq : (M:ZMod p) ≠ 0 := fun h => pre ((ZMod.intCast_zmod_eq_zero_iff_dvd ..).mp h)
+  have diag := (ZMod.intCast_zmod_eq_zero_iff_dvd (b-a) p).mpr equal
+  refine ⟨-(f:ZMod p)/(K:ZMod p),fun x w n row=>?_⟩
+  have e := congrArg (fun z : ℤ => (z:ZMod p)) row
+  change ((M*n:ℤ):ZMod p)=((f+K*(x+(b-a)*w):ℤ):ZMod p) at e
+  simp only [Int.cast_mul,Int.cast_add,diag,zero_mul,add_zero] at e
+  rw [←ZMod.intCast_zmod_eq_zero_iff_dvd,eq_div_iff unit]
+  constructor
+  · intro hn
+    rw [hn,mul_zero] at e
+    linear_combination (norm:=ring) -e
+  · intro hn
+    apply mul_left_cancel₀ uq
+    rw [mul_zero,e]
+    linear_combination (norm:=ring) hn
+
 end
 
 end Cogentic.Window

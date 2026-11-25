@@ -23,11 +23,11 @@ theorem target_hits_iff (n ell a : ℕ) (side : Bool) (L : ℤ) :
     dvd_mul_of_dvd_left (dvd_mul_of_dvd_left (dvd_mul_left ..) _) _
   exact (dvd_add_left dv).symm
 
-private theorem natAbs_gap {a m : ℕ} (hm : a ≤ m) : ((a:ℤ)-m).natAbs = m-a := by
+theorem natAbs_gap {a m : ℕ} (hm : a ≤ m) : ((a:ℤ)-m).natAbs = m-a := by
   rw [show (a:ℤ)-m = -((m-a:ℕ):ℤ) by rw [Nat.cast_sub hm]; ring,Int.natAbs_neg]
   rfl
 
-private theorem n_coprime_gap {n a : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed.d (n.log2+1)) (amin : 1 ≤ a)
+theorem n_coprime_gap {n a : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed.d (n.log2+1)) (amin : 1 ≤ a)
     (amax : a ≤ Fixed.A (n.log2+1))
     (none : presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n) = Option.none) :
     n.Coprime (Fixed.rootBase n-a) := by

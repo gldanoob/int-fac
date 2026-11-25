@@ -235,7 +235,7 @@ private theorem two_width_bounds {n ell a a' : ℕ} (hn : 2 ≤ n) (big : 10004 
   refine ⟨(div_le_iff₀ (by positivity)).mpr (by linarith),?_⟩
   linarith [mul_nonneg (mul_nonneg nonneg up.le) ap.le]
 
-private theorem conditional_center_error {n ell a a' : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed.d (n.log2+1))
+theorem conditional_center_error {n ell a a' : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed.d (n.log2+1))
     (target : ell ∈ dyadicTargets (Fixed.beta (n.log2+1)))
     (cap : a ≤ Fixed.A (n.log2+1)) (cap' : a' ≤ Fixed.A (n.log2+1)) (side : Bool) (observed : ℝ)
     (central : |observed-lineCenter n a| ≤ ((n.log2+1:ℕ):ℝ)^3*projectionScale n a) :

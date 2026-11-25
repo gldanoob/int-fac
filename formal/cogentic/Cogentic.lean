@@ -37,6 +37,15 @@ import Cogentic.ForcedRows
 import Cogentic.CleanArithmetic
 import Cogentic.GramPositivity
 import Cogentic.ModelRank
+import Cogentic.CellPairMoment
+import Cogentic.DivisorCovariance
+import Cogentic.PolynomialRetained
+import Cogentic.ObservedScalar
+import Cogentic.BoxWitness
+import Cogentic.PolynomialExceptions
+import Cogentic.MomentRows
+import Cogentic.LogArithmeticCost
+import Cogentic.MinorEnumerationCost
 import Lean.Util.CollectAxioms
 
 /-! Fail the build if any of these public deductions acquires an additional axiom. -/
@@ -52,6 +61,16 @@ run_cmd
     ``Cogentic.Window.fixed_full_principal_mass, ``Cogentic.Window.fixed_central_mass_lower,
     ``Cogentic.Window.fixed_relative_principal_mass, ``Cogentic.Window.fixed_character_relative,
     ``Cogentic.Construction.constructed_class_relative, ``Cogentic.Construction.scalar_progression_relative,
+    ``Cogentic.Construction.grid_cells_have_marks, ``Cogentic.Construction.weighted_constructed_marks,
+    ``Cogentic.Construction.weighted_pair_gamma, ``Cogentic.Construction.centered_pair_bound,
+    ``Cogentic.Construction.centered_cell_pair_moment, ``Cogentic.Construction.PrescribedRows.box_witness,
+    ``Cogentic.Construction.PrescribedRows.admission_probability,
+    ``Cogentic.Window.fixed_divisibility_covariance, ``Cogentic.Construction.observed_second_scalar,
+    ``Cogentic.Construction.PrescribedRows.first_probability, ``Cogentic.Construction.PrescribedRows.second_probability,
+    ``Cogentic.Construction.first_polynomial_exceptional, ``Cogentic.Construction.coefficient_outside_weight,
+    ``Cogentic.Construction.retained_from_polynomial_events, ``Cogentic.centered_bounds_of_local_entries,
+    ``Cogentic.Elimination.solve_cross_product_bits, ``Cogentic.Elimination.solve_back_substitution_height,
+    ``Cogentic.ArchNumerics.log_partial_fraction_height, ``Cogentic.MinorEnumeration.fixed_selection_visits,
     ``Cogentic.Window.mark_prime_weight, ``Cogentic.Window.omitted_prime_mass_uniform,
     ``Cogentic.Window.fixed_central_insertions, ``Cogentic.Window.fixed_all_shift_upper,
     ``Cogentic.Window.affine_gaussian_reduced, ``Cogentic.Window.marked_prime_classMass,

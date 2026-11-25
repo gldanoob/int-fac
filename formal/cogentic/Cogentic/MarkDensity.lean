@@ -70,7 +70,7 @@ theorem mark_factor_count {n ell : ℕ} (hn : 2 ≤ n)
   apply (Nat.pow_le_pow_iff_right (by decide : 1<2)).mp
   exact rad.trans (size.le.trans (width.trans eq.le))
 
-private theorem band_eventually (line : DirichletLZerosOnLine) :
+theorem band_eventually (line : DirichletLZerosOnLine) :
     ∃ d₀ : ℕ, ∀ d ≥ d₀, (∑ q ∈ (Finset.Ioc d (d^3)).filter Nat.Prime, (q:ℝ)⁻¹) ≤ Real.log 3+1/32 := by
   obtain ⟨C,hC,band⟩ := cubic_reciprocal_band line
   have little := (isLittleO_log_rpow_rpow_atTop 2 (show (0:ℝ)<1/2 by norm_num)).tendsto_div_nhds_zero
