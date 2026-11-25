@@ -8,6 +8,8 @@ bit operations. The analytic input is a fixed $0<\delta\le1/2$ such that the Ded
 
 Bach–Miller–Shallit proved randomized polynomial-time complete factorization from the same single value. Their general algorithm guesses a prime multiplicity and varies a polynomial of corresponding degree. Bach–Shallit subsequently gave randomized splitting from a cyclotomic multiple. Źrałek's deterministic cyclotomic result has fixed-field and smoothness conditions. The [fixed-index splitting proof](cyclotomic-order-multiples.md) in this repository gives polynomial time for bounded prime multiplicities. The estimate here handles unbounded multiplicities. Publication priority for this deterministic bound is unverified. [Bach–Miller–Shallit, Theorem 2 and §4](https://www.cs.cmu.edu/~glmiller/Publications/Papers/BMS86.pdf) · [Bach–Shallit](https://doi.org/10.1090/S0025-5718-1989-0947467-1) · [Źrałek, Theorem 5.5](https://arxiv.org/pdf/0707.4102#page=11)
 
+With access to additional values on powers of the original input, a short nonadaptive block gives unconditional deterministic polynomial-time complete factorization for arbitrary multiplicities. [Power-sum decoder](divisor-sums-on-powers.md)
+
 ## A uniform prime-index split
 
 Let $n\mid N$ contain distinct primes $p,q$ with $\Phi_k(p)\mid M$, where $3\le k\le b$ is an odd prime. The following search takes $b^{O_\delta(k)}$ bit operations when $\log(2M)=O(b)$. For the actual oracle value, $\sigma(N)\le N^2$. Trial division within the search handles all sufficiently small prime divisors, including $k$.
