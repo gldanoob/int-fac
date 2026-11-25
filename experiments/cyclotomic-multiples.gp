@@ -1,15 +1,34 @@
+cyclotomicCoefficientGcd(n,d,f) = {
+  my(power=liftall(Mod(Mod(1,n)*x,f)^d));
+  gcd(concat([n],vector(poldegree(f)-1,i,polcoef(power,i))));
+};
+
 \\ Search one finite coefficient box. A successful result records the polynomial.
 splitCyclotomicBox(n,m,k,height) = {
   if(n<3 || n%2==0 || m<1 || k<2 || height<0,error("invalid cyclotomic box"));
   my(d=m>>valuation(m,2));
   for(degree=2,k,
     forvec(coeff=vector(degree,i,[-height,height]),
-      my(f=x^degree+Polrev(coeff), power=liftall(Mod(Mod(1,n)*x,f)^d));
-      my(g=gcd(concat([n],vector(degree-1,i,polcoef(power,i)))));
+      my(f=x^degree+Polrev(coeff),g=cyclotomicCoefficientGcd(n,d,f));
       if(1<g && g<n,return([g,f]))
     )
   );
   [1,0]
+};
+
+checkCubicScalarModel(p,q,height,expectedHits) = {
+  my(n=p*q,m=p^2+p+1,hits=0);
+  if(!isprime(p) || !isprime(q) || p%3!=1 || gcd(m,q*(q^6-1))!=3 ||
+     min(p,q)<=height^2+height,error("cubic scalar model assumptions"));
+  for(d=2,3,
+    forvec(c=vector(d,j,[-height,height]),
+      my(f=x^d+Polrev(c),g=cyclotomicCoefficientGcd(n,m,f));
+      my(inert=d==3 && (c[2] || c[3]) && #polrootsmod(f,p)==0);
+      if((inert && g!=p) || (!inert && g!=1 && g!=n),error("cubic scalar model ",f));
+      if(g==p,hits++)
+    )
+  );
+  if(hits!=expectedHits,error("cubic scalar model count ",hits));
 };
 
 checkCyclotomicBoxes() = {
@@ -38,6 +57,13 @@ checkCyclotomicBoxes() = {
     error("height-four prime certificate"));
   if(splitCyclotomicBox(p*q,m,3,4)!=[1,0],error("expected the whole height-four box to miss"));
   if(splitCyclotomicBox(p*q,m,3,5)!=[p,x^3-4*x^2-5*x-5],error("height-five witness"));
+  p=123733; q=123737;
+  if(#polrootsmod(x^3-2,p)!=0,error("expected an inert pure cubic"));
+  checkCubicScalarModel(p,q,2,0);
+  checkCubicScalarModel(p,q,3,56);
+  p=124855102398854570831177532388275947679201618458733020317118446340180791; q=p+16;
+  checkCubicScalarModel(p,q,3,0);
+  checkCubicScalarModel(p,q,4,44);
   \\ Count sign vectors whose cyclotomic projection is constant.
   for(k=3,10,
     my(u=(x^k-1)/polcyclo(k),ones=(x^k-1)/(x-1),constant=0);

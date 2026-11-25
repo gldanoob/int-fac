@@ -168,6 +168,20 @@ The two primality tests and the identity $\gcd(M,q(q^6-1))=1$ pass. All $9^2+9^3
 
 At height five the quadratic resolvents also give an exact obstruction to constructing the next hard example by prescribing degree-one primes in one norm field and abelian Artin data. The minimum field degrees are $2^{28}$ and $2^{13}$ on the two prime residue classes modulo three. [Degree theorem and exact sign-profile replay](cubic-resolvent-profiles.md)
 
+### Exact scalar criterion when three divides the exponent
+
+Let $p,q$ be distinct primes, $p\equiv1\pmod3$, $M=p^2+p+1$ and $\gcd(M,q(q^6-1))=3$. Suppose $q>\max(3,H^2+H)$. If $p\le H^2+H$ the height-$H$ box already splits $pq$. Indeed the intervals $[a^2-H,a^2+H]$ for $a=0,\ldots,H$ cover the integers from zero to $H^2+H$. Set $b=a^2-p$, so $0<|b|\le H$. The linear coefficient of $X^3$ modulo $X^2+aX+b$ is $a^2-b=p$. Thus $X^M$ is scalar at $p$. At $q$, $X$ is a unit and its order modulo the scalars divides $q(q^6-1)$. Its cube is nonscalar, hence its $M$th power is nonscalar as well.
+
+For $p>H^2+H$ the **only** polynomials returning a proper gcd are nonpure cubics irreducible modulo $p$. Here a pure monic cubic means $X^3+c$. For $f(0)\ne0$, $X$ is a unit at both primes. At $q$ its projective order divides $q(q^6-1)$ since each residual field degree divides six and the nilpotent kernel has exponent dividing $q$. At $p$ a quadratic or reducible cubic instead has projective order dividing $p(p^2-1)$, again of gcd three with $M$. On these components the $M$th power is scalar exactly when the cube is scalar. For quadratics the nonconstant coefficient of $X^3$ is $a^2-b$. For cubics the two coefficients are the negatives of the linear and quadratic coefficients of $f$. Their zero tests agree over both primes and over the integers by the size bounds. An irreducible cubic at $p$ has $X^M$ scalar there by the finite-field norm. The other cases $f(0)=0$ give either a pure nilpotent power or a product with both a nilpotent and a unit component, with the same scalar outcome at both primes.
+
+For $H\ge2$, the conductor-seven cyclic cubic $X^3-X^2-2X+1$ is in the box. A miss on every nonpure cubic forces $p\equiv\pm1\pmod7$ away from seven, and then $7\nmid M$. Arbitrarily large primes $q\equiv2\pmod M$ satisfy the required gcd condition since $2^6-1=63$ and $v_3(M)=1$. In particular any fixed box can miss on the $p\equiv1\pmod3$ branch: take sufficiently large $p$ splitting completely in the compositum of its splitting fields and $\mathbb Q(\zeta_3)$, then choose $q$ in that progression. The exact norm-degree calculation applies to the fields with a nonpure representative. At height five all 213 fields have such a representative; this follows by comparing the two sets of reduced defining polynomials with and without $X^3+c$ in the box enumeration. [Conductor-seven field](cubic-order-multiples.md) · [Quadratic profiles and norm-field degrees](cubic-resolvent-profiles.md)
+
+For $p=123733$, $q=123737$, all 150 height-two probes miss even though $X^3-2$ is irreducible modulo $p$. At height three there are 56 proper gcds. A larger certificate uses
+$$
+p=124855102398854570831177532388275947679201618458733020317118446340180791,\qquad q=p+16.
+$$
+Here all 392 height-three probes miss and 44 height-four probes give $p$, including $X^3-2X^2-3X-4$. The exact regression tests both primalities, both gcd assumptions and the prediction for every polynomial through each example's first successful height. [Regression](../experiments/cyclotomic-multiples.gp)
+
 ## Finite checks
 
 The height-one regression runs the polynomial search on indices $3,4,5,6$. It splits $85$ with $M=2^8\cdot31\cdot307$, handles a repeated prime in $2057=11^2\cdot17$, and splits $55$ even though the successful polynomial gives the identity at the full exponent. The quartic field example $N=235$, $M=26$ has $f=X^4+47X^3-164X^2+47X+1$. In its quotient $X^{13}=141+220X+115X^3\pmod{235}$, giving the factor $5$. At $47$ the roots $13,18,29,34$ have signs $-,+,-,+$. These are finite arithmetic checks. The uniform witness bound is a paper proof. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)
