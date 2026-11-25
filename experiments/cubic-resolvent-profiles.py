@@ -114,22 +114,26 @@ def biquadratic_count(active):
     return (len(rows) - packing(triples) + 1) // 2
 
 
-def merge_ranks(v, inputs):
+def join_ranks(tables, witness=0, prune=None):
+    states = {(): (0, witness)}
+    for table in sorted(tables, key=len):
+        combined = {}
+        for left, (a, m) in states.items():
+            for right, (b, n) in table.items():
+                keep_minimum(combined, basis(left + right), (a + b, m | n))
+        states = prune(combined) if prune else combined
+    return states
+
+
+def merge_ranks(v, inputs, prune=None):
     """A state stores the charged internal rank and an attaining sign mask."""
     output = {}
     for sign, bucket in enumerate(inputs):
-        states = {(): (0, sign << v)}
-        for table in bucket:
-            combined = {}
-            for left, (a, m) in states.items():
-                for right, (b, n) in table.items():
-                    keep_minimum(combined, basis(left + right), (a + b, m | n))
-            states = combined
-        for span, (cost, witness) in states.items():
+        for span, (cost, witness) in join_ranks(bucket, sign << v, prune).items():
             pivot = next((x for x in span if x & (1 << v)), 0)
             tail = (x ^ pivot if x & (1 << v) else x for x in span if x != pivot)
             keep_minimum(output, basis(tail), (cost + bool(pivot), witness))
-    return output, None
+    return (prune(output) if prune else output), None
 
 
 def check(height):
@@ -201,6 +205,20 @@ def check(height):
                 print(f'minimum-count profiles by biquadratic covering number: {dict(covers)}')
 
 
+def check_cubic_bases():
+    """Enumerate three Artin conditions above a shared quadratic resolvent."""
+    matches = 0
+    for u1, u2, v1, v2, b, c in product(range(3), repeat=6):
+        local = ((u1, v1, 0), (u2, v2, 0), (u1 + u2, v1 + v2, 1))
+        if all(any((u + t*b) % 3 == 0 and (v + t*c) % 3 == target
+                   for t in range(3)) for u, v, target in local):
+            assert b == 0 and c != 0
+            matches += 1
+    assert matches == 18
+    print(f'three cubic bases: {matches} of 729 elements satisfy the Artin conditions')
+
+
 if __name__ == '__main__':
     check(2)
     check(5)
+    check_cubic_bases()

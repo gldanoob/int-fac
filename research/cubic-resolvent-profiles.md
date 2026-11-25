@@ -43,6 +43,28 @@ The quadratic class $[-3]$ is itself in the box. On the $p\equiv2$ branch it is 
 
 Run `python3 -B experiments/cubic-resolvent-profiles.py`. The height-two check exhausts all sign assignments and compares both minima to the elimination algorithm. At height five the replay checks rank witnesses against the original squareclasses. A separate PARI/GP field enumeration using `polredabs` on each irreducible gives 213 distinct cubic fields, four cyclic, and the same 196 nontrivial squareclasses. The computation concerns a finite polynomial family and does not construct a height-five failure for the order search. [Exact replay](../experiments/cubic-resolvent-profiles.py)
 
+The exact minimum ranks through height 13 are as follows.
+
+| Height | $p\equiv2\pmod3$ | $p\equiv1\pmod3$ |
+|---:|---:|---:|
+| 1 | 0 | 0 |
+| 2 | 0 | 2 |
+| 3 | 4 | 6 |
+| 4 | 14 | 9 |
+| 5 | 28 | 13 |
+| 6 | 46 | 14 |
+| 7 | 64 | 18 |
+| 8 | 83 | 25 |
+| 9 | 101 | 27 |
+| 10 | 136 | 30 |
+| 11 | 176 | 39 |
+| 12 | 215 | 42 |
+| 13 | 267 | 45 |
+
+The larger computation prunes boundary states by subspace dimension. If $(U,a)$ and $(V,b)$ have boundary spans $U,V$ and previously charged ranks $a,b$, discard the second whenever $a+\dim(U+V)-\dim V\le b$. For every possible later span $W$, the excess $\dim(U+W)-\dim(V+W)$ is bounded by $\dim(U+V+W)-\dim(V+W)\le\dim(U+V)-\dim V$. A sign variable may be fixed before elimination to fit memory. Its coordinate still belongs to the active vectors, so compute the joint span of all residual components before charging the final rank. The native search exhausted 4,096 conditioned assignments on each height-13 branch. Its upper witnesses were checked against a fresh enumeration of the original integer polynomials.
+
+Run `python3 -B experiments/cubic-rank-frontier.py --verify-only 1 2 3 4 5 6 7 8 9 10 11 12 13` to check all 26 attaining sign profiles. Omit `--verify-only` to recompute the lower bounds with the Python implementation. Its running time increases sharply with height; `--cut` controls how many signs are fixed per subproblem. The four certificate columns give height, residue modulo three, rank and the hexadecimal mask of negative signs in increasing prime order, with $-1$ first. [Exact rank replay](../experiments/cubic-rank-frontier.py) · [Attaining sign profiles](../experiments/cubic-rank-frontier.txt)
+
 ## Several Galois fields with separate Artin conditions
 
 Let each base field $L_j$ be Galois over $\mathbb Q$. Allow degree-one primes in each $L_j$ with separate abelian Artin conditions, as well as rational congruences. An active quadratic resolvent $K$ is covered if $K\subseteq L_j$ for at least one $j$. Containment in the compositum of several bases can leave it uncovered.
@@ -65,7 +87,21 @@ Existence of a suitable prime above a rational prime specifies a conjugacy-stabl
 
 At height five, the minimum numbers of separate **quadratic** base fields on the two branches are therefore **31** and **24**. The first branch has 8,192 minimizing profiles and the second has 12. There is also an exact count for biquadratic fields on a given profile. Let $t$ be the maximum number of pairwise disjoint triples $a,b,ab$ among the $n$ active classes. The minimum number of quadratic or biquadratic fields covering them is $\lceil(n-t)/2\rceil$. Assign each class to one field in a cover. Every field assigned three classes consumes a whole triple. Conversely pack the triples and pair the leftovers. At all 8,192 first-branch minimum-count profiles the classes are independent and 16 fields suffice. Of the 12 second-branch minimum-count profiles, four require 11 fields and eight require 12.
 
+Optimizing over **all** height-five profiles gives the same global minima, 16 and 11. Minimize the number of active classes minus the number of selected triples, imposing the quadratic profile equations, disjointness and activity of all three selected vertices. The exact minima of this integer objective are 31 and 22. Independent min-plus elimination had boundary widths 16 and 21. A second replay using Z3 regenerates the 196 classes from the polynomial box; it finds assignments at the stated bounds and proves the immediately smaller bounds infeasible on both branches. [Global cover replay](../experiments/cubic-biquadratic-cover.py)
+
 A finite check uses $L_1=\mathbb Q(i)$ and $L_2=\mathbb Q(\sqrt3)$. Require complete splitting in the closures of $X^3-3X^2-2$ and $X^3-6X^2-3X+2$, respectively. Their quadratic resolvents are $L_1,L_2$. The radical $X^3-2$ has the uncovered resolvent $\mathbb Q(\sqrt{-3})$, which is inside $L_1L_2$. Of the 250 qualifying primes $p\equiv1\pmod{12}$ below 100,000, the radical stays irreducible at 177 and splits at 73. The density theorem gives one third in the limit. [PARI/GP replay](../experiments/cubic-resolvent-growth.gp) · [Height-five cover replay](../experiments/cubic-resolvent-profiles.py)
+
+### Nonnormal cubic bases
+
+For a nonnormal cubic base $L$ with normal closure $N_L$, the rational normal closure of an abelian extension of $L$ is abelian over $N_L$. Indeed each conjugate extension becomes abelian after base change to $N_L$. Consequently any quadratic resolvent outside every base's normal closure retains its entire independent cubic block by the preceding commutator argument. Here eligibility is determined by Frobenius in the joint normal closure of the Artin fields, which is all the independence proof needs. An $S_3$ cubic base can thus affect only its own quadratic resolvent. In particular the height-five minima 31 and 24 also hold when bases of degree at most three are allowed. Quadratic bases achieve the bounds. A cyclic cubic base covers no quadratic resolvent, and a nonnormal cubic has only one in its normal closure.
+
+Within a shared resolvent, different cubic directions can interact. The following example uses three nonisomorphic cubic base fields, each with a single existential requirement on a degree-one prime. Let $X=\mathbb F_3^2$, let the sign involution act on $X$ by inversion, and put $A=X^2\oplus\mathbb F_3^2$ with coordinates $(u,v,b,c)$. Translations $x\in X$ act on $A$ by adding $xb,xc$ to $u,v$, respectively. The involution negates $b,c$ and fixes $u,v$. These actions define $G=A\rtimes(X\rtimes C_2)$. It is solvable of order $2\cdot3^8$ and occurs over $\mathbb Q$ by Shafarevich's theorem. [Schmidt and Wingberg](https://arxiv.org/abs/math/9809211)
+
+Let $l_1,l_2$ be the coordinate functionals of $X$ and $l_3=l_1+l_2$. For each $j$ use the cubic field fixed by the inverse image $H_j$ of the reflection subgroup in the quotient $(l_j(X),\mathrm{sign})\simeq S_3$. The three rational normal closures are distinct and have the same quadratic resolvent. The map $H_j\to\mathbb F_3^2$ sending an element to $(l_j(u),l_j(v))$ is an abelian quotient, since the translation component lies in $\ker l_j$. At positive quadratic sign, degree one in all bases forces the old coordinate $x=0$, so Frobenius lies in $A$. The possible Artin values in base $j$ are
+$$
+                      (l_j(u)+t_j b,\;l_j(v)+t_j c),\qquad t_j\in\mathbb F_3,
+$$
+by conjugating with coset representatives. Prescribe $(0,0)$ in the first two bases and $(0,1)$ in the third. Adding the first two equations and subtracting the third gives $(t_1+t_2-t_3)b=0$ and $(t_1+t_2-t_3)c=-1$. Thus $b=0$ and $c\ne0$ throughout the eligible set. It contains $u=v=b=0,c=1$, so Chebotarev gives positive density. The extra $S_3$ quotient $(b,\mathrm{sign})$, independent of the old two cubic coordinates over the resolvent, must split. The one using $c$ must be inert. The finite replay finds 18 admissible elements among all 729 in $A$. These are existential Artin conditions in abstract cubic fields; the specific fields in the height-five box were only used for the covering count above. [Group check](../experiments/cubic-resolvent-profiles.py)
 
 ## Bounds as the coefficient height grows
 
