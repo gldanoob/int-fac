@@ -1,7 +1,7 @@
 """Exact one-prime miss densities from cubic-miss-fields.gp records on stdin."""
 
 from ast import literal_eval
-from collections import defaultdict
+from collections import Counter, defaultdict
 from fractions import Fraction
 from itertools import product
 from math import isqrt, prod
@@ -60,12 +60,17 @@ def sum_products(_, inputs):
     return sum(prod(bucket) for bucket in inputs), ()
 
 
-def density(fields, residue):
+def field_groups(fields):
     groups = defaultdict(list)
     for d, m in fields:
         groups[frozenset(p for p, e in factor(d).items() if e % 2)].append((d, m))
     cyclic = [isqrt(d) for d, _ in groups.pop(frozenset(), [])]
     assert len(set(cyclic)) == len(cyclic) and set(cyclic) <= {7, 9, 13, 19}
+    return groups, len(cyclic)
+
+
+def density(fields, residue):
+    groups, cyclic_count = field_groups(fields)
     terms, rank = [], 0
     for D, group in groups.items():
         w = cubic_rank(D, group)
@@ -75,9 +80,84 @@ def density(fields, residue):
         terms.append((scope, {bits: (3**w if (sum(bits) + shift) % 2 else 1)
                               for bits in product((0, 1), repeat=len(scope))}))
     signs = {p for scope, _ in terms for p in scope}
-    denominator = 2**len(signs) * 3**(rank + len(cyclic))
+    denominator = 2**len(signs) * 3**(rank + cyclic_count)
     numerators, _ = profiles["eliminate"](terms, signs, sum_products)
     return Fraction(prod(numerators), denominator)
+
+
+def positive_collision(D, group, rank):
+    """Count pairs of positive-sign cubic vectors with the same root pattern."""
+    if len(group) == rank:
+        return 5**rank
+    if D == ANCHOR:
+        rows = [factor(m) for _, m in group]
+        primes = sorted(set().union(*(row.keys() for row in rows)))
+        forms = [[row.get(p, 0) for p in primes] for row in rows]
+    else:
+        assert prod(D) == -51 and rank == 2 and len(group) == 3
+        forms = [(1, 0), (0, 1), (1, 1)]
+    counts = Counter()
+    columns = len(forms[0])
+    for vector in product(range(3), repeat=columns):
+        pattern = tuple(sum(a*b for a, b in zip(row, vector, strict=True)) % 3 != 0
+                        for row in forms)
+        counts[pattern] += 1
+    numerator, remainder = divmod(sum(n*n for n in counts.values()), 9**(columns-rank))
+    assert remainder == 0
+    return numerator
+
+
+def collision_density(fields, residues):
+    groups, cyclic_count = field_groups(fields)
+    terms, rank = [], 0
+    for D, group in groups.items():
+        w = cubic_rank(D, group)
+        rank += w
+        base = sorted(D ^ ANCHOR if 3 in D else D)
+        scope = tuple(2*p+j for p in base for j in (0, 1))
+        # Negative quadratic sign forces every cubic in the block to be reducible.
+        weight = (positive_collision(D, group, w), 3**w, 9**w)
+        table = {}
+        for bits in product((0, 1), repeat=len(scope)):
+            negatives = sum((sum(bits[j::2]) + (residues[j] == 2 and 3 in D)) % 2
+                            for j in (0, 1))
+            table[bits] = weight[negatives]
+        terms.append((scope, table))
+    signs = {v for scope, _ in terms for v in scope}
+    numerators, _ = profiles["eliminate"](terms, signs, sum_products)
+    return Fraction(prod(numerators)*5**cyclic_count, 2**len(signs)*9**(rank+cyclic_count))
+
+
+def small_collision_walsh(fields):
+    """Independent Walsh/Parseval check for heights one and two."""
+    groups, cyclic = field_groups(fields)
+    assert all(len(group) == 1 for group in groups.values())
+    classes = list(groups)
+    atoms = sorted(set.union(set(ANCHOR), *map(set, classes)))
+    masks = [sum(1 << atoms.index(p) for p in D) for D in classes]
+    anchor = sum(1 << atoms.index(p) for p in ANCHOR)
+    size = 1 << len(classes)
+    products = [0]*size
+    for j in range(1, size):
+        bit = j & -j
+        products[j] = products[j ^ bit] ^ masks[bit.bit_length()-1]
+    transforms = []
+    for sign in (1, -1):
+        values = [(-2)**j.bit_count() * (1 if d == 0 else sign if d == anchor else 0)
+                  for j, d in enumerate(products)]
+        for i in range(len(classes)):
+            bit = 1 << i
+            for j in range(size):
+                if j & bit:
+                    values[j] += values[j ^ bit]
+        transforms.append(values)
+    powers = [9**i for i in range(len(classes)+1)]
+    result = []
+    for a, b in ((0, 0), (0, 1), (1, 1)):
+        total = sum(transforms[a][j] * transforms[b][j] * powers[len(classes)-j.bit_count()]
+                    for j in range(size))
+        result.append(Fraction(total * 5**cyclic, size * 9**len(fields)))
+    return result
 
 
 def main():
@@ -104,8 +184,15 @@ def main():
             assert density(fields[H], residue) == expected
             assert brute.get((H, residue), expected) == expected
             print(f"H={H} p mod 3={residue}: {n}/3^{power} = {float(expected):.12g}")
+        collisions = [collision_density(fields[H], pair) for pair in ((1, 1), (1, 2), (2, 2))]
+        if brute and H <= 2:
+            assert small_collision_walsh(fields[H]) == collisions
+        if H == 1:
+            assert collisions == [Fraction(125, 729)]*3
+        print(f"H={H} both orders, branch pairs 11/12/22: "
+              + " ".join(f"{float(x):.12g}" for x in collisions))
     if brute:
-        print("Independent PARI/GP CRT enumeration agrees at H=1 and H=2.")
+        print("Independent CRT and Walsh checks agree at H=1 and H=2.")
 
 
 if __name__ == "__main__":

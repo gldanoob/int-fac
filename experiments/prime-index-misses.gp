@@ -1,6 +1,8 @@
 read("experiments/cyclotomic-multiples.gp");
 
-checkPrimeIndexPrediction(k,height,ps,qs,extras) = {
+nonpureInert(f,k,p) = poldegree(f)==k && poldegree(f-x^k)>0 && polisirreducible(Mod(1,p)*f);
+
+checkPrimeIndexPrediction(k,height,ps,qs,extras,both=0) = {
   my(L=lcm(vector(k,j,j)), rows=0,good=0,certified=0,exceptions=0,forced=0,tests=0);
   \\ Record the whole box so every proper gcd is checked, including its orientation.
   my(probes=List());
@@ -8,17 +10,23 @@ checkPrimeIndexPrediction(k,height,ps,qs,extras) = {
   foreach(ps,p,
     if(!isprime(p),error("nonprime"));
     my(h=subst(polcyclo(k),x,p),inert=vector(#probes,i,
-      my(f=probes[i]); poldegree(f)==k && poldegree(f-x^k)>0 && polisirreducible(Mod(1,p)*f)));
+      nonpureInert(probes[i],k,p)));
     foreach(qs,q,
       if(!isprime(q),error("nonprime"));if(p==q,next);
-      my(g=gcd(h,q*(q^L-1)));
+      my(g=gcd(h,q*(q^L-1)),base=h,other=vector(#probes));
+      if(both,
+        base=lcm(h,subst(polcyclo(k),x,q));
+        other=vector(#probes,i,nonpureInert(probes[i],k,q)));
+
       foreach(extras,a,
-        my(d=h*a>>valuation(h*a,2),n=p*q,bound=a*max(g,gcd(k,p-1)));
+        my(d=base*a>>valuation(base*a,2),n=p*q,bound=a*max(g,gcd(k,p-1)));
+        if(both,my(J=lcm(vector(k-1,j,j)));
+          bound=max(gcd(d,p*(p^J-1)),gcd(d,q*(q^J-1))));
         my(cert=bound<=logint(min(p,q),2) && (1+k*height)^bound<min(p,q),ok=1);
         rows++; certified+=cert;
         for(i=1,#probes,my(v=cyclotomicCoefficientGcd(n,d,probes[i]));
-          my(split=(v!=1 && v!=n));
-          if(split!=inert[i] || (split && v!=p),ok=0;if(cert,error("certified discrepancy ",[k,p,q,a,probes[i]])));
+          my(split=(v!=1 && v!=n),want=if(inert[i]==other[i],0,if(inert[i],p,q)));
+          if((split && v!=want) || (!split && want),ok=0;if(cert,error("certified discrepancy ",[k,p,q,a,probes[i]])));
           if(split && cert,forced++);tests++);
         good+=ok;exceptions+=!ok)));
   if(!certified || !forced,error("empty certificate test"));
@@ -31,5 +39,7 @@ run() = {
   if(small[6]!=9,error("small exceptional pairs"));print(small);
   print(checkPrimeIndexPrediction(3,2,p3,q3,[1,2,3,5]));
   print(checkPrimeIndexPrediction(5,1,p5,q5,[1,2,3]));
+  print(["both orders",checkPrimeIndexPrediction(3,2,p3,q3,[1,3,5],1)]);
+  print(["both orders",checkPrimeIndexPrediction(5,1,p5,q5,[1,3],1)]);
 };
 iferr(run(),E,print(E);quit(1));quit(0);
