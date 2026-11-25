@@ -165,6 +165,18 @@ For uniformity take the first $m$ markers, all $O(m\log(2m))$. All cubic generat
 
 Five fixtures check a shortest projected generator by enumerating the bounded binary quadratic form, verify both valuations at 3, certify the quartic group order, and compare the cubic signs with quartic cycle types at eligible primes through 997. For $\ell=53$ the cubic is $X^3-24X^2+172X-372$. With $p=7$, both $q=13$ (mixed split) and $q=19$ (quadratic component) return the actual proper gcd 7 at exponent $105\Phi_3(7)$. For the five fields together the local tests guarantee a split on 9,293 of the 17,822 ordered distinct pairs of eligible primes in $[1000,2000]$. [PARI/GP construction and direct gcd checks](../experiments/cubic-s4-markers.gp)
 
+For the same five polynomials, the exact counting replay over larger balanced pairs gives the table below. A prime contributes a five-bit mask in each role according to its five quartic factorization types. Multiplying the resulting histogram counts sums over all ordered pairs without running a modular exponentiation for each pair. A prime has disjoint masks in the two roles, so diagonal pairs contribute zero. The predicted limiting certified fraction is $1-(7/8)^5=15961/32768$ by the independence proved above.
+
+| $X$ | Eligible primes in $[X,2X]$ | Ordered distinct pairs | Pairs certified | Fraction |
+|---:|---:|---:|---:|---:|
+| $10^4$ | 1,033 | 1,066,056 | 515,656 | 48.3704% |
+| $10^5$ | 8,392 | 70,417,272 | 34,400,550 | 48.8524% |
+| $10^6$ | 70,434 | 4,960,877,922 | 2,412,724,567 | 48.6350% |
+| $10^7$ | 606,028 | 367,269,330,756 | 178,821,393,615 | 48.6894% |
+| $10^8$ | 5,317,482 | 28,275,609,502,842 | 13,770,091,828,280 | 48.6995% |
+
+The bounded computation completed every row through $10^8$. The $10^9$ row reached its time cap before returning a count. Each completed row can be reproduced with `balancedS4(markerRows,X)` in the linked replay. [Mask construction and exact histogram count](../experiments/cubic-s4-markers.gp)
+
 For odd prime indices and bounded extra multipliers there is an exact limiting answer. On almost every balanced ordered pair the successful polynomials are precisely the nonpure degree-$k$ probes irreducible at the covered prime. The statement holds simultaneously for all extra multipliers up to $A$ when $A\log(2H)=o(\log X)$. [One-prime density theorem and finite replay](prime-index-miss-density.md)
 
 At index four, the exact-input search has a smaller sufficient family. The same reciprocal shape gives a two-parameter search under the uniform strip for arbitrary supplied multiples. [Quartic criterion, search bound and exact densities](quartic-order-multiples.md)
