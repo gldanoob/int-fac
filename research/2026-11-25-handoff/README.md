@@ -28,7 +28,7 @@ Additional arguments give direct joint generation at $pq$ for one divisor sum, s
 
 ## Where to resume
 
-1. **Height six.** The quartic norm construction produces an explicit primitive irreducible polynomial. The outstanding step is to prove which Artin coordinates its prime values fix, then certify a pair by literal powering. No pair in the archived scan gives a height-six miss. [Quartic construction and outstanding checks](height-six/quartic/README.md)
+1. **Height six.** The quartic norm construction produces an explicit primitive irreducible polynomial. A subsequent proof identifies 16 cubics that split at its prime values and verifies them on three certified primes. A pair matching on the remaining 54 active fields still needs a literal powering certificate. No pair in the archived scan gives a height-six miss. [Quartic construction and splitting proof](height-six/quartic/README.md)
 2. **Quarter parity.** Review the uniform prime-progression and Fourier estimates for growing support in the fixed-center draft. An efficient evaluator of the quarter bit from the integer alone would remove the oracle assumption. [Fixed-center proof](quarter-parity/fixed-center.md) · [Direct evaluator results](../floor-sum-and-log-parity.md)
 3. **Order supply.** The overlap theorem would have wider algorithmic consequences with a quantitative supply of prime pairs having a small overlap deficit, or with a way to guarantee comparably useful divisibility on general inputs. [Order supply](cyclotomic-supply/audit.md)
 

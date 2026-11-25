@@ -4,7 +4,9 @@ This repository investigates algorithms that return the smallest prime factor of
 
 ## Research
 
-The [November 25 final handoff](research/2026-11-25-handoff/README.md) collects the average-time reductions, the exact height-five counterexample, the complete height-six search data and the remaining proof obligations.
+The [November 25 continuation](research/2026-11-25-continuation.md) records results obtained after the morning work.
+
+The [November 25 morning handoff](research/2026-11-25-handoff/README.md) collects the average-time reductions, the exact height-five counterexample, the complete height-six search data and the remaining proof obligations.
 
 Start with the [known-results index](research/known-results.md), including the [discussion board leads](research/known-results.md#discussion-board-leads-checked-on-november-24), and the [order-oracle and CRT reductions](research/order-and-crt-reductions.md). Before deriving a lemma or running a new sweep, check the published theorem and the latest upstream correction for that question. Record the exact input, assumptions, guarantee and source next to any remaining gap.
 
