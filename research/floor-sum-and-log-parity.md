@@ -52,6 +52,8 @@ Read those digits as $W$. The half-open interval $[nW/K,n(W+1)/K)$ contains $r$ 
 
 The Lean proof checks the symmetric pair and the complete centered sum for all integers satisfying the stated bounds, including radius zero. It also proves that the outer-quarter predicate gives adjacent-bit equality and that decoding $j$ such answers yields $\lfloor 2^{j+1}r/n\rfloor$ when the first digit is zero. Run `make check` at the repository root. [CenteredFloor.lean](../formal/CenteredFloor.lean)
 
+On balanced semiprimes, predicting the first informative bit with a fixed advantage over one half requires reading a linear number of input bits, even when the larger prime is supplied. The result allows adaptive bit positions and unrestricted computation between reads. [Bit-probe bound and exact finite classifier](centered-bit-probes.md)
+
 ## What the floor-sum formulas evaluate
 
 - Schinzel extends Lerch's exact formulas for fractional parts of rational quadratics summed over a **complete** residue system. Corollary 1 expresses the unshifted complete sum in terms of class numbers. Here the individual endpoint $h$ carries the root information. Over a full period $0\le t<q$, pairing $t$ and $q-t$ gives $f(q-t)-f(t)=a(q-2t)$. For odd $q$ the full parity is $a(q-1)/2\bmod2$ (zero in this family since $a$ is then even). For even $q$ the pairs cancel and the parity is $\lfloor aq/4\rfloor\bmod2$ from $t=q/2$. For instance $n=7$ gives $(a,q)=(15,106)$ and odd full-period parity. [Schinzel, *An extension of some formulae of Lerch*, pp. 111–112](https://dml.cz/bitstream/handle/10338.dmlcz/120576/ActaOstrav_10-2002-1_12.pdf)
