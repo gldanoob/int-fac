@@ -2,7 +2,7 @@
 
 Let $H(m)$ be the Hurwitz class number, counting all classes of positive binary quadratic forms of discriminant $-m$ with the usual automorphism weights. Write $h(D)$ for the primitive order class number. The reduction below uses $H$ at nonfundamental discriminants and allows repeated prime factors of the factoring input.
 
-The [single-index reduction](#one-large-index-and-quarter-bit-precision-suffice) factors using just the lowest $\lceil b_n/4\rceil+1$ bits of the positive three-square count at each twist $\ell n^2$. The two-index argument first explains how to isolate any prime power.
+The [single-index reduction](#one-large-index-and-quarter-bit-precision-suffice) factors using just the lowest $\lceil b_n/4\rceil+1$ bits of the positive three-square count at each twist $\ell n^2$. The [polynomial-overhead refinement](hurwitz-polynomial-reductions.md) uses small composite twists to reduce the query count. The two-index argument first explains how to isolate any prime power.
 
 ## Two-index oracle and bit bound
 
@@ -90,6 +90,37 @@ Suppose $n=pq$ with distinct odd primes labeled by $p\equiv1\bmod4$, $q\equiv3\b
 Quadratic reciprocity gives $(-\ell/p)=(p/\ell)$ and likewise at $q$. For exactly one negative sign the difference is $2p$ or $2q$. For two negative signs it is $2(p+q)+4\equiv4\bmod8$. This explains why reducing the normalized value modulo four loses the labels and taking one more bit recovers them.
 
 In fact, polynomially many such queries **uniquely identify** each prime among all odd primes up to $n$. To separate any distinct candidates $r,s$, require $\ell\equiv3\bmod8$, $\ell\nmid nrs$ and $(rs/\ell)=-1$. On the units modulo $8nrs$, CRT permits that sign within the specified residue class modulo 8, since $r,s$ are distinct odd primes. The combined map to the four classes modulo 8 and the sign of the quadratic character has index eight for its kernel. The least-prime-in-a-coset theorem supplies $\ell=O(\log^2 n)$ uniformly, since the modulus is at most $8n^3$. Enumerating that list and checking gcds with $n$ uses polynomial overhead. This is an information bound. A deterministic algorithm recovering the unknown prime quickly from the list of its Legendre symbols is a separate decoding problem. The GP check compared the four cases against direct Legendre symbols on 364 eligible triples of primes. [Lamzouri–Li–Soundararajan, Theorem 1.4](https://arxiv.org/pdf/1309.3595#page=3) · [Chen–Garvan, Eq. 2.1](https://qseries.org/fgarvan/papers/mockmod4.pdf)
+
+## What all three-bit power queries determine
+
+For a prime twist $\ell\equiv3\bmod8$ write $\chi(d)=(d/\ell)$. Assume first $(n,2\ell)=1$. Define squarefree $A$ and $B$ using only primes $p\equiv1\bmod4$ dividing $n$. Include $p$ in $A$ if $e_p=v_p(n)$ is odd and in $B$ if $\lfloor e_p/2\rfloor$ is odd. Let $L(d)=3-2\chi(d)$ and
+$$
+V_t=\frac{3H(\ell n^{2t})}{3H(\ell)\,[n\chi(n)]^t}\pmod8.
+$$
+
+| $t\bmod4$ | 0 | 1 | 2 | 3 |
+| --- | --- | --- | --- | --- |
+| $V_t$ | $1$ | $L(AB)$ | $L(A)$ | $L(B)$ |
+
+A split prime contributes one after normalization. For an inert prime with $k=t e_p$, the contribution is $(-1)^k(1+2\sum_{j=1}^{k}p^{-j})\bmod8$. The terms in the sum alternate modulo four for $p\equiv3\bmod4$, so this contribution is always one. For $p\equiv1\bmod4$ the four successive values starting at $k=0$ are $1,5,5,1$. Multiplication gives the table, using $L(AB)=L(A)L(B)\bmod8$. If $n=2^a\ell^c u$ with $(u,2\ell)=1$, apply the table to $u$ and multiply the unnormalized count by $(3\cdot2^{at}-2)\sum_{j=0}^{ct}\ell^j$. These local factors follow from the same Hurwitz formula. [Chen–Garvan, Eq. (2.1)](https://arxiv.org/pdf/2010.14315#page=6)
+
+Thus two powers suffice at every prime twist, and one suffices on squarefree $n$. On a semiprime with both factors $1\bmod4$ the extra sign is $\chi(n)$, which is public. With both factors $3\bmod4$ it is constant. The mixed-class case recovers the two labeled signs as above. On general inputs the second power can add information. For $n=375$ the twists 11 and 43 have the same $\chi(n)$ and $V_1$, while $V_2$ differs. The small-twist coset argument also distinguishes any two candidate squarefree values of $A$ or $B$, since the product of distinct squarefree candidates is nonsquare. Efficient reconstruction from these signatures remains open. The [power-query regression](../experiments/hurwitz-three-bits.gp) compares the formula with direct enumeration of reduced forms and positive three-square triples.
+
+## A fast evaluation under a local promise
+
+For a prime twist define $\chi(d)=(-\ell/d)$ on odd conductors coprime to $\ell$ and $R(n)=H(\ell n^2)/H(\ell)$. At a split prime the local factor at $p^e$ equals $p^e\chi(p)^e$ exactly. At an inert prime, put $a=\lceil e/2\rceil$. The difference between the local count and $(-p)^e$ is precisely
+$$
+2(p+1)\sum_{j=0}^{a-1}p^{2j}.
+$$
+The geometric sum has 2-adic valuation $v_2(a)$, by factoring $a$ into its odd part and a power of two and successively doubling the sum length. Thus $1+v_2(p+1)+v_2(a)$ is the exact valuation of the local error. If every inert factor has this valuation at least $s$, a single Jacobi symbol computes the count modulo $2^s$ as $3H(\ell)n\chi(n)$. This includes the quarter-bit precision on conductors meeting the promise. The computation uses the unfactored conductor, though this gives no efficient test for the promise. Global cancellation may give extra correct bits. [Chen–Garvan, Eq. (2.1)](https://arxiv.org/pdf/2010.14315#page=6)
+
+On squarefree conductors the first correction has a standard name. In Hittmeir’s notation for the rational quartic symbol, $Q=(\ell^2\mid n)_4$ equals the product of $(\ell/p)$ over $p\equiv1\bmod4$ dividing $n$. Indeed $\ell^2$ is a fourth power at every other prime of $n$, and at these primes it is a fourth power exactly when $\ell$ is a square. Quadratic reciprocity at $p\equiv1\bmod4$ identifies this product with the preceding $\chi(A)$. Therefore $R(n)\equiv n\chi(n)(3-2Q)\bmod8$. This gives a two-way polynomial-cost conversion on eligible twists between a three-bit count and this rational quartic symbol. [Hittmeir, Lemma 2.6 and Corollary 6.3](https://arxiv.org/pdf/1604.07791) · [Local regression](../experiments/hurwitz-jacobi.gp)
+
+## What existing coefficient methods charge
+
+* Mortenson’s Andrews–Crandall formula gives $r_3(3n^2)=6\tau(3n^2)+4S$ for odd $n$, with $S$ a signed sum over ordered positive triples satisfying $xy+xz+yz=3n^2$. For $n=pq$ with distinct primes $p,q>3$, $\tau(3n^2)=18$ while $r_3(3n^2)=8R(n)\ge8n$. The sum contains at least $2n-27$ individual terms. A term-by-term implementation has exponential cost in the conductor bit length, even with immediate access to each solution. This count leaves summation by groups open. [Mortenson, Theorems 1.2 and 1.4](https://arxiv.org/pdf/1702.01627#page=2)
+* Even the fixed twist $\ell=3$ has no finite automaton that reads $n$ in a fixed base and returns $R(n)\bmod8$ on all $(n,6)=1$. Define the multiplicative function $f(n)=(2/R(n))$ there and zero on other inputs. Such an automaton would make $f$ automatic by testing coprimality with 6 in parallel. Konieczny’s Theorem A would make $f$ agree with a Dirichlet character on all integers without small prime factors, since it is nonzero there. At every prime $p\equiv5\bmod12$ the local formula gives $R(p^2)\equiv5\bmod8$ and hence $f(p^2)=-1\ne f(p)^2$. Such primes are arbitrarily large. This excludes only fixed finite-state evaluation. [Konieczny, Theorem A](https://arxiv.org/pdf/1905.11981#page=1)
+* The local formula gives $\sum_{d\mid n}\chi(d)R(n/d)=\sigma_1(n)=r_4(n)/8$ on the admissible odd conductors. Inversion at a composite index involves its divisors. Bruin’s fast coefficient theorem for sums of an even number of squares takes a **factored** index and gives an expected-time bound under its number-field RH hypothesis. The pinned upstream theta-section algorithm charges $O(\operatorname{poly}(q)N^{3/2}\operatorname{polylog}N)$ at index $N$, and its cyclotomic completion theorem assumes a sufficiently precise local coefficient is supplied. [Bruin, Theorem 6.5](https://pub.math.leidenuniv.nl/~bruinpj/coefficients.pdf#page=17) · [Upstream theta evaluator](https://github.com/1337isnot1337/integer-factoring/blob/1b331929bb774ae8dcb8f50cdd10a3243b7c649f/research/theta-parity-refinement.md) · [Upstream completion theorem](https://github.com/1337isnot1337/integer-factoring/blob/1b331929bb774ae8dcb8f50cdd10a3243b7c649f/research/one-cyclotomic-completion.md)
 
 ## Numerical check
 
