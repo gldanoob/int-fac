@@ -91,3 +91,24 @@ $$
 On the full odd grid of size $D$ the signed count is $4\lfloor D/4\rfloor+2-D=\chi_4(D)$. Subtract the nonunits, then multiply the local signed counts by CRT. At $Q=n^2$, the right side is $\prod_{p\mid n}(1-\chi_4(p))$, between zero and $2^{\omega(n)}<n$ for $n>1$. Hence **$\varphi(n)=\lceil2A_{n^2}/n\rceil$**. For odd $n\ge5$ the totient is even and $2^{\omega(n)}/n\le2/5$ (for two or more distinct primes use $4/15$). An additive error below $n/4$ in the count still gives the totient by rounding $2A_{n^2}/n$ to the nearest even integer. Computing that aggregate at the required precision from unrestricted $n$ remains open.
 
 For blocks 101 and 103 the public comparison matches 7,600 of 10,200 unshifted signs and 5,000 mixed bits. The replay checks the count and the two-block triangle formula against individual unit frequencies. It includes primes, repeated prime powers, and inputs with three and four distinct primes. [Finite sign and count checks](../experiments/salie-quarter.py)
+
+## Searching for a disagreeing frequency near a square root
+
+For balanced two-block inputs, finding a single unit frequency where the public comparison is wrong and $k=O(\sqrt Q\,\operatorname{poly}(\log Q))$ would suffice to split the modulus in polynomial time. The odd-square test above then recovers $k-z$ and $k+z$, each divisible by one of the two blocks. Conversely, the blocks give a frequency at $k=(U+V)/2=O(\sqrt Q)$ whenever their ratio is bounded.
+
+There is a density bound for schedules that search around public multiples of $\sqrt Q$. Fix an integer $e\ge1$ and let $Q=(pq)^e$ for ordered distinct primes $p,q\in[X,2X]$. Choose up to $m$ real coefficients $a_j\in[0,A]$, independently of the pair. They may vary with $X$. Allow every integer in every window $|k-a_j\sqrt Q|\le E$, with $E\ge1$. The fraction of prime pairs for which any such window contains a valid disagreement is
+$$
+ \ll_e \frac{m\log X}{X}(1+A+E/X^e)^2
+                (1+X^{1-e/2}\sqrt E).
+$$
+For $m,A=X^{o(1)}$ and bounded $E$, this is at most $X^{-1/2+o(1)}$ at the input modulus and $X^{-1+o(1)}$ at its square. The result permits arbitrary choices of frequencies inside the windows.
+
+Indeed each disagreement has $2k=u q^e+v p^e$ with $u,v$ positive odd and $u,v\ll_e 1+A+E/X^e$. Fix $p,u,v,j$ and set $z=q^{e/2}$. Then
+$$
+        |u z^2-2a_j p^{e/2}z+v p^e|\le2E.
+$$
+Completing the square shows that admissible real $z$ lie in at most two intervals of total length $O(\sqrt{E/u})$. On $[X,2X]$ the derivative of $q^{e/2}$ is bounded below by a constant times $X^{e/2-1}$. Hence there are $O_e(1+X^{1-e/2}\sqrt E)$ possible integers $q$. Summing over the coefficients and the first prime, and using the prime number theorem for the denominator, gives the claim.
+
+At $e=1$ the exponent is attained by $k=\lceil\sqrt{pq}\rceil$. In fact this choice yields a unit disagreement exactly when $k=(p+q)/2$, the first square test in Fermat's method. The next semigroup element is at least $(p+q)/2+\min(p,q)>\lceil\sqrt{pq}\rceil$. For $p<q$ the exact criterion is $q<p+2+\sqrt{8p}$. Consequently the fraction among balanced prime pairs is $\Theta(X^{-1/2})$. The upper bound follows by Brun–Titchmarsh in intervals of length $O(\sqrt X)$. For the lower bound divide $[X,2X]$ into $O(\sqrt X)$ intervals of length at most $\sqrt X$. Every distinct pair in one interval passes. Cauchy–Schwarz applied to the prime counts in the intervals gives $\gg X^{3/2}/(\log X)^2$ such ordered pairs. [Montgomery and Vaughan, Theorem 2](https://personal.science.psu.edu/rcv4/personal/Publications/large_sieve.pdf)
+
+Across the primes in $[101,200]$, the integer square test and direct CRT signs agree on 4,173 unit frequencies in four square-root windows at exponents one and two. Of these, 198 disagree with the public prediction, including 105 first Fermat successes at exponent one. [Integer replay](../experiments/salie-quarter.py)

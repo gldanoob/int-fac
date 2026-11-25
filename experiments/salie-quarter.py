@@ -103,6 +103,32 @@ def check_frequencies():
         print(f'orders={orders} units={phi} negatives={negative} public agreements={agreements}')
 
 
+def check_sqrt_windows():
+    primes = [p for p in range(101, 201) if all(p % d for d in range(2, isqrt(p) + 1))]
+    tested = hits = first = 0
+    for i, p in enumerate(primes):
+        for q in primes[i+1:]:
+            for e in (1, 2):
+                u, v = p**e, q**e
+                order = u*v
+                for a in range(1, 5):
+                    center = isqrt(a*a*order)
+                    for k in range(center-1, center+2):
+                        if gcd(k, order) != 1:
+                            continue
+                        c = k * pow(2, -1, order) % order
+                        actual = cosine_sign(c*pow(v, -1, u), u) * cosine_sign(c*pow(u, -1, v), v)
+                        wrong = actual != cosine_sign(c, order)
+                        squares = (k*k-j*order for j in range(1, k*k//order+1, 2))
+                        assert wrong == any(isqrt(n)**2 == n for n in squares)
+                        if e == a == 1 and k == center+1:
+                            assert wrong == (2*k == p+q) == (q <= p+2+isqrt(8*p))
+                            first += wrong
+                        hits += wrong
+                        tested += 1
+    print(f'square-root window units={tested}, disagreements={hits}, first Fermat successes={first}')
+
+
 def check_sums():
     counts = [0, 0, 0]
     for n in range(3, 182, 2):
@@ -176,3 +202,4 @@ if __name__ == '__main__':
     check_sums()
     check_first_negative()
     check_frequencies()
+    check_sqrt_windows()
