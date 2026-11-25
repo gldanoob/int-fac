@@ -40,6 +40,42 @@ Bruin's approximation algorithms concern finite fields and quantum computation. 
 
 For the dyadic frequencies specifically, the omitted pair contributes $2\cos\theta$ and then $2\cos(2\theta)$. The identity $\cos(2\theta)=2\cos^2\theta-1$ shows that one of these two normalized errors has magnitude at least 1.
 
+## Signs at the original square modulus
+
+For odd $n$ with at most a fixed number of distinct prime divisors, complete deterministic factoring is polynomial-time equivalent to computing the **exact sign** of $K(t)$ at unit frequencies of the original modulus $n^2$. For an arbitrary $b$-bit odd input, the forward reduction takes $2^{O(\sqrt{b\log(2b)})}$ bit operations and sign queries. All query frequencies are nonadaptive. With a coarse value of $K(t)/n$ to absolute error $1/128$ in place of the sign, the corresponding bounds are polynomial for $O(\log b)$ distinct primes, and $2^{O(\sqrt b)}$ for arbitrary inputs. These are costs outside the oracle. The original-modulus sign is a parity of local quarter-interval tests.
+
+Write $n=tm$ after trial division to an explicit bound $B$ below, with all prime factors of $t$ removed from $m$. Write $Q=m^2$, $D_i=p_i^{2e_i}$ for its $r$ residual prime-power components and $c_i=(Q/D_i)^{-1}\bmod D_i$. Use the auxiliary functions on all residues
+$$
+F(v)=\prod_i2\cos(2\pi\,2c_iv/D_i),\qquad
+S(v)=\prod_i s_{D_i}(2c_iv),\qquad s_D(x)=\operatorname{sgn}\cos(2\pi x/D).
+$$
+For units, stationary phase identifies $F$ with the normalized sum and $S$ with its sign. Exactly,
+$$
+S(v)=(-1)^{\sum_i\lfloor4c_i v/D_i+1/2\rfloor}.
+$$
+Odd denominators preclude ties. The factors of $n$ therefore evaluate the sign by integer arithmetic. Conversely, an original-modulus query can sample the residual at any unit $v\bmod Q$. Impose $T\equiv vt^2\bmod Q$ and $2T\equiv n^2/D\bmod D$ for each known component $D\mid t^2$ of full prime-power order. Its cosine is $2\cos(2\pi/D)>1$ since $D\ge9$. The product of the known components preserves the sign. For coarse values divide by that product. Its magnitude is between 1 and $2^b$, so $O(b)$ fractional working bits with a sufficiently large constant keep the resulting absolute error below $1/100$.
+
+**Fourier coefficients.** Write $k=\lfloor D/4\rfloor$. On the cyclic group modulo $D$ we have $s_D=2\,1_{[-k,k]}-1$. With normalized Fourier coefficients,
+$$
+\widehat s_D(1)=\widehat s_D(-1)=\frac{2\sin((2k+1)\pi/D)}{D\sin(\pi/D)}
+=\frac{1}{D\sin(\pi/(2D))}\ge\frac{2}{\pi}.
+$$
+For other nonzero frequencies $h$ the absolute value is at most $2/(D|\sin(\pi h/D)|)$. Summing gives $\|\widehat s_D\|_1\le C(1+\log D)$ for an absolute $C$. CRT makes each global Fourier coefficient of $S$ a product of local coefficients. For every root $w^2=1\bmod Q$, the coefficient at $f=2w$ uses precisely the local modes $\pm1$. Indeed the CRT idempotents are $(Q/D_i)c_i$, so independent choices of signs give exactly these global frequencies. Hence all $2^r$ desired coefficients exceed $\nu=2^{-r}$, and the whole coefficient absolute sum is bounded by $T_0=(C'(1+b))^r$. For $F$, the same desired coefficients all equal one, the other coefficients vanish, and $T_0=2^r$.
+
+**Deterministic sampling.** Use an integer upper bound $R$ for $r$ to evaluate the preceding bounds before factoring $m$. In the sign case use $\nu=2^{-R}$ and $T_0=(C'(1+b))^R$. In the coarse case use $\nu=1$ and $T_0=2^R$. Set $L=\lceil10^5 T_0/\nu\rceil$, enumerate the small-bias dilations at bias $\nu/(10^5T_0)$, and search a frequency mesh with spacing at most $\nu/(10^5T_0 L)$. The Fejér kernel and its weighted phase samples are as in the threshold proof. If the least prime in $m$ exceeds $L$, every nonzero frequency difference has additive order greater than $L$. For each desired frequency some enumerated dilation gives interference at most
+$$
+T_0\left((L+1)^{-1}+\nu/(10^5T_0)\right).
+$$
+The move to the nearest mesh point costs at most $2\pi L T_0$ times the spacing. Both bounds hold after every common translation. [Kernel, deterministic dilation set and inversion](kloosterman-threshold.md#a-deterministic-set-of-dilations-and-translations)
+
+For each dilation the shifts $0,1,2,\ldots,2^{\lceil\log_2Q\rceil}$ (powers of two after zero) and indices $-L\le k\le L$ specify at most $U=(2L+1)(2b+3)$ locations. Choose $B>RU+L$. Some integer $s\in[0,RU]$ translates all locations to units. Each residual prime exceeds $RU$, and for any one location it forbids at most one candidate translation. There are at most $rU$ forbidden candidates altogether. The decoder finds the first good $s$ by gcds. This avoids requiring any sign answer at a nonunit.
+
+At the tag of a desired frequency the translated, weighted samples approximate $\widehat S(f)e_Q((s+u)f)$ or $\widehat F(f)e_Q((s+u)f)$. The error is below $\nu/64$, including sample and numerical error: the sign is exact, and the coarse case has $\nu=1$. Dividing each dyadic phase sample by its zero-shift anchor and applying modular halving as above recovers $f$ exactly. One may skip anchors of magnitude below $\nu/2$. Test each proposal by squaring $w=f/2\bmod Q$. For verified roots, partition each current block $d$ of $m$ by $\gcd(d,w-1)$ and the complementary quotient. Every pair of distinct prime powers has opposite signs at some recovered root. Their unitary splits separate all blocks, whose prime bases are recovered by integer roots and primality testing.
+
+For a promised bound $R$, the search and trial division to $B=RU+L+1$ are polynomial in $b,T_0/\nu,R$. For the all-input sign bound choose $B=2^{\lceil A\sqrt{b\log_2(2b)}\rceil}$ at the outset and $R=\lfloor b/\log_2 B\rfloor$. For a sufficiently large absolute $A$ this $B$ exceeds $RU+L$, since $\log_2 L=O(1+R\log(2b))$. In the coarse case take $B=2^{\lceil A\sqrt b\rceil}$ and use $\log_2 L=O(1+R)$. Small inputs and $m=1$ are immediate. The padded comparison theorem gives a polynomial all-input reduction with a different oracle. [Padded threshold proof](kloosterman-threshold.md)
+
+The finite sign replay queried the original square modulus and verified all eight, sixteen and eight roots in three fixtures. The bases were $8{,}813{,}740{,}459$, $18{,}359{,}021{,}376{,}097$ and $18{,}094{,}609{,}162{,}327$, respectively. They took 70,488, 92,915 and 92,958 distinct unit sign queries. The third included $2053^2$. Literal inverse sums check both signs at $105^2$. The three larger oracles compute exact local quarter comparisons from the fixture factors. The decoder uses one public dilation, a floating-point FFT and exact root and gcd checks. [Replay with the shared frequency decoder](../experiments/kloosterman-threshold.py)
+
 ## Replay
 
 This Python block evaluates the original finite sum on three small inputs. The decoder sees only values rounded to a grid of spacing $1/128$. A second check uses enumerated stationary roots with deterministic perturbations of magnitude $1/128$ on a wider range.

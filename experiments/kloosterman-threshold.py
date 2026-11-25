@@ -124,6 +124,42 @@ def threshold_decode(n, oracle, window):
     return sorted(blocks), frequencies, len(lifts) * sample.cache_info().misses
 
 
+def quarter_sign(t, squares, inverses):
+    value = 1
+    for d, inverse in zip(squares, inverses):
+        residue = (2 * t * inverse) % d
+        if 4 * min(residue, d - residue) > d:
+            value = -value
+    return value
+
+
+def sign_fixture(powers, window):
+    n = math.prod(powers)
+    q = n * n
+    squares = [p * p for p in powers]
+    inverses = [pow(q // d, -1, d) for d in squares]
+
+    @lru_cache(None)
+    def oracle(t):
+        assert math.gcd(t, n) == 1
+        return quarter_sign(t, squares, inverses)
+
+    frequencies = filtered_frequencies(n, window, oracle, 0.1)
+    halves = {f * pow(2, -1, q) % q for f in frequencies}
+    roots = {w for w in halves if w * w % q == 1}
+    assert len(roots) == 2**len(powers)
+    blocks = [n]
+    for w in roots:
+        split = []
+        for block in blocks:
+            divisor = math.gcd(w - 1, block)
+            split.extend(v for v in (divisor, block // divisor) if v > 1)
+        blocks = split
+    assert sorted(blocks) == sorted(powers)
+    print(f"unpadded sign {n=} blocks={sorted(blocks)} roots={len(roots)} "
+          f"queries={oracle.cache_info().misses}")
+
+
 def direct_check():
     def direct(n, frequency):
         q = n * n
@@ -140,6 +176,15 @@ def direct_check():
         assert abs(full - transferred) < 1e-10 and abs(abs(full) - 1) > 1 / 4096
         outcomes.add(abs(full) > 1)
     assert outcomes == {False, True}
+    squares = (9, 25, 49)
+    inverses = [pow(105**2 // d, -1, d) for d in squares]
+    signs = set()
+    for t in (1, 2, 4, 8, 11, 109):
+        value = direct(105, t)
+        result = quarter_sign(t, squares, inverses)
+        assert abs(value.imag) < 1e-10 and result * value.real > 1e-8
+        signs.add(result)
+    assert signs == {-1, 1}
 
 
 def threshold_fixture(powers, window):
@@ -189,6 +234,9 @@ def threshold_fixture(powers, window):
 
 if __name__ == "__main__":
     direct_check()
+    sign_fixture((2053, 2063, 2081), 511)
+    sign_fixture((2053, 2063, 2081, 2083), 511)
+    sign_fixture((2053**2, 2063, 2081), 511)
     threshold_fixture((1009, 1013, 1019), 255)
     threshold_fixture((307**2, 1013, 1019), 255)
     threshold_fixture((1009, 1013, 1019, 1021), 255)
