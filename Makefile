@@ -4,6 +4,7 @@ GP ?= gp
 .PHONY: check
 check:
 	"$(LEAN)" formal/TapeCover.lean
+	"$(LEAN)" formal/CubeSampler.lean
 	"$(LEAN)" formal/RawClique.lean
 	"$(LEAN)" formal/OrderQueries.lean
 	"$(LEAN)" formal/PrimitiveCertificate.lean
