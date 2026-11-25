@@ -158,6 +158,14 @@ $$
 
 Both integers are prime and $\gcd(M,q(q^6-1))=1$. At height three all $7^2+7^3=392$ monic quadratics and cubics give a trivial gcd. At height four $X^3-4X^2-3X-4$ gives the proper divisor $p$. The regression tests primality, the coprimality condition, and both boxes directly by modular polynomial arithmetic. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)
 
+A second example has minimum coefficient height exactly five. Set
+
+$$
+p=24763102584321751944268821159635694704503772729308318972897810337966384138507108937879503989045648329929045593283754372269849516295353301697542889679,\qquad q=p+110,\qquad M=p^2+p+1.
+$$
+
+The two primality tests and the identity $\gcd(M,q(q^6-1))=1$ pass. All $9^2+9^3=810$ polynomials at height four give a trivial gcd on $pq$, and $X^3-4X^2-5X-5$ gives $p$ at height five. The search screened 1,033,296 probable primes in its final progression before finding this candidate. The certificate replays only the resulting primes and polynomial boxes. [Exact GP regression](../experiments/cyclotomic-multiples.gp)
+
 ## Finite checks
 
 The height-one regression runs the polynomial search on indices $3,4,5,6$. It splits $85$ with $M=2^8\cdot31\cdot307$, handles a repeated prime in $2057=11^2\cdot17$, and splits $55$ even though the successful polynomial gives the identity at the full exponent. The quartic field example $N=235$, $M=26$ has $f=X^4+47X^3-164X^2+47X+1$. In its quotient $X^{13}=141+220X+115X^3\pmod{235}$, giving the factor $5$. At $47$ the roots $13,18,29,34$ have signs $-,+,-,+$. These are finite arithmetic checks. The uniform witness bound is a paper proof. [PARI/GP regression](../experiments/cyclotomic-multiples.gp)

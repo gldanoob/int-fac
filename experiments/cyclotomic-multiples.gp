@@ -33,6 +33,11 @@ checkCyclotomicBoxes() = {
     error("height-three prime certificate"));
   if(splitCyclotomicBox(p*q,m,3,3)!=[1,0],error("expected the whole height-three box to miss"));
   if(splitCyclotomicBox(p*q,m,3,4)!=[p,x^3-4*x^2-3*x-4],error("height-four witness"));
+  p=24763102584321751944268821159635694704503772729308318972897810337966384138507108937879503989045648329929045593283754372269849516295353301697542889679; q=p+110; m=p^2+p+1;
+  if(!isprime(p) || !isprime(q) || gcd(m,q*(q^6-1))!=1,
+    error("height-four prime certificate"));
+  if(splitCyclotomicBox(p*q,m,3,4)!=[1,0],error("expected the whole height-four box to miss"));
+  if(splitCyclotomicBox(p*q,m,3,5)!=[p,x^3-4*x^2-5*x-5],error("height-five witness"));
   \\ Count sign vectors whose cyclotomic projection is constant.
   for(k=3,10,
     my(u=(x^k-1)/polcyclo(k),ones=(x^k-1)/(x-1),constant=0);
