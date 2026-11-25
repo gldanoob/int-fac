@@ -11,8 +11,22 @@ sigmaPowerExponents(N,{shortBlock=0}) = {
   vector(2*h,i,J+i-1)
 };
 
-\\ Recover the least full prime-power block of a residual with no prime <=16.
-sigmaPowerSmallest(N,m,S,J,h) = {
+\\ A recurrence root may propose a block. Only accept full prime powers dividing m.
+sigmaPowerRecurrenceBlocks(m,T,Y,H0,b) = {
+  my(h=#Y\2,rhs=vectorv(h,i,-Y[h+i]));
+  my(prec=8*b+64,scale=2^prec,c=Vec(matsolve(H0,rhs)),blocks=List());
+  \\ Rounding the recurrence limits the size of the integer root-isolation problem.
+  my(P=Polrev(concat(apply(v->round(scale*v),c),[scale])));
+  localbitprec(prec);
+  foreach(polrootsreal(P,[T/m,1]),z,
+    my(B=round(T/z));
+    if(B>=2 && m%B==0 && gcd(m\B,B)==1 && isprimepower(B),listput(blocks,B))
+  );
+  Set(Vec(blocks))
+};
+
+\\ Recover full prime-power blocks of a residual with no prime <=16.
+sigmaPowerMomentBlocks(N,m,S,J,h,{leastOnly=0}) = {
   my(b=logint(N,2)+1,mJ=m^(J+1),ph=mJ\S[1],E=1-ph*S[1]/mJ);
   if(E<=0 || E>=1,error("invalid divisor sums"));
   \\ The Jth root of 1/(N*E) is a lower estimate of the least block B.
@@ -24,7 +38,12 @@ sigmaPowerSmallest(N,m,S,J,h) = {
     floor(Q*T^k*Ej/E)
   ));
   \\ At scale Q, the subset terms cost h and moment rounding costs 2h.
-  my(H0=matrix(h,h,i,k,Y[i+k-1]),H1=matrix(h,h,i,k,Y[i+k])-3*h*matid(h));
+  my(H0=matrix(h,h,i,k,Y[i+k-1]));
+  if(!leastOnly,
+    my(blocks=iferr(sigmaPowerRecurrenceBlocks(m,T,Y,H0,b),err,[]));
+    if(#blocks,return(blocks))
+  );
+  my(H1=matrix(h,h,i,k,Y[i+k])-3*h*matid(h));
   my(lo=0,hi=1,delta=1/(64*N^2));
   \\ The signature test can have either answer within delta below T/B.
   while(hi-lo>delta,
@@ -32,8 +51,10 @@ sigmaPowerSmallest(N,m,S,J,h) = {
     if(qfsign(d*H1-numerator(u)*H0)[1],lo=u,hi=u)
   );
   if(lo==0,error("invalid moment bracket"));
-  round(T/lo)
+  [round(T/lo)]
 };
+
+sigmaPowerSmallest(N,m,S,J,h) = sigmaPowerMomentBlocks(N,m,S,J,h,1)[1];
 
 \\ Use the geometric-series identity to update each supplied divisor sum.
 sigmaPowerStrip(S,J,p,B) = {
@@ -60,20 +81,15 @@ sigmaPowerFactors(N,S,{shortBlock=0}) = {
   );
   while(m>1,
     if(h<1,error("too many prime factors"));
-    my(B=sigmaPowerSmallest(N,m,S,J,h),p);
-    if(B<2 || m%B,error("invalid recovered block"));
-    \\ A promised block is a prime power, so its largest exact root exponent suffices.
-    forstep(e=logint(B,2),1,-1,
-      p=sqrtnint(B,e);
-      if(p^e==B,
-        if(!isprime(p),error("composite recovered base"));
-        listput(found,[p,e]);break()
-      )
-    );
-    m\=B;
-    if(gcd(m,B)!=1,error("incomplete recovered block"));
-    S=sigmaPowerStrip(S,J,p,B);
-    h--
+    foreach(sigmaPowerMomentBlocks(N,m,S,J,h),B,
+      if(B<2 || m%B,error("invalid recovered block"));
+      my(p,e=isprimepower(B,&p));
+      if(!e,error("recovered block is not a prime power"));
+      m\=B;
+      if(gcd(m,B)!=1,error("incomplete recovered block"));
+      listput(found,[p,e]);S=sigmaPowerStrip(S,J,p,B);
+      h--
+    )
   );
   foreach(S,s,if(s!=1,error("invalid final divisor sum")));
   vecsort(Vec(found))
@@ -88,6 +104,12 @@ checkSigmaPowerCase(P,{shortBlock=0}) = {
 };
 
 checkSigmaPowerMoments() = {
+  my(m=17*19,T=8,Y=vector(4,i,m^3*((T/17)^(i-1)+(T/19)^(i-1))));
+  my(H0=matrix(2,2,i,j,Y[i+j-1]));
+  if(sigmaPowerRecurrenceBlocks(m,T,Y,H0,16)!=[17,19] ||
+     sigmaPowerRecurrenceBlocks(17*m,T,Y,H0,16)!=[19],error("recurrence block validation"));
+  my(exps=sigmaPowerExponents(m),S=apply(j->(17^(j+1)-1)*(19^(j+1)-1)/(16*18),exps));
+  if(sigmaPowerSmallest(m,m,S,exps[1],#S/2)!=17,error("signature fallback"));
   [
     checkSigmaPowerCase([]),
     checkSigmaPowerCase([[2,5],[3,3],[13,2]]),
