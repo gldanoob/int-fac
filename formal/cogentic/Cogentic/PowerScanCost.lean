@@ -35,7 +35,7 @@ def leBits (x y : List Bool) : Bool × ℕ :=
   let sub := subtract (max x.length y.length) y x false
   (!sub.borrow,sub.gates+1)
 
-private theorem leBits_spec (x y : List Bool) :
+theorem leBits_spec (x y : List Bool) :
     ((leBits x y).1=true ↔ value x ≤ value y) ∧ (leBits x y).2=7*max x.length y.length+1 := by
   let w := max x.length y.length
   let sub := subtract w y x false
@@ -47,7 +47,7 @@ private theorem leBits_spec (x y : List Bool) :
   refine ⟨?_,congrArg (·+1) g⟩
   cases h : sub.borrow <;> simp [h] at e ⊢ <;> omega
 
-private theorem value_low_zeros (i : ℕ) (bs : List Bool) :
+theorem value_low_zeros (i : ℕ) (bs : List Bool) :
     value (List.replicate i false ++ bs)=2^i*value bs := by
   induction i with
   | zero => simp

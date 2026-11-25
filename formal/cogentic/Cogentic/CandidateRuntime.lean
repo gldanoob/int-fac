@@ -330,7 +330,7 @@ private theorem select_length (k : ℕ) (a b : Bool) (xs ys : List Bool) :
   | zero => rfl
   | succ k ih => simp [selectDigits,ih]
 
-private theorem difference_length (x y : SignedWord) :
+theorem difference_length (x y : SignedWord) :
     (signedDifference x y).1.digits.length = max x.digits.length y.digits.length+1 := by
   unfold signedDifference; exact select_length ..
 
@@ -382,7 +382,7 @@ def horner (a : List Bool) : List SignedWord → SignedWord × ℕ
     let next := mulAdd a c tail.1
     (next.1,tail.2+next.2)
 
-private theorem horner_spec (a : List Bool) (cs : List ℤ) (h w : ℕ)
+theorem horner_spec (a : List Bool) (cs : List ℤ) (h w : ℕ)
     (bounds : ∀ c ∈ cs, c.natAbs.size ≤ h) (aw : a.length≤w)
     (room : h+cs.length*(2*a.length+1)≤w) :
     let out := horner a (cs.map encode)

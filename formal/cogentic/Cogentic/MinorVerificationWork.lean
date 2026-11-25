@@ -3,15 +3,17 @@ import Cogentic.MinorReconstructionCost
 namespace Cogentic.Concrete
 open Elimination BinaryReconstruction
 
-private def Within (s k a : ℕ) : Prop := a≤2^(k*s)
+namespace SolverGrowth
 
-private theorem weaken {s k l a} (h : Within s k a) (le : k≤l) : Within s l a :=
+def Within (s k a : ℕ) : Prop := a≤2^(k*s)
+
+theorem weaken {s k l a} (h : Within s k a) (le : k≤l) : Within s l a :=
   h.trans (Nat.pow_le_pow_right Nat.zero_lt_two (Nat.mul_le_mul_right s le))
 
-private theorem product {s k l a b : ℕ} (x : Within s k a) (y : Within s l b) : Within s (k+l) (a*b) := by
+theorem product {s k l a b : ℕ} (x : Within s k a) (y : Within s l b) : Within s (k+l) (a*b) := by
   exact (Nat.mul_le_mul x y).trans_eq (by rw [←pow_add,Nat.add_mul])
 
-private theorem plus {s k l a b : ℕ} (pos : 0<s) (x : Within s k a) (y : Within s l b) :
+theorem plus {s k l a b : ℕ} (pos : 0<s) (x : Within s k a) (y : Within s l b) :
     Within s (k+l+1) (a+b) := by
   have u := weaken x (Nat.le_add_right k l)
   have v := weaken y (Nat.le_add_left l k)
@@ -20,32 +22,32 @@ private theorem plus {s k l a b : ℕ} (pos : 0<s) (x : Within s k a) (y : Withi
     _ = 2^(1+(k+l)*s) := by rw [pow_add,pow_one,two_mul]
     _ ≤ _ := Nat.pow_le_pow_right Nat.zero_lt_two (by simp only [Nat.add_mul,one_mul]; omega))
 
-private theorem top {s k l a b : ℕ} (x : Within s k a) (y : Within s l b) : Within s (k+l) (max a b) :=
+theorem top {s k l a b : ℕ} (x : Within s k a) (y : Within s l b) : Within s (k+l) (max a b) :=
   max_le (weaken x (Nat.le_add_right ..)) (weaken y (Nat.le_add_left ..))
 
-private theorem smaller {s k a b} (x : Within s k b) (le : a≤b) : Within s k a := le.trans x
+theorem smaller {s k a b} (x : Within s k b) (le : a≤b) : Within s k a := le.trans x
 
-private theorem numeral (s c : ℕ) (pos : 0<s) : Within s c c :=
+theorem numeral (s c : ℕ) (pos : 0<s) : Within s c c :=
   (Nat.lt_two_pow_self (n:=c)).le.trans (Nat.pow_le_pow_right Nat.zero_lt_two (Nat.le_mul_of_pos_right c pos))
 
-private theorem bitLength {s k a : ℕ} (x : Within s k a) : Within s k a.size :=
+theorem bitLength {s k a : ℕ} (x : Within s k a) : Within s k a.size :=
   smaller x (Nat.size_le.mpr Nat.lt_two_pow_self)
 
-private theorem productLength {s k l a b : ℕ} (pos : 0<s) (x : Within s k a.size) (y : Within s l b.size) :
+theorem productLength {s k l a b : ℕ} (pos : 0<s) (x : Within s k a.size) (y : Within s l b.size) :
     Within s (k+l+1) (a*b).size := by
   apply smaller (plus pos x y)
   apply Nat.size_le.mpr
   rw [pow_add]
   exact Nat.mul_lt_mul_of_lt_of_le (Nat.lt_size_self _) (Nat.lt_size_self _).le (Nat.two_pow_pos _)
 
-private theorem succLength {s k a : ℕ} (pos : 0<s) (x : Within s k a.size) : Within s (k+2) (a+1).size := by
+theorem succLength {s k a : ℕ} (pos : 0<s) (x : Within s k a.size) : Within s (k+2) (a+1).size := by
   apply smaller (plus pos x (numeral s 1 pos))
   apply Nat.size_le.mpr
   rw [pow_succ]
   have := Nat.lt_size_self a
   omega
 
-private theorem factorialLength {s k a : ℕ} (pos : 0<s) (x : Within s k a) : Within s (k+k+2) a.factorial.size := by
+theorem factorialLength {s k a : ℕ} (pos : 0<s) (x : Within s k a) : Within s (k+k+2) a.factorial.size := by
   have b : a.factorial ≤ 2^(a*a) := calc
     _ ≤ a^a := Nat.factorial_le_pow _
     _ ≤ (2^a)^a := Nat.pow_le_pow_left (Nat.lt_two_pow_self (n:=a)).le _
@@ -53,11 +55,15 @@ private theorem factorialLength {s k a : ℕ} (pos : 0<s) (x : Within s k a) : W
   exact smaller (plus pos (product x x) (numeral s 1 pos)) (by
     simpa only [Nat.size_pow] using Nat.size_le_size b)
 
-private theorem powerLength {s k a : ℕ} (pos : 0<s) (x : Within s k a) : Within s (k+2) (2^a).size := by
+theorem powerLength {s k a : ℕ} (pos : 0<s) (x : Within s k a) : Within s (k+2) (2^a).size := by
   simpa only [Nat.size_pow] using plus pos x (numeral s 1 pos)
 
-private theorem smallPower {s k a : ℕ} (r : ℕ) (x : Within s k a) : Within s (k*r) (a^r) := by
+theorem smallPower {s k a : ℕ} (r : ℕ) (x : Within s k a) : Within s (k*r) (a^r) := by
   exact (Nat.pow_le_pow_left x r).trans_eq (by rw [←pow_mul]; congr 1; ring)
+
+end SolverGrowth
+
+open SolverGrowth
 
 private theorem verification_polynomial {d h w V cap a n W : ℕ}
     (dd : d≤W) (hh : h≤W) (ww : w≤W) (vv : V≤W) (cc : cap≤W) (aa : a≤W) (nn : n≤W) :

@@ -193,7 +193,7 @@ theorem cross_spec (a b c d : SignedWord) (W : ℕ)
   nlinarith
 
 /-- Width of an input operand of a cross product in a reachable row. -/
-private theorem operand_bits {N n H : ℕ} (base : List (Elimination.Row N)) (hp : 1≤H)
+theorem operand_bits {N n H : ℕ} (base : List (Elimination.Row N)) (hp : 1≤H)
     (input : ∀ r∈base, ∀ j, (r.aug j).natAbs≤H) {rows : List (Elimination.Row n)}
     (reach : Elimination.SolveStep base rows) (r : Elimination.Row n) (rm : r∈rows)
     (j : Option (Fin n)) :

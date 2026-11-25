@@ -85,7 +85,7 @@ private theorem select_length (w : ℕ) (b c : Bool) (x y : List Bool) :
   | zero => rfl
   | succ w ih => simp [selectDigits,ih]
 
-private theorem cross_length (a b c d : SignedWord) {w : ℕ}
+theorem cross_length (a b c d : SignedWord) {w : ℕ}
     (ha : a.digits.length≤w) (hb : b.digits.length≤w)
     (hc : c.digits.length≤w) (hd : d.digits.length≤w) :
     (cross a b c d).1.digits.length≤3*w+1 := by

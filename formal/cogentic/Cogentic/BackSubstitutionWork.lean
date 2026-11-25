@@ -115,7 +115,7 @@ private theorem factorial_exp (k : ℕ) : k.factorial ≤ 2^(k.size*k) := by
     _ ≤ (2^k.size)^k := Nat.pow_le_pow_left (Nat.lt_size_self k).le _
     _ = _ := by rw [←pow_mul]
 
-private theorem fill_height_exp (n m H : ℕ) :
+theorem fill_height_exp (n m H : ℕ) :
     (n+1).factorial*((m+1).factorial*H^(m+1))^n ≤ 2^(fillExponent n m H) := by
   have hH : H^(m+1) ≤ 2^(H.size*(m+1)) := by
     rw [pow_mul]; exact Nat.pow_le_pow_left (Nat.lt_size_self H).le _

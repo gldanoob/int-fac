@@ -9,7 +9,7 @@ open scoped Classical
 
 /-- On a constructor cell the inverse unconditional marginal is uniformly
 dominated by the inverse prescribed marginal with a polynomial insertion cost. -/
-private theorem cell_common_envelope (line : DirichletLZerosOnLine) :
+theorem cell_common_envelope (line : DirichletLZerosOnLine) :
     ∃ C : ℝ, 0<C ∧ ∃ b₀ : ℕ, ∀ {n ell : ℕ}, let b := n.log2+1
     b₀≤b → 2≤n → ¬n.Prime → ell∈dyadicTargets (Fixed.beta b) →
     presieve n b (Fixed.beta b) (Fixed.A b) (Fixed.rootBase n)=none →

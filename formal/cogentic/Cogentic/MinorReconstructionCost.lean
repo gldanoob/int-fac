@@ -77,6 +77,37 @@ theorem observation_height {m d T C : ℕ} (cols : Vector (Vector ℚ d) m)
   rw [Int.abs_eq_natAbs] at zi
   exact_mod_cast zi
 
+/-- The full rounded matrix and right-hand side are bounded before a minor
+is selected, so this input bound also covers singular and inconsistent minors. -/
+theorem constructed_observation_height {n ell u v w z : ℕ} (hn : 2≤n)
+    (big : 10004≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (box : let b:=n.log2+1; u≤2*b^2*Fixed.U b*Fixed.A b ∧ v≤2*b^2*Fixed.U b ∧
+        w≤2*b^2*Fixed.U b*Fixed.A b ∧ z≤2*b^2*Fixed.U b) :
+    let s := TryPair.fixedInput n ell (Construction.construct n ell u v w z)
+    ∀ {rel}, Marking.stageOne s=some rel → ∀ {lat}, stageTwo rel=some lat →
+    ∀ {cols}, markColumns s rel=some cols →
+    let d := 2*s.degree-2
+    let P := TryPair.localBits s rel
+    let H := rel.marks.length*(rel.rows.length+1).factorial*(2*s.degree*(s.L₀+1)+1)*2^P+1
+    (∀ i,((observation cols lat.particular P).get i).natAbs≤H) ∧
+    ∀ j i,(((lat.directions.map (fun direction=>observation cols direction P)).get j).get i).natAbs≤H := by
+  intro s rel stage lat solved cols computed d P H
+  obtain ⟨roots,cols',_,good,acc⟩ := Construction.constructed_column_accuracy hn big target box stage
+  cases Option.some.inj (good.symm.trans computed)
+  have small (j k) : |(cols.get j).get k| ≤ ((2*s.degree*(s.L₀+1)+1:ℕ):ℚ) := by
+    obtain ⟨err,amp⟩ := acc j k
+    have perturb := (abs_sub_abs_le_abs_sub _ _).trans err
+    have power : (1/2:ℝ)^P≤1 := pow_le_one₀ (by norm_num) (by norm_num)
+    have realBound : |((cols.get j).get k:ℝ)|≤((2*s.degree*(s.L₀+1)+1:ℕ):ℝ) := by
+      push_cast; linarith
+    exact_mod_cast realBound
+  have height := stageTwo_height solved
+  constructor
+  · exact observation_height _ _ P small height.1.2
+  · intro j k
+    simpa only [Vector.get_eq_getElem,Vector.getElem_map] using
+      observation_height _ _ P small (height.2 j).2 k
+
 /-- The observed archimedean system supplies the coordinate heights required by
 binary reconstruction for every candidate minor that returns a solution. -/
 theorem constructed_minor_width {n ell u v w z : ℕ} (hn : 2≤n)
@@ -93,20 +124,7 @@ theorem constructed_minor_width {n ell u v w z : ℕ} (hn : 2≤n)
         (lat.directions.map (fun direction=>observation cols direction P)) indices=some x →
       ∀ i, (x i).num.natAbs.size ≤ fillExponent d d H+1 ∧ (x i).den.size ≤ fillExponent d d H+1 := by
   intro s rel stage lat solved cols computed d P H indices x found i
-  obtain ⟨roots,cols',_,good,acc⟩ := Construction.constructed_column_accuracy hn big target box stage
-  cases Option.some.inj (good.symm.trans computed)
-  have small (j k) : |(cols.get j).get k| ≤ ((2*s.degree*(s.L₀+1)+1:ℕ):ℚ) := by
-    obtain ⟨err,amp⟩ := acc j k
-    have perturb := (abs_sub_abs_le_abs_sub _ _).trans err
-    have power : (1/2:ℝ)^P≤1 := pow_le_one₀ (by norm_num) (by norm_num)
-    have realBound : |((cols.get j).get k:ℝ)|≤((2*s.degree*(s.L₀+1)+1:ℕ):ℝ) := by
-      push_cast; linarith
-    exact_mod_cast realBound
-  have height := stageTwo_height solved
-  apply minor_solution_width (H:=H) (by dsimp [H]; omega) _ _ found i
-  · exact observation_height _ _ P small height.1.2
-  · intro j k
-    simpa only [Vector.get_eq_getElem,Vector.getElem_map] using
-      observation_height _ _ P small (height.2 j).2 k
+  obtain ⟨rhs,columns⟩ := constructed_observation_height hn big target box stage solved computed
+  exact minor_solution_width (H:=H) (by dsimp [H];omega) rhs columns found i
 
 end Cogentic.Concrete

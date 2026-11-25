@@ -98,17 +98,17 @@ private theorem project_independent {s : Marking.Input} (dp : 0<s.degree)
     (funext fun k => by cases k <;> exact v0 _)
   exact ⟨tz,fz,yz.1⟩
 
-/-- For each sufficiently large surviving input and each target, one positive
-search tuple has independent intercept, target indicators and all true log rows. -/
-theorem exists_protected_rank (line : DirichletLZerosOnLine) :
-    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
-    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
-    ∃ (u v : ℤ×ℤ) (rel : Marking.Relations), inCoefficientBox n u ∧ inCoefficientBox n v ∧
-      let s := TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat)
-      let S := (wanted s.degree ell (Fixed.rootBase n)).toFinset
-      Marking.stageOne s=some rel ∧ (∀ r, Marking.Row.mk false ell r ∈ rel.rows ↔ r∈S) ∧
-      6997*Fixed.h (n.log2+1)+2 ≤ (ordinaryMarkMatrix rel ((constructorCellMarks n ell none).filter
-        (fun a=>a%ell=Fixed.rootBase n%ell ∧ a∈rel.marks))).rank ∧
+/-- On any boxed, successful tuple, an off-target mark in each constructor
+cell and a baseline mark of each target color suffice for both forms of
+independence. The tuple can therefore carry further simultaneous tests. -/
+theorem protected_rank_of_cell_hits {n ell : ℕ} (hn : 2≤n) (big : 130000≤Fixed.d (n.log2+1))
+    (target : ell∈dyadicTargets (Fixed.beta (n.log2+1))) (u v : ℤ×ℤ) (rel : Marking.Relations)
+    (bu : inCoefficientBox n u) (bv : inCoefficientBox n v) :
+    let b := n.log2+1; let s := TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat)
+    let S := (wanted s.degree ell (Fixed.rootBase n)).toFinset
+    Marking.stageOne s=some rel →
+    (∀ c : Option (Bool×Fin (Fixed.d b)), ∃ a∈constructorCellMarks n ell c, a∈rel.marks ∧ a%ell=Fixed.rootBase n%ell) →
+    (∀ r∈wanted (Fixed.d b) ell (Fixed.rootBase n), ∃ a∈constructorCellMarks n ell none, a∈rel.marks ∧ a%ell=r) →
       ∃ x : Bool → Fin s.degree → ℝ,
         (∀ side j, x side j ∈ Set.Icc ((RootLogs.bracket s side j).left:ℝ) ((RootLogs.bracket s side j).right:ℝ) ∧
           RootLogs.normalized s.A (s.coeffs side) (x side j)=0) ∧
@@ -116,21 +116,8 @@ theorem exists_protected_rank (line : DirichletLZerosOnLine) :
           x (gridPlace j).1 (gridPlace j).2|) ∧
         IndependentWithTargets rel S ell (bracketMarkMatrix s rel x) := by
   classical
-  obtain ⟨n₁,supply⟩ := protected_target_cells_rank line
-  obtain ⟨b₀,grow⟩ := Fixed.degree_grows 130000
-  refine ⟨max n₁ (max 2 (2^b₀)),?_⟩
-  intro n large ell target composite sieved
-  obtain ⟨nlarge,other⟩ := max_le_iff.mp large
-  obtain ⟨hn,pow⟩ := max_le_iff.mp other
-  let b := n.log2+1
-  have bit := (Nat.le_log2 (show n≠0 by omega)).mpr pow
-  have big : 130000 ≤ Fixed.d b := grow _ (by dsimp [b]; omega)
-  obtain ⟨u,v,rel,bu,bv,stage,quiet,hit,_,_,ordinary⟩ := supply n nlarge ell target composite sieved
-  refine ⟨u,v,rel,bu,bv,stage,?_,ordinary,?_⟩
-  · intro r
-    simpa using computed_target_row_iff (show 3≤Fixed.d b by omega) target stage r
-  let s := TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat)
-  let S := (wanted s.degree ell (Fixed.rootBase n)).toFinset
+  intro b s S stage quiet hit
+  change 130000≤Fixed.d b at big
   have box (k : ℤ×ℤ) (inside : inCoefficientBox n k) :
       k.1.toNat≤2*b^2*Fixed.U b*Fixed.A b ∧ k.2.toNat≤2*b^2*Fixed.U b := by
     obtain ⟨_,l,_,r⟩ := inside
@@ -168,6 +155,39 @@ theorem exists_protected_rank (line : DirichletLZerosOnLine) :
   change targetScore S f (rel.marks.get i%ell)=0 at zi
   rw [hi,mod,targetScore,dif_pos r.prop] at zi
   exact zi
+
+/-- For each sufficiently large surviving input and each target, one positive
+search tuple has independent intercept, target indicators and all true log rows. -/
+theorem exists_protected_rank (line : DirichletLZerosOnLine) :
+    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    ∃ (u v : ℤ×ℤ) (rel : Marking.Relations), inCoefficientBox n u ∧ inCoefficientBox n v ∧
+      let s := TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat)
+      let S := (wanted s.degree ell (Fixed.rootBase n)).toFinset
+      Marking.stageOne s=some rel ∧ (∀ r, Marking.Row.mk false ell r ∈ rel.rows ↔ r∈S) ∧
+      6997*Fixed.h (n.log2+1)+2 ≤ (ordinaryMarkMatrix rel ((constructorCellMarks n ell none).filter
+        (fun a=>a%ell=Fixed.rootBase n%ell ∧ a∈rel.marks))).rank ∧
+      ∃ x : Bool → Fin s.degree → ℝ,
+        (∀ side j, x side j ∈ Set.Icc ((RootLogs.bracket s side j).left:ℝ) ((RootLogs.bracket s side j).right:ℝ) ∧
+          RootLogs.normalized s.A (s.coeffs side) (x side j)=0) ∧
+        IndependentWithTargets rel S ell (fun j i=>log |(rel.marks.get i:ℝ)/s.A-
+          x (gridPlace j).1 (gridPlace j).2|) ∧
+        IndependentWithTargets rel S ell (bracketMarkMatrix s rel x) := by
+  classical
+  obtain ⟨n₁,supply⟩ := protected_target_cells_rank line
+  obtain ⟨b₀,grow⟩ := Fixed.degree_grows 130000
+  refine ⟨max n₁ (max 2 (2^b₀)),?_⟩
+  intro n large ell target composite sieved
+  obtain ⟨nlarge,other⟩ := max_le_iff.mp large
+  obtain ⟨hn,pow⟩ := max_le_iff.mp other
+  let b := n.log2+1
+  have bit := (Nat.le_log2 (show n≠0 by omega)).mpr pow
+  have big : 130000 ≤ Fixed.d b := grow _ (by dsimp [b]; omega)
+  obtain ⟨u,v,rel,bu,bv,stage,quiet,hit,_,_,ordinary⟩ := supply n nlarge ell target composite sieved
+  refine ⟨u,v,rel,bu,bv,stage,?_,ordinary,?_⟩
+  · intro r
+    simpa using computed_target_row_iff (show 3≤Fixed.d b by omega) target stage r
+  exact protected_rank_of_cell_hits hn big target u v rel bu bv stage quiet hit
 
 end Cogentic.Construction
 

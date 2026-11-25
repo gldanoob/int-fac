@@ -38,12 +38,12 @@ private theorem normal_spec (x : SignedWord) :
       have p := Nat.pos_of_ne_zero z
       simp [normal,v,nz,encode,SignedWord.decode,signed,p]
 
-private def adjust (c : SignedWord) (x : List Bool) (neg : Bool) : SignedWord × ℕ :=
+def adjust (c : SignedWord) (x : List Bool) (neg : Bool) : SignedWord × ℕ :=
   let z := signedDifference c ⟨neg,x⟩
   let out := normal z.1
   (out.1,z.2+out.2+1)
 
-private theorem adjust_spec (c : SignedWord) (x : List Bool) (neg : Bool) :
+theorem adjust_spec (c : SignedWord) (x : List Bool) (neg : Bool) :
     let k := max c.digits.length x.length
     (adjust c x neg).1=encode (c.decode-signed neg (value x)) ∧
     (adjust c x neg).1.digits.length≤k+1 ∧ (adjust c x neg).2=28*k+14 := by

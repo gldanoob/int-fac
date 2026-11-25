@@ -61,6 +61,12 @@ import Cogentic.ProtectedRank
 import Cogentic.AnnihilatorExtraction
 import Cogentic.CenteredResidueContrast
 import Cogentic.ExhaustiveMarkCost
+import Cogentic.ProtectedDrawPeeling
+import Cogentic.SmoothOverlapPeeling
+import Cogentic.ProtectedDiagonalLoss
+import Cogentic.ProtectedInteractions
+import Cogentic.PooledPhysicalCenter
+import Cogentic.CompiledColumns
 import Cogentic.PowerScanCost
 import Cogentic.CandidateMarkConstruction
 import Cogentic.FactorBaseCost
@@ -127,6 +133,13 @@ run_cmd
     ``Cogentic.SealedSquareSupport.blind_decoder_on_small_support,
     ``Cogentic.Construction.protected_target_cells_rank, ``Cogentic.Construction.retained_arch_energy,
     ``Cogentic.Construction.exists_retained_arch_rank, ``Cogentic.Construction.exists_protected_rank,
+    ``Cogentic.Construction.retained_common_denominator_failure, ``Cogentic.Construction.protected_rank_denominator_peeling,
+    ``Cogentic.Construction.actual_rejection_peeling, ``Cogentic.Construction.peeled_row_hit_loss,
+    ``Cogentic.Construction.physical_pair_upper_for_peeling, ``Cogentic.Construction.retained_projected_energy,
+    ``Cogentic.Construction.protected_diagonal_rejection, ``Cogentic.Construction.protected_interaction_error_budget,
+    ``Cogentic.Construction.pooled_physical_center_second, ``Cogentic.Construction.pooled_ratio_center_exact,
+    ``Cogentic.BinaryBisection.isolate_stage_gates, ``Cogentic.BinaryRootColumns.entry_value,
+    ``Cogentic.BinaryRootColumns.fixed_work, ``Cogentic.BinaryProjection.fixed_columns_gates, ``Cogentic.BinaryProjection.row_spec, ``Cogentic.BinaryMarkDistance.markLog_spec,
     ``Cogentic.Construction.pooled_residue_class_contrast, ``Cogentic.Construction.hit_smooth_marginal_ratio,
     ``Cogentic.Construction.saddle_pointwise_error_frobenius_floor, ``Cogentic.Companion.factor_tree_of_local_bounds,
     ``Cogentic.BinaryFactorBase.fixed_factorBase, ``Cogentic.CandidateMarks.constructed_base_eq,
@@ -136,6 +149,10 @@ run_cmd
     ``Cogentic.BinaryPowerScan.driver_root_setup, ``Cogentic.CandidateRuntime.fixed_rows_and_marks,
     ``Cogentic.Concrete.exhaustive_mark_L_two_thirds, ``Cogentic.BinaryReconstruction.verified_proposal_spec,
     ``Cogentic.Concrete.all_minor_verification_gates, ``Cogentic.Concrete.constructed_minor_width,
+    ``Cogentic.BinaryHelmert.coefficient_spec, ``Cogentic.Concrete.exhaustive_arch_numerics_gates,
+    ``Cogentic.BinaryLogSeries.binaryLog_spec, ``Cogentic.BinaryLogSeries.roundSub_spec,
+    ``Cogentic.RootLogs.isolate_distance_width, ``Cogentic.BinaryConstructorBase.fixed_base, ``Cogentic.BinaryProjection.constructed_column_words,
+    ``Cogentic.Concrete.exhaustive_correction_gates,
     ``Cogentic.BinaryPerturbation.fixed_pair, ``Cogentic.BinaryCofactor.fixed_markModulus, ``Cogentic.Concrete.measured_search_L_two_thirds,
     ``Cogentic.Construction.pooled_residue_score_second, ``Cogentic.Construction.common_weight_cell_profiles, ``Cogentic.Construction.constructor_cell_insertion_total_variation, ``Cogentic.Construction.common_weight_second_transfer,
     ``Cogentic.Construction.kept_common_overlap_envelope, ``Cogentic.Construction.retained_same_prime_covariance, ``Cogentic.Construction.prescribed_pair_branch_partition, ``Cogentic.Construction.ordinary_target_branch_masks, ``Cogentic.Construction.PrescribedRows.hitProduct_on_pair_branch,

@@ -5,7 +5,7 @@ namespace Cogentic.Construction
 open Finset Real Filter Cogentic.Window
 open scoped Classical
 
-private theorem target_class_card {n ell : ℕ} (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+theorem target_class_card {n ell : ℕ} (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
     (cell : Option (Bool×Fin (Fixed.d (n.log2+1)))) (r : ℕ) :
     let b := n.log2+1; let X := (constructorCellMarks n ell cell).filter (fun a=>a ≡ r [MOD ell]); let M := 2*(cellMarkCount b:ℝ)/ell
     (X.card:ℝ)≤M := by
@@ -254,24 +254,29 @@ theorem target_class_score_error (line : DirichletLZerosOnLine) (k : ℕ) (kp : 
   exact cov R T large hn comp target absent cell r
 
 
-/-- A single positive coefficient tuple realizes every prescribed cell and target
-residue in any family of at most four times the degree plus four constraints. -/
-theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
+/-- For a family of at most four times the degree plus four prescribed
+classes, a single nonnegative test of arbitrarily small expected cost
+certifies all the retained count bounds on any boxed draw passing it. -/
+theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0<k) :
     ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
     presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
     let b := n.log2+1
     ∀ (I : Type*) [Fintype I] [Nonempty I], Fintype.card I≤4*Fixed.d b+4 →
     ∀ (cell : I → Option (Bool×Fin (Fixed.d b))) (residue : I → ℕ),
-    ∃ (u v : ℤ×ℤ) (rel : Marking.Relations), inCoefficientBox n u ∧ inCoefficientBox n v ∧
-      Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))=some rel ∧
-      ∀ i, let Y := (constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ residue i [MOD ell] ∧ a∈rel.marks)
-      4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card := by
+    let O := PrescribedRows.unrestricted n ell; let Ω := O.CoeffPoint false × O.CoeffPoint true
+    ∃ (test : Ω→ℝ) (μ : ℝ), (∀ t,0≤test t) ∧ HasSum (fun t=>twoFieldWeight O O t*test t) μ ∧ μ≤1/(k:ℝ) ∧
+      ∀ t : Ω, let u := t.1.val; let v := t.2.val
+        inCoefficientBox n u → inCoefficientBox n v → test t<1 →
+        ∃ rel : Marking.Relations,
+          Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))=some rel ∧
+          ∀ i, let Y := (constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ residue i [MOD ell] ∧ a∈rel.marks)
+            4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card := by
   classical
-  obtain ⟨b₁,count⟩ := target_class_score_error line 262144 (by decide)
+  obtain ⟨b₁,count⟩ := target_class_score_error line (262144*k) (Nat.mul_pos (by decide) hk)
   obtain ⟨n₂,marks⟩ := grid_cells_have_marks line
   obtain ⟨b₃,grows⟩ := Fixed.degree_grows 10004
   obtain ⟨b₄,deleted⟩ := rejected_score_loss line 2 (by norm_num)
-  obtain ⟨b₅,tiny⟩ := fixed_class_accuracy 2048
+  obtain ⟨b₅,tiny⟩ := fixed_class_accuracy (2048*(k:ℝ))
   obtain ⟨b₆,floor⟩ := PrescribedRows.smooth_probability_margin line
   let threshold := max (max b₁ b₆) (max b₃ (max 1000 (max b₄ b₅)))
   refine ⟨max n₂ (max 2 (2^threshold)),?_⟩
@@ -313,12 +318,13 @@ theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
   let fc (c : I) (t : Ω) := (s c t-m c)^2/(M/64)^2+loss c t/(M/64)
   let z : ℝ := Fixed.z b
   let e := exp (-2*z^2)
-  have entry (c : I) : cost c/(M/64)^2≤4096/(262144*(d:ℝ)) := by
+  have entry (c : I) : cost c/(M/64)^2≤4096/(262144*(k:ℝ)*d) := by
     have bound := (count R T one hn comp target absent (cell c) (residue c)).2
-    change cost c/M^2≤1/(262144*(d:ℝ)) at bound
+    push_cast at bound
+    change cost c/M^2≤1/(262144*(k:ℝ)*d) at bound
     exact (show cost c/(M/64)^2=4096*(cost c/M^2) by ring).le.trans
       ((mul_le_mul_of_nonneg_left bound (by norm_num : (0:ℝ)≤4096)).trans_eq (by ring))
-  have terms (c : I) : ∃ ξ, HasSum (fun t:Ω => W t*fc c t) ξ ∧ ξ≤4096/(262144*(d:ℝ))+64*e := by
+  have terms (c : I) : ∃ ξ, HasSum (fun t:Ω => W t*fc c t) ξ ∧ ξ≤4096/(262144*(k:ℝ)*d)+64*e := by
     obtain ⟨μ,h,ub⟩ := deleted R T four hn comp target absent (X c) (fun _=>1)
       (fun a ha=>(mem_filter.mp (mem_filter.mp ha).1).2) (fun a _=>cop a)
     simp only [abs_one,one_div,sum_const,nsmul_one] at h ub
@@ -342,27 +348,28 @@ theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
     _ ≤ _ := by apply exp_le_exp.mpr; change z*log 2≤z^2
                 nlinarith only [mul_nonneg (sub_nonneg.mpr z1) (zero_le_one.trans z1),
                   mul_le_mul_of_nonneg_left (log_le_sub_one_of_pos (by norm_num : (0:ℝ)<2)) (zero_le_one.trans z1)]
-  have smallD : (4*(d:ℝ)+4)*(64*e)≤1/4 := by
+  have kp : (0:ℝ)<k := Nat.cast_pos.mpr hk
+  have smallD : (4*(d:ℝ)+4)*(64*e)≤1/(2*(k:ℝ)) := by
     have le := mul_le_mul_of_nonneg_right dz (exp_pos (-2*z^2)).le
     rw [←exp_add,show z^2+ -2*z^2= -z^2 by ring] at le
     have ad := mul_le_mul_of_nonneg_right dn (exp_pos (-2*z^2)).le
-    dsimp only [e]
-    linarith only [le,ad,tiny b five]
-  have smallC : (4*(d:ℝ)+4)*(4096/(262144*(d:ℝ)))≤1/4 := by
-    rw [←mul_div_assoc,div_le_iff₀ (by positivity : (0:ℝ)<262144*d)]; linarith
-  have union := sum.trans (mul_le_mul_of_nonneg_right fcard (by positivity))
-  have total : (∑ c:I, ξ c)≤1/2 := union.trans (by rw [mul_add]; linarith only [smallC,smallD])
-  have box := coefficient_tail_lt_half_mark (b:=b) big
-  change 1216*B^2*exp (-π*((b:ℝ)^2)^2/2)<1/(2*B) at box
-  have small : 1/(2*B)≤1/4 := by rw [div_le_div_iff₀ (by linarith) (by norm_num)]; linarith
-  have fit : (∑ c:I, ξ c)+2432*B^2*exp (-π*((b:ℝ)^2)^2/2)<1 := by
-    linarith only [total,box,small]
+    have h : (4*(d:ℝ)+4)*(64*e)≤512*exp (-z^2) := by
+      dsimp only [e];linarith only [le,ad]
+    apply h.trans
+    rw [le_div_iff₀ (by positivity)]
+    nlinarith only [tiny b five]
+  have smallC : (4*(d:ℝ)+4)*(4096/(262144*(k:ℝ)*d))≤1/(2*(k:ℝ)) := by
+    rw [←mul_div_assoc,div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith only [mul_le_mul_of_nonneg_left dn kp.le,kp]
+  have unionBound := sum.trans (mul_le_mul_of_nonneg_right fcard (by positivity))
+  have total : (∑ c:I, ξ c)≤1/(k:ℝ) := unionBound.trans (by
+    rw [mul_add,show 1/(k:ℝ)=1/(2*(k:ℝ))+1/(2*(k:ℝ)) by ring];exact add_le_add smallC smallD)
   have pw0 (a) : 0≤w a := inv_nonneg.mpr (mul_nonneg (R.probability_unit target false _).1 (T.probability_unit target true _).1)
   have l0 (c t) : 0≤loss c t := sum_nonneg (fun a _=>by split <;> first | exact pw0 a | rfl)
   have f0 (c t) : 0≤fc c t := add_nonneg (div_nonneg (sq_nonneg _) (sq_nonneg _)) (div_nonneg (l0 c t) (by positivity))
-  obtain ⟨t,bu,bv,cheap⟩ := twoField_box_of_cost R T target (fun t=>∑ c:I,fc c t) _ (fun t=>sum_nonneg (fun c _=>f0 c t))
-    ((hasSum_sum (s:=(univ:Finset I)) (fun c _=>ex c)).congr_fun (fun t=>mul_sum ..)) fit
-  let u := t.1.val; let v := t.2.val
+  refine ⟨fun t=>∑ c:I,fc c t,∑ c:I,ξ c,fun t=>sum_nonneg (fun c _=>f0 c t),?_,total,?_⟩
+  · exact (hasSum_sum (s:=(univ:Finset I)) (fun c _=>ex c)).congr_fun (fun t=>mul_sum ..)
+  intro t u v bu bv cheap
   let stage := Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))
   let retained (a : ℕ) := ∃ rel,stage=some rel ∧ a∈rel.marks
   let yes (a : ℕ) := E a u ∧ F a v ∧ retained a
@@ -419,7 +426,7 @@ theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
     have contradiction := lower (Classical.arbitrary I)
     simp [no] at contradiction; linarith
   | some rel =>
-    refine ⟨u,v,rel,bu,bv,hs,?_⟩
+    refine ⟨rel,hs,?_⟩
     intro c Y
     have sub : (X c).filter yes ⊆ Y := by
       intro a mem
@@ -430,6 +437,38 @@ theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
     have eq : 2*M*(ell:ℝ)=4*(cellMarkCount b:ℝ) := by dsimp only [M]; field_simp; ring
     change 4*(cellMarkCount b:ℝ)≤(ell:ℝ)*B^2*Y.card
     linarith only [mul_le_mul_of_nonneg_right q ep'.le,eq]
+
+/-- A single positive coefficient tuple realizes every prescribed cell and target
+residue in any family of at most four times the degree plus four constraints. -/
+theorem simultaneous_target_class_counts (line : DirichletLZerosOnLine) :
+    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    let b := n.log2+1
+    ∀ (I : Type*) [Fintype I] [Nonempty I], Fintype.card I≤4*Fixed.d b+4 →
+    ∀ (cell : I → Option (Bool×Fin (Fixed.d b))) (residue : I → ℕ),
+    ∃ (u v : ℤ×ℤ) (rel : Marking.Relations), inCoefficientBox n u ∧ inCoefficientBox n v ∧
+      Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))=some rel ∧
+      ∀ i, let Y := (constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ residue i [MOD ell] ∧ a∈rel.marks)
+      4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card := by
+  obtain ⟨n₀,test⟩ := target_class_count_test line 2 (by decide)
+  refine ⟨max n₀ (2^1000),?_⟩
+  intro n large ell target comp absent b I _ _ count cell residue
+  obtain ⟨old,lim⟩ := max_le_iff.mp large
+  have powpos : 0<(2:ℕ)^1000 := pow_pos (by decide : 0<(2:ℕ)) _
+  have big : 1000≤b := ((Nat.le_log2 ((powpos.trans_le lim).ne')).mpr lim).trans (Nat.le_succ _)
+  let O := PrescribedRows.unrestricted n ell
+  obtain ⟨f,μ,nonneg,law,rate,passes⟩ := test n old ell target comp absent I count cell residue
+  have tail := coefficient_tail_lt_half_mark (b:=b) big
+  have hp := Nat.mul_pos (Fixed.degree_pos (Nat.succ_pos n.log2)) (Nat.succ_pos b.log2)
+  have bpos : 0<1000*Fixed.h b := Nat.mul_pos (by decide) hp
+  have B2 : (2:ℝ)≤Fixed.B b := Nat.cast_le.mpr (Nat.succ_le_of_lt (Nat.one_lt_pow bpos.ne' (by decide : 1<2)))
+  have half : 1/(2*(Fixed.B b:ℝ))≤1/4 := by
+    rw [div_le_div_iff₀ (by linarith only [B2]) (by norm_num)];linarith only [B2]
+  have enough : μ+2432*(Fixed.B b:ℝ)^2*exp (-π*((b:ℝ)^2)^2/2)<1 := by
+    norm_num at rate;linarith only [rate,tail,half]
+  obtain ⟨t,bu,bv,cheap⟩ := twoField_box_of_cost O O target f μ nonneg law enough
+  obtain ⟨rel,stage,supply⟩ := passes t bu bv cheap
+  exact ⟨t.1.val,t.2.val,rel,bu,bv,stage,supply⟩
 
 /-- A single positive coefficient tuple realizes every prescribed cell and target
 residue in any family of at most four times the degree plus four constraints. -/
