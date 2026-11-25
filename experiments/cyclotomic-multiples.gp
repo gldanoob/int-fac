@@ -98,3 +98,18 @@ checkPairedCubicBox() = {
   if(hits!=78,error("paired inertness count ",hits));
   hits
 };
+
+checkDualCubicHeightFive() = {
+  my(p=508961741223076646327831254220359177129733378337682010159415812572815148962965545641339938825691409335536493976781107341750834152234854509376810751);
+  my(q=561758698292688217113428090639547348333634156756244687775200810868194329340493471143867703613714392797661849741193872207506873581717354063386196751);
+  my(hp=p^2+p+1,hq=q^2+q+1,m=lcm(hp,hq),n=p*q,hits=0);
+  if(!isprime(p) || !isprime(q) || p>=q || q>=2*p || gcd(hp,hq)!=13 ||
+     gcd(m,p*(p^2-1)*q*(q^2-1))!=1,error("dual-order primes or exponents"));
+  if(splitCyclotomicBox(n,m,3,5)!=[1,0],error("dual-order height-five split"));
+  if(splitCyclotomicBox(n,m,3,6)!=[p,x^3+3*x^2-6*x-6],error("dual-order first witness"));
+  forvec(c=vector(3,i,[-5,5]),
+    my(f=x^3+Polrev(c),a=polisirreducible(Mod(1,p)*f),b=polisirreducible(Mod(1,q)*f));
+    if(a!=b,error("dual-order inertness mismatch ",f));hits+=a);
+  if(hits!=178,error("dual-order inertness count ",hits));
+  hits
+};
