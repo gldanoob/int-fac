@@ -283,4 +283,58 @@ theorem fixed_principal_prime_band (line : DirichletLZerosOnLine) :
       rw [mul_mul_mul_comm, ← Real.rpow_add pos, show (-99/400+1/5:ℝ) = -19/400 by norm_num]
       ring
 
+/-- At nonzero height, integration by parts saves a full frequency in the
+    principal main term of the actual Euler product on the same rectangle. -/
+theorem principal_euler_frequency_bound (line : DirichletLZerosOnLine) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (B : ℝ) (D : Finset ℕ) (s : ℂ), 16 ≤ B →
+      199/200 ≤ s.re → s.re ≤ 1 → 0 < |s.im| → |s.im| ≤ B^(1/5 : ℝ) →
+      let J := (Finset.Ioc ⌊Real.sqrt B⌋₊ ⌊B⌋₊).filter Nat.Prime
+      D ⊆ J →
+      ‖∏ p ∈ J \ D, (1 + (p:ℂ)^(-s))‖ ≤ Real.exp (
+        6*B^(1-s.re)/(|s.im| *Real.log B) + C*(1+Real.log (3*B))^2*B^(-19/400:ℝ) +
+        D.card*B^(-199/400:ℝ) + (∑' n : ℕ, (n:ℝ)^(-3/2:ℝ))/2) := by
+  obtain ⟨C,hC,approx⟩ := fixed_principal_prime_band line
+  refine ⟨C,hC,fun B D s hB lo hi imPos tim => ?_⟩
+  let J := (Finset.Ioc ⌊Real.sqrt B⌋₊ ⌊B⌋₊).filter Nat.Prime
+  dsimp only
+  intro omitted
+  let H := Real.log B
+  let integ := ∫ x in H/2..H, Complex.exp ((1-s)*x)/(x:ℂ)
+  have pos : 0 < B := by linarith
+  have logpos : 0 < H := Real.log_pos (by linarith)
+  have decay := prime_integral_decay (1-s) (H/2) (by linarith) (by simp; linarith)
+  simp only [show 2*(H/2)=H by ring,Complex.sub_im,Complex.one_im, zero_sub,abs_neg,
+    Complex.sub_re,Complex.one_re] at decay
+  have iBound : ‖integ‖ ≤ 6*B^(1-s.re)/(|s.im| *H) := by
+    rw [Real.rpow_def_of_pos pos,(le_div_iff₀ (mul_pos imPos logpos))]
+    rw [le_div_iff₀ (show 0 < H/2 by linarith)] at decay
+    change _ ≤ 6*Real.exp (H*(1-s.re))
+    rw [mul_comm H (1-s.re)]
+    dsimp [integ]
+    linarith
+  let w (p : ℕ) := (p:ℂ)^(-s)
+  have full := (norm_add_le ((∑ p ∈ J, w p)-integ) integ).trans
+    (add_le_add (approx B s hB lo hi tim) iBound)
+  rw [sub_add_cancel] at full
+  have small (p : ℕ) (hp : p ∈ D) : ‖w p‖ ≤ B^(-199/400:ℝ) := by
+    have lower := Nat.lt_of_floor_lt (Finset.mem_Ioc.mp (Finset.mem_filter.mp (omitted hp)).1).1
+    have sp := Real.sqrt_pos.mpr pos
+    dsimp only [w]
+    rw [← Complex.ofReal_natCast, Complex.norm_cpow_eq_rpow_re_of_pos (sp.trans lower), Complex.neg_re]
+    refine (Real.rpow_le_rpow_of_nonpos sp lower.le (by linarith : -s.re ≤ 0)).trans ?_
+    rw [Real.sqrt_eq_rpow, ← Real.rpow_mul pos.le]
+    exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by linarith)
+  have del : ‖∑ p ∈ D, w p‖ ≤ D.card*B^(-199/400:ℝ) :=
+    (norm_sum_le ..).trans (by simpa using Finset.sum_le_sum small)
+  have sumBound := (norm_sub_le (∑ p ∈ J, w p) (∑ p ∈ D, w p)).trans (add_le_add full del)
+  rw [← Finset.sum_sdiff_eq_sub omitted] at sumBound
+  have unit (p : ℕ) : (1:DirichletCharacter ℂ 1) (p:ZMod 1) = 1 := by
+    rw [Subsingleton.elim (p:ZMod 1) 1, map_one]
+  have eb := squarefree_product_bound (1:DirichletCharacter ℂ 1) (J \ D)
+    (fun p hp => (Finset.mem_filter.mp (Finset.mem_sdiff.mp hp).1).2.one_le) s (by linarith)
+  simp only [unit,mul_one] at eb
+  refine eb.trans (Real.exp_le_exp.mpr (add_le_add ?_ le_rfl))
+  dsimp only [H,w] at sumBound
+  linarith
+
 end Cogentic.Window

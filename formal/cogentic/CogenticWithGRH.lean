@@ -18,13 +18,22 @@ theorem polynomial_generators :
 
 open Fixed TwoThirdsSearch TwoThirdsFactor
 
+/-- Complete prime factors with a trial-division fallback. -/
+theorem concrete_factorization :
+    ∃ (k : ℕ) (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))),
+      ∀ n (hn : 2 ≤ n),
+        let factors := (Concrete.run k gen n hn).factors
+        factors.prod = n ∧ (∀ p ∈ factors, p.Prime) ∧
+          ∀ p, p.Prime → ∀ j, p^j ∣ n ↔ j ≤ factors.count p :=
+  Concrete.total_factorization LFunction_eq_zero_re
+
 /-- The remaining hypothesis about candidate success quantifies over all large
     surviving inputs. The final inequality refers to supplied per-node charges. -/
-theorem factor_of_eventual_coverage (attempt : ℕ → TryPair)
-    (covered : ∃ n₀ : ℕ, ∀ n ≥ n₀, (parameters attempt n).Covers n) :
+theorem factor_of_eventual_coverage
+    (covered : ∃ n₀ : ℕ, ∀ n ≥ n₀, (parameters Concrete.candidate n).Covers n) :
     ∃ (threshold k : ℕ) (schedules : (n : ℕ) → 2 ≤ n → RelationSchedule n)
       (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))),
-      (∀ n (hn : 2 ≤ n), threshold ≤ n → (schedules n hn).parameters = parameters attempt n ∧
+      (∀ n (hn : 2 ≤ n), threshold ≤ n → (schedules n hn).parameters = parameters Concrete.candidate n ∧
         (schedules n hn).candidates = (dyadicTargets (beta (n.log2+1))).sort) ∧
       ∀ (n : ℕ) (hn : 2 ≤ n) (charge : ℕ → ℕ) (cap : ℕ),
         (∀ a, 2 ≤ a → a ≤ n → charge a ≤ cap) →
@@ -32,6 +41,6 @@ theorem factor_of_eventual_coverage (attempt : ℕ → TryPair)
         tree.factors.prod = n ∧ (∀ p ∈ tree.factors, p.Prime) ∧
         (∀ p, p.Prime → ∀ j, p^j ∣ n ↔ j ≤ tree.factors.count p) ∧
         tree.work charge ≤ (2*n.log2-1)*cap :=
-  fixed_factorization LFunction_eq_zero_re attempt covered
+  Concrete.factor_of_box_coverage LFunction_eq_zero_re covered
 
 end Cogentic

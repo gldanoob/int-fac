@@ -70,7 +70,7 @@ structure RelationSchedule (n : ℕ) where
     2^beta ≤ 3*beta*candidates.toFinset.card ∧
     ∀ a ∈ candidates, BoxWitness n (2*L₀^2*U*A) (2*L₀^2*U) attempt a
 
-private theorem presieve_hits {n bits beta A m d : ℕ} (hd : ProperDivisor n d)
+theorem presieve_hits {n bits beta A m d : ℕ} (hd : ProperDivisor n d)
     (bound : d ≤ indexCap bits beta) : presieve n bits beta A m ≠ none := by
   have occurs : d ∈ List.range' 2 (indexCap bits beta - 1) :=
     List.mem_range'_1.mpr ⟨hd.1, by have := hd.1; omega⟩

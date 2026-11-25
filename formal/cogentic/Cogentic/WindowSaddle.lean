@@ -267,17 +267,11 @@ private theorem prime_factor_phase (p : ℕ) (hp : 0 < p) (α t : ℝ) :
   push_cast
   ring
 
-/-- The characteristic function used in the saddle bounds is exactly the
-    principal squarefree Euler product at the specified complex frequency. -/
-theorem saddle_characteristic_euler (J : Finset ℕ) (hJ : ∀ p ∈ J, 0 < p) (α t : ℝ) :
-    saddleCharacteristic J (primeProbability α) (fun p => Real.log p) t =
-      Complex.exp (-Complex.I*(t*saddleMean J α)) *
-        principalEuler J (α-t*Complex.I) / (∏ p ∈ J, (1+(((p:ℝ)^(-α) : ℝ) : ℂ))) := by
-  have factor (p : ℕ) (hp : p ∈ J) :
+private theorem prime_centered_factor (p : ℕ) (hp : 0 < p) (α t : ℝ) :
       centeredFactor (primeProbability α p) (t*Real.log p) =
         phase (-primeProbability α p*(t*Real.log p)) *
         ((1+(p : ℂ)^(-((α : ℂ)-t*Complex.I))) / (1+(((p:ℝ)^(-α) : ℝ) : ℂ))) := by
-    rw [centeredFactor_eq, prime_factor_phase p (hJ p hp)]
+    rw [centeredFactor_eq, prime_factor_phase p hp]
     congr 1
     have pos : 0 < 1+(p : ℝ)^(-α) := by positivity
     have nz : (1+(((p:ℝ)^(-α) : ℝ) : ℂ)) ≠ 0 := by exact_mod_cast pos.ne'
@@ -285,15 +279,23 @@ theorem saddle_characteristic_euler (J : Finset ℕ) (hJ : ∀ p ∈ J, 0 < p) (
       Complex.ofReal_one, Complex.ofReal_add]
     field_simp
     ring
-  have cent : (∏ p ∈ J, phase (-primeProbability α p*(t*Real.log p))) =
+
+private theorem prime_center_phase (J : Finset ℕ) (α t : ℝ) : (∏ p ∈ J, phase (-primeProbability α p*(t*Real.log p))) =
       Complex.exp (-Complex.I*(t*saddleMean J α)) := by
     simp only [phase, ← Complex.exp_sum]
     congr 1
     simp only [saddleMean, Complex.ofReal_mul, Complex.ofReal_sum, Complex.ofReal_neg,
       Finset.mul_sum]
     exact Finset.sum_congr rfl (fun p _ => by ring)
-  rw [saddleCharacteristic, Finset.prod_congr rfl factor, Finset.prod_mul_distrib,
-    Finset.prod_div_distrib, cent, principalEuler]
+
+/-- The characteristic function used in the saddle bounds is exactly the
+    principal squarefree Euler product at the specified complex frequency. -/
+theorem saddle_characteristic_euler (J : Finset ℕ) (hJ : ∀ p ∈ J, 0 < p) (α t : ℝ) :
+    saddleCharacteristic J (primeProbability α) (fun p => Real.log p) t =
+      Complex.exp (-Complex.I*(t*saddleMean J α)) *
+        principalEuler J (α-t*Complex.I) / (∏ p ∈ J, (1+(((p:ℝ)^(-α) : ℝ) : ℂ))) := by
+  rw [saddleCharacteristic, Finset.prod_congr rfl (fun p hp => prime_centered_factor p (hJ p hp) α t), Finset.prod_mul_distrib,
+    Finset.prod_div_distrib, prime_center_phase, principalEuler]
   ring
 
 /-- Explicit lower bound for the actual central prime Euler integral on a
@@ -945,20 +947,19 @@ private theorem poisson_exponent_real {ι : Type*} (J : Finset ι) (r ell : ι �
   intro p hp
   nlinarith [mul_le_mul_of_nonneg_left (one_sub_cos_lower _ (hphase p hp)) (hr p hp)]
 
-/-- Pointwise first Edgeworth expansion of the actual centered prime product.
-    Setting u=Vt² and y=H|t| keeps the remainder integrable with relative
-    size H⁴/V². The separate squared-probability term is the finite-band
-    Bernoulli-to-Poisson replacement error. -/
-theorem saddle_edgeworth_pointwise {ι : Type*} (J : Finset ι) (r ell : ι → ℝ)
-    (t H : ℝ) (hH : 0 ≤ H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+private theorem central_poisson_parameters {ι : Type*} (J : Finset ι) (r ell : ι → ℝ)
+    (t H : ℝ) (hH : 0 ≤ H) (hr : ∀ p ∈ J, 0 ≤ r p)
     (hband : ∀ p ∈ J, |ell p| ≤ H) (hsmall : H*|t| ≤ 1) :
     let M := poissonMoment J r ell
-    let u := M 2 * t^2
+    let u := M 2*t^2
     let y := H*|t|
-    |(saddleCharacteristic J r ell t).re - Real.exp (-u/2)*
-      (1+(M 4*t^4/24)-(M 3)^2*t^6/72)| ≤
-      4*(∑ p ∈ J, (r p)^2) + Real.exp (-u/3)*
-      (y^4*(Real.exp 1*u+3*u^2+2*u^3+16*(Real.exp 1+3)*u^4)) := by
+    let b := -(M 3)*t^3/6
+    let c := M 4*t^4/24
+    let d := M 5*t^5/120
+    let z := poissonExponent J r ell t
+    0 ≤ u ∧ 0 ≤ y ∧ |b| ≤ u*y ∧ 0 ≤ c ∧ c ≤ u*y^2 ∧ |d| ≤ u*y^3 ∧
+      -u/2+c ≤ -u/3 ∧ z.re ≤ -u/3 ∧
+      ‖z-((-u/2+c : ℝ)+(b+d : ℝ)*Complex.I)‖ ≤ Real.exp 1*u*y^4 := by
   let M := poissonMoment J r ell
   let u := M 2*t^2
   let y := H*|t|
@@ -1012,8 +1013,32 @@ theorem saddle_edgeworth_pointwise {ι : Type*} (J : Finset ι) (r ell : ι → 
     · dsimp [u,y,M]
       have ts : |t|^6 = t^2*|t|^4 := by rw [show (6:ℕ)=2+4 by decide,pow_add,sq_abs]
       rw [ts]; ring
+  exact ⟨hu,hy,hb,hc,hc',hd,la,poisson_exponent_real J r ell t hr phasele,E⟩
+
+/-- Pointwise first Edgeworth expansion of the actual centered prime product.
+    Setting u=Vt² and y=H|t| keeps the remainder integrable with relative
+    size H⁴/V². The separate squared-probability term is the finite-band
+    Bernoulli-to-Poisson replacement error. -/
+theorem saddle_edgeworth_pointwise {ι : Type*} (J : Finset ι) (r ell : ι → ℝ)
+    (t H : ℝ) (hH : 0 ≤ H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hsmall : H*|t| ≤ 1) :
+    let M := poissonMoment J r ell
+    let u := M 2 * t^2
+    let y := H*|t|
+    |(saddleCharacteristic J r ell t).re - Real.exp (-u/2)*
+      (1+(M 4*t^4/24)-(M 3)^2*t^6/72)| ≤
+      4*(∑ p ∈ J, (r p)^2) + Real.exp (-u/3)*
+      (y^4*(Real.exp 1*u+3*u^2+2*u^3+16*(Real.exp 1+3)*u^4)) := by
+  let M := poissonMoment J r ell
+  let u := M 2*t^2
+  let y := H*|t|
+  let b := -(M 3)*t^3/6
+  let c := M 4*t^4/24
+  let d := M 5*t^5/120
+  let z := poissonExponent J r ell t
+  obtain ⟨hu,hy,hb,hc,hc',hd,la,hz,E⟩ := central_poisson_parameters J r ell t H hH hr hband hsmall
   have point := real_edgeworth_error z (-u/3) (-u/2) b c d (Real.exp 1*u*y^4)
-    hc (poisson_exponent_real J r ell t hr phasele) la E
+    hc hz la E
   have polynomial := edgeworth_polynomial_bound u y b c d hu hy hsmall hb hc hc' hd
   have approx := saddle_poisson_approximation J r ell t hr hr'
   have realError := (Complex.abs_re_le_norm (saddleCharacteristic J r ell t - Complex.exp z)).trans approx
@@ -1022,6 +1047,810 @@ theorem saddle_edgeworth_pointwise {ι : Type*} (J : Finset ι) (r ell : ι → 
   rw [reduce] at point
   exact (abs_sub_le _ (Complex.exp z).re _).trans
     (add_le_add realError (point.trans (mul_le_mul_of_nonneg_left polynomial (Real.exp_pos _).le)))
+
+private def momentConstant : ℕ → ℝ
+  | 0 => 1
+  | k+1 => 3*(2*(k:ℝ)+1)/2 * momentConstant k
+
+private theorem gaussianMoment_scaled (V : ℝ) (hV : 0 < V) (k : ℕ) :
+    gaussianMoment (V/3) k = momentConstant k/V^k*Real.sqrt (3*Real.pi/V) := by
+  induction k with
+  | zero =>
+    simp only [gaussianMoment, Nat.mul_zero, pow_zero, one_mul, integral_gaussian,
+      momentConstant,div_one]
+    congr 1; ring
+  | succ k ih =>
+    have m := gaussianMoment_succ (2*V/3) (by positivity) k
+    rw [show 2*V/3/2=V/3 by ring, ih] at m
+    rw [m,momentConstant,pow_succ]
+    field_simp
+
+private def envelopeTerm (V H : ℝ) (k : ℕ) (t : ℝ) : ℝ :=
+  Real.exp (-(V*t^2)/3)*(H*|t|)^4*(V*t^2)^k
+
+private theorem envelopeTerm_eq (V H : ℝ) (k : ℕ) (t : ℝ) :
+    envelopeTerm V H k t = (H^4*V^k)*(t^(2*(k+2))*Real.exp (-(V/3)*t^2)) := by
+  simp only [envelopeTerm,mul_pow,show |t|^4=t^4 by exact (by decide : Even 4).pow_abs _,
+    ← pow_mul, Nat.mul_add, pow_add]
+  rw [show -(V*t^2)/3 = -(V/3)*t^2 by ring]
+  ring
+
+private theorem envelopeTerm_integrable (V H : ℝ) (hV : 0 < V) (k : ℕ) :
+    Integrable (envelopeTerm V H k) := by
+  simp_rw [show envelopeTerm V H k = fun t => (H^4*V^k)*(t^(2*(k+2))*Real.exp (-(V/3)*t^2)) by
+    funext t; exact envelopeTerm_eq V H k t]
+  apply Integrable.const_mul
+  convert! integrable_rpow_mul_exp_neg_mul_sq (b := V/3) (s := ((2*(k+2):ℕ):ℝ))
+    (by positivity) (lt_of_lt_of_le (by norm_num) (Nat.cast_nonneg _)) using 1
+  simp only [Real.rpow_natCast]
+
+private theorem envelopeTerm_integral (V H : ℝ) (hV : 0 < V) (k : ℕ) :
+    (∫ t : ℝ, envelopeTerm V H k t) = momentConstant (k+2)*
+        (H^4/V^2*Real.sqrt (3*Real.pi/V)) := by
+  simp_rw [envelopeTerm_eq]
+  rw [integral_const_mul]
+  change _*gaussianMoment (V/3) (k+2) = _
+  rw [gaussianMoment_scaled V hV, pow_add]
+  field_simp
+
+private def envelopeCoefficient : ℕ → ℝ
+  | 0 => 1
+  | 1 => Real.exp 1+1
+  | 2 => 4
+  | 3 => 2
+  | _ => 16*(Real.exp 1+3)
+
+private def saddleEnvelope (V H t : ℝ) : ℝ :=
+  ∑ k ∈ Finset.range 5, envelopeCoefficient k*envelopeTerm V H k t
+
+/-- Absolute constant in the integrated first Edgeworth remainder. -/
+def saddleEdgeworthConstant : ℝ :=
+  ∑ k ∈ Finset.range 5, envelopeCoefficient k*momentConstant (k+2)
+
+private theorem saddleEnvelope_eq (V H t : ℝ) :
+    let u := V*t^2
+    let y := H*|t|
+    saddleEnvelope V H t = Real.exp (-u/3)*(y^4*
+      (1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4)) := by
+  simp only [saddleEnvelope,envelopeTerm,Finset.sum_range_succ,Finset.sum_range_zero,
+    envelopeCoefficient]
+  ring
+
+private theorem saddleEnvelope_integrable (V H : ℝ) (hV : 0 < V) :
+    Integrable (saddleEnvelope V H) := by
+  apply integrable_finsetSum
+  exact fun k _ => (envelopeTerm_integrable V H hV k).const_mul _
+
+private theorem saddleEnvelope_integral (V H : ℝ) (hV : 0 < V) :
+    (∫ t : ℝ, saddleEnvelope V H t) =
+      saddleEdgeworthConstant*(H^4/V^2*Real.sqrt (3*Real.pi/V)) := by
+  unfold saddleEnvelope
+  rw [integral_finsetSum _ (fun k _ => (envelopeTerm_integrable V H hV k).const_mul _)]
+  simp_rw [integral_const_mul,envelopeTerm_integral V H hV, ← mul_assoc]
+  rw [← Finset.sum_mul,saddleEdgeworthConstant]
+  rw [← Finset.sum_mul]
+
+private def edgeworthModel (V K₃ K₄ t : ℝ) : ℝ :=
+  Real.exp (-(V/2)*t^2)*(1+K₄*t^4/24-K₃^2*t^6/72)
+
+private theorem edgeworthModel_integrable (V K₃ K₄ : ℝ) (hV : 0 < V) :
+    Integrable (edgeworthModel V K₃ K₄) := by
+  let G (x : ℝ) := Real.exp (-(V/2)*x^2)
+  have ig (k : ℕ) : Integrable (fun x : ℝ => x^k*G x) := by
+    simpa [G] using integrable_rpow_mul_exp_neg_mul_sq (b := V/2) (s := (k:ℝ))
+      (by positivity) (lt_of_lt_of_le (by norm_num) (Nat.cast_nonneg _))
+  have i0 : Integrable G := by simpa using ig 0
+  have e : edgeworthModel V K₃ K₄ = fun x =>
+      (G x+(K₄/24)*(x^4*G x))-(K₃^2/72)*(x^6*G x) := by
+    funext x; unfold edgeworthModel G; ring
+  rw [e]
+  exact (i0.add ((ig 4).const_mul _)).sub ((ig 6).const_mul _)
+
+private theorem edgeworthModel_tail (V H K₃ K₄ t : ℝ) (hV : 0 ≤ V) (_hH : 0 ≤ H)
+    (h₃ : |K₃| ≤ V*H) (h₄ : |K₄| ≤ V*H^2) (hout : 1 ≤ H*|t|) :
+    |edgeworthModel V K₃ K₄ t| ≤ saddleEnvelope V H t := by
+  let u := V*t^2
+  let y := H*|t|
+  have hu : 0 ≤ u := by dsimp [u]; positivity
+  have hy : 0 ≤ y := by dsimp [y]; positivity
+  have yy : 1 ≤ y := hout
+  have y2 := pow_le_pow_left₀ zero_le_one yy 2
+  have y4 := pow_le_pow_left₀ zero_le_one yy 4
+  simp only [one_pow] at y2 y4
+  have y24 : y^2 ≤ y^4 := by nlinarith [mul_nonneg (sq_nonneg y) (sub_nonneg.mpr y2)]
+  have q4 : |K₄*t^4/24| ≤ u*y^2 := by
+    dsimp [u,y]
+    rw [abs_div,abs_mul,abs_of_nonneg (show 0 ≤ t^4 by positivity),
+      abs_of_pos (by norm_num : (0:ℝ)<24),mul_pow,sq_abs]
+    nlinarith [mul_le_mul_of_nonneg_right h₄ (show 0 ≤ t^4 by positivity),
+      mul_nonneg (mul_nonneg hV (sq_nonneg H)) (show 0 ≤ t^4 by positivity)]
+  have q3 : K₃^2*t^6/72 ≤ u^2*y^2 := by
+    have sq := pow_le_pow_left₀ (abs_nonneg K₃) h₃ 2
+    rw [sq_abs] at sq
+    dsimp [u,y]
+    rw [mul_pow,mul_pow,sq_abs]
+    nlinarith [mul_le_mul_of_nonneg_right sq (show 0 ≤ t^6 by positivity),
+      mul_nonneg (sq_nonneg (V*H)) (show 0 ≤ t^6 by positivity)]
+  have polynomial : |1+K₄*t^4/24-K₃^2*t^6/72| ≤ y^4*(1+u+u^2) := by
+    apply (abs_sub ..).trans
+    rw [abs_of_nonneg (show 0 ≤ K₃^2*t^6/72 by positivity)]
+    have s := abs_add_le (1:ℝ) (K₄*t^4/24)
+    rw [abs_one] at s
+    nlinarith [mul_le_mul_of_nonneg_left y24 hu, mul_le_mul_of_nonneg_left y24 (sq_nonneg u)]
+  rw [edgeworthModel,abs_mul,abs_of_pos (Real.exp_pos _),saddleEnvelope_eq]
+  change _ ≤ Real.exp (-u/3)*(y^4*(1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4))
+  have ex : Real.exp (-(V/2)*t^2) ≤ Real.exp (-u/3) := Real.exp_le_exp.mpr
+    (by dsimp [u] at *; linarith only [hu])
+  apply (mul_le_mul ex polynomial (abs_nonneg _) (Real.exp_pos _).le).trans
+  apply mul_le_mul_of_nonneg_left _ (Real.exp_pos _).le
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  nlinarith [mul_nonneg (Real.exp_pos 1).le hu, sq_nonneg u,
+    show 0 ≤ u^3 by positivity, show 0 ≤ (Real.exp 1+3)*u^4 by positivity]
+
+/-- First Edgeworth expansion for the actual central Euler integral. The
+    variance and cumulants in the main term are the Poisson prime moments.
+    The explicit squared-probability term accounts for the distinction
+    between Bernoulli and Poisson primes on the original squarefree support. -/
+theorem saddle_integral_edgeworth {ι : Type*} (J : Finset ι) (r ell : ι → ℝ) (H : ℝ)
+    (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) :
+    let M := poissonMoment J r ell
+    let V := M 2
+    |(∫ t : ℝ in -(1/H)..1/H, (saddleCharacteristic J r ell t).re) -
+      Real.sqrt (2*Real.pi/V)*(1+M 4/(8*V^2)-5*(M 3)^2/(24*V^3))| ≤
+      (8/H)*(∑ p ∈ J, (r p)^2) + saddleEdgeworthConstant*(H^4/V^2*Real.sqrt (3*Real.pi/V)) := by
+  let M := poissonMoment J r ell
+  let V := M 2
+  let I := Set.Ioc (-(1/H)) (1/H)
+  let f (t : ℝ) := (saddleCharacteristic J r ell t).re
+  let G := edgeworthModel V (M 3) (M 4)
+  let A := 4*(∑ p ∈ J, (r p)^2)
+  have vpos : 0 < V := hV
+  have ip : 0 < 1/H := by positivity
+  have lr : -(1/H) ≤ 1/H := by linarith
+  have measurable : MeasurableSet I := measurableSet_Ioc
+  have fcont : Continuous f := by unfold f saddleCharacteristic centeredFactor phase; fun_prop
+  have iF : Integrable (I.indicator f) := (integrable_indicator_iff measurable).mpr fcont.integrableOn_Ioc
+  have iG : Integrable G := edgeworthModel_integrable _ _ _ vpos
+  have iA : Integrable (I.indicator (fun _ => A)) :=
+    (integrable_indicator_iff measurable).mpr continuous_const.integrableOn_Ioc
+  have env := saddleEnvelope_integrable V H vpos
+  have bound (t : ℝ) : ‖I.indicator f t-G t‖ ≤ I.indicator (fun _ => A) t+saddleEnvelope V H t := by
+    rw [Real.norm_eq_abs]
+    by_cases h : t ∈ I
+    · rw [Set.indicator_of_mem h, Set.indicator_of_mem h]
+      have hsmall : H*|t| ≤ 1 := by
+        rw [mul_comm, ← le_div_iff₀ hH, abs_le]
+        exact ⟨h.1.le,h.2⟩
+      have p := saddle_edgeworth_pointwise J r ell t H hH.le hr hr' hband hsmall
+      let u := V*t^2
+      let y := H*|t|
+      have hu : 0 ≤ u := by dsimp [u]; positivity
+      have inside : |f t-G t| ≤ A+Real.exp (-u/3)*(y^4*
+          (Real.exp 1*u+3*u^2+2*u^3+16*(Real.exp 1+3)*u^4)) := by
+        simpa only [f,G,edgeworthModel,show -(V/2)*t^2 = -u/2 by dsimp [u]; ring] using p
+      apply inside.trans
+      rw [saddleEnvelope_eq]
+      change _ ≤ A+Real.exp (-u/3)*(y^4*_)
+      apply add_le_add le_rfl
+      apply mul_le_mul_of_nonneg_left _ (Real.exp_pos _).le
+      apply mul_le_mul_of_nonneg_left _ (by positivity)
+      change Real.exp 1*u+3*u^2+2*u^3+16*(Real.exp 1+3)*u^4 ≤
+        1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4
+      nlinarith [sq_nonneg u]
+    · rw [Set.indicator_of_notMem h, Set.indicator_of_notMem h, zero_sub, abs_neg, zero_add]
+      have hout : 1 ≤ H*|t| := by
+        rw [mul_comm, ← div_le_iff₀ hH]
+        by_contra! ha
+        exact h (show t ∈ I from ⟨(abs_lt.mp ha).1,(abs_lt.mp ha).2.le⟩)
+      apply edgeworthModel_tail V H _ _ t vpos.le hH.le _ _ hout
+      · simpa only [pow_one] using poisson_moment_bound J r ell 1 H hr hband
+      · exact poisson_moment_bound J r ell 2 H hr hband
+  have total := norm_integral_le_of_norm_le (iA.add env) (Filter.Eventually.of_forall bound)
+  change ‖∫ t, I.indicator f t-G t‖ ≤ ∫ t, I.indicator (fun _ => A) t+saddleEnvelope V H t at total
+  rw [integral_sub iF iG, integral_add iA env, integral_indicator measurable,
+    integral_indicator measurable, ← intervalIntegral.integral_of_le lr, ← intervalIntegral.integral_of_le lr,
+    intervalIntegral.integral_const,saddleEnvelope_integral V H vpos,Real.norm_eq_abs] at total
+  change _ ≤ _ + _ at total
+  have main : (∫ t : ℝ, G t) = _ := saddle_edgeworth_integral V (M 3) (M 4) vpos
+  rw [main] at total
+  apply total.trans_eq
+  simp only [smul_eq_mul,A]
+  ring
+
+private def shiftScale : ℝ := 1000*(Real.exp 1+3)
+
+private def shiftedModel (V K₃ K₄ a t : ℝ) : ℝ :=
+  Real.exp (-(V/2)*t^2) *
+    (1+K₄*t^4/24-K₃^2*t^6/72+K₃*a*t^4/6-a^2*t^2/2)
+
+/-- Shifting the target logarithm by up to two prime logarithms gives the
+    same integrated order of error. This pointwise estimate includes the
+    mixed term between the skewness and the frequency displacement. -/
+private theorem shifted_saddle_pointwise {ι : Type*} (J : Finset ι) (r ell : ι → ℝ)
+    (a t H : ℝ) (hH : 0 ≤ H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hsmall : H*|t| ≤ 1) (ha : |a| ≤ 2*H) :
+    let M := poissonMoment J r ell
+    |(phase (a*t)*saddleCharacteristic J r ell t).re - shiftedModel (M 2) (M 3) (M 4) a t| ≤
+      4*(∑ p ∈ J, (r p)^2) + shiftScale*saddleEnvelope (M 2) H t := by
+  let M := poissonMoment J r ell
+  let u := M 2*t^2
+  let y := H*|t|
+  let b := -(M 3)*t^3/6
+  let c := M 4*t^4/24
+  let d := M 5*t^5/120
+  let z := poissonExponent J r ell t
+  obtain ⟨hu,hy,hb,hc,hc',hd,la,hz,E⟩ := central_poisson_parameters J r ell t H hH hr hband hsmall
+  change 0 ≤ u at hu
+  change 0 ≤ y at hy
+  change |b| ≤ u*y at hb
+  change 0 ≤ c at hc
+  change c ≤ u*y^2 at hc'
+  change |d| ≤ u*y^3 at hd
+  let U := u+2
+  have hU : 0 ≤ U := by dsimp [U]; linarith
+  have hb' : |b+a*t| ≤ U*y := by
+    apply (abs_add_le ..).trans
+    rw [abs_mul]
+    have s := mul_le_mul_of_nonneg_right ha (abs_nonneg t)
+    change |b|+|a| * |t| ≤ (u+2)*y
+    dsimp [y] at hb ⊢; linarith only [hb,s]
+  have hcu : c ≤ U*y^2 := hc'.trans (by dsimp [U]; nlinarith [sq_nonneg y])
+  have hdu : |d| ≤ U*y^3 := hd.trans (by dsimp [U]; nlinarith [show 0 ≤ y^3 by positivity])
+  let z' := z + Complex.I*(a*t : ℝ)
+  have zr : z'.re ≤ -u/3 := by simpa [z',z] using hz
+  have rem : ‖z'-((-u/2+c : ℝ)+(b+a*t+d : ℝ)*Complex.I)‖ ≤ Real.exp 1*U*y^4 := by
+    have id : z'-((-u/2+c : ℝ)+(b+a*t+d : ℝ)*Complex.I) =
+        z-((-u/2+c : ℝ)+(b+d : ℝ)*Complex.I) := by dsimp [z']; push_cast; ring
+    rw [id]
+    apply E.trans
+    change Real.exp 1*u*y^4 ≤ Real.exp 1*(u+2)*y^4
+    gcongr; linarith
+  have point := real_edgeworth_error z' (-u/3) (-u/2) (b+a*t) c d (Real.exp 1*U*y^4)
+    hc zr la rem
+  have poly := edgeworth_polynomial_bound U y (b+a*t) c d hU hy hsmall hb' hc hcu hdu
+  have big : Real.exp (-u/3)*(y^4*(Real.exp 1*U+3*U^2+2*U^3+16*(Real.exp 1+3)*U^4))
+      ≤ shiftScale*saddleEnvelope (M 2) H t := by
+    rw [saddleEnvelope_eq]
+    change _ ≤ shiftScale*(Real.exp (-u/3)*(y^4*(1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4)))
+    rw [show shiftScale*(Real.exp (-u/3)*(y^4*(1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4))) =
+      Real.exp (-u/3)*(y^4*(shiftScale*(1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4))) by ring]
+    apply mul_le_mul_of_nonneg_left _ (Real.exp_pos _).le
+    apply mul_le_mul_of_nonneg_left _ (by positivity)
+    apply sub_nonneg.mp
+    dsimp [U,shiftScale]
+    ring_nf
+    positivity
+  have approx := saddle_poisson_approximation J r ell t hr hr'
+  have err : |(phase (a*t)*saddleCharacteristic J r ell t).re-(Complex.exp z').re| ≤
+      4*(∑ p ∈ J, (r p)^2) := by
+    have expz : Complex.exp z' = phase (a*t)*Complex.exp z := by
+      rw [show z'=Complex.I*(a*t : ℝ)+z by dsimp [z']; ring, Complex.exp_add]
+      rfl
+    rw [expz,← Complex.sub_re]
+    apply (Complex.abs_re_le_norm _).trans
+    rw [← mul_sub,norm_mul,norm_phase,one_mul]
+    exact approx
+  have model : Real.exp (-u/2)*(1+c-(b+a*t)^2/2) = shiftedModel (M 2) (M 3) (M 4) a t := by
+    dsimp [u,b,c,shiftedModel]
+    rw [show -(M 2*t^2)/2=-(M 2/2)*t^2 by ring]
+    ring
+  rw [model] at point
+  exact (abs_sub_le _ (Complex.exp z').re _).trans
+    (add_le_add err (point.trans ((mul_le_mul_of_nonneg_left poly (Real.exp_pos _).le).trans big)))
+
+private theorem shiftedModel_split (V K₃ K₄ a t : ℝ) :
+    shiftedModel V K₃ K₄ a t = edgeworthModel V K₃ K₄ t +
+      (K₃*a/6)*(t^4*Real.exp (-(V/2)*t^2)) - (a^2/2)*(t^2*Real.exp (-(V/2)*t^2)) := by
+  dsimp [shiftedModel,edgeworthModel]; ring
+
+private theorem shiftedModel_integral (V K₃ K₄ a : ℝ) (hV : 0 < V) :
+    Integrable (shiftedModel V K₃ K₄ a) ∧ (∫ t : ℝ, shiftedModel V K₃ K₄ a t) =
+      Real.sqrt (2*Real.pi/V)*(1+K₄/(8*V^2)-5*K₃^2/(24*V^3)+K₃*a/(2*V^2)-a^2/(2*V)) := by
+  let G (t : ℝ) := Real.exp (-(V/2)*t^2)
+  have ig (k : ℕ) : Integrable (fun x : ℝ => x^k*G x) := by
+    simpa [G] using integrable_rpow_mul_exp_neg_mul_sq (b := V/2) (s := (k:ℝ))
+      (by positivity) (lt_of_lt_of_le (by norm_num) (Nat.cast_nonneg _))
+  have base := edgeworthModel_integrable V K₃ K₄ hV
+  have i4 := (ig 4).const_mul (K₃*a/6)
+  have i2 := (ig 2).const_mul (a^2/2)
+  have e : shiftedModel V K₃ K₄ a = fun t =>
+      edgeworthModel V K₃ K₄ t + (K₃*a/6)*(t^4*G t) - (a^2/2)*(t^2*G t) :=
+    funext (shiftedModel_split V K₃ K₄ a)
+  rw [e]
+  refine ⟨(base.add i4).sub i2, ?_⟩
+  have ib : Integrable (fun t => edgeworthModel V K₃ K₄ t+(K₃*a/6)*(t^4*G t)) := base.add i4
+  rw [integral_sub ib i2,integral_add base i4,integral_const_mul,integral_const_mul]
+  have m0 : gaussianMoment (V/2) 0 = Real.sqrt (2*Real.pi/V) := by
+    simp only [gaussianMoment,Nat.mul_zero,pow_zero,one_mul,integral_gaussian]; congr 1; ring
+  have m1 := gaussianMoment_succ V hV 0
+  have m2 := gaussianMoment_succ V hV 1
+  norm_num at m1 m2
+  rw [m0] at m1
+  rw [m1] at m2
+  change (∫ t : ℝ, edgeworthModel V K₃ K₄ t)+_*gaussianMoment (V/2) 2-_*gaussianMoment (V/2) 1 = _
+  rw [m1,m2,show (∫ t : ℝ, edgeworthModel V K₃ K₄ t) = _ from saddle_edgeworth_integral V K₃ K₄ hV]
+  field_simp
+  ring
+
+private theorem shiftedModel_tail (V H K₃ K₄ a t : ℝ) (hV : 0 ≤ V) (hH : 0 ≤ H)
+    (h₃ : |K₃| ≤ V*H) (h₄ : |K₄| ≤ V*H^2) (ha : |a| ≤ 2*H) (hout : 1 ≤ H*|t|) :
+    |shiftedModel V K₃ K₄ a t| ≤ shiftScale*saddleEnvelope V H t := by
+  let u := V*t^2
+  let y := H*|t|
+  have hu : 0 ≤ u := by dsimp [u]; positivity
+  have yy : 1 ≤ y := hout
+  have y2 := pow_le_pow_left₀ zero_le_one yy 2
+  simp only [one_pow] at y2
+  have y24 : y^2 ≤ y^4 := by nlinarith [mul_nonneg (sq_nonneg y) (sub_nonneg.mpr y2)]
+  have lin : |K₃*a*t^4/6| ≤ u*y^4 := by
+    have prod := mul_le_mul h₃ ha (abs_nonneg _) (mul_nonneg hV hH)
+    rw [abs_div,abs_mul,abs_mul,abs_of_pos (by norm_num : (0:ℝ)<6),
+      abs_of_nonneg (show 0 ≤ t^4 by positivity)]
+    apply (show |K₃| * |a| * t^4/6 ≤ u*y^2 by
+      dsimp [u,y]; rw [mul_pow,sq_abs]
+      nlinarith [mul_le_mul_of_nonneg_right prod (show 0 ≤ t^4 by positivity),
+        mul_nonneg (mul_nonneg hV (sq_nonneg H)) (show 0 ≤ t^4 by positivity)]).trans
+    exact mul_le_mul_of_nonneg_left y24 hu
+  have quad : a^2*t^2/2 ≤ 2*y^4 := by
+    have sq := pow_le_pow_left₀ (abs_nonneg _) ha 2
+    rw [sq_abs] at sq
+    have w : a^2*t^2/2 ≤ 2*y^2 := by
+      dsimp [y]; rw [mul_pow,sq_abs]; nlinarith [mul_le_mul_of_nonneg_right sq (sq_nonneg t)]
+    linarith
+  have model : shiftedModel V K₃ K₄ a t =
+      edgeworthModel V K₃ K₄ t+Real.exp (-u/2)*(K₃*a*t^4/6-a^2*t^2/2) := by
+    dsimp [shiftedModel,edgeworthModel,u]
+    rw [show -(V*t^2)/2=-(V/2)*t^2 by ring]; ring
+  rw [model]
+  apply (abs_add_le ..).trans
+  rw [abs_mul,abs_of_pos (Real.exp_pos _)]
+  have b : |K₃*a*t^4/6-a^2*t^2/2| ≤ y^4*(u+2) := by
+    apply (abs_sub ..).trans
+    rw [abs_of_nonneg (show 0 ≤ a^2*t^2/2 by positivity)]
+    linarith only [lin,quad]
+  have ex : Real.exp (-u/2) ≤ Real.exp (-u/3) := Real.exp_le_exp.mpr (by linarith)
+  apply (add_le_add (edgeworthModel_tail V H _ _ t hV hH h₃ h₄ hout)
+    (mul_le_mul ex b (abs_nonneg _) (Real.exp_pos _).le)).trans
+  rw [saddleEnvelope_eq]
+  let P := 1+(Real.exp 1+1)*u+4*u^2+2*u^3+16*(Real.exp 1+3)*u^4
+  change Real.exp (-u/3)*(y^4*P)+Real.exp (-u/3)*(y^4*(u+2)) ≤ shiftScale*(Real.exp (-u/3)*(y^4*P))
+  rw [show Real.exp (-u/3)*(y^4*P)+Real.exp (-u/3)*(y^4*(u+2)) = (Real.exp (-u/3)*y^4)*(P+(u+2)) by ring,
+    show shiftScale*(Real.exp (-u/3)*(y^4*P))=(Real.exp (-u/3)*y^4)*(shiftScale*P) by ring]
+  apply mul_le_mul_of_nonneg_left _ (by positivity)
+  apply sub_nonneg.mp
+  dsimp [P,shiftScale]
+  ring_nf
+  positivity
+
+/-- The central integral after changing the logarithmic center by a. -/
+def shiftedMass {ι : Type*} (J : Finset ι) (r ell : ι → ℝ) (H a : ℝ) : ℝ :=
+  ∫ t : ℝ in -(1/H)..1/H, (phase (a*t)*saddleCharacteristic J r ell t).re
+
+/-- At a common saddle, all centers displaced by at most two maximal prime
+    logarithms have a uniform expansion. The stated Gaussian coefficient
+    is quadratic in the displacement, including the skewness correction. -/
+theorem shifted_saddle_integral {ι : Type*} (J : Finset ι) (r ell : ι → ℝ) (a H : ℝ)
+    (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) (ha : |a| ≤ 2*H) :
+    let M := poissonMoment J r ell
+    let V := M 2
+    |shiftedMass J r ell H a - Real.sqrt (2*Real.pi/V)*
+      (1+M 4/(8*V^2)-5*(M 3)^2/(24*V^3)+(M 3)*a/(2*V^2)-a^2/(2*V))| ≤
+      (8/H)*(∑ p ∈ J, (r p)^2) + (1000*(Real.exp 1+3)*saddleEdgeworthConstant)*
+      (H^4/V^2*Real.sqrt (3*Real.pi/V)) := by
+  let M := poissonMoment J r ell
+  let V := M 2
+  let I := Set.Ioc (-(1/H)) (1/H)
+  let f (t : ℝ) := (phase (a*t)*saddleCharacteristic J r ell t).re
+  let G := shiftedModel V (M 3) (M 4) a
+  let A := 4*(∑ p ∈ J, (r p)^2)
+  have vpos : 0 < V := hV
+  have ip : 0 < 1/H := by positivity
+  have lr : -(1/H) ≤ 1/H := by linarith
+  have measurable : MeasurableSet I := measurableSet_Ioc
+  have fcont : Continuous f := by unfold f saddleCharacteristic centeredFactor phase; fun_prop
+  have iF : Integrable (I.indicator f) := (integrable_indicator_iff measurable).mpr fcont.integrableOn_Ioc
+  obtain ⟨iG,main⟩ := shiftedModel_integral V (M 3) (M 4) a vpos
+  have iA : Integrable (I.indicator (fun _ => A)) :=
+    (integrable_indicator_iff measurable).mpr continuous_const.integrableOn_Ioc
+  have env := (saddleEnvelope_integrable V H vpos).const_mul shiftScale
+  have bound (t : ℝ) : ‖I.indicator f t-G t‖ ≤ I.indicator (fun _ => A) t+shiftScale*saddleEnvelope V H t := by
+    rw [Real.norm_eq_abs]
+    by_cases h : t ∈ I
+    · rw [Set.indicator_of_mem h,Set.indicator_of_mem h]
+      apply shifted_saddle_pointwise J r ell a t H hH.le hr hr' hband _ ha
+      rw [mul_comm, ← le_div_iff₀ hH, abs_le]
+      exact ⟨h.1.le,h.2⟩
+    · rw [Set.indicator_of_notMem h,Set.indicator_of_notMem h,zero_sub,abs_neg,zero_add]
+      have hout : 1 ≤ H*|t| := by
+        rw [mul_comm, ← div_le_iff₀ hH]
+        by_contra! hl
+        exact h (show t ∈ I from ⟨(abs_lt.mp hl).1,(abs_lt.mp hl).2.le⟩)
+      apply shiftedModel_tail V H _ _ a t vpos.le hH.le _ _ ha hout
+      · simpa only [pow_one] using poisson_moment_bound J r ell 1 H hr hband
+      · exact poisson_moment_bound J r ell 2 H hr hband
+  have total := norm_integral_le_of_norm_le (iA.add env) (Filter.Eventually.of_forall bound)
+  change ‖∫ t, I.indicator f t-G t‖ ≤ ∫ t, I.indicator (fun _ => A) t+shiftScale*saddleEnvelope V H t at total
+  change Integrable G at iG
+  change (∫ t, G t) = _ at main
+  rw [integral_sub iF iG, integral_add iA env, integral_indicator measurable,
+    integral_indicator measurable, ← intervalIntegral.integral_of_le lr, ← intervalIntegral.integral_of_le lr,
+    intervalIntegral.integral_const,integral_const_mul,saddleEnvelope_integral V H vpos,Real.norm_eq_abs,main] at total
+  apply total.trans_eq
+  simp only [smul_eq_mul,A,shiftScale]
+  ring
+
+/-- Removing an Euler factor retains its share of the common centering phase. -/
+def omittedCharacteristic {ι : Type*} [DecidableEq ι] (J D : Finset ι) (r ell : ι → ℝ) (t : ℝ) : ℂ :=
+  ∏ p ∈ J, if p ∈ D then phase (-r p*(t*ell p)) else centeredFactor (r p) (t*ell p)
+
+def omittedMass {ι : Type*} [DecidableEq ι] (J D : Finset ι) (r ell : ι → ℝ) (H a : ℝ) : ℝ :=
+  ∫ t : ℝ in -(1/H)..1/H, (phase (a*t)*omittedCharacteristic J D r ell t).re
+
+/-- Exact omitted squarefree Euler product with the shared logarithmic center. -/
+theorem omitted_characteristic_euler (J D : Finset ℕ) (hJ : ∀ p ∈ J, 0 < p) (α t : ℝ) :
+    omittedCharacteristic J D (primeProbability α) (fun p => Real.log p) t =
+      Complex.exp (-Complex.I*(t*saddleMean J α)) *
+        principalEuler (J\D) (α-t*Complex.I) / (∏ p ∈ J\D, (1+(((p:ℝ)^(-α) : ℝ) : ℂ))) := by
+  let Q (p : ℕ) := (1+(p : ℂ)^(-((α : ℂ)-t*Complex.I)))/(1+(((p:ℝ)^(-α) : ℝ) : ℂ))
+  have oneFactor (p : ℕ) (hp : p ∈ J) :
+      (if p ∈ D then phase (-primeProbability α p*(t*Real.log p))
+        else centeredFactor (primeProbability α p) (t*Real.log p)) =
+      phase (-primeProbability α p*(t*Real.log p))*(if p ∈ D then 1 else Q p) := by
+    split_ifs <;> simp only [mul_one,prime_centered_factor p (hJ p hp) α t,Q]
+  have retained : (∏ p ∈ J, if p ∈ D then 1 else Q p) = ∏ p ∈ J\D, Q p := by
+    rw [Finset.sdiff_eq_filter,Finset.prod_filter]; simp
+  rw [omittedCharacteristic,Finset.prod_congr rfl oneFactor,Finset.prod_mul_distrib,
+    retained,prime_center_phase]
+  simp only [Q,Finset.prod_div_distrib,principalEuler]
+  ring
+
+private theorem omitted_product_error {ι : Type*} [DecidableEq ι]
+    (J D : Finset ι) (r ell : ι → ℝ) (t : ℝ) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1) :
+    ‖omittedCharacteristic J D r ell t-saddleCharacteristic J r ell t‖ ≤
+      2*(∑ p ∈ J, if p ∈ D then r p else 0) := by
+  induction J using Finset.induction_on with
+  | empty => simp [omittedCharacteristic,saddleCharacteristic]
+  | insert p J hp ih =>
+    have h0 := hr p (Finset.mem_insert_self ..)
+    have h1 := hr' p (Finset.mem_insert_self ..)
+    let θ := t*ell p
+    let A := if p ∈ D then phase (-r p*θ) else centeredFactor (r p) θ
+    let B := centeredFactor (r p) θ
+    let X := omittedCharacteristic J D r ell t
+    let Y := saddleCharacteristic J r ell t
+    have A1 : ‖A‖ ≤ 1 := by
+      dsimp only [A]; split_ifs
+      · exact (norm_phase _).le
+      · exact norm_centeredFactor_le_one _ _ h0 h1
+    have Y1 : ‖Y‖ ≤ 1 := by
+      dsimp only [Y,saddleCharacteristic]
+      rw [norm_prod]
+      exact Finset.prod_le_one (fun _ _ => norm_nonneg _) (fun q hq => norm_centeredFactor_le_one _ _
+        (hr q (Finset.mem_insert_of_mem hq)) (hr' q (Finset.mem_insert_of_mem hq)))
+    have ab : ‖A-B‖ ≤ 2*(if p ∈ D then r p else 0) := by
+      dsimp only [A,B]; split_ifs
+      · rw [centeredFactor_eq,show phase (-r p*θ)-phase (-r p*θ)*(((1-r p : ℝ):ℂ)+(r p:ℂ)*phase θ) =
+          phase (-r p*θ)*((r p:ℂ)*(1-phase θ)) by push_cast; ring,
+          norm_mul,norm_phase,one_mul,norm_mul,Complex.norm_real,Real.norm_eq_abs,abs_of_nonneg h0]
+        have x := norm_sub_le (1 : ℂ) (phase θ)
+        rw [norm_one,norm_phase] at x
+        linarith [mul_le_mul_of_nonneg_left x h0]
+      · simp
+    have tail := ih (fun q h => hr q (Finset.mem_insert_of_mem h)) (fun q h => hr' q (Finset.mem_insert_of_mem h))
+    rw [omittedCharacteristic,Finset.prod_insert hp,saddleCharacteristic,Finset.prod_insert hp,Finset.sum_insert hp]
+    change ‖A*X-B*Y‖ ≤ _
+    rw [show A*X-B*Y=A*(X-Y)+(A-B)*Y by ring]
+    apply (norm_add_le ..).trans
+    rw [norm_mul,norm_mul]
+    have left := mul_le_mul_of_nonneg_right A1 (norm_nonneg (X-Y))
+    have right := mul_le_mul_of_nonneg_left Y1 (norm_nonneg (A-B))
+    change ‖X-Y‖ ≤ _ at tail
+    linarith
+
+/-- A different omitted set at each logarithmic shift has an explicit
+    uniform cost in the corresponding common-saddle integral. -/
+theorem omitted_mass_error {ι : Type*} [DecidableEq ι] (J D : Finset ι) (r ell : ι → ℝ)
+    (H a : ℝ) (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1) :
+    |omittedMass J D r ell H a-shiftedMass J r ell H a| ≤
+      (4/H)*(∑ p ∈ J, if p ∈ D then r p else 0) := by
+  let f (t : ℝ) := (phase (a*t)*omittedCharacteristic J D r ell t).re
+  let g (t : ℝ) := (phase (a*t)*saddleCharacteristic J r ell t).re
+  have fcont : Continuous f := by
+    have prod : Continuous (omittedCharacteristic J D r ell) := by
+      unfold omittedCharacteristic
+      apply continuous_finsetProd
+      intro p _
+      by_cases h : p ∈ D <;> simp [h,centeredFactor,phase] <;> fun_prop
+    exact Complex.continuous_re.comp ((by unfold phase; fun_prop :
+      Continuous (fun t : ℝ => phase (a*t))).mul prod)
+  have gcont : Continuous g := by unfold g saddleCharacteristic centeredFactor phase; fun_prop
+  have bound (t : ℝ) : ‖f t-g t‖ ≤ 2*(∑ p ∈ J, if p ∈ D then r p else 0) := by
+    dsimp only [f,g]
+    rw [Real.norm_eq_abs, ← Complex.sub_re]
+    apply (Complex.abs_re_le_norm _).trans
+    rw [← mul_sub,norm_mul,norm_phase,one_mul]
+    exact omitted_product_error J D r ell t hr hr'
+  change |(∫ t : ℝ in -(1/H)..1/H, f t) - (∫ t : ℝ in -(1/H)..1/H, g t)| ≤ _
+  rw [← intervalIntegral.integral_sub (fcont.intervalIntegrable ..) (gcont.intervalIntegrable ..),← Real.norm_eq_abs]
+  apply (intervalIntegral.norm_integral_le_of_norm_le_const (fun t _ => bound t)).trans_eq
+  rw [abs_of_nonneg (by linarith [one_div_pos.mpr hH] : 0 ≤ 1/H- -(1/H))]
+  ring
+
+private def centerPolynomial (V K₃ K₄ a : ℝ) : ℝ :=
+  1+K₄/(8*V^2)-5*K₃^2/(24*V^3)+K₃*a/(2*V^2)-a^2/(2*V)
+
+private theorem centerPolynomial_near_one (V H K₃ K₄ a : ℝ) (hV : 0 < V) (hH : 0 ≤ H)
+    (h₃ : |K₃| ≤ V*H) (h₄ : |K₄| ≤ V*H^2) (ha : |a| ≤ 2*H) :
+    |centerPolynomial V K₃ K₄ a-1| ≤ 4*H^2/V := by
+  have b4 := mul_le_mul_of_nonneg_right h₄ hV.le
+  have s3 := pow_le_pow_left₀ (abs_nonneg _) h₃ 2
+  rw [sq_abs] at s3
+  have b3 := mul_le_mul h₃ ha (abs_nonneg _) (mul_nonneg hV.le hH)
+  rw [← abs_mul] at b3
+  have b3' := mul_le_mul_of_nonneg_right b3 hV.le
+  have sa := pow_le_pow_left₀ (abs_nonneg _) ha 2
+  rw [sq_abs] at sa
+  have sa' := mul_le_mul_of_nonneg_right sa (sq_nonneg V)
+  have p4 := mul_le_mul_of_nonneg_right (le_abs_self K₄) hV.le
+  have n4 := mul_le_mul_of_nonneg_right (neg_le_abs K₄) hV.le
+  have p3 := mul_le_mul_of_nonneg_right (le_abs_self (K₃*a)) hV.le
+  have n3 := mul_le_mul_of_nonneg_right (neg_le_abs (K₃*a)) hV.le
+  unfold centerPolynomial
+  rw [abs_le]
+  constructor <;> field_simp <;> nlinarith [sq_nonneg K₃, mul_nonneg (sq_nonneg a) (sq_nonneg V),
+    mul_nonneg (sq_nonneg V) (sq_nonneg H)]
+
+/-- Uniform absolute error after scaling the omitted central integrals by
+    the leading Gaussian mass. D bounds the sum of deleted probabilities. -/
+def insertionError {ι : Type*} (J : Finset ι) (r ell : ι → ℝ) (H D : ℝ) : ℝ :=
+  let V := poissonMoment J r ell 2
+  ((4/H)*D+(8/H)*(∑ p ∈ J, (r p)^2)+(1000*(Real.exp 1+3)*saddleEdgeworthConstant)*
+    (H^4/V^2*Real.sqrt (3*Real.pi/V)))/Real.sqrt (2*Real.pi/V)
+
+private theorem normalized_omitted_expansion {ι : Type*} [DecidableEq ι]
+    (J D : Finset ι) (r ell : ι → ℝ) (H a d : ℝ)
+    (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) (ha : |a| ≤ 2*H)
+    (hD : (∑ p ∈ J, if p ∈ D then r p else 0) ≤ d) :
+    let M := poissonMoment J r ell
+    let V := M 2
+    |omittedMass J D r ell H a/Real.sqrt (2*Real.pi/V)-centerPolynomial V (M 3) (M 4) a| ≤
+      insertionError J r ell H d := by
+  let M := poissonMoment J r ell
+  let V := M 2
+  let scale := Real.sqrt (2*Real.pi/V)
+  let P := centerPolynomial V (M 3) (M 4) a
+  have sp : 0 < scale := Real.sqrt_pos.mpr (div_pos (by positivity) hV)
+  have m := shifted_saddle_integral J r ell a H hH hr hr' hband hV ha
+  have diff := omitted_mass_error J D r ell H a hH hr (fun p hp => (hr' p hp).trans (by norm_num))
+  change |omittedMass J D r ell H a/scale-P| ≤ _
+  rw [show omittedMass J D r ell H a/scale-P=(omittedMass J D r ell H a-scale*P)/scale by field_simp, abs_div,abs_of_pos sp]
+  unfold insertionError
+  apply div_le_div_of_nonneg_right _ sp.le
+  apply (abs_sub_le _ (shiftedMass J r ell H a) _).trans
+  change |shiftedMass J r ell H a-scale*P| ≤ _ at m
+  have deleted := diff.trans (mul_le_mul_of_nonneg_left hD (by positivity))
+  linarith only [m,deleted]
+
+private theorem normalized_omitted_near_one {ι : Type*} [DecidableEq ι]
+    (J D : Finset ι) (r ell : ι → ℝ) (H a d : ℝ)
+    (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) (ha : |a| ≤ 2*H)
+    (hD : (∑ p ∈ J, if p ∈ D then r p else 0) ≤ d) :
+    let V := poissonMoment J r ell 2
+    |omittedMass J D r ell H a/Real.sqrt (2*Real.pi/V)-1| ≤ 4*(H^2/V)+insertionError J r ell H d := by
+  let M := poissonMoment J r ell
+  let V := M 2
+  have m3 : |M 3| ≤ V*H := by simpa using poisson_moment_bound J r ell 1 H hr hband
+  have m4 : |M 4| ≤ V*H^2 := poisson_moment_bound J r ell 2 H hr hband
+  have near := centerPolynomial_near_one V H (M 3) (M 4) a hV hH.le m3 m4 ha
+  have appr := normalized_omitted_expansion J D r ell H a d hH hr hr' hband hV ha hD
+  apply (abs_sub_le _ (centerPolynomial V (M 3) (M 4) a) _).trans
+  exact (add_le_add appr near).trans_eq (by ring)
+
+/-- The positive base mass and the accompanying one-point insertion ratio. -/
+theorem saddle_single_ratio {ι : Type*} [DecidableEq ι] (J D₀ D₁ : Finset ι)
+    (r ell : ι → ℝ) (H a d : ℝ) (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p)
+    (hr' : ∀ p ∈ J, r p ≤ 1/2) (hband : ∀ p ∈ J, |ell p| ≤ H)
+    (hV : 0 < poissonMoment J r ell 2) (ha : |a| ≤ 2*H)
+    (h₀ : (∑ p ∈ J, if p ∈ D₀ then r p else 0) ≤ d)
+    (h₁ : (∑ p ∈ J, if p ∈ D₁ then r p else 0) ≤ d)
+    (hsmall : 4*(H^2/poissonMoment J r ell 2)+insertionError J r ell H d ≤ 1/2) :
+    let V := poissonMoment J r ell 2
+    let η := 4*(H^2/V)+insertionError J r ell H d
+    let ratio := omittedMass J D₁ r ell H a/omittedMass J D₀ r ell H 0
+    0 < omittedMass J D₀ r ell H 0 ∧ |ratio-1| ≤ 4*η ∧ |ratio| ≤ 3 := by
+  let scale := Real.sqrt (2*Real.pi/poissonMoment J r ell 2)
+  let A := omittedMass J D₁ r ell H a/scale
+  let B := omittedMass J D₀ r ell H 0/scale
+  let η := 4*(H^2/poissonMoment J r ell 2)+insertionError J r ell H d
+  have sp : 0 < scale := Real.sqrt_pos.mpr (div_pos (by positivity) hV)
+  have b0 : |B-1| ≤ η := normalized_omitted_near_one J D₀ r ell H 0 d hH hr hr' hband hV
+    (by rw [abs_zero]; positivity) h₀
+  have b1 : |A-1| ≤ η := normalized_omitted_near_one J D₁ r ell H a d hH hr hr' hband hV ha h₁
+  change η ≤ 1/2 at hsmall
+  have half : 1/2 ≤ B := by linarith [(abs_le.mp b0).1]
+  have bp : 0 < B := by linarith
+  have ep : 0 ≤ η := (abs_nonneg _).trans b0
+  have id : A/B = omittedMass J D₁ r ell H a/omittedMass J D₀ r ell H 0 :=
+    div_div_div_cancel_right₀ sp.ne' _ _
+  dsimp only
+  rw [← id]
+  refine ⟨(div_pos_iff_of_pos_right sp).mp bp, ?_, ?_⟩
+  · rw [show A/B-1=(A-B)/B by field_simp,abs_div,abs_of_pos bp,div_le_iff₀ bp]
+    have b := abs_sub_le A 1 B
+    rw [abs_sub_comm 1 B] at b
+    change _ ≤ 4*η*B
+    nlinarith [mul_le_mul_of_nonneg_left half ep]
+  · rw [abs_div,abs_of_pos bp,div_le_iff₀ bp]
+    have al := abs_le.mp b1
+    exact abs_le.mpr ⟨by linarith [al.1], by linarith [al.2]⟩
+
+private theorem quadratic_ratio_error (x₀ x₁ x₂ x₁₂ c ε η δ : ℝ)
+    (h₀ : |x₀-1| ≤ η) (h₁ : |x₁-1| ≤ η) (h₂ : |x₂-1| ≤ η) (h₁₂ : |x₁₂-1| ≤ η)
+    (hsmall : η ≤ 1/2) (hc : |c| ≤ δ) (hl : |x₁₂-x₁-x₂+x₀+c| ≤ 4*ε) :
+    |x₁₂/x₀ - (x₁/x₀)*(x₂/x₀)*(1-c)| ≤ 4*(4*ε+2*η^2+δ*(2*η+η^2)) := by
+  have hn : 0 ≤ η := (abs_nonneg _).trans h₀
+  have half : 1/2 ≤ x₀ := by linarith [(abs_le.mp h₀).1]
+  have pos : 0 < x₀ := by linarith
+  have cross (x y : ℝ) (hx : |x-1| ≤ η) (hy : |y-1| ≤ η) :
+      |(x-1)*(y-1)| ≤ η^2 := by rw [abs_mul,sq]; exact mul_le_mul hx hy (abs_nonneg _) hn
+  have mixed := cross x₁₂ x₀ h₁₂ h₀
+  have single := cross x₁ x₂ h₁ h₂
+  have prod : |x₁*x₂-1| ≤ 2*η+η^2 := by
+    rw [show x₁*x₂-1=(x₁-1)+(x₂-1)+(x₁-1)*(x₂-1) by ring]
+    exact (abs_add_le ..).trans (by linarith [abs_add_le (x₁-1) (x₂-1)])
+  have term := mul_le_mul hc prod (abs_nonneg _) ((abs_nonneg _).trans hc)
+  rw [← abs_mul] at term
+  let L := x₁₂-x₁-x₂+x₀+c
+  let B := 4*ε+2*η^2+δ*(2*η+η^2)
+  have num : |x₁₂*x₀-x₁*x₂*(1-c)| ≤ B := by
+    rw [show x₁₂*x₀-x₁*x₂*(1-c) =
+      ((L+(x₁₂-1)*(x₀-1))-(x₁-1)*(x₂-1))+c*(x₁*x₂-1) by dsimp [L]; ring]
+    apply (abs_add_le ..).trans
+    have first := abs_add_le L ((x₁₂-1)*(x₀-1))
+    have second := abs_sub (L+(x₁₂-1)*(x₀-1)) ((x₁-1)*(x₂-1))
+    change |L| ≤ 4*ε at hl
+    dsimp [B]; linarith only [first,second,hl,mixed,single,term]
+  have denom : 1 ≤ 4*x₀^2 := by nlinarith [mul_nonneg (by linarith : 0 ≤ x₀-1/2) (by linarith : 0 ≤ x₀+1/2)]
+  have nonneg : 0 ≤ B := (abs_nonneg _).trans num
+  rw [show x₁₂/x₀-(x₁/x₀)*(x₂/x₀)*(1-c)=(x₁₂*x₀-x₁*x₂*(1-c))/x₀^2 by field_simp,
+    abs_div,abs_of_nonneg (sq_nonneg x₀), div_le_iff₀ (sq_pos_of_pos pos)]
+  change _ ≤ 4*B*x₀^2
+  nlinarith only [num,mul_le_mul_of_nonneg_left denom nonneg]
+
+/-- Pair insertion covariance of the actual finite squarefree Euler saddle
+    masses, allowing separate deletions at each center. The curvature is
+    the negative product of the two logarithmic displacements divided by
+    the prime variance. The finite error is second order whenever the
+    normalized Edgeworth and deletion errors are second order. -/
+theorem saddle_pair_covariance {ι : Type*} [DecidableEq ι]
+    (J : Finset ι) (D : ℝ → Finset ι) (r ell : ι → ℝ) (H h k d : ℝ)
+    (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) (hh : |h| ≤ H) (hk : |k| ≤ H)
+    (hD : ∀ a : ℝ, |a| ≤ 2*H → (∑ p ∈ J, if p ∈ D a then r p else 0) ≤ d)
+    (hsmall : 4*(H^2/poissonMoment J r ell 2)+insertionError J r ell H d ≤ 1/2) :
+    let form := fun a : ℝ => omittedMass J (D a) r ell H a
+    let V := poissonMoment J r ell 2
+    let δ := H^2/V
+    let ε := insertionError J r ell H d
+    let η := 4*δ+ε
+    |form (h+k)/form 0-(form h/form 0)*(form k/form 0)*(1-h*k/V)| ≤
+      4*(4*ε+2*η^2+δ*(2*η+η^2)) := by
+  let M := poissonMoment J r ell
+  let V := M 2
+  let scale := Real.sqrt (2*Real.pi/V)
+  let form := fun a : ℝ => omittedMass J (D a) r ell H a
+  let F := fun a : ℝ => form a/scale
+  let P := centerPolynomial V (M 3) (M 4)
+  let δ := H^2/V
+  let ε := insertionError J r ell H d
+  let η := 4*δ+ε
+  have vpos : 0 < V := hV
+  have sp : 0 < scale := Real.sqrt_pos.mpr (div_pos (by positivity) hV)
+  have appr (a : ℝ) (ha : |a| ≤ 2*H) : |F a-P a| ≤ ε :=
+    normalized_omitted_expansion J (D a) r ell H a d hH hr hr' hband hV ha (hD a ha)
+  have close (a : ℝ) (ha : |a| ≤ 2*H) : |F a-1| ≤ η := by
+    exact normalized_omitted_near_one J (D a) r ell H a d hH hr hr' hband hV ha (hD a ha)
+  have z : |(0 : ℝ)| ≤ 2*H := by rw [abs_zero]; positivity
+  have h1 : |h| ≤ 2*H := by linarith
+  have h2 : |k| ≤ 2*H := by linarith
+  have h12 : |h+k| ≤ 2*H := (abs_add_le h k).trans (by linarith)
+  have curvature : |h*k/V| ≤ δ := by
+    rw [abs_div,abs_mul,abs_of_pos vpos]
+    exact div_le_div_of_nonneg_right ((mul_le_mul hh hk (abs_nonneg k) hH.le).trans_eq (by ring)) vpos.le
+  have linear :
+      |F (h+k)-F h-F k+F 0+h*k/V| ≤ 4*ε := by
+    have id : F (h+k)-F h-F k+F 0+h*k/V =
+        ((F (h+k)-P (h+k))-(F h-P h))-(F k-P k)+(F 0-P 0) := by
+      dsimp [P,centerPolynomial]; ring
+    rw [id]
+    have a1 := abs_sub (F (h+k)-P (h+k)) (F h-P h)
+    have a2 := abs_sub ((F (h+k)-P (h+k))-(F h-P h)) (F k-P k)
+    apply (abs_add_le ..).trans
+    linarith only [a1,a2,appr (h+k) h12,appr h h1,appr k h2,appr 0 z]
+  have result := quadratic_ratio_error (F 0) (F h) (F k) (F (h+k)) (h*k/V) ε η δ
+    (close 0 z) (close h h1) (close k h2) (close (h+k) h12) hsmall curvature linear
+  simpa only [F,div_div_div_cancel_right₀ sp.ne'] using result
+
+private theorem bernoulli_curvature_error {ι : Type*} (J : Finset ι) (r ell : ι → ℝ)
+    (H h k m : ℝ) (hH : 0 ≤ H) (hm : 0 ≤ m) (hr : ∀ p ∈ J, 0 ≤ r p)
+    (hr' : ∀ p ∈ J, r p ≤ 1/2) (hmax : ∀ p ∈ J, r p ≤ m)
+    (hV : 0 < poissonMoment J r ell 2) (hh : |h| ≤ H) (hk : |k| ≤ H) :
+    let V := poissonMoment J r ell 2
+    let W := saddleVariance J r ell
+    |h*k/W-h*k/V| ≤ 2*m*(H^2/V) := by
+  let V := poissonMoment J r ell 2
+  let W := saddleVariance J r ell
+  have vp : 0 < V := hV
+  have low : V/2 ≤ W := by
+    unfold V W poissonMoment saddleVariance
+    rw [Finset.sum_div]
+    apply Finset.sum_le_sum
+    intro p hp
+    nlinarith [mul_nonneg (mul_nonneg (hr p hp) (sq_nonneg (ell p)))
+      (sub_nonneg.mpr (hr' p hp))]
+  have diff : V-W = ∑ p ∈ J, (r p)^2*(ell p)^2 := by
+    unfold V W poissonMoment saddleVariance
+    rw [← Finset.sum_sub_distrib]
+    exact Finset.sum_congr rfl (fun p _ => by ring)
+  have pos : 0 ≤ V-W := by rw [diff]; exact Finset.sum_nonneg (fun _ _ => by positivity)
+  have upper : V-W ≤ m*V := by
+    rw [diff]
+    unfold V poissonMoment
+    rw [Finset.mul_sum]
+    apply Finset.sum_le_sum
+    intro p hp
+    nlinarith [mul_le_mul_of_nonneg_right (hmax p hp) (mul_nonneg (hr p hp) (sq_nonneg (ell p)))]
+  have wp : 0 < W := by linarith
+  change |h*k/W-h*k/V| ≤ 2*m*(H^2/V)
+  rw [show h*k/W-h*k/V=h*k*(V-W)/(W*V) by field_simp,abs_div,abs_mul,abs_of_nonneg pos,
+    abs_of_pos (mul_pos wp vp),div_le_iff₀ (mul_pos wp vp)]
+  have hk2 : |h*k| ≤ H^2 := by rw [abs_mul,sq]; exact mul_le_mul hh hk (abs_nonneg k) hH
+  apply (mul_le_mul hk2 upper pos (sq_nonneg H)).trans
+  rw [show 2*m*(H^2/V)*(W*V) = 2*m*H^2*W by field_simp]
+  nlinarith [mul_le_mul_of_nonneg_left low (mul_nonneg hm (sq_nonneg H))]
+
+/-- The pair-insertion ratio with the exact Bernoulli variance, equal to the
+    second derivative of the logarithm of the squarefree Euler product. -/
+theorem saddle_pair_covariance_bernoulli {ι : Type*} [DecidableEq ι]
+    (J : Finset ι) (D : ℝ → Finset ι) (r ell : ι → ℝ) (H h k d m : ℝ)
+    (hH : 0 < H) (hm : 0 ≤ m) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
+    (hmax : ∀ p ∈ J, r p ≤ m) (hband : ∀ p ∈ J, |ell p| ≤ H)
+    (hV : 0 < poissonMoment J r ell 2) (hh : |h| ≤ H) (hk : |k| ≤ H)
+    (hD : ∀ a : ℝ, |a| ≤ 2*H → (∑ p ∈ J, if p ∈ D a then r p else 0) ≤ d)
+    (hsmall : 4*(H^2/poissonMoment J r ell 2)+insertionError J r ell H d ≤ 1/2) :
+    let form := fun a : ℝ => omittedMass J (D a) r ell H a
+    let V := poissonMoment J r ell 2
+    let δ := H^2/V
+    let ε := insertionError J r ell H d
+    let η := 4*δ+ε
+    |form (h+k)/form 0-(form h/form 0)*(form k/form 0)*(1-h*k/(saddleVariance J r ell))| ≤
+      4*(4*ε+2*η^2+δ*(2*η+η^2)) + 18*m*δ := by
+  let form := fun a => omittedMass J (D a) r ell H a
+  let ratio := (form h/form 0)*(form k/form 0)
+  let V := poissonMoment J r ell 2
+  let W := saddleVariance J r ell
+  let δ := H^2/V
+  have h0 : |(0:ℝ)| ≤ 2*H := by rw [abs_zero]; positivity
+  have h1 : |h| ≤ 2*H := by linarith
+  have h2 : |k| ≤ 2*H := by linarith
+  have p1 := (saddle_single_ratio J (D 0) (D h) r ell H h d hH hr hr' hband hV h1
+    (hD 0 h0) (hD h h1) hsmall).2.2
+  have p2 := (saddle_single_ratio J (D 0) (D k) r ell H k d hH hr hr' hband hV h2
+    (hD 0 h0) (hD k h2) hsmall).2.2
+  have pr : |ratio| ≤ 9 := by
+    dsimp only [ratio]
+    rw [abs_mul]
+    exact (mul_le_mul p1 p2 (abs_nonneg _) (by norm_num)).trans_eq (by norm_num)
+  have base := saddle_pair_covariance J D r ell H h k d hH hr hr' hband hV hh hk hD hsmall
+  have diff := bernoulli_curvature_error J r ell H h k m hH.le hm hr hr' hmax hV hh hk
+  have last : |ratio*(1-h*k/V)-ratio*(1-h*k/W)| ≤ 18*m*δ := by
+    rw [show ratio*(1-h*k/V)-ratio*(1-h*k/W)=ratio*(h*k/W-h*k/V) by ring,abs_mul]
+    exact (mul_le_mul pr diff (abs_nonneg _) (by norm_num)).trans_eq (by dsimp [δ,V]; ring)
+  exact (abs_sub_le _ (ratio*(1-h*k/V)) _).trans (add_le_add base last)
 
 end
 

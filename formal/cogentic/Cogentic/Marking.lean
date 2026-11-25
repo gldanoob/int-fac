@@ -128,6 +128,12 @@ theorem mem_rows {s : Input} {row : Row} : row ∈ s.rows ↔ row.q ∈ s.base �
 def Input.clean (s : Input) := s.rows.filter (fun row => !(row.bad s))
 def Input.badRows (s : Input) := s.rows.filter (fun row => row.bad s)
 
+theorem mem_clean {s : Input} {row : Row} : row ∈ s.clean ↔
+    row ∈ s.rows ∧
+    (polynomial (s.coeffs row.second)).derivative.eval₂ (Int.castRingHom (ZMod row.q)) row.r ≠ 0 ∧
+    (polynomial (s.coeffs (!row.second))).eval₂ (Int.castRingHom (ZMod row.q)) row.r ≠ 0 := by
+  simp [Input.clean,Row.bad,Row.isRoot,horner_correct]
+
 def Input.eligibleMarks (s : Input) := (s.marks.toFinset.filter (fun a =>
   1 ≤ a ∧ a ≤ s.A ∧ (((a:ℤ)-s.m).natAbs).Coprime s.n)).sort
 
@@ -219,6 +225,14 @@ theorem retained_iff {s : Input} {out : Relations} (ok : stageOne s = some out) 
   simp only [stageOne] at ok
   split at ok <;> cases ok
   simp only [List.mem_filter, survives_correct]
+
+theorem rows_and_guards {s : Input} {out : Relations} (ok : stageOne s = some out) :
+    s.guard ∧ s.target ∈ s.base ∧ out.target = s.target ∧ out.rows = s.clean ∧
+    (out.rows.filter (fun r => !r.second && r.q == s.target)).length = s.degree := by
+  simp only [stageOne] at ok
+  split at ok
+  next h => cases ok; exact ⟨h.1,h.2.1,rfl,rfl,h.2.2⟩
+  next _ => cases ok
 
 /-- Supply the actual CRT polynomials for a four-coordinate trial and the
     subsequent exact solver. Failed factor-base checks discard this trial. -/

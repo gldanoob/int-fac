@@ -1,8 +1,12 @@
 import Mathlib.Analysis.Complex.Polynomial.Basic
 import Mathlib.Analysis.MellinInversion
+import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.Data.Nat.Squarefree
+import Mathlib.MeasureTheory.Integral.Gamma
 import Mathlib.NumberTheory.DirichletCharacter.Bounds
 import Mathlib.NumberTheory.DirichletCharacter.Orthogonality
 import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
@@ -340,6 +344,194 @@ theorem gaussian_mellin_uniform (Y S : ℝ) (s : ℂ) (hY : 0 < Y) (hS : 0 < S)
       gcongr
       exact gaussian_log_uniform (Y/S) s hR hs hs'
     _ = _ := by field_simp
+
+private def normalizedWeight (R x : ℝ) : ℝ := Real.exp (-(Real.pi*R^2)*(x-1)^2)
+
+private theorem normalizedGaussian_real (R x : ℝ) : normalizedGaussian R x = normalizedWeight R x := by
+  simp [normalizedGaussian,normalizedWeight]
+
+private theorem normalizedWeight_integral (R : ℝ) (hR : 0 < R) :
+    (∫ x : ℝ, normalizedWeight R x) = 1/R := by
+  unfold normalizedWeight
+  rw [MeasureTheory.integral_sub_right_eq_self (f := fun x : ℝ => Real.exp (-(Real.pi*R^2)*x^2)),
+    integral_gaussian,show Real.pi/(Real.pi*R^2)=1/(R^2) by field_simp [Real.pi_ne_zero],
+    Real.sqrt_div zero_le_one,Real.sqrt_one,Real.sqrt_sq hR.le]
+
+private theorem normalizedWeight_first_moment (R : ℝ) (hR : 0 < R) :
+    (∫ x : ℝ, |x-1| * normalizedWeight R x) = 1/(Real.pi*R^2) := by
+  let b := Real.pi*R^2
+  have hb : 0 < b := by dsimp [b]; positivity
+  change (∫ x : ℝ, |x-1| * Real.exp (-b*(x-1)^2)) = 1/b
+  rw [MeasureTheory.integral_sub_right_eq_self (f := fun x : ℝ => |x| * Real.exp (-b*x^2))]
+  have g := _root_.integral_rpow_mul_exp_neg_mul_rpow (p := (2:ℝ)) (q := (1:ℝ))
+    (by norm_num) (by norm_num) hb
+  norm_num [Real.rpow_two] at g
+  calc
+    _ = ∫ x : ℝ, |x| * Real.exp (-b*|x|^2) := by simp
+    _ = 2*∫ x in Set.Ioi (0:ℝ), x*Real.exp (-b*x^2) :=
+      integral_comp_abs (f := fun x => x*Real.exp (-b*x^2))
+    _ = _ := by simp_rw [neg_mul]; rw [g,Real.rpow_neg_one]; ring
+
+private theorem central_cpow_lipschitz (s : ℂ) (hs : 1/2 ≤ s.re) (hs' : s.re ≤ 1)
+    (hn : ‖s-1‖ ≤ 2) (x : ℝ) (hx : 1/2 ≤ x) : ‖(x : ℂ)^(s-1)-1‖ ≤ 8*|x-1| := by
+  by_cases zero : s-1 = 0
+  · rw [zero]; simp
+  let d (v : ℝ) := (s-1)*(v:ℂ)^(s-1-1)
+  have deriv (v : ℝ) (hv : v ∈ Set.Ici (1/2:ℝ)) :
+      HasDerivWithinAt (fun y : ℝ => (y : ℂ)^(s-1)) (d v) (Set.Ici (1/2)) v :=
+    (hasDerivAt_ofReal_cpow_const (by exact ne_of_gt (lt_of_lt_of_le (by norm_num) hv)) zero).hasDerivWithinAt
+  have bound (v : ℝ) (hv : v ∈ Set.Ici (1/2:ℝ)) : ‖d v‖ ≤ 8 := by
+    change 1/2 ≤ v at hv
+    have vp : 0 < v := by linarith
+    dsimp only [d]
+    rw [norm_mul,Complex.norm_cpow_eq_rpow_re_of_pos vp]
+    simp only [Complex.sub_re,Complex.one_re]
+    have pw : v^(s.re-1-1) ≤ 4 := by
+      by_cases h : 1 ≤ v
+      · exact (Real.rpow_le_one_of_one_le_of_nonpos h (by linarith)).trans (by norm_num)
+      · have less := Real.rpow_le_rpow_of_exponent_ge vp (le_of_not_ge h)
+          (show (-2:ℝ) ≤ s.re-1-1 by linarith)
+        apply less.trans
+        rw [Real.rpow_neg vp.le,Real.rpow_two,inv_le_comm₀ (sq_pos_of_pos vp) (by norm_num)]
+        norm_num
+        nlinarith [mul_nonneg (by linarith : 0 ≤ v-1/2) (by linarith : 0 ≤ v+1/2)]
+    exact (mul_le_mul hn pw (Real.rpow_nonneg vp.le _) (by norm_num)).trans_eq (by norm_num)
+  have b := Convex.norm_image_sub_le_of_norm_hasDerivWithin_le deriv bound (convex_Ici _)
+    (show (1:ℝ) ∈ Set.Ici (1/2:ℝ) by norm_num) hx
+  simpa [Real.norm_eq_abs] using b
+
+open MeasureTheory in
+private theorem normalizedGaussian_central (R : ℝ) (s : ℂ) (hR : 1 ≤ R)
+    (hs : 1/2 ≤ s.re) (hs' : s.re ≤ 1) (hn : ‖s-1‖ ≤ 2) :
+    ‖mellin (normalizedGaussian R) s - ((1/R : ℝ):ℂ)‖ ≤ 24/(Real.pi*R^2) := by
+  let w := normalizedWeight R
+  let f := (Set.Ioi 0).indicator (fun x : ℝ => (x:ℂ)^(s-1)*(w x:ℂ))
+  let I := Set.Ioc (0:ℝ) 1
+  let g := I.indicator (fun x : ℝ => x^(-1/2 : ℝ))
+  let b := Real.pi*R^2
+  have rp : 0 < R := zero_lt_one.trans_le hR
+  have bp : 0 < b := by dsimp [b]; positivity
+  have wpos (x : ℝ) : 0 ≤ w x := (Real.exp_pos _).le
+  have intF : (∫ x : ℝ, f x) = mellin (normalizedGaussian R) s := by
+    rw [show (∫ x : ℝ, f x) = ∫ x in Set.Ioi (0:ℝ), (x:ℂ)^(s-1)*(w x:ℂ) from integral_indicator measurableSet_Ioi]
+    simp only [mellin,smul_eq_mul,normalizedGaussian_real,w]
+  have intW : (∫ x : ℝ, (w x : ℂ)) = ((1/R : ℝ):ℂ) := by
+    exact (integral_ofReal (𝕜 := ℂ) (f := w)).trans (congrArg Complex.ofReal (normalizedWeight_integral R rp))
+  have iF : Integrable f := (integrable_indicator_iff measurableSet_Ioi).mpr (by
+    simpa only [MellinConvergent,smul_eq_mul,w,normalizedGaussian_real] using
+      normalized_gaussian_convergent R s hR hs hs')
+  have iW : Integrable (fun x => (w x:ℂ)) := .of_integral_ne_zero (by rw [intW]; exact_mod_cast (one_div_pos.mpr rp).ne')
+  have iM : Integrable (fun x : ℝ => |x-1| * w x) := .of_integral_ne_zero (by
+    rw [normalizedWeight_first_moment R rp]; positivity)
+  have iG : Integrable g := (integrable_indicator_iff measurableSet_Ioc).mpr
+    ((intervalIntegral.intervalIntegrable_rpow' (a := 0) (b := (1:ℝ)) (by norm_num : -1 < (-1/2:ℝ))).1)
+  have ig : (∫ x : ℝ, g x) = 2 := by
+    dsimp only [g,I]
+    rw [integral_indicator measurableSet_Ioc, ← intervalIntegral.integral_of_le zero_le_one,
+      integral_rpow (Or.inl (by norm_num : -1 < (-1/2:ℝ)))]
+    norm_num
+  have gp (x : ℝ) : 0 ≤ g x := by
+    by_cases hit : x ∈ I
+    · rw [show g x = x^(-1/2:ℝ) from Set.indicator_of_mem hit _]; exact Real.rpow_nonneg hit.1.le _
+    · rw [show g x = 0 from Set.indicator_of_notMem hit _]
+  have bound (x : ℝ) : ‖f x-(w x:ℂ)‖ ≤
+      8*(|x-1| * w x)+(2*Real.exp (-b/4))*g x := by
+    by_cases positive : 0 < x
+    · rw [show f x = (x:ℂ)^(s-1)*(w x:ℂ) from Set.indicator_of_mem positive _,
+        show (x:ℂ)^(s-1)*(w x:ℂ)-(w x:ℂ)=((x:ℂ)^(s-1)-1)*(w x:ℂ) by ring,
+        norm_mul,Complex.norm_real,Real.norm_eq_abs,abs_of_nonneg (wpos x)]
+      by_cases near : 1/2 ≤ x
+      · apply (mul_le_mul_of_nonneg_right (central_cpow_lipschitz s hs hs' hn x near) (wpos x)).trans
+        nlinarith [mul_nonneg (show 0 ≤ 2*Real.exp (-b/4) by positivity) (gp x)]
+      · have x1 : x ≤ 1 := by linarith
+        have c := norm_sub_le ((x:ℂ)^(s-1)) 1
+        rw [norm_one,Complex.norm_cpow_eq_rpow_re_of_pos positive,Complex.sub_re,Complex.one_re] at c
+        have pw := Real.rpow_le_rpow_of_exponent_ge positive x1 (show (-1/2:ℝ) ≤ s.re-1 by linarith)
+        have min1 := Real.one_le_rpow_of_pos_of_le_one_of_nonpos positive x1 (by norm_num : (-1/2:ℝ) ≤ 0)
+        have wt : w x ≤ Real.exp (-b/4) := by
+          dsimp [w,normalizedWeight,b]
+          apply Real.exp_le_exp.mpr
+          have sq : 1/4 ≤ (x-1)^2 := by nlinarith [sq_nonneg (x-1/2)]
+          nlinarith [mul_le_mul_of_nonneg_left sq bp.le]
+        rw [show g x=x^(-1/2:ℝ) from Set.indicator_of_mem (show x ∈ I from ⟨positive,x1⟩) _]
+        have mult := mul_le_mul (show ‖(x:ℂ)^(s-1)-1‖ ≤ 2*x^(-1/2:ℝ) by linarith) wt
+          (wpos x) (show 0 ≤ 2*x^(-1/2:ℝ) by positivity)
+        nlinarith [mul_nonneg (abs_nonneg (x-1)) (wpos x)]
+    · rw [show f x = 0 from Set.indicator_of_notMem (show x ∉ Set.Ioi 0 from positive) _,
+        zero_sub,norm_neg,Complex.norm_real,Real.norm_eq_abs,abs_of_nonneg (wpos x)]
+      have far : 1 ≤ |x-1| := by rw [abs_of_nonpos (by linarith : x-1 ≤ 0)]; linarith
+      nlinarith [mul_le_mul_of_nonneg_right far (wpos x),
+        wpos x,
+        mul_nonneg (show 0 ≤ 2*Real.exp (-b/4) by positivity) (gp x)]
+  have est := norm_integral_le_of_norm_le ((iM.const_mul 8).add (iG.const_mul (2*Real.exp (-b/4))))
+    (Filter.Eventually.of_forall bound)
+  change ‖∫ x : ℝ, f x-(w x:ℂ)‖ ≤ ∫ x : ℝ, 8*(|x-1| * w x)+(2*Real.exp (-b/4))*g x at est
+  rw [integral_sub iF iW,intF,intW,integral_add (iM.const_mul 8) (iG.const_mul _),
+    integral_const_mul,integral_const_mul,ig,normalizedWeight_first_moment R rp] at est
+  have tail : Real.exp (-b/4) ≤ 4/b := by
+    rw [neg_div,Real.exp_neg,inv_le_comm₀ (Real.exp_pos _) (by positivity)]
+    simp only [inv_div]
+    linarith [Real.add_one_le_exp (b/4)]
+  change _ ≤ 8*(1/b)+(2*Real.exp (-b/4))*2 at est
+  change _ ≤ 24/b
+  simp only [div_eq_mul_inv] at tail est ⊢
+  linarith only [est,tail]
+
+/-- On the central saddle arc, the Mellin transform of the linear Gaussian
+    differs from the transform of a point mass at its center by a relative
+    error of order one over the inverse relative width. -/
+theorem gaussian_mellin_central (Y S : ℝ) (s : ℂ) (hY : 0 < Y) (hS : 0 < S)
+    (hR : 1 ≤ Y/S) (hs : 1/2 ≤ s.re) (hs' : s.re ≤ 1) (hn : ‖s-1‖ ≤ 2) :
+    ‖mellin (fun x : ℝ => (gaussian Y S x : ℂ)) s - (Y:ℂ)^(s-1)‖ ≤
+      Y^(s.re-1) * (24/(Real.pi*(Y/S))) := by
+  have hYc : (Y:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hY.ne'
+  have hSc : (S:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hS.ne'
+  have cp : ((Y⁻¹ : ℝ):ℂ)^(-s) = (Y:ℂ)^s := by
+    rw [Complex.cpow_def_of_ne_zero (Complex.ofReal_ne_zero.mpr (inv_pos.mpr hY).ne'),
+      Complex.cpow_def_of_ne_zero hYc,← Complex.ofReal_log (inv_pos.mpr hY).le,
+      ← Complex.ofReal_log hY.le,Real.log_inv,Complex.ofReal_neg,neg_mul_neg]
+  rw [gaussian_scale_function Y S hY hS,mellin_div_const,mellin_comp_mul_left _ _ (inv_pos.mpr hY),
+    smul_eq_mul,cp,Complex.cpow_sub s 1 hYc,Complex.cpow_one]
+  let m := mellin (normalizedGaussian (Y/S)) s
+  have fact : (Y:ℂ)^s*m/S-(Y:ℂ)^s/Y =
+      ((Y:ℂ)^s/S)*(m-((1/(Y/S) : ℝ):ℂ)) := by push_cast; field_simp
+  rw [fact,norm_mul,norm_div,Complex.norm_cpow_eq_rpow_re_of_pos hY,Complex.norm_real,
+    Real.norm_eq_abs,abs_of_pos hS]
+  have n := normalizedGaussian_central (Y/S) s hR hs hs' hn
+  apply (mul_le_mul_of_nonneg_left n (show 0 ≤ Y^s.re/S by positivity)).trans_eq
+  rw [Real.rpow_sub hY,Real.rpow_one]
+  field_simp
+
+open Asymptotics Filter MeasureTheory in
+open scoped Topology in
+/-- Holomorphy on the full right half-plane allows deforming the Mellin
+    line between the saddle and the fixed vertical line. -/
+theorem gaussian_mellin_differentiable (Y S : ℝ) (s : ℂ) (hS : 0 < S) (hs : 0 < s.re) :
+    DifferentiableAt ℂ (mellin (fun x : ℝ => (gaussian Y S x : ℂ))) s := by
+  let f (x : ℝ) := (gaussian Y S x : ℂ)
+  have cont : Continuous f := by unfold f gaussian; fun_prop
+  apply mellin_differentiableAt_of_isBigO_rpow_exp (a := 1) (b := 0) zero_lt_one
+    (cont.continuousOn.locallyIntegrableOn measurableSet_Ioi) _ _ hs
+  · apply IsBigO.of_bound (Real.exp (Y+S^2/(4*Real.pi))/S)
+    apply Eventually.of_forall
+    intro x
+    dsimp only [f,gaussian]
+    rw [Complex.norm_real,Real.norm_eq_abs,Real.norm_eq_abs,
+      abs_of_pos (div_pos (Real.exp_pos _) hS),abs_of_pos (Real.exp_pos _)]
+    rw [div_mul_eq_mul_div,← Real.exp_add]
+    apply div_le_div_of_nonneg_right _ hS.le
+    apply Real.exp_le_exp.mpr
+    have sq := sq_nonneg (2*Real.pi*(x-Y)-S^2)
+    field_simp [Real.pi_ne_zero]
+    nlinarith only [sq]
+  · apply IsBigO.of_bound (1/S)
+    apply Eventually.of_forall
+    intro x
+    simp only [f,gaussian,neg_zero,Real.rpow_zero,norm_one,mul_one,Complex.norm_real,Real.norm_eq_abs]
+    rw [abs_of_pos (div_pos (Real.exp_pos _) hS)]
+    apply div_le_div_of_nonneg_right _ hS.le
+    apply Real.exp_le_one_iff.mpr
+    exact mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr Real.pi_pos.le) (sq_nonneg _)
 
 private theorem frequency_envelope_tail (D T : ℝ) (hD : 0 < D) (hT : 0 ≤ T) :
     (∫ t in {t : ℝ | T < |t|}, Real.exp (-|t|/D)) = 2*D*Real.exp (-T/D) := by

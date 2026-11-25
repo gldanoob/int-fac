@@ -360,14 +360,14 @@ theorem order_from_unit_minor {K₁ K₂ R₁ R₂ ι : Type*} [Field K₁] [Fie
   exact order_from_unit_class_relation σ₁ σ₂ inc₁ inc₂ inj₁ inj₂ eval₁ eval₂ ℓ e he t₁ t₂
     a₁ a₂ target_eval neutral_eval u₁ u₂ v₁ v₂ ut₁ ut₂ vr₁ vr₂ d c hc hdPos
 
-/-- Real spanning by observed lattice vectors forces an actual nonzero integer
+/-- Spanning over a field by observed lattice vectors forces an actual nonzero integer
 minor from the same candidate family, even when its initial indexing type is infinite. -/
-theorem integer_minor_of_real_span {ι τ L : Type*} [Fintype ι] [DecidableEq ι]
+theorem integer_minor_of_field_span {F ι τ L : Type*} [Field F] [Fintype ι] [DecidableEq ι]
     [AddCommGroup L] [Module ℤ L] (b : Module.Basis ι ℤ L) (v : τ → L)
-    (obs : L →ₗ[ℤ] (ι → ℝ)) (hs : Submodule.span ℝ (Set.range fun j => obs (v j)) = ⊤) :
+    (obs : L →ₗ[ℤ] (ι → F)) (hs : Submodule.span F (Set.range fun j => obs (v j)) = ⊤) :
     ∃ pick : ι → τ, (b.toMatrix (fun j => v (pick j))).det ≠ 0 := by
   classical
-  let canonical := Pi.basisFun ℝ ι
+  let canonical := Pi.basisFun F ι
   let axes := Module.Basis.ofSpan hs.ge
   let e := axes.indexEquiv canonical
   let realBasis := axes.reindex e
@@ -375,22 +375,29 @@ theorem integer_minor_of_real_span {ι τ L : Type*} [Fintype ι] [DecidableEq �
     Module.Basis.ofSpan_subset hs.ge ⟨e.symm i, by simp [realBasis, axes]⟩
   choose pick hpick using contained
   let A := b.toMatrix fun j => v (pick j)
-  let B : Matrix ι ι ℝ := fun i j => obs (b j) i
-  have factor : canonical.toMatrix realBasis = B * A.map (Int.castRingHom ℝ) := by
+  let B : Matrix ι ι F := fun i j => obs (b j) i
+  have factor : canonical.toMatrix realBasis = B * A.map (Int.castRingHom F) := by
     ext i j
-    change realBasis j i = ∑ k, obs (b k) i * ((b.repr (v (pick j)) k : ℤ) : ℝ)
+    change realBasis j i = ∑ k, obs (b k) i * ((b.repr (v (pick j)) k : ℤ) : F)
     rw [← hpick]
     have h := congrArg obs (b.sum_repr (v (pick j)))
     simpa only [map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, zsmul_eq_mul, Pi.mul_apply, Pi.intCast_apply, mul_comm]
       using (congrFun h i).symm
-  have unitDet := (canonical.is_basis_iff_det (v := (realBasis : ι → (ι → ℝ)))).mp
+  have unitDet := (canonical.is_basis_iff_det (v := (realBasis : ι → (ι → F)))).mp
     ⟨realBasis.linearIndependent, realBasis.span_eq⟩
   have nz : (canonical.toMatrix realBasis).det ≠ 0 := unitDet.ne_zero
   refine ⟨pick, fun bad => nz ?_⟩
   change A.det = 0 at bad
   rw [factor, Matrix.det_mul]
-  change B.det * ((Int.castRingHom ℝ).mapMatrix A).det = 0
+  change B.det * ((Int.castRingHom F).mapMatrix A).det = 0
   rw [← RingHom.map_det, bad, map_zero, mul_zero]
+
+/-- Real spanning by observed lattice vectors forces an actual nonzero integer
+minor from the same candidate family, even when its initial indexing type is infinite. -/
+theorem integer_minor_of_real_span {ι τ L : Type*} [Fintype ι] [DecidableEq ι]
+    [AddCommGroup L] [Module ℤ L] (b : Module.Basis ι ℤ L) (v : τ → L)
+    (obs : L →ₗ[ℤ] (ι → ℝ)) (hs : Submodule.span ℝ (Set.range fun j => obs (v j)) = ⊤) :
+    ∃ pick : ι → τ, (b.toMatrix (fun j => v (pick j))).det ≠ 0 := integer_minor_of_field_span b v obs hs
 
 /-- Each logarithmic real embedding descends to the unit class modulo torsion,
 since changing an integral unit by a torsion unit only changes its real sign. -/
