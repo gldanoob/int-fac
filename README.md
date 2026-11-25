@@ -14,6 +14,7 @@ Start with the [known-results index](research/known-results.md), including the [
 | [Cubic order multiples](research/cubic-order-multiples.md) | A deterministic split from an unfactored multiple of $p^2+p+1$ in specified congruence classes |
 | [Known multiples of one hidden prime’s p+1](research/p-plus-one-multiples.md) | Complete factoring of Lucas–Carmichael numbers, one divisor sum on squarefree inputs, and a square-root search for a missing multiplier |
 | [Polynomial overhead for three-square queries](research/hurwitz-polynomial-reductions.md) | Complete factoring from quarter-bit counts on small composite twists or the parity of remainders modulo small odd primes on prime twists |
+| [Coarse Kloosterman sums](research/kloosterman-localization.md) | Two-prime factorization from square-modulus exponential sums with fixed normalized error |
 | [Quadratic floor-sum and discrete-log parity](research/floor-sum-and-log-parity.md) | Factoring from one floor-sum bit per bisection step, fixed-length nonadaptive queries for two prime divisors, or canonical discrete-log parities |
 | [Parity of clipped counts](research/box-count-parity.md) | A split from one-bit counts in planar disks in the fixed quadrant, three-square boxes, or slices of reduced forms |
 | [Low bits of Hurwitz class numbers](research/hurwitz-residues.md#one-large-index-and-quarter-bit-precision-suffice) | All-input reduction to the low bits of a positive three-square count, including repeated prime factors |
