@@ -34,9 +34,30 @@ $$
 
 for $D\ge1$, absorbing logarithms by slightly reducing $\epsilon$. Use $b=\lceil2\log_2 q\rceil$ with leading zero padding. Taking $D\le\kappa\log_2 q$ for a sufficiently small absolute $\kappa$ makes the error $O(q^{-\gamma})$. If the true length of $n$ is given, it partitions the prime interval at powers of two divided by $q$. There are at most two subintervals and the same prime-sum bound applies to each.
 
+## Rational functions and quadratic-character probes
+
+The predictor can also ask either of the following questions about the hidden prime $p$ in $\mathbb F_q$. At each node it may choose new coefficients using $q$ and all preceding answers.
+
+- Is $R(p)$ a nonzero square, for any rational function $R$ of degree at most $D$?
+- Is the standard representative of $R(p)$ in a chosen interval of residues, for any rational function of degree at most $D$ that is regular at zero?
+
+Here $D=q^{o(1)}$. Values at poles can be assigned a fixed bit. There is an absolute $\kappa>0$ such that a tree with at most $\kappa\log_2 q$ digit and quadratic-character probes combined and at most $\kappa\log_2 q/\log_2\log_2 q$ interval probes still predicts any whole informative word with probability $2^{-h}+O(q^{-\gamma})$ for some $\gamma>0$. The budgets apply along each path. The word and center can be chosen at its leaf as above. This is a restriction on information obtained from the hidden input. The arithmetic between probes can be unrestricted.
+
+Fix a leaf with $d$ digit probes, $s$ character probes and $u$ interval probes. Remove constant queries. At most $O((s+u)D)$ candidate primes are zeros or poles requiring special treatment. Away from these, the indicator of one character answer is $(1\pm\chi(R(p)))/2$, with $\chi$ the quadratic character. Expanding their product has coefficient absolute sum at most one. Each term is a single quadratic character of a product of the rational functions. An interval's Fourier expansion, including for the complementary answer, costs $O(1+\log q)$ in coefficient absolute sum. The $d$ digit restrictions use the same joint expansion as above. Completing its real frequencies modulo $q$ adds only a linear phase in $p$.
+
+After subtracting $2^{-h}$ times the leaf mass, the nonconstant target Fourier modes involve trace functions of the form
+$$
+\chi(S(x))\, e_q\!\left(A/x+Bx+\sum_{i=1}^u a_iR_i(x)\right),\qquad A\ne0 .
+$$
+The additive phase retains its simple pole at zero, because every interval function is regular there. Its Artin–Schreier sheaf is wild at zero, and the quadratic factor is tame there, including when $S$ has a pole or zero. Thus the rank-one sheaf is nonexceptional for Fouvry–Kowalski–Michel. Its conductor is $O(1+(s+u)D)$ by counting singularities and pole orders. Theorem 1.5 has polynomial dependence on the conductor, so this costs $q^{o(1)}$. Omitting a finite set from each trace sum costs its cardinality, with the same total coefficient bounds. The $O(1)$ endpoint exceptions for the target word and the $O(1/q)$ constant-coefficient error are harmless. [Fouvry–Kowalski–Michel, conductor and Theorem 1.5](https://people.math.ethz.ch/~kowalski/weights-over-primes.pdf#page=3)
+
+The leaf's joint discrepancy is therefore at most $q^{-1/48+\epsilon+o(1)}[C(1+b/d)]^d[C(1+\log q)]^u$, after dividing by the number of candidate primes. Use one for the digit factor at $d=0$. Summing over at most $2^{d_{\max}+s_{\max}+u_{\max}}$ leaves gives a power saving for sufficiently small $\kappa$. This controls overall success even when a particular leaf is rare.
+
+The same proof allows a pole at zero in an interval function if the coefficient of $X^{-1}$ in its Laurent expansion is zero. The phase still has nonzero $X^{-1}$ coefficient, and its highest surviving pole order is between one and $q-1$, which suffices for wild ramification. Allowing the unshifted reciprocal removes the bound: a single middle-half interval test on $2/p\bmod q$, followed by complementation, gives the first informative bit exactly for $p>4$. The angular correction $1/(pq)$ is then less than $1/(4q)$, the minimum possible distance from a $q$-grid point to a quarter boundary.
+
 ## Finite check
 
-For $q=1{,}000{,}003$ there are 36,960 possible $p$. Exhausting all adaptive depth-two binary decision trees gives a best first-bit score of 18,901 out of 36,960 (51.14%). The calculation uses all choices for the first position, all choices for each of the two second positions, and exact majority at the four leaves. This checks the prediction model at one modulus. The power saving above comes from the prime-sum theorem.
+For $q=1{,}000{,}003$ there are 36,960 possible $p$. Exhausting all adaptive depth-two binary decision trees gives a best first-bit score of 18,901 out of 36,960 (51.14%). The calculation uses all choices for the first position, all choices for each of the two second positions, and exact majority at the four leaves. Four interval probes alone scored 18,676, four quadratic-character probes alone scored 18,725, and the combined 48-probe menu scored 18,901. This checks the prediction model at one modulus. The power saving above comes from the prime-sum theorem.
 
 ~~~python
 from math import isqrt
@@ -52,7 +73,8 @@ primes = [p for p in range(q//2+1, q) if sieve[p]]
 def first_bit(p):
     n = p*q
     s = (2*p*pow(p,-1,q)-1) % n
-    assert s%p == p-1 and s%q == 1
+    other = (2*q*pow(q,-1,p)-1) % n
+    assert s+other == n and s%p == p-1 and s%q == 1
     return int(4*min(s,n-s) < n)
 
 def mask(pred):
@@ -66,9 +88,23 @@ def majority(r):
     ones = (r & truth).bit_count()
     return max(ones, r.bit_count()-ones)
 
-def best_one(r):
-    return max(majority(r & col)+majority(r & ~col) for col in cols)
+def best_two(probes):
+    def best_one(r):
+        return max(majority(r & c)+majority(r & ~c) for c in probes)
+    return max(best_one(rows & c)+best_one(rows & ~c) for c in probes)
 
-best_two = max(best_one(rows & col)+best_one(rows & ~col) for col in cols)
-assert (len(primes), best_two) == (36960, 18901)
+def inv_or_zero(x):
+    return pow(x,-1,q) if x%q else 0
+
+intervals = [mask(lambda p: q//4 <= (p*p+1)%q < 3*q//4),
+             mask(lambda p: q//8 <= (p**3+17)%q < 5*q//8),
+             mask(lambda p: q//4 <= inv_or_zero(p+1) < 3*q//4),
+             mask(lambda p: q//8 <= inv_or_zero(p+7) < 5*q//8)]
+characters = [mask(lambda p,f=f: pow(f(p)%q,(q-1)//2,q)==1) for f in
+              (lambda p:p, lambda p:p+1, lambda p:p*p+1,
+               lambda p:(p+5)*inv_or_zero(p+7))]
+assert len(primes) == 36960
+assert [best_two(v) for v in (cols, intervals, characters, cols+intervals+characters)] == [
+    18901, 18676, 18725, 18901]
+assert truth == mask(lambda p: 4*min(v:=2*pow(p,-1,q)%q,q-v) < q)
 ~~~
