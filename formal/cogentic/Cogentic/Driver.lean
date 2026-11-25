@@ -29,23 +29,28 @@ private def powerCandidate (n bits k : ℕ) : Option {d // ProperDivisor n d} :=
 
 def powerDivisor (n bits : ℕ) := (List.range' 2 (bits-1)).findSome? (powerCandidate n bits)
 
+/-- The root scan also accepts perfect powers whose base is composite. -/
+theorem powerDivisor_of_power {n bits p k : ℕ} (fits : n < 2^bits) (hp : 2 ≤ p)
+    (hk : 2 ≤ k) (eq : p^k = n) : powerDivisor n bits ≠ none := by
+  have maxK : k < bits := (Nat.pow_lt_pow_iff_right (by decide : 1 < 2)).mp
+    ((Nat.pow_le_pow_left hp k).trans_lt (eq ▸ fits))
+  have less : p < n := by
+    calc p = p^1 := by simp
+         _ < p^k := Nat.pow_lt_pow_right (by omega) (by omega)
+         _ = n := eq
+  have exactRoot := rootDigits_exact (lo := 0) (by omega) eq (Nat.zero_le _) (by omega : p < 0 + 2^bits)
+  have divides : p ∣ n := eq ▸ dvd_pow_self p (by omega)
+  intro h
+  have miss := List.findSome?_eq_none_iff.mp h k (List.mem_range'_1.mpr ⟨hk,by omega⟩)
+  simp [powerCandidate, exactRoot, (show 1 < p by omega), less, divides] at miss
+
 theorem powerDivisor_complete {n bits : ℕ} (fits : n < 2^bits) (composite : ¬n.Prime)
     (pp : IsPrimePow n) : powerDivisor n bits ≠ none := by
   obtain ⟨p,k,prime,positive,eq⟩ := (isPrimePow_nat_iff n).mp pp
-  have hk : 2 ≤ k := by
-    by_contra! h; have : k = 1 := by omega
-    exact composite (by simpa [← eq, this] using prime)
-  have maxK : k < bits := (Nat.pow_lt_pow_iff_right (by decide : 1 < 2)).mp
-    ((Nat.pow_le_pow_left prime.two_le k).trans_lt (eq ▸ fits))
-  have less : p < n := by
-    calc p = p^1 := by simp
-         _ < p^k := Nat.pow_lt_pow_right prime.one_lt (by omega)
-         _ = n := eq
-  have exactRoot := rootDigits_exact (lo := 0) positive eq (Nat.zero_le _) (by omega : p < 0 + 2^bits)
-  have divides : p ∣ n := eq ▸ dvd_pow_self p positive.ne'
-  intro h
-  have miss := List.findSome?_eq_none_iff.mp h k (List.mem_range'_1.mpr ⟨hk,by omega⟩)
-  simp [powerCandidate, exactRoot, prime.one_lt, less, divides] at miss
+  apply powerDivisor_of_power fits prime.two_le _ eq
+  by_contra! h
+  have : k = 1 := by omega
+  exact composite (by simpa [← eq, this] using prime)
 
 private def gcdCandidate (n z : ℕ) : Option {d // ProperDivisor n d} :=
   let d := n.gcd z

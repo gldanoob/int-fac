@@ -14,15 +14,24 @@ private def trial (n : ℕ) (hn : 2 ≤ n) : Decision n :=
       by_contra bad
       exact h ((Nat.not_prime_iff_minFac_lt hn).mp bad)))
 
-/-- If the fixed search has insufficient certificates, the splitter may still
-    succeed. A divisor returned here is checked independently of prime supply. -/
-def tryDivisor (n : ℕ) (hn : 2 ≤ n) (bases : List ℕ) : Option {d // ProperDivisor n d} :=
+def fixedCollection (n : ℕ) (hn : 2 ≤ n) :=
   let b := n.log2+1
   let gs := (dyadicTargets (Fixed.beta b)).sort
   let probe := searchBox n (2*b^2*Fixed.U b*Fixed.A b) (2*b^2*Fixed.U b) (candidate n)
-  match (collect hn probe gs).1 with
+  collect hn probe gs
+
+/-- An exponent backend is only called when the fixed search returns orders. -/
+def tryDivisorWith (n : ℕ) (hn : 2 ≤ n) (split : ℕ → Option {d // ProperDivisor n d}) :
+    Option {d // ProperDivisor n d} :=
+  let b := n.log2+1
+  match (fixedCollection n hn).1 with
   | .divisor d h => some ⟨d,h⟩
-  | .orders e _ _ _ _ => splitWithExponent n (saturate e b (Fixed.beta b)) bases
+  | .orders e _ _ _ _ => split (saturate e b (Fixed.beta b))
+
+/-- If the fixed search has insufficient certificates, the splitter may still
+    succeed. A divisor returned here is checked independently of prime supply. -/
+def tryDivisor (n : ℕ) (hn : 2 ≤ n) (bases : List ℕ) : Option {d // ProperDivisor n d} :=
+  tryDivisorWith n hn (fun m => splitWithExponent n m bases)
 
 /-- Dense verified targets force the real splitter to return a divisor on a
     surviving composite with at least two distinct prime factors. -/
@@ -89,7 +98,8 @@ theorem tryDivisor_of_coverage (line : DirichletLZerosOnLine) :
 
 /-- Fixed program with explicit trial division on a search miss. Inputs up to
     eight bits skip parameter construction altogether. -/
-def totalStep (k n : ℕ) (hn : 2 ≤ n)
+def totalStepWith (search : (a : ℕ) → 2 ≤ a → List ℕ → Option {d // ProperDivisor a d})
+    (k n : ℕ) (hn : 2 ≤ n)
     (gen : generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))) : Decision n := by
   if n.log2+1 ≤ 8 then exact trial n hn
   else
@@ -103,10 +113,14 @@ def totalStep (k n : ℕ) (hn : 2 ≤ n)
       else
         let result := (powerDivisor n b).orElse fun _ =>
           (presieve n b (Fixed.beta b) (Fixed.A b) (Fixed.rootBase n)).orElse fun _ =>
-            tryDivisor n hn bases
+            search n hn bases
         match result with
         | some d => exact asDecision d
         | none => exact trial n hn
+
+def totalStep (k n : ℕ) (hn : 2 ≤ n)
+    (gen : generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))) : Decision n :=
+  totalStepWith tryDivisor k n hn gen
 
 def run (k : ℕ) (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1))))
     (n : ℕ) (hn : 2 ≤ n) := TwoThirdsFactor.factor (fun a ha => totalStep k a ha (gen a ha)) n hn

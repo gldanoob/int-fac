@@ -52,6 +52,11 @@ import Cogentic.BinaryPivotCost
 import Cogentic.AdmissionMoments
 import Cogentic.TwoFieldRetentionLoss
 import Cogentic.RetainedCellSelection
+import Cogentic.CellCountConcentration
+import Cogentic.CellAtomVariation
+import Cogentic.SealedSquareSupport
+import Cogentic.CompanionFactorization
+import Cogentic.UpstreamExponentBridge
 import Cogentic.SamePrimeBlocks
 import Cogentic.SimultaneousScoreBudget
 import Cogentic.IndexCapCost
@@ -102,12 +107,19 @@ run_cmd
     ``Cogentic.Construction.PrescribedRows.difference_joint_loss,
     ``Cogentic.Construction.PrescribedRows.gcd_one_conditional_smooth,
     ``Cogentic.Construction.PrescribedRows.separated_joint_relative,
-    ``Cogentic.Construction.cell_pair_covariance_approximation,
+    ``Cogentic.Construction.cell_pair_covariance_approximation, ``Cogentic.Construction.all_cells_retained_together,
+    ``Cogentic.Construction.unrestricted_all_cells_rank,
+    ``Cogentic.SealedSquareSupport.square_fibers_of_failed_gcd_scan,
+    ``Cogentic.SealedSquareSupport.blind_decoder_on_small_support,
+    ``Cogentic.Companion.split_of_box_rank, ``Cogentic.powerDivisor_of_power,
+    ``Cogentic.Companion.factorization_of_box_rank, ``Cogentic.Companion.step_of_search_hit,
+    ``Cogentic.CompanionSplitCost.splitter_cost_of_saturated_bound,
+    ``Cogentic.CompanionFactorCost.recursive_factorization_cost, ``Cogentic.finish_companion_output,
     ``Cogentic.Construction.centered_smooth_score_decay, ``Cogentic.Construction.polynomial_retained_cell_scores,
     ``Cogentic.Construction.admitted_rejection_budget, ``Cogentic.Construction.rejected_score_loss, ``Cogentic.Construction.twoField_admission_probability,
     ``Cogentic.Construction.ordinary_gram_simultaneous_box, ``Cogentic.Construction.ordinary_gram_schedule_budget,
     ``Cogentic.Construction.ordinary_rows_per_prime, ``Cogentic.Construction.same_prime_gram_error,
-    ``Cogentic.Construction.PrescribedRows.first_residue_probability, ``Cogentic.Construction.forced_marginal_ratio, ``Cogentic.Construction.forced_pair_curvature, ``Cogentic.BinarySaturation.driver_saturation,
+    ``Cogentic.Construction.PrescribedRows.first_residue_probability, ``Cogentic.Construction.forced_marginal_ratio, ``Cogentic.Construction.full_band_marginal_ratio, ``Cogentic.Construction.forced_pair_curvature, ``Cogentic.BinarySaturation.driver_saturation,
     ``Cogentic.BinaryIndexCap.fixed_presieve_with_cap, ``Cogentic.BinarySplitter.driver_primality, ``Cogentic.BinarySplitter.driver_splitter,
     ``Cogentic.BinarySplitter.driver_budgets_scale,
     ``Cogentic.BinaryPivot.stageTwo_pivot_gates, ``Cogentic.BinaryModularPower.verify_exponent_iff,

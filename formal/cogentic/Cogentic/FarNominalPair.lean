@@ -77,21 +77,21 @@ theorem nominal_deletion_saving (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
 
 /-- Removing any polynomial number of primes from the retained saddle
 band changes the nominal Euler times central integral by at most the
-specified relative error. Both bands use the same full-band saddle. -/
-theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
-    ∃ b₀ : ℕ, ∀ b≥b₀, ∀ (u α : ℝ) (L K : Finset ℕ),
+specified relative error at every central shift of size at most twice the log bandwidth. -/
+theorem shifted_nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
+    ∃ b₀ : ℕ, ∀ b≥b₀, ∀ (u α t : ℝ) (L K : Finset ℕ),
     let J := primeBand b; let H := log (Fixed.B b)
     let mass := fun S : Finset ℕ =>
-      eulerMass S α * omittedMass J (J\S) (primeProbability α) (fun p=>log p) H 0
+      eulerMass S α * omittedMass J (J\S) (primeProbability α) (fun p=>log p) H t
     90*(Fixed.d b:ℝ) ≤ u → u ≤ 110*(Fixed.d b:ℝ) → 199/200 ≤ α → saddleMean J α=H*u →
-    K⊆L → L⊆J → (J\K).card ≤ b^k →
+    |t| ≤ 2*H → K⊆L → L⊆J → (J\K).card ≤ b^k →
     0 < mass L ∧ 0 < mass K ∧ |mass K/mass L-1| ≤ exp (-v*(Fixed.z b:ℝ)^2) := by
   classical
   obtain ⟨b₁,dele⟩ := fixed_prime_deletions k
   obtain ⟨b₂,floor⟩ := fixed_central_mass_lower k
   obtain ⟨b₃,save⟩ := nominal_deletion_saving k v hv
   refine ⟨max 110 (max b₁ (max b₂ b₃)),?_⟩
-  intro b huge u α L K J H mass lo hi ha mean sub lj card
+  intro b huge u α t L K J H mass lo hi ha mean shift sub lj card
   obtain ⟨bb,b1,b2,b3⟩ := (max_le_iff.trans (and_congr_right (fun _ =>
     max_le_iff.trans (and_congr_right (fun _ => max_le_iff))))).mp huge
   have band : (Ioc ⌊sqrt (Fixed.B b:ℝ)⌋₊ ⌊(Fixed.B b:ℝ)⌋₊).filter Nat.Prime=J := by simp [J,primeBand]
@@ -99,8 +99,8 @@ theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
   let m := (Fixed.B b:ℝ)^(-199/400:ℝ)
   let δ := (b:ℝ)^k*m
   let r := primeProbability α
-  let g := fun S : Finset ℕ => omittedMass J (J\S) r (fun p=>log p) H 0
-  let base := shiftedMass J r (fun p=>log p) H 0
+  let g := fun S : Finset ℕ => omittedMass J (J\S) r (fun p=>log p) H t
+  let base := shiftedMass J r (fun p=>log p) H t
   have d := dele b b1 u α lo hi ha
   rw [band] at d
   obtain ⟨hp,up,pm,_,_,caps,deletions⟩ := d
@@ -108,10 +108,10 @@ theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
   have root : 0 < sqrt u := sqrt_pos.mpr (by linarith only [up])
   have center (S : Finset ℕ) (size : (J\S).card ≤ b^k) :
       1/(2*H*sqrt u) ≤ g S := by
-    have h := floor b b2 u α 0 (J\S)
+    have h := floor b b2 u α t (J\S)
     dsimp only at h
     rw [band] at h
-    exact h lo hi ha mean (by rw [abs_zero]; positivity) size sdiff_subset
+    exact h lo hi ha mean shift size sdiff_subset
   have pos (S : Finset ℕ) (size : (J\S).card ≤ b^k) : 0 < g S := (by positivity : 0 < 1/(2*H*sqrt u)).trans_le (center S size)
   have rp (p : ℕ) : 0 ≤ r p := by dsimp [r,primeProbability]; positivity
   have ro (p : ℕ) : r p ≤ 1 := by
@@ -119,7 +119,7 @@ theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
     apply (div_le_one (add_pos_of_pos_of_nonneg zero_lt_one (rpow_nonneg (Nat.cast_nonneg _) _))).mpr
     linarith
   have diff (S : Finset ℕ) (size : (J\S).card ≤ b^k) : |g S-base| ≤ 4/H*δ :=
-    (omitted_mass_error J (J\S) r (fun p=>log p) H 0 hh (fun _ _=>rp _) (fun _ _=>ro _)).trans
+    (omitted_mass_error J (J\S) r (fun p=>log p) H t hh (fun _ _=>rp _) (fun _ _=>ro _)).trans
       (mul_le_mul_of_nonneg_left (deletions _ size) (by positivity))
   have diff2 : |g K-g L| ≤ 8/H*δ := by
     have step := abs_sub_le (g K) base (g L)
@@ -162,6 +162,23 @@ theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
   have extra := mul_le_mul_of_nonneg_right (show 1 ≤ (b:ℝ) by linarith only [bv]) (show 0 ≤ δ by dsimp [δ]; positivity)
   dsimp only [δ] at *
   linarith only [gain,extra]
+
+/-- Removing any polynomial number of primes from the retained saddle
+band changes the nominal Euler times central integral by at most the
+specified relative error. Both bands use the same full-band saddle. -/
+theorem nested_nominal_density_ratio (k : ℕ) (v : ℝ) (hv : 1 ≤ v) :
+    ∃ b₀ : ℕ, ∀ b≥b₀, ∀ (u α : ℝ) (L K : Finset ℕ),
+    let J := primeBand b; let H := log (Fixed.B b)
+    let mass := fun S : Finset ℕ =>
+      eulerMass S α * omittedMass J (J\S) (primeProbability α) (fun p=>log p) H 0
+    90*(Fixed.d b:ℝ) ≤ u → u ≤ 110*(Fixed.d b:ℝ) → 199/200 ≤ α → saddleMean J α=H*u →
+    K⊆L → L⊆J → (J\K).card ≤ b^k →
+    0 < mass L ∧ 0 < mass K ∧ |mass K/mass L-1| ≤ exp (-v*(Fixed.z b:ℝ)^2) := by
+  obtain ⟨b₀,h⟩ := shifted_nested_nominal_density_ratio k v hv
+  refine ⟨b₀,?_⟩
+  intro b huge u α L K J H mass lo hi ha mean sub lj card
+  have hh : 0 ≤ H := log_nonneg (by exact_mod_cast (Nat.one_le_two_pow : 1 ≤ Fixed.B b))
+  exact h b huge u α 0 L K lo hi ha mean (by rw [abs_zero]; linarith) sub lj card
 
 /-- For the reduced gcd-one branch, the second-mark nominal model equals
 the ordinary one-mark nominal model times the ratio of the two conductor
