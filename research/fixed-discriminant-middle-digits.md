@@ -7,6 +7,8 @@ Fix squarefree $d\equiv3\bmod8$. Given $M=df^2$ for odd $f$, the method below al
 
 Both bounds are uniform for squarefree $d\le b^D$ with fixed $D$. The same algorithm receives the index, $d$ and the requested position in both settings. From an index in the second family it can certify a suitable outer conductor in $O(\sqrt n\operatorname{poly}(b))$ worst-case time, including when all digits are wanted. If only a polynomial bound on the squarefree part is supplied, one can find the unique $d$ by trying the small squarefree candidates and testing for a square quotient. The root-mean-square bound implies the same mean bound and a tail probability at most $2^t\operatorname{poly}(b)/S^2$ at bit budget $S$. In particular $t=O(\log b)$ gives exact polynomial mean time.
 
+The identical cost bound holds for the [compact primitive-norm pad interval](compact-three-square-pads.md#direct-evaluation-on-full-compact-pad-intervals) at every outer conductor. The executable checks both certificates from their public index lengths.
+
 ## A pointwise integer enclosure
 
 Compute $B_d=C(d)$ by enumerating positive triples for the small $d$. For $p^e\parallel f$ the Hurwitz product gives

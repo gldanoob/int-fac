@@ -32,17 +32,20 @@ def projection(scope, remaining):
 
 
 class Profile:
-    def __init__(self, weights):
+    def __init__(self, weights, conditioned=()):
         self.discs = list(weights)
         self.weights = list(weights.values())
         self.classes = [squareclass(d) for d in self.discs]
+        self.conditioned = tuple(conditioned)
+        self.fixed_masks = []
         self.scopes = []
         for s in self.classes:
             s = set(s)
             if 3 in s:
                 s.remove(3)
                 s.symmetric_difference_update([-1])
-            self.scopes.append(tuple(sorted(s)))
+            self.fixed_masks.append(sum(1 << j for j, v in enumerate(self.conditioned) if v in s))
+            self.scopes.append(tuple(sorted(s.difference(self.conditioned))))
         variables = set().union(*self.scopes)
         live = dict(enumerate(self.scopes))
         self.steps = []
@@ -65,9 +68,15 @@ class Profile:
         self.denominator = prod(w.denominator for w in self.weights)
 
     def optimize(self, branch, forced=frozenset()):
+        candidates = (self._optimize(branch, forced, signs)
+                      for signs in range(1 << len(self.conditioned)))
+        return max(candidates, key=lambda entry: entry[0])
+
+    def _optimize(self, branch, forced, fixed_signs):
+        offsets = [(branch * (3 in s) + (mask & fixed_signs).bit_count()) % 2
+                   for s, mask in zip(self.classes, self.fixed_masks)]
         tables = []
-        for s, scope, weight in zip(self.classes, self.scopes, self.weights):
-            off = branch * (3 in s)
+        for s, scope, weight, off in zip(self.classes, self.scopes, self.weights, offsets):
             split, inert = weight.numerator, weight.denominator
             if s in forced:
                 split, inert = weight.denominator, 0
@@ -90,8 +99,8 @@ class Profile:
         signs = {}
         for (v, outer, _), picks in reversed(list(zip(self.steps,archive))):
             signs[v] = picks[sum(signs[u] << j for j,u in enumerate(outer))]
-        active = [i for i,(s,scope) in enumerate(zip(self.classes,self.scopes))
-                  if (sum(signs[u] for u in scope) + branch*(3 in s)) % 2 == 0]
+        active = [i for i,(scope,off) in enumerate(zip(self.scopes,offsets))
+                  if (sum(signs[u] for u in scope) + off) % 2 == 0]
         if ans:
             assert forced.intersection(self.classes) <= {self.classes[i] for i in active}
             assert ans == prod(self.weights[i] for i in active if self.classes[i] not in forced)
@@ -174,7 +183,8 @@ if __name__ == "__main__":
     h = int(sys.argv[1]) if len(sys.argv) > 1 else 6
     max_degree = int(sys.argv[2]) if len(sys.argv) > 2 else 0
     weights, summary = block_weights(h)
-    model = Profile(weights)
+    # Keeping the most connected signs outside the tables bounds memory at height 12.
+    model = Profile(weights, (-1, 2, 5, 7, 11) if h >= 12 else ())
     print("height, cubic fields, resolvents incl. cyclic block, cyclic rank, total rank, relations, last witness prime", summary[:7], flush=True)
     for branch in (0,1):
         main, active = model.optimize(branch)

@@ -20,7 +20,7 @@ In each of the cuts `xy|uv` and `xu|yv`, the diagonal has rank `K`. Its factors 
 
 The construction retains the high-word family's factor-generation bound and adds the elementary low-residue checks. At `w=λ` only the diagonal is needed. A comparable unrestricted crossing has `2^(λ−1)` odd labels. If `(w−1)/(λ−1)` stays positive, (1) is strictly below its leading width `2√2(λ−1)`. The saving refers to this public congruence on these two particular input labels. The upstream grid transfer requests an unrestricted crossing at each scheduled pair of edges. Its grouping steps can put internal transform messages on those edges. [Modular half-rate family](https://github.com/1337isnot1337/integer-factoring/blob/1b331929/research/modular-half-endpoint.md) · [Grid transfer hypotheses](https://github.com/1337isnot1337/integer-factoring/blob/1b331929/research/subexponential-piece-transfer.md) · [Audited multiplier messages](https://github.com/1337isnot1337/integer-factoring/blob/1b331929/research/factoring-network-structure.md)
 
-There is a complementary lower bound. For every finite exact decomposition of `T` into pieces of row and column matrix ranks `r_i,c_i`,
+The [placement seminorm and direct-sum argument](multiaxis-crossing-barrier.md#a-leading-coefficient-or-a-shared-product-residue) gives the matching leading log score $(w-1)+\sqrt2(\lambda-w)$ for this tensor in every characteristic. There is also an elementary restriction to unequal wire lengths, giving a second lower bound. For every finite exact decomposition of `T` into pieces of row and column matrix ranks `r_i,c_i`,
 
 \[
  \log_2\sum_i\sqrt{r_i c_i}\ \ge

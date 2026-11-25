@@ -25,6 +25,61 @@ middleStart(m,k) = {
   sqrtint((t-2)\(4*m))+1
 };
 
+compactPadK(b) = (3*b+1)\2+2*(logint((b+2)^12,2)+1)+8;
+compactCoprime(m,x,step) = {while(gcd(x,2*m)!=1,x+=step);x};
+compactStart(m,k) = {
+  my(s=sqrtint((2^(2*k)-1)\m)+1);
+  sqrtint(s-4*m-1)+1
+};
+
+compactBracket(m,k,lo,hi,first,bitAnswer) = {
+  while(hi-lo>1,
+    my(mid=(lo+hi)\2,w=compactCoprime(m,mid,1));
+    if(w>=hi,w=compactCoprime(m,mid,-1));
+    if(w<=lo,break);
+    if(bitAnswer(m*(w^2+4*m)^2)==first,lo=w,hi=w)
+  );
+  [lo^2+4*m,hi^2+4*m]
+};
+
+\\ Return the count or zero. The first two transitions determine the count without endpoint labels.
+compactScan(m,bitAnswer) = {
+  my(b=logint(m,2)+1,k=compactPadK(b),Q=2^k,U=middleUpper(m),mesh=16*U+1);
+  my(lo=compactCoprime(m,compactStart(m,k),1),hi=compactCoprime(m,compactStart(m,k+1)-1,-1));
+  my(prev=lo,first=bitAnswer(m*(lo^2+4*m)^2),last=first,changes=List());
+  for(i=1,mesh,
+    my(x=min(hi,compactCoprime(m,lo+(hi-lo)*i\mesh,1)));
+    if((x^2-prev^2)^2*U^2*m>=Q^2,error("compact qualifying gap too large"));
+    my(bit=bitAnswer(m*(x^2+4*m)^2));
+    if(bit!=last,
+      listput(changes,compactBracket(m,k,prev,x,last,bitAnswer));
+      if(#changes==2,break)
+    );
+    prev=x;last=bit
+  );
+  if(!#changes,return(0));
+  my(a=changes[1],bot=0,top=0);
+  if(#changes==2,
+    my(z=changes[2]);bot=ceil(Q/(z[2]-a[1]));top=floor(Q/(z[1]-a[2])),
+    my(J=if(first,2,1));bot=ceil(J*Q/a[2]);top=ceil(J*Q/a[1])-1
+  );
+  if(bot==top,bot,0)
+};
+
+\\ On a possible endpoint ambiguity, only an exact value seen in two independent scans is accepted.
+compactMajority(m,bitAnswer,markers,{inspect=0}) = {
+  my(v=[compactScan(m,bitAnswer),0,0]);
+  for(i=1,2,
+    my(p=markers[i]);
+    if(!isprime(p) || kronecker(-m,p)!=-1,error("invalid compact inert marker"));
+    v[i+1]=compactScan(m*p^2,bitAnswer)/(p+2)
+  );
+  for(i=1,3,if(v[i]>0 && denominator(v[i])==1,
+    for(j=i+1,3,if(v[j]==v[i],return(if(inspect,[v[i],v],v[i]))))
+  ));
+  if(inspect,[0,v],0)
+};
+
 middleScan(m,bitAnswer) = {
   if(m<3 || m%8!=3,error("expected an index 3 modulo 8"));
   my(b=logint(m,2)+1,k=8*b+16,S=j->1+4*m*j^2);
@@ -108,6 +163,59 @@ middleFixtureOracle(M) = {
   error("unrecognized split multiplier")
 };
 
+compactFixtureOracle(M) = {
+  foreach(compactSeeds,seed,
+    if(M%seed[1],next);
+    my(s,x);
+    if(issquare(M/seed[1],&s) && s>=4*seed[1] && issquare(s-4*seed[1],&x) && gcd(x,2*seed[1])==1,
+      compactCalls++;compactPeak=max(compactPeak,logint(M,2)+1);
+      return(bittest(s*seed[2],logint(M,2)\2))
+    )
+  );
+  error("unrecognized compact primitive norm")
+};
+
+compactMarkers(m) = {
+  my(b=logint(m,2)+1,Y=max(16*middleUpper(m),b^8),p=Y,ret=List());
+  while(#ret<2,p=nextprime(p+1);if(kronecker(-m,p)==-1,listput(ret,p)));
+  if(p>2*Y,error("fixture missed its marker interval"));
+  Vec(ret)
+};
+
+checkCompactPads() = {
+  local(middleCalls=0,middlePeak=0,compactCalls=0,compactPeak=0,compactSeeds=[]);
+  foreach([3,11,27,35,59],m,
+    if(compactScan(m,middleIndependentOracle)!=middleFactoredCount(m),error("compact exact count ",m))
+  );
+  print(["compact independently evaluated answers",middleCalls,"peak index bits",middlePeak]);
+  my(amp=middleAmplify(11,89),C=middleFactoredCount(11)*amp[2]);
+  if(25*C^2<121*amp[1],error("fixture did not reach two transitions"));
+  compactSeeds=[[amp[1],C]];
+  if(compactScan(amp[1],compactFixtureOracle)!=C,error("two compact transitions"));
+  my(r=9*(2^169+1),m=r^2+2,markers=compactMarkers(m),total=0,corrected=0);
+  foreach([r\2+1,r,2*r,3*r,7*r+1],v,
+    compactSeeds=concat([[m,v]],vector(2,i,[m*markers[i]^2,(markers[i]+2)*v]));
+    my(response=compactMajority(m,compactFixtureOracle,markers,1));
+    if(response[1]!=v,error("compact synthetic endpoint ",v));
+    corrected+=(response[2][1]!=v);total++
+  );
+  if(!corrected,error("endpoint fixture did not exercise a correction"));
+  print(["full-count two-transition input bits",logint(amp[1],2)+1,"synthetic endpoint tests",total,
+         "unperturbed failures corrected",corrected,"norm-transfer answers",compactCalls,"peak index bits",compactPeak]);
+  my(a=Mod(3,8),crtCases=0,gains=0);
+  forprime(p=3,19,
+    my(x=1);while(kronecker(-x,p)!=-1,x++);a=chinese(a,Mod(x,p));
+    my(d=lift(a));while(!issquarefree(d),d+=a.mod);
+    if(d%8!=3 || !prod(q=2,p,if(isprime(q) && q>2,kronecker(-d,q)==-1,1)),
+      error("prescribed inert progression",[p,d]));
+    my(C=middleFactoredCount(d));
+    forprime(q=3,p,
+      if(middleFactoredCount(d*q^4)!=C*middleLocal(q,2,-1),error("inert gain",[d,q]));gains++
+    );crtCases++
+  );
+  print(["squarefree prescribed-character progressions",crtCases,"exact inert prime-square gains",gains]);
+};
+
 checkMiddleThreeSquares() = {
   local(middleCalls=0,middlePeak=0);
   my(exact=0,ramified=0,split=0,inert=0);
@@ -147,4 +255,4 @@ checkMiddleThreeSquares() = {
          "semiprime fixture bit transfers",middleTransfers,"decoded twist and counts",pair]);
 };
 
-iferr(checkMiddleThreeSquares(),err,print(err);quit(1));
+iferr({checkMiddleThreeSquares();checkCompactPads()},err,print(err);quit(1));

@@ -68,14 +68,19 @@ fixedStripInterval(r,done,Y) = {
   [r,Vec(parts)]
 };
 
-fixedPadBound(d,k) = {
-  if(k<24 || k%8,return(0));
-  my(b=(k-16)\8);sqrtint((2^b-1)\d)
+fixedCompactK(b) = (3*b+1)\2+2*(logint((b+2)^12,2)+1)+8;
+
+fixedPadOptions(d,k) = {
+  my(opts=List(),lo=1,hi=k,b);
+  if(k>=24 && k%8==0,b=(k-16)\8;listput(opts,[sqrtint((2^b-1)\d),b,0]));
+  while(lo<hi,my(mid=(lo+hi)\2);if(fixedCompactK(mid)<k,lo=mid+1,hi=mid));
+  if(fixedCompactK(lo)==k,listput(opts,[sqrtint((2^lo-1)\d),lo,1]));
+  Vec(opts)
 };
 
 \\ A valid recovered outer conductor is an exact certificate for its local contribution.
-fixedPadCertificate(f,d,k,small) = {
-  my(b=(k-16)\8,H=fixedPadBound(d,k));
+fixedPadCertificate(f,d,opt,small) = {
+  my(H=opt[1],b=opt[2]);
   if(!H,return(0));
   my(xs=[1]);
   foreach(small,pe,
@@ -84,8 +89,11 @@ fixedPadCertificate(f,d,k,small) = {
   );
   foreach(xs,n,
     my(u=d*n^2,s=f\n);
-    if(logint(u,2)+1!=b || (s-1)%(4*u),next);
-    if(!issquare((s-1)\(4*u)),next);
+    if(logint(u,2)+1!=b,next);
+    if(opt[3],
+      my(x);if(s<4*u || !issquare(s-4*u,&x) || gcd(x,2*u)!=1,next),
+      if((s-1)%(4*u) || !issquare((s-1)\(4*u)),next)
+    );
     my(c=fixedSmallCount(d)*n);
     foreach(small,pe,if(n%pe[1]==0,c*=fixedLocal(pe[1],valuation(n,pe[1]),d)));
     return(s*c)
@@ -100,7 +108,7 @@ fixedMiddleQuotient(M,d,t) = {
   my(k=logint(M,2)\2);
   if(t<0 || t>k,error("requested digit outside the supported range"));
   my(step=2^(k-t),lo=fixedSmallCount(d)*f,r=f,done=1,cap=sqrtint(f)+1,Y=min(cap,8));
-  my(H=fixedPadBound(d,k),small=[]);
+  my(opts=fixedPadOptions(d,k),attempted=vector(#opts),small=[]);
   while(1,
     my(strip=fixedStripInterval(r,done,Y));r=strip[1];small=concat(small,strip[2]);
     foreach(strip[2],pe,lo*=fixedLocal(pe[1],pe[2],d));
@@ -108,9 +116,9 @@ fixedMiddleQuotient(M,d,t) = {
     if(r<(Y+1)^2,return([floor(lo*fixedLocal(r,1,d)/step),Y,0]));
     my(h=logint(r,Y+1),hi=floor(lo*((Y+2)/Y)^h));
     if(floor(lo/step)==hi\step,return([hi\step,Y,0]));
-    if(H && Y>=H,
-      my(c=fixedPadCertificate(f,d,k,small));if(c,return([floor(c/step),Y,2]));
-      H=0
+    for(o=1,#opts,if(!attempted[o] && opts[o][1] && Y>=opts[o][1],
+      my(c=fixedPadCertificate(f,d,opts[o],small));if(c,return([floor(c/step),Y,2]));
+      attempted[o]=1)
     );
     if(f<=65536 && Y>=sqrtnint(f^2,5)+1,return([floor(lo*fixedRemainingLocal(r,d)/step),Y,1]));
     if(Y==cap,error("residual survived full square-root cutoff"));
@@ -213,6 +221,22 @@ checkFixedDigits() = {
   );
   print(["direct exact standard-pad quotients",pads,"largest index bits",peak,
          "largest trial cutoff",maxY,"toy fallbacks",capUsed,"certified pads",certs]);
+  my(compact=0,compactCerts=0,compactPeak=0);
+  foreach([[3,143],[3,187],[11,143],[19,11^2*13]],pair,
+    my(d=pair[1],n=pair[2],u=d*n^2,K=fixedCompactK(logint(u,2)+1),c=fixedReference(n,d));
+    my(lo=sqrtint(sqrtint((2^(2*K)-1)\u)-4*u)+1,hi=sqrtint(sqrtint((2^(2*K+2)-1)\u)-4*u));
+    for(i=0,31,
+      my(x=lo+(hi-lo)*(2*i+1)\64);while(gcd(x,2*u)!=1,x++);
+      my(s=x^2+4*u,M=u*s^2);
+      if(logint(M,2)\2!=K,error("compact dyad"));
+      foreach([0,2,K],t,
+        my(v=fixedMiddleQuotient(M,d,t));
+        if(v[1]!=s*c\2^(K-t),error("compact certified quotient ",[d,n,i,t]));
+        compact++;compactCerts+=(v[3]==2);compactPeak=max(compactPeak,logint(M,2)+1)
+      )
+    )
+  );
+  print(["direct compact-pad quotients",compact,"certified pads",compactCerts,"peak index bits",compactPeak]);
   my(p=10007,z=17011,n=p*z,lo=sqrtint(n)\2,hi=2*sqrtint(n)+2,calls=0);
   if(!isprime(p) || !isprime(z) || p%3!=2 || z%3!=1,error("mixed semiprime fixture"));
   while(hi-lo>2*sqrtnint(n,4),

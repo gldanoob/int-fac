@@ -41,6 +41,9 @@ The replay eliminates quadratic character variables from the exact product by ma
 | 9 | 194.05918585 | 224.42757668 |
 | 10 | 261.94608427 | 334.37557097 |
 | 11 | 350.61641615 | 459.03111624 |
+| 12 | 458.95247593 | 613.04813590 |
+
+At height twelve, conditioning on the 32 sign choices at $-1,2,5,7,11$ keeps each exact table below the unconditioned memory requirement. An independent calculation first combined equal residual rows with their signed reciprocal weights, then optimized each of the same 32 subproblems. Both calculations produced identical rational maxima on both branches.
 
 One can also require splitting in a multiquadratic base whose squareclasses span a binary space $U$ of dimension at most $d$, and impose abelian Artin conditions over that base. Every represented $D\in U$ splits and its cubic coordinates can be fixed. Every $D\notin U$ retains its full cubic kernel. Indeed an element fixing the base inverts that block, and its commutators with the individual cubic kernel give the whole block while fixing every abelian prescription. For each $U$ maximize the product above subject to a positive sign at its represented classes, omitting their factors. Every feasible quadratic profile and fixed covered cubic pattern can attain the stated remaining distribution, for example by prescribing the covered cubic identities. This statement concerns prime samples from the Artin and congruence conditions. Distributions of primes among the values of a particular norm polynomial would require additional results. [Norm fields and the commutator argument](cubic-resolvent-profiles.md)
 
