@@ -10,6 +10,8 @@ Bach–Miller–Shallit proved randomized polynomial-time complete factorization
 
 With access to additional values on powers of the original input, a short nonadaptive block gives unconditional deterministic polynomial-time complete factorization for arbitrary multiplicities. [Power-sum decoder](divisor-sums-on-powers.md)
 
+A separate argument gives unconditional polynomial average bit cost over integers of each bit length from the single supplied value, with arbitrary prime multiplicities. [Average-case algorithm, proof and replay](average-single-divisor-sum.md)
+
 ## A uniform prime-index split
 
 Let $n\mid N$ contain distinct primes $p,q$ with $\Phi_k(p)\mid M$, where $3\le k\le b$ is an odd prime. The following search takes $b^{O_\delta(k)}$ bit operations when $\log(2M)=O(b)$. For the actual oracle value, $\sigma(N)\le N^2$. Trial division within the search handles all sufficiently small prime divisors, including $k$.
