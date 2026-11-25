@@ -54,6 +54,30 @@ The Lean proof checks the symmetric pair and the complete centered sum for all i
 
 On balanced semiprimes, predicting the first informative bit with a fixed advantage over one half requires reading a linear number of input bits, even when the larger prime is supplied. The result allows adaptive bit positions and unrestricted computation between reads. [Bit-probe bound and exact finite classifier](centered-bit-probes.md)
 
+### Evaluation under a small-remainder promise
+
+Let $n=pq$ for distinct odd primes, with $q\equiv h\pmod p$ and $H=|h|\in\{1,2,3,4,6,12\}$. For a center $c=2^j$ with $p,q>16c$, the mixed-root bit has the following values.
+
+| Supplied $H$ | $c=1$ | $c\ge2$ |
+|---|---|---|
+| $1,2$ | 1 | 1 |
+| $3,6$ | 0 | 0 |
+| $4$ | 0 | 1 |
+| $12$ | 1 | 0 |
+
+To see this, take $U=q^{-1}\bmod p$ in $[1,p-1]$, write $hU=1+vp$, and choose the mixed root $R=2qU-1$. Reflecting $R$ to $n-R$ preserves the outer-quarter test. The exact identity is
+$$
+\frac{cR}{n}=\frac{2cv}{h}+\delta,\qquad
+\delta=\frac{2c}{hp}-\frac{c}{n}.
+$$
+Since $vp\equiv-1\pmod H$, the first term has fractional part $a/d$ where $g=\gcd(2c,H)$, $d=H/g$, and $a$ is a unit residue modulo $d$ (with $a=0$ for $d=1$). The sufficient bounds $p\ge16c/g$ and $2q>H$ give $|\delta|<1/(4d)$ and $\operatorname{sgn}(\delta)=\operatorname{sgn}(h)$. For $d\in\{1,2,3,6\}$ the distance to either quarter boundary is at least $1/(4d)$. The outer-quarter bit is one for $d=1,6$ and zero for $d=2,3$. For $d=4$ the same estimate puts the phase at a quarter boundary before the shift. As $2c$ is a power of two, $2c/g=1$ in this case and $a\equiv-\operatorname{sgn}(h)p^{-1}\pmod4$. The shift puts the phase outside the middle half exactly when $p\equiv1\pmod4$, giving an additional case if that residue is supplied.
+
+At these centers the known pair $\{\pm c\}$ contributes one, so XOR with one converts the table bit to the centered floor-sum parity after subtracting $F(C)$. A supplied set of possible classes suffices wherever its rows agree.
+
+With $H$ supplied, the factor-size condition can be tested from $n$. For any dyadic center $c$ of the decoder, try division through $16c$. Finding a proper divisor gives both primes and the exact bit by CRT. Otherwise the table applies. Thus every center polynomial in $\log n$ has a deterministic polynomial-time evaluator on this promise, including inputs with small prime factors. More generally the small-factor check costs $O(\sqrt c\,\operatorname{poly}(\log n))$ bit operations. Put $t=\lceil\sqrt{16c}\rceil$ and evaluate $\prod_{i=1}^t(X+i)$ modulo $n$ at $0,t,\ldots,(t-1)t$ by product and remainder trees. Check the gcd of each product with $n$. For a nonunit block, check its at most $t$ entries for a proper gcd. If $t^2\ge n$, trial division up to $\lfloor\sqrt n\rfloor\le t$ suffices. This is the Pollard–Strassen block search. The dependence on $c$ still matters for the largest centers, and recognizing $H$ from unrestricted $n$ remains open. [Costa–Harvey, §1](https://arxiv.org/pdf/1201.2116#page=1)
+
+If $q=kp+h$ and $k$ is known, then $4kn+h^2=(2kp+h)^2$ and the square root directly gives $p$. A short range of possible $k$ and $H$ can be tried by square tests and proper gcds. This is the $a=1$, $b=k$ case of Lehman's multiplier identity. Lehman credits Lawrence for the earlier use of small rational approximations to the factor ratio. The table needs no bound on the multiplier and gives only the promised parity bits. [Lehman, *Factoring Large Integers*, §1 and equation (4.6)](https://doi.org/10.1090/S0025-5718-1974-0340163-2)
+
 ## What the floor-sum formulas evaluate
 
 - Schinzel extends Lerch's exact formulas for fractional parts of rational quadratics summed over a **complete** residue system. Corollary 1 expresses the unshifted complete sum in terms of class numbers. Here the individual endpoint $h$ carries the root information. Over a full period $0\le t<q$, pairing $t$ and $q-t$ gives $f(q-t)-f(t)=a(q-2t)$. For odd $q$ the full parity is $a(q-1)/2\bmod2$ (zero in this family since $a$ is then even). For even $q$ the pairs cancel and the parity is $\lfloor aq/4\rfloor\bmod2$ from $t=q/2$. For instance $n=7$ gives $(a,q)=(15,106)$ and odd full-period parity. [Schinzel, *An extension of some formulae of Lerch*, pp. 111–112](https://dml.cz/bitstream/handle/10338.dmlcz/120576/ActaOstrav_10-2002-1_12.pdf)
@@ -88,7 +112,7 @@ Schnorr gives the shift-bit identity relating the parity of $2^j x\bmod r$ to th
 
 ## Replay in memory
 
-The Python command compares the floor sums with direct root counts at every cutoff for every odd $n$ from 3 through 1501. The discrete-log check enumerates each generated subgroup to supply independent canonical parity bits.
+The Python command compares the floor sums with direct root counts at every cutoff for every odd $n$ from 3 through 1501. It also checks the small-remainder table and quarter-boundary rule for both signs. The discrete-log check enumerates each generated subgroup to supply independent canonical parity bits.
 
 ~~~sh
 python3 -B - <<'PY'
@@ -139,6 +163,51 @@ for n in range(3, 1502, 2):
     assert gcd(r-1,n)*gcd(r+1,n) == n
     cases += 1
 assert (cases, queries) == (393, 1629)
+
+def prime(x):
+    return x > 1 and all(x % d for d in range(2, isqrt(x)+1))
+
+remainders = set()
+checked_sums = set()
+table = {1: (1, 1), 2: (1, 1), 3: (0, 0), 4: (0, 1),
+         6: (0, 0), 12: (1, 0)}
+for H in (1, 2, 3, 4, 6, 8, 12):
+    for sign in (-1, 1):
+        h = sign*H
+        for p in range(17, 140, 2):
+            if not prime(p):
+                continue
+            for k in range(1, 5):
+                q = k*p+h
+                if q <= 16 or not prime(q):
+                    continue
+                n = p*q
+                # Construct the opposite mixed root using the other inverse.
+                r = 2*p*pow(p, -1, q)-1
+                U = pow(q, -1, p)
+                v = (h*U-1)//p
+                assert h*(2*q*U-1) == 2*v*n+2*q-h
+                for c in (1, 2, 4, 8):
+                    if min(p, q) <= 16*c:
+                        continue
+                    d = H//gcd(H, 2*c)
+                    if H == 8:
+                        expected = int(p % 4 == 1) if d == 4 else int(d == 1)
+                    else:
+                        expected = table[H][c > 1]
+                    x = c*r % n
+                    assert expected == int(4*min(x, n-x) < n)
+                    remainders.add((h, d, expected))
+                    if h not in checked_sums:
+                        K, m = c, n//4
+                        a, C = K*K*n, K*n*c
+                        den = a*n+1
+                        total = sum(a*t*t//den for t in range(C-m, C+m+1))
+                        assert (total - a*C*C//den) % 2 == (1 ^ expected)
+                        checked_sums.add(h)
+assert len(checked_sums) == 14
+assert all((h, 4, bit) in remainders for h in (-8, 8) for bit in (0, 1))
+assert all((h, 6, 1) in remainders and (h, 3, 0) in remainders for h in (-12, 12))
 
 n = 101*103
 near_counts = []
