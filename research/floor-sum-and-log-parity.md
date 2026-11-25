@@ -107,6 +107,40 @@ A different one-bit oracle compares the magnitude of a complete Kloosterman sum 
 
 At the original square modulus, the exact sign of the sum is the parity of one quarter-interval comparison per prime-power component. Polynomially many nonadaptive sign queries suffice for complete factoring when there are $O(\log b)$ components. For arbitrary $b$-bit inputs, the reduction takes $2^{O(\sqrt b)}$ work and queries. [Original-modulus sign theorem](kloosterman-localization.md#sign-decoding-with-logarithmically-many-prime-factors)
 
+## Factoring from imperfect answers at short centers
+
+Fix an odd $n$ with exactly two distinct prime divisors, with arbitrary multiplicities. Let $1\le T\le\lfloor\sqrt n\rfloor$ and $0<\delta\le1/2$. Suppose a fixed predictor gives the correct centered floor parity on at least a $1/2+\delta$ fraction of **unit centers in $[1,T]$**, for this particular $n$. It may make errors at arbitrary locations. There is a Las Vegas reduction using $\mathrm{poly}(\log n,1/\delta)$ queries exclusively in that interval and expected additional bit cost
+$$
+ (1+\sqrt n/T)\,\mathrm{poly}(\log n,1/\delta).
+$$
+In particular, inverse-polynomial advantage on uniformly sampled centers up to $\sqrt n/\mathrm{poly}(\log n)$ suffices for expected polynomial-time factoring with chosen-center access to the predictor. The guarantee concerns one fixed answer function on these centers. Set the public scale $K=T$ in the centered identity, so every query has the same coefficient and interval length. For the finitely many small $n$ factor directly.
+
+Write $r$ for a mixed root of one and $\alpha=r/n$. Subtract the midpoint contribution and remove the publicly computable contribution of $\{\pm c\}$. Encode the remaining prediction as $R(c)\in\{-1,1\}$, with positive sign in the outer quarters, and set $R(c)=0$ at nonunits. The true sign on units is $F(c\alpha)$ for $F(x)=\operatorname{sgn}\cos(2\pi x)$. Divisibility removes at most $T/3+T/5$ centers, so a positive absolute fraction are units. A gcd extracts a factor whenever a nonunit is encountered. In particular
+$$
+ T^{-1}\sum_{c=1}^T R(c)F(c\alpha)\ge (14/15)\delta.
+$$
+
+**Rational approximations.** Choose $J=O(1/\delta)$ and $A=O((1+\log J)/\delta)$ with sufficiently large absolute constants. If $\|j\alpha\|<A/T$ for some $1\le j\le J$, then $r$ lies within $nA/(jT)$ of $na/j$ for some integer $0\le a\le j$. Always try those intervals. Each interval of radius $B$ costs $O(1+B/\sqrt n)$ translated applications of Coppersmith's inclusive small-root theorem to $X^2-1$. Verify each listed root and its gcd with $n$. A mixed root gives both prime-power blocks. [Coppersmith, Corollary 1](https://www.di.ens.fr/~fouque/ens-rennes/coppersmith.pdf#page=11)
+
+**Finding a correlated frequency.** In the remaining case the geometric-sum bound gives $|T^{-1}\sum_{c=1}^T e(jc\alpha)|\le 1/(2A)$ for every $1\le j\le J$, where $e(x)=\exp(2\pi i x)$. The Erdős–Turán inequality bounds the interval discrepancy of the $T$ angles by $O(1/J+(1+\log J)/A)$. Choose the constants so this is below $\delta/100$. Smooth $F$ by the circle Fejér kernel of degree $m=O(\delta^{-2})$. Outside arcs of radius $\eta=\delta/100$ around the two discontinuities, its error is $O(1/(m\eta))$, from the kernel's tail bound. The two arcs have empirical mass at most $4\eta+2\delta/100$. Increasing $m$'s constant makes the average absolute smoothing error less than $\delta/3$. The smoothed function has zero constant coefficient, and its other coefficients are bounded by $2/(\pi |j|)$. Hence for at least one $1\le j\le m$,
+$$
+ \left|T^{-1}\sum_{c=1}^T R(c)e(-jc\alpha)\right|\ge \beta,
+ \qquad \beta=c_0\delta/(1+\log(2m))
+$$
+with an absolute $c_0>0$. Real-valuedness permits positive $j$. This step allows the errors to cancel the first harmonic entirely. [Erdős–Turán inequality, Theorem F.3](https://personal.science.psu.edu/rcv4/Vol2/Vol2.pdf)
+
+Take a power of two $P$ between $16T/\beta$ and $32T/\beta$. Extend $R$ by zero to $\mathbb Z/P$. At the nearest $f$ to $Pj\alpha$ modulo $P$, rotating each summand costs at most $\pi T/P$. Thus $|\widehat R(f)|\ge \tau=\beta T/(2P)$ under $1/P$ normalization. For each listed frequency and each $1\le j\le m$, try the $j$ lifts of the estimate $j\alpha\equiv f/P\pmod1$ with error at most $1/(2P)$, accounting for wraparound. They give intervals of radius $n/(2jP)$ for the mixed root, with outward integer rounding. The same translated small-root search applies.
+
+For completeness, the heavy-frequency list takes polynomially many queries and operations in $\log P,1/\tau$. For $v\bmod 2^s$, the total normalized squared Fourier mass in that residue class equals
+$$
+ \mathbb E_{x,d}\big[R(x+d)R(x)e(-vd/P)\big],
+$$
+where $x$ is uniform modulo $P$ and $d$ uniform among multiples of $P/2^s$. This follows by orthogonality. Estimate the real part by independent samples, starting with the full frequency set and testing its two children at each level. Retain estimates above $\tau^2/2$. With additive error $\tau^2/4$ at every tested node, all frequencies of magnitude at least $\tau$ survive, and at most $4/\tau^2$ nodes survive each level by Parseval. Abort a trial exceeding that cap. Hoeffding and a union bound over the capped tree give constant success probability using $O(\tau^{-4}\log((2+\log P)/\tau))$ samples per test, allowing a portion of the error for numerical rounding. Values outside $[1,T]$ require no query. Independent retries and exact divisor verification give the asserted expected bound. This is the cyclic power-of-two form of significant-Fourier learning. [Akavia–Goldwasser–Safra](https://people.csail.mit.edu/akavia/2003-focsAGS.pdf) · [Galbraith–Laity–Shani](https://arxiv.org/abs/1607.01842)
+
+**A deterministic limitation for this error model.** Suppose a deterministic decoder must tolerate $d$ erroneous centers per input and asks at most $d$ distinct centers. Simulate it with a fixed reply, say zero, at every query. There is a valid fixed predictor giving exactly these replies on this path and the true parity elsewhere. Consequently this simulation already factors every promised input within the decoder's own resource bound. The observation applies even when $d/T$ tends to zero. It uses adversarial fixed error locations and imposes no efficiency requirement on the predictor.
+
+The replay deliberately answers with the negative third harmonic, erasing the useful fundamental peak. On two inputs its agreement on short centers was 66.65% and 66.66%. The sampled Fourier tree listed the third harmonic and omitted both fundamental peaks in each case. Actual translated lattice calls recovered 10,007 and 20,011. A third input exercised the small-rational case, and twelve centered sums were checked term by term. These finite parameters allow enumeration of the sampled signal array. The query bound above uses on-demand predictor access and evaluates only surviving tree nodes. [Corrupted short-center replay](../experiments/noisy-centered-parity.py)
+
 ## What the floor-sum formulas evaluate
 
 - Schinzel extends Lerch's exact formulas for fractional parts of rational quadratics summed over a **complete** residue system. Corollary 1 expresses the unshifted complete sum in terms of class numbers. Here the individual endpoint $h$ carries the root information. Over a full period $0\le t<q$, pairing $t$ and $q-t$ gives $f(q-t)-f(t)=a(q-2t)$. For odd $q$ the full parity is $a(q-1)/2\bmod2$ (zero in this family since $a$ is then even). For even $q$ the pairs cancel and the parity is $\lfloor aq/4\rfloor\bmod2$ from $t=q/2$. For instance $n=7$ gives $(a,q)=(15,106)$ and odd full-period parity. [Schinzel, *An extension of some formulae of Lerch*, pp. 111–112](https://dml.cz/bitstream/handle/10338.dmlcz/120576/ActaOstrav_10-2002-1_12.pdf)
