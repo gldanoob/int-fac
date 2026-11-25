@@ -46,3 +46,48 @@ $$
 In fact $8t_*<Q$ since $U\ge9$, $V\ge25$, and $t_*$ is a unit by coprimality and $7\nmid n$. For a unit $t<Q/8$ we have $B=4t$; the two positive odd integers $B-z,B+z$ have sum $8t<Q$ and product divisible by $Q$. They share no prime divisor of $Q$ since $\gcd(2B,Q)=1$. Hence they must be $uU$ and $vV$ in some order for positive odd $u,v$. Conversely such a pair gives an odd $z$ by taking half the absolute difference, and it gives the mixed root because each summand is below $Q$. Both square blocks are one modulo eight. Therefore $u+v\equiv0\pmod8$, and the smallest possible weighted sum is $7U+V$, obtained by putting as much weight as possible on the smaller block. This proves the formula. From a supplied $t_*$ the quadratic $7U^2-8t_*U+Q=0$ recovers the blocks. If $7\mid n$, ordinary division already identifies one of the two prime types. Finding the first sign change efficiently from $n$ is a separate problem.
 
 The finite replay compares 6,746 literal twisted sums at odd moduli through 181 against exact root enumeration. It compares the integer sign test at all 2,708 two-prime unit inputs in that sweep and checks 106 centered floor sums by direct integer summation. Nine square-modulus fixtures verify the first negative frequency, including inputs with repeated prime factors. Run `python3 -B experiments/salie-quarter.py`. [Independent finite checks](../experiments/salie-quarter.py)
+
+## A comparison that works without the factors
+
+Write $c=2t\bmod Q$ in $[0,Q)$ and $s(y)=\operatorname{sgn}\cos(2\pi y)$. The elementary comparison $s(c/Q)$ uses just $c,Q$. For two large prime-power blocks it predicts the sign of $W_Q(t)$ on a proportion tending to $3/4$ of unit frequencies. Its agreement with the mixed-root bit at the same frequencies tends to $1/2$. These proportions concern uniform unit frequencies. The prescribed dyadic centers are a different sampling problem.
+
+**The exact exceptions for two blocks.** Let $Q=UV$ with distinct odd prime-power blocks, and let $k$ be the absolute least residue of $2c$ modulo $Q$. Then
+$$
+ \operatorname{sgn} W_Q(t)\ne s(c/Q)
+ \quad\Longleftrightarrow\quad
+ k=\frac{U+V}{2}+iU+jV\quad\text{for integers }i,j\ge0.
+$$
+Consequently the first disagreement in this ordering occurs at $k_*=(U+V)/2$. It is a unit and is attained for either sign of the centered residue. Thus every frequency with $k<\sqrt Q$ has an exact comparison from the input alone. A supplied first disagreement determines the two prime powers by the quadratic $Z^2-2k_*Z+Q=0$. This holds at the original twisted modulus and at the ordinary square modulus.
+
+To see the criterion, let $x=(cV^{-1}\bmod U)/U$ and $y=(cU^{-1}\bmod V)/V$. The root sum factors as $4\cos(2\pi x)\cos(2\pi y)$ and $x+y\equiv c/Q\bmod1$. Let $h/U$ and $l/V$ be the centered representatives of $2x$ and $2y$ modulo one. Writing $2x$ as its nearest integer plus its centered part shows that $s(x)s(y)s(x+y)$ is negative precisely when $|h/U+l/V|>1/2$. In that case $h,l$ have the same sign and
+$$
+              2k=(U-2|h|)V+(V-2|l|)U.
+$$
+Conversely, if $2k=aV+bU$ for positive odd $a,b$, the bound $2k<Q$ gives $a<U,b<V$. The centered numerators $(U-a)/2,(V-b)/2$ give the sum $1-k/Q$ and its negative gives the opposite residue. These are exactly the two frequencies with this $k$. The first disagreement follows by taking $a=b=1$.
+
+The same proof gives an input-only evaluator beyond the guaranteed range. Disagreement holds precisely when $k^2-jQ=z^2$ for a **positive odd** $j$ and integer $0\le z<k$. In one direction take $z=|aV-bU|/2$ and $j=ab$. In the other, $k-z,k+z$ are positive odd integers below $Q$ whose product is divisible by $Q$. Since $k$ is a unit, the two prime-power blocks divide opposite factors. Enumerating the odd multiples costs $O(1+k^2/Q)\operatorname{poly}(\log Q)$. Alternatively use the translated quadratic small-root searches above on $[0,k)$ and retain the opposite parity to $k$. This costs $O(1+k/\sqrt Q)\operatorname{poly}(\log Q)$. Both bounds apply near the half-integer as well as near the integer.
+
+There is an exact count of the errors. Define $T(u,v)$ to count positive odd pairs $a,b$ with $a/u+b/v<1$. If $p\mid U$ and $q\mid V$ are the base primes, there are
+$$
+  2\big[T(U,V)-T(U/p,V)-T(U,V/q)+T(U/p,V/q)\big]
+$$
+wrong unit frequencies. The same-sign centered choices give the factor two. Removing the requirements $p\nmid a$, $q\nmid b$ gives the four terms. Each $T$ is an ordinary linear floor sum and can be evaluated by the Euclidean algorithm from the supplied orders. For the mixed-root bit $s(x-y)$, agreement with $s(x+y)$ is equivalent to $\cos(4\pi x)+\cos(4\pi y)>0$, or $|h|/U+|l|/V<1/2$. Reflection independently in each local grid shows that exactly twice as many unit frequencies fail this second comparison as fail the unshifted one.
+
+**More than two prime factors.** Let $Q=\prod_iD_i$ have $r$ odd prime-power blocks. Its sign is $\prod_i s(x_i)$ for $x_i=(c(Q/D_i)^{-1}\bmod D_i)/D_i$, and $\sum x_i\equiv c/Q\bmod1$. For independent continuous uniform $X_i$ on the circle, the conditional mean of the sign product given $Y=\sum X_i\bmod1$ is the $r$-fold convolution $C_r=s^{*r}$. Its sign is $s(Y)$ away from the quarter boundaries. Indeed all $C_r$ are even and change sign under a half-turn. For $0<y<1/2$, integrating over the central half gives $C_r'(y)=-4C_{r-1}(y-1/4)$ almost everywhere, proving the sign by induction. The optimal accuracy given the sum is
+$$
+ P_r=\frac12+\left(\frac2\pi\right)^{r+1}
+       \sum_{j>0\text{ odd}}\frac{(-1)^{(r+1)(j-1)/2}}{j^{r+1}} .
+$$
+The series follows by integrating $sC_r$ using the Fourier coefficients of $s$. For two blocks, $C_2(y)=1-4\|y\|$ and $P_2=3/4$. For three, $\int s C_3=\int C_2^2=1/3$, giving $P_3=2/3$. For two blocks the map $(X_1,X_2)\mapsto(X_1+X_2,X_1-X_2)$ preserves uniform measure on the torus, giving accuracy $1/2$ for predicting the mixed bit from the sum.
+
+These continuous bounds persist for finite public comparisons. Allow a predictor to see $c\bmod m$ with $(m,Q)=1$ and to use up to $K$ interval boundaries in $c/Q$ for each residue. Its accuracy is at most $P_r+O((K+1)m\sum_iD_i^{-1})$. The two-block mixed bit has upper bound $1/2$ with the same error. For $s(c/Q)$ itself use $m=1,K=2$ for an absolute error bound in either direction. For two blocks, restricting this public prediction to $\operatorname{dist}(c/Q,\tfrac12\mathbb Z)\le\delta\le1/4$ gives coverage $4\delta+O(\sum_i D_i^{-1})$ and joint error probability $4\delta^2+O(\sum_iD_i^{-1})$. This follows by integrating the conditional error $2\operatorname{dist}(y,\tfrac12\mathbb Z)$ on those intervals.
+
+For the discrete approximation, the local numerators $a_i=D_i x_i$ are independent and uniform over their unit grids by CRT. In any given class modulo $m$, the number of units in an interval of length $L$ is $(1-1/p_i)L/m+O(1)$ by subtracting the multiples of $p_i$. Couple $a_i\bmod m$ to an independent uniform label $Z_i$ with failure $O(m/D_i)$. Given the labels, couple $x_i$ to an independent uniform $X_i$ by matching quantiles, with distance $O(m/D_i)$ when the labels agree. The estimate is trivial if the error bound is of constant size. Otherwise $\lfloor\sum x_i\rfloor$ agrees with $\lfloor\sum X_i\rfloor$ except with probability $O(m\sum_iD_i^{-1})$, since the continuous sum modulo one is uniform. The continuous label $\sum_i (Q/D_i)Z_i-Q\lfloor\sum X_i\rfloor\bmod m$ is uniform independently of all $X_i$ and agrees with the actual label outside these exceptions. Crossing a local sign boundary or a predictor boundary costs at most the stated additional error. This comparison concerns a fixed modulus and varying diagonal unit frequencies. Related distribution results for short sums at varying prime powers use a different family. [Ricotta, Royer and Shparlinski](https://ambp.centre-mersenne.org/articles/10.5802/ambp.385/)
+
+**Counting all negative unit frequencies.** For any odd $Q$, let $A_Q$ count the negative signs among unit frequencies and let $\chi_4$ be the nontrivial character modulo four. Then
+$$
+ \varphi(Q)-2A_Q=\prod_{p^e\parallel Q}\big(\chi_4(p^e)-\chi_4(p^{e-1})\big).
+$$
+On the full odd grid of size $D$ the signed count is $4\lfloor D/4\rfloor+2-D=\chi_4(D)$. Subtract the nonunits, then multiply the local signed counts by CRT. At $Q=n^2$, the right side is $\prod_{p\mid n}(1-\chi_4(p))$, between zero and $2^{\omega(n)}<n$ for $n>1$. Hence **$\varphi(n)=\lceil2A_{n^2}/n\rceil$**. For odd $n\ge5$ the totient is even and $2^{\omega(n)}/n\le2/5$ (for two or more distinct primes use $4/15$). An additive error below $n/4$ in the count still gives the totient by rounding $2A_{n^2}/n$ to the nearest even integer. Computing that aggregate at the required precision from unrestricted $n$ remains open.
+
+For blocks 101 and 103 the public comparison matches 7,600 of 10,200 unshifted signs and 5,000 mixed bits. The replay checks the count and the two-block triangle formula against individual unit frequencies. It includes primes, repeated prime powers, and inputs with three and four distinct primes. [Finite sign and count checks](../experiments/salie-quarter.py)

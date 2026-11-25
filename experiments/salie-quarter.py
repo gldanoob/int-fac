@@ -1,7 +1,7 @@
 """Check the original-modulus Salié formula, quarter bit and first negative sign."""
 
 import cmath
-from math import gcd, isqrt, sqrt, tau
+from math import gcd, isqrt, prod, sqrt, tau
 
 
 def character(x, n):
@@ -35,6 +35,72 @@ def negative_sign(q, t):
         if z * z == square and z % q not in (bound % q, -bound % q):
             return True
     return False
+
+
+def cosine_sign(a, d):
+    return 1 if 4 * min(a % d, -a % d) < d else -1
+
+
+def odd_triangle(u, v):
+    """Count positive odd i,j with i/u + j/v < 1 by a Euclidean floor sum."""
+    bound = (u*v - u - v - 1) // 2
+    if bound < 0:
+        return 0
+    last_row, intercept = divmod(bound, v)
+    n, a, m = last_row + 1, v, u
+    count = n
+    while True:
+        slope, a = divmod(a, m)
+        height, intercept = divmod(intercept, m)
+        count += slope * n*(n-1)//2 + height*n
+        n, intercept = divmod(a*n + intercept, m)
+        if n == 0:
+            return count
+        m, a = a, m
+
+
+def check_frequencies():
+    for blocks in (((3, 2), (5, 2)), ((7, 2), (11, 2)), ((101, 1), (103, 1)),
+                   ((103, 1), (107, 1)), ((3, 3), (7, 2), (11, 2)),
+                   ((13, 1), (17, 1), (19, 1), (23, 1))):
+        orders = [p**e for p, e in blocks]
+        q = prod(orders)
+        inverses = [pow(q // d, -1, d) for d in orders]
+        negative = agreements = mixed_agreements = 0
+        if len(orders) == 2:
+            u, v = orders
+            first = (u + v) // 2
+            exceptions = {k for start in range(first, q//2+1, u)
+                          for k in range(start, q//2+1, v) if gcd(k, q) == 1}
+            assert min(exceptions) == first
+        for c in range(1, q):
+            if gcd(c, q) != 1:
+                continue
+            local = [c*a % d for a, d in zip(inverses, orders)]
+            sign = prod(cosine_sign(x, d) for x, d in zip(local, orders))
+            public = cosine_sign(c, q)
+            negative += sign < 0
+            agreements += public == sign
+            if len(orders) == 2:
+                k = min(2*c % q, -2*c % q)
+                assert (public != sign) == (k in exceptions)
+                mixed_agreements += public == cosine_sign(v*local[0] - u*local[1], q)
+
+        phi = prod(d - d//p for d, (p, _) in zip(orders, blocks))
+        chi4 = lambda d: 1 if d % 4 == 1 else -1
+        assert phi - 2*negative == prod(chi4(d)-chi4(d//p)
+                                        for d, (p, _) in zip(orders, blocks))
+        if all(e % 2 == 0 for _, e in blocks):
+            n = isqrt(q)
+            assert (2*negative + n-1)//n == phi//n
+        if len(orders) == 2:
+            u, v = orders
+            p, l = (p for p, _ in blocks)
+            triangle = (odd_triangle(u, v) - odd_triangle(u//p, v)
+                        - odd_triangle(u, v//l) + odd_triangle(u//p, v//l))
+            assert phi-agreements == 2*triangle
+            assert mixed_agreements == 2*agreements-phi
+        print(f'orders={orders} units={phi} negatives={negative} public agreements={agreements}')
 
 
 def check_sums():
@@ -109,3 +175,4 @@ def check_first_negative():
 if __name__ == '__main__':
     check_sums()
     check_first_negative()
+    check_frequencies()
