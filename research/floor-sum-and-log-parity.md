@@ -80,6 +80,8 @@ If $q=kp+h$ and $k$ is known, then $4kn+h^2=(2kp+h)^2$ and the square root direc
 
 A lattice search evaluates every center under the supplied promise $aq\equiv h\pmod{p^r}$, $\gcd(h,n)=1$, by recovering the factors first. Its deterministic cost is $n^{1/(4(r+1))}$ times polynomial overhead, and is polynomial for $p\ge n^{1/(r+1)}/\operatorname{poly}(b)$. This applies to arbitrary dyadic centers and to coefficients of either sign. At short centers the table above can give the bit directly. [Cofactor congruence and proof](hidden-divisor-lattices.md#a-congruence-on-the-complementary-factor)
 
+A different one-bit oracle compares the magnitude of a complete Kloosterman sum to a fixed threshold. It suffices for deterministic polynomial-time recovery with arbitrary prime multiplicities at one padded square modulus. [Threshold reduction](kloosterman-threshold.md)
+
 ## What the floor-sum formulas evaluate
 
 - Schinzel extends Lerch's exact formulas for fractional parts of rational quadratics summed over a **complete** residue system. Corollary 1 expresses the unshifted complete sum in terms of class numbers. Here the individual endpoint $h$ carries the root information. Over a full period $0\le t<q$, pairing $t$ and $q-t$ gives $f(q-t)-f(t)=a(q-2t)$. For odd $q$ the full parity is $a(q-1)/2\bmod2$ (zero in this family since $a$ is then even). For even $q$ the pairs cancel and the parity is $\lfloor aq/4\rfloor\bmod2$ from $t=q/2$. For instance $n=7$ gives $(a,q)=(15,106)$ and odd full-period parity. [Schinzel, *An extension of some formulae of Lerch*, pp. 111–112](https://dml.cz/bitstream/handle/10338.dmlcz/120576/ActaOstrav_10-2002-1_12.pdf)

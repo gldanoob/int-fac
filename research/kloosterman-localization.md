@@ -2,6 +2,8 @@
 
 Let $n$ be odd with exactly two distinct prime divisors, including arbitrary positive multiplicities, and set $Q=n^2$. The complete factorization of $n$ follows from $O(\log n)$ classical Kloosterman sums at modulus $Q$, each given with absolute error at most $n/128$. All arithmetic outside the queries costs polynomial time in $\log n$. The required error is a fixed constant after division by $\sqrt Q$. This gives an alternative to evaluating the [fixed-width floor sums](floor-sum-and-log-parity.md#nonadaptive-queries-for-two-distinct-prime-divisors). Its unknown cost is approximating each sum on an unfactored input.
 
+For arbitrary prime support, a separate deterministic polynomial-time reduction uses only fixed-threshold comparison bits after adding known prime factors to the base of the square modulus. [All-input threshold reduction](kloosterman-threshold.md)
+
 ## Stationary phase at a square modulus
 
 For a unit $t\bmod n$, define $e_Q(z)=\exp(2\pi iz/Q)$ and
