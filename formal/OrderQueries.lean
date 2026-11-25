@@ -1,4 +1,4 @@
-import Std
+import ModularPower
 
 -- A useful oracle answer can contain extra factors. Count progress inside the
 -- group exponent, where gcd(current, exponent) always divides the exponent.
@@ -93,6 +93,8 @@ theorem scan_hits {n x steps i p q : Nat} (hn : 0 < n) (hp : 1 < p)
       | succ j => exact ih (by omega) left right
 
 /-- This concrete verified order certificate for 77 needs only the first gcd. -/
-example : Nat.powMod 2 30 77 = 1 ∧ scan 77 (Nat.powMod 2 15 77) 1 = some 7 := by decide
+example : ModularPower.powMod 2 30 77 = 1 ∧ scan 77 (ModularPower.powMod 2 15 77) 1 = some 7 := by
+  simp only [ModularPower.powMod_def]
+  decide
 
 end OrderCertificate

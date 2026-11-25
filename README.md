@@ -2,7 +2,7 @@
 
 This repository investigates algorithms that return the smallest prime factor of every integer $N\ge2$. For a $b$-bit input, the public kernel-checked leaderboard bound is $2^{O(b/\sqrt{\log b})}$ deterministic bit operations. A November 25 Cogentic manuscript claims the stronger deterministic worst-case bound $2^{O(b^{3/4})}$. Its companion claims complete factorization in per-input expected time $L_N[1/3,105]$ using random bits. Both authors' release statements announce Lean proof sources separately. [Pinned manuscripts, models and verification status](research/cogentic-factoring-papers.md) · [Leaderboard](https://bigospeedrun.com/integer-factoring) · [Upstream factoring project](https://github.com/1337isnot1337/integer-factoring)
 
-Building on the deterministic companion, our current paper bound for complete factoring on every input is $\exp(O(b^{2/3}(\log b)^{1/3}))$. It uses the companion's order extractor and a new smooth-number estimate from proved Dirichlet GRH. The fixed four-coordinate construction has undergone internal review of its window estimates, rank certificate and bit cost. The full theorem remains a paper result. [Worst-case verification and Sage checks](research/cogentic-worst-case-verification.md) · [Derivation](research/cogentic-deterministic-two-thirds.md) · [Single certificate to factor](research/cogentic-dense-exponents.md) · [Executable two-field prototype](research/cogentic-quadratic-order.md)
+Building on the deterministic companion, our current paper bound for complete factoring on every input is $\exp(O(b^{2/3}(\log b)^{1/3}))$. It uses the companion's order extractor and a new smooth-number estimate from proved Dirichlet GRH. The fixed four-coordinate construction has undergone internal review of its window estimates, rank certificate and bit cost. Lean checks the uniform character estimate, the certificate-to-factor reduction and the integer search bounds. Search coverage for the concrete extractor and its bit cost remain open in Lean. [Worst-case verification and Sage checks](research/cogentic-worst-case-verification.md) · [Derivation](research/cogentic-deterministic-two-thirds.md) · [Single certificate to factor](research/cogentic-dense-exponents.md) · [Executable two-field prototype](research/cogentic-quadratic-order.md)
 
 
 ## Research
@@ -60,10 +60,10 @@ Start with the [known-results index](research/known-results.md), including the [
 
 ## Reproduce the results
 
-Run from the repository root with Lean 4 and PARI/GP installed. The checked versions are Lean 4.36.0 and PARI/GP 2.19.1 (development build).
+Run from the repository root with elan, Lake and PARI/GP installed. The factoring project pins Lean 4.33.1 and Mathlib. The other standalone checks use Lean 4.36.0 and PARI/GP 2.19.1 (development build).
 
 ~~~sh
 make check
 ~~~
 
-The check uses the installed elan stable binary when available and otherwise uses Lean on the search path. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements, together with existence and uniqueness of primitive-form certificates, the three conic secant identities, and the clipped three-square shell equivalence. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
+The standalone checks use the installed elan stable binary when available and otherwise use Lean on the search path. Run `make check-two-thirds-lean` for the pinned factoring project alone. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements, together with existence and uniqueness of primitive-form certificates, the three conic secant identities, and the clipped three-square shell equivalence. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
