@@ -33,5 +33,15 @@ checkCyclotomicBoxes() = {
     error("height-three prime certificate"));
   if(splitCyclotomicBox(p*q,m,3,3)!=[1,0],error("expected the whole height-three box to miss"));
   if(splitCyclotomicBox(p*q,m,3,4)!=[p,x^3-4*x^2-3*x-4],error("height-four witness"));
+  \\ Count sign vectors whose cyclotomic projection is constant.
+  for(k=3,10,
+    my(u=(x^k-1)/polcyclo(k),ones=(x^k-1)/(x-1),constant=0);
+    for(mask=0,2^k-1,
+      my(v=Polrev(vector(k,j,bittest(mask,j-1))));
+      my(w=liftall(lift(Mod(Mod(1,2)*v*u,x^k-1))));
+      if(w==0 || w==ones,constant++)
+    );
+    if(constant!=2^(k-eulerphi(k)+(hammingweight(k)==1)),error("sign projection at index ",k))
+  );
   #cases
 };

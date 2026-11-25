@@ -71,7 +71,7 @@ Fix this conductor-seven field and take $\alpha=3+\theta$, of norm $29$. For any
 
 To compute the density, let $\alpha_1,\alpha_2,\alpha_3$ be the Galois conjugates of $\alpha$. Its principal ideal is a prime of norm $29$. Since $29\equiv1\bmod 7$, its three conjugates are the distinct primes of $K$ over $29$. Valuation modulo two at these primes gives the three coordinate vectors, proving that the $\alpha_i$ are independent in $K^\times/K^{\times2}$. Thus $L=K(\sqrt{\alpha_1},\sqrt{\alpha_2},\sqrt{\alpha_3})$ is Galois over $\mathbb Q$ with $\operatorname{Gal}(L/K)\cong\{\pm1\}^3$. At an unramified split $q$ away from $2\cdot29$, the three residue signs are the Frobenius sign vector at a prime over $q$, up to permutation. Mixed signs form a union of conjugacy classes of size six in the subgroup of size eight. Chebotarev gives relative density $6/8$ among split primes, or density $1/4$ among all rational primes.
 
-The same argument gives mixed signs at relative density $1-2^{1-k}$ for any fixed Galois field of degree $k\ge2$. Choose an auxiliary rational prime splitting completely and, by the ideal Chinese remainder theorem, an integral element of valuation exactly one at one prime above it and zero at every other. The $k$ conjugates then have independent square classes. Of the $2^k$ sign vectors, only the two constant vectors lack mixed signs. The cubic factoring assertion uses in addition the odd projective exponent $H_p$ at the fixed inert prime.
+The same argument gives mixed signs at relative density $1-2^{1-k}$ for any fixed Galois field of degree $k\ge2$. Choose an auxiliary rational prime splitting completely and, by the ideal Chinese remainder theorem, an integral element of valuation exactly one at one prime above it and zero at every other. The $k$ conjugates then have independent square classes. Of the $2^k$ sign vectors, only the two constant vectors lack mixed signs. The cubic factoring assertion uses in addition the odd projective exponent $H_p$ at the fixed inert prime. Combining independent fields gives a stronger estimate for varying ordered pairs of primes: at any fixed sufficiently large height $T$, the limiting upper fraction of pairs for which any supplied multiple defeats the whole box is at most $\exp(-aT^b)$ for constants $a,b>0$. [Joint density theorem](cyclotomic-order-multiples.md#how-often-a-fixed-box-succeeds)
 
 ## PARI/GP replay
 
@@ -82,6 +82,8 @@ awk '/^~~~gp$/ {body=1; next} /^~~~$/ {body=0} body' research/cubic-order-multip
 ~~~
 
 The fixture uses $\alpha=3+\theta$ of norm $29$. It checks the forward split at $N=65$, both reverse gcd outcomes at $p=19$ with $q=5$ inert and $q=41$ split, and the common-exponent obstruction at $N=85$. Inflating $M$ in the reverse cases also exercises removal of multiple powers of $3$.
+
+For a second field take $\tau^3-\tau^2-4\tau-1=0$ of discriminant $169$, and $\alpha_2=4-\tau$ of norm $31$. The distinct conductors $7,13$ and the private primes $29,31$ give two independent sign extensions as in the joint density theorem. Among the $135\cdot134=18{,}090$ ordered distinct prime pairs in $[1000,2000]$, exactly $5{,}764$ satisfy the inert and mixed-sign conditions in at least one of these fields. The limiting fraction satisfying those conditions is $1-(5/6)^2=11/36$.
 
 ~~~gp
 f = x^3 - x^2 - 2*x + 1;
@@ -125,4 +127,25 @@ checkfixture() =
   print("OK: forward, reverse (inert and split), common-exponent obstruction");
 }
 iferr(checkfixture(), err, print(err); quit(1));
+{
+checktwofields() =
+  my(fs=[f,x^3-x^2-4*x-1],a=[x+3,4-x]);
+  if(poldisc(fs[2])!=169 || polresultant(fs[2],a[2])!=31,error("second field or norm"));
+  my(inert=vector(4),mixed=vector(4),primes=0);
+  forprime(t=1000,2000,
+    primes++;
+    my(pm=0,qm=0);
+    for(i=1,2,
+      my(roots=polrootsmod(fs[i],t));
+      if(#roots==0,pm+=2^(i-1));
+      if(#roots==3 && #Set(Vec(apply(z->kronecker(lift(subst(a[i],x,z)),t),roots)))==2,
+        qm+=2^(i-1))
+    );
+    inert[1+pm]++;mixed[1+qm]++
+  );
+  my(success=sum(pm=0,3,sum(qm=0,3,(bitand(pm,qm)>0)*inert[1+pm]*mixed[1+qm])));
+  if(primes!=135 || success!=5764,error("joint prime count"));
+  print("Two independent cubic fields cover ",success," of ",primes*(primes-1)," ordered pairs");
+}
+iferr(checktwofields(),err,print(err);quit(1));
 ~~~
