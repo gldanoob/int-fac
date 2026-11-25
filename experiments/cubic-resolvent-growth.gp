@@ -62,6 +62,34 @@ negativeTriangle(p,q) = {
   print(["negative triangle",p,q,h,discs,F,heights,probe(F,d,1)]);
 };
 
+cubeGapMatching(Y) = {
+  my(available=Map(),markers=List(),n=0,steps=Set([]),largest=0,localchecks=0);
+  forprime(p=Y+1,2*Y,if(p%49==1,mapput(available,p,1);listput(markers,p)));
+  foreach(Vec(markers),u,
+    if(!mapisdefined(available,u),next);
+    forstep(t=7,sqrtnint((2*Y-u)\2,3),7,
+      my(v=u+2*t^3);
+      if(!mapisdefined(available,v),next);
+      my(f=x^3-3*t^2*x-u-v,d=[-3*u,-3*v,-3*u*v]);
+      if(poldisc(f)!=-108*u*v,error("bad cube-gap discriminant"));
+      my(F=[negativeSingleton(u),negativeSingleton(v),shorttranslate(f)]);
+      for(i=1,3,
+        if(!polisirreducible(F[i]) || !issquare(poldisc(F[i])/d[i]),error("bad cube-gap field"));
+        largest=max(largest,height(F[i]))
+      );
+      if(n<3,localchecks+=probe(F,d,1));
+      n++;steps=setunion(steps,[t]);mapdelete(available,u);mapdelete(available,v);break
+    )
+  );
+  foreach(Vec(available),u,
+    forstep(t=7,sqrtnint((2*Y-u)\2,3),7,
+      if(mapisdefined(available,u+2*t^3),error("matching is not maximal"))
+    )
+  );
+  if(n==0 || #steps<2 || #markers!=2*n+#Vec(available),error("missing matching coverage"));
+  print(["cube gaps",Y,#markers,n,steps,largest,localchecks])
+};
+
 separateBases() = {
   my(f=x^3-3*x^2-2,g=x^3-6*x^2-3*x+2,h=x^3-2,counts=[0,0]);
   if(!issquare(-poldisc(f)) || !issquare(poldisc(g)/3) || !issquare(-poldisc(h)/3),
@@ -82,5 +110,7 @@ positiveMarker(1000003);
 negativeTriangle(10193,10487);
 negativeTriangle(1373,1471);
 negativeTriangle(1000001213,1000001311);
+cubeGapMatching(100000);
+cubeGapMatching(1000000);
 separateBases();
 quit;

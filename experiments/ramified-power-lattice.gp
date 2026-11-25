@@ -35,6 +35,42 @@ checkRamifiedPowerLattice() = {
   print(["input bits",b,"prime-index rows",checks,"distinct powers",#Set(Vec(indices)),
          "certified floor(log2 radius)+3",floor(mass),"bin exponent",bin,
          "four-row LLL factor",primes[1],"scaled norm and lower-bound bits",[logint(norm,2)+1,logint(bound,2)+1]]);
+  my(rawProduct=1,primitiveProduct=1,overlaps=0,compositeMass=0,maxBits=0,orders=[],grouped=0);
+  for(j=25,50,
+    my(r=e*j+h+1,P=2^bin,M=powerCountOracle(a*n^(2*j+1)));
+    my(newOrders=setminus(select(k->k>=3,divisors(r)),orders));
+    my(raw=1,primitive=1,den=1,d=0);
+    foreach(newOrders,k,
+      my(value=subst(polcyclo(k),'x,p));
+      raw*=value;primitive*=value/gcd(value,k);den*=4*k;d+=eulerphi(k)
+    );
+    orders=setunion(orders,newOrders);if(#newOrders>1,grouped++);
+    my(A=ceil(P^d/den));
+    if(gcd(raw,rawProduct)>1,overlaps++);
+    if(M%primitive || gcd(primitive,primitiveProduct)!=1 || primitive<A,error("primitive-order row ",[j,r]));
+    if(M>n^(2*j+2),error("public modulus exceeded bound"));
+    compositeMass+=logint(A,2)^2/(d*(logint(M,2)+1));
+    maxBits=max(maxBits,logint(a*n^(2*j+1),2)+1);
+    rawProduct*=raw;primitiveProduct*=primitive
+  );
+  if(!overlaps || !grouped || compositeMass<=bin+3,error("composite radius or overlap fixture failed"));
+  print(["all-index rows",26,"rows with multiple orders",grouped,"overlapping full values",overlaps,
+         "certified floor(log2 radius)+3",floor(compositeMass),"maximum index bits",maxBits]);
+  my(schedules=0);
+  foreach([16,32,65],J,
+    forstep(v=1,2*J+9,2,
+      my(seen=[],degreeMass=0);
+      for(j=(J+1)\2,J,
+        my(r=v*j+(v+1)/2,ks=setminus(select(k->k>=3,divisors(r)),seen));
+        my(d=sum(i=1,#ks,eulerphi(ks[i])));
+        if(!setsearch(ks,r) || (v>=J && 2*d<r),error("group degree bound ",[J,v,j]));
+        seen=setunion(seen,ks);degreeMass+=d/j
+      );
+      if(degreeMass<v*J/8,error("summed degree bound ",[J,v]));
+      schedules++
+    )
+  );
+  print(["verified grouped degree schedules",schedules]);
 };
 
 iferr(checkRamifiedPowerLattice(),err,print(err);quit(1));
