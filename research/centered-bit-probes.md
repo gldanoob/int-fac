@@ -108,3 +108,23 @@ assert [best_two(v) for v in (cols, intervals, characters, cols+intervals+charac
     18901, 18676, 18725, 18901]
 assert truth == mask(lambda p: 4*min(v:=2*pow(p,-1,q)%q,q-v) < q)
 ~~~
+
+## Advice stored before the center is chosen
+
+Fix a large odd prime $q$, draw $p$ uniformly from the primes in $(q/2,q)$, and let $N=pq$. A predictor knows $q$ and can first store an arbitrary $d$-bit message depending on $p,q$. After that it sees the query center and has access only to $q$, that center, and its message. Let $C$ be any public set of $T$ distinct centers in $[1,q/8]$. For a uniform center in $C$, the predictor's mean accuracy on the informative centered floor bit satisfies
+$$
+ \Pr[\text{correct}]\le\frac12+O\!\left(\sqrt{\frac{2^d(\log q)^3}{T}}\right).
+$$
+The same second-moment bound gives an $O(2^d(\log q)^3/(T\delta^2))$ fraction of possible $p$ for which the chosen message has advantage at least $\delta$. Thus inverse-polylogarithmic advantage on a positive fraction of inputs requires $d\ge\log_2 T-O(\log\log q)$. At $T=\lfloor q/12\rfloor$ this is within $O(\log\log q)$ of the bits needed to identify the smaller prime completely. The preprocessing can read all of $N$ and perform unrestricted computation. The restriction is the size of the message available *after* the center is known. [Factoring from biased answers on short centers](floor-sum-and-log-parity.md#factoring-from-imperfect-answers-at-short-centers)
+
+To prove the bound, put $G=\mathbb F_q^\times$, $a=2p^{-1}\bmod q$ and $F(y)=\operatorname{sgn}\cos(2\pi y/q)$ on $G$. At all the specified centers the true sign is exactly $F(ca)$. Indeed the mixed-root angle differs from $ca/q$ modulo one by $c/(pq)<1/(4q)$, and every point of the $q$-grid is at least $1/(4q)$ from a quarter boundary. All centers are units. The known rational-root contribution to the centered parity is constant over these short centers.
+
+Each message specifies an arbitrary word $u(c)\in\{-1,1\}$ on $C$. Extend it by zero to $G$. For $a\in G$ let $S_u(a)=\sum_{c\in G}u(c)F(ac)$. For every multiplicative character $\chi$ of $G$,
+$$
+ \left|\sum_{y\in G}F(y)\overline{\chi(y)}\right|\ll\sqrt q\log q .
+$$
+For the principal character the signed count has absolute value at most two. For a nonprincipal character, express the two outer intervals by additive Fourier series on $\mathbb F_q$. Their normalized Fourier absolute sums are $O(\log q)$ by the geometric series formula. Each nonzero additive twist of $\chi$ has Gauss sum of magnitude $\sqrt q$, and the zero twist vanishes. This is the usual completion proof of Pólya–Vinogradov. [Pomerance, character sums on intervals](https://math.dartmouth.edu/~carlp/pv.pdf)
+
+Multiplicative Parseval applied to the correlation and $\sum_c|u(c)|^2=T$ now gives $\sum_{a\in G}|S_u(a)|^2\ll q(\log q)^2T$. Distinct candidate primes give distinct $a$, and there are $\asymp q/\log q$ such primes. Therefore $\mathbb E_p|S_u(a)/T|^2\ll(\log q)^3/T$ for every fixed word. Bound the squared maximum over the $2^d$ words by the sum of their squares. Cauchy–Schwarz and Markov's inequality give the two assertions. Conditioning on independent random coins gives the same bounds for randomized encoders or decoders. More generally for a fixed distribution of centers with probabilities $w_c$, the same proof replaces $1/T$ by $\sum_c w_c^2$.
+
+At $q=65{,}537$ the replay uses 3,030 possible smaller primes and 4,096 centers. For explicit menus of 1, 4, 16 and 64 words, exact integer agreement scores gave mean best accuracies of 50.01%, 50.23%, 50.81% and 52.32%. These are results for the indicated menus. The replay checks the spectral inequality for each of the 64 words and independently validates 192 correlations against the actual mixed-root angles. [Finite multiplicative Fourier replay](../experiments/short-center-advice.py)
