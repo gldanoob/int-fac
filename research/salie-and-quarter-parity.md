@@ -13,6 +13,8 @@ Here the modulus of the character sum is the original integer $n$. For inputs wi
 
 For a proof of the classical formula, hold $b$ coprime to $n$ fixed. The Fourier transform in $a$ of $\sum_{y^2=4ab\bmod n}e_n(y)$, with kernel $e_n(-au)$, is $\sum_y e_n(y-u(4b)^{-1}y^2)$. It vanishes at nonunits $u$ because the linear coefficient is one. At a unit, completing the square gives $e_n(bu^{-1})(-bu/n)G_n$, where $G_n=\epsilon_n\sqrt n$ is the ordinary quadratic Gauss sum. Inverting and using $G_n^2=(-1/n)n$ gives the Salié identity at $a=b=t$. This proof works for odd composite moduli and imprimitive Jacobi symbols as well. [Williams, Salié's prime-modulus formula](https://people.math.carleton.ca/~williams/papers/pdf/044.pdf) · [Chen and Wang, equations (2.1)–(2.3) and the Gauss-sum lemma](https://dml.cz/bitstream/handle/10338.dmlcz/151785/CzechMathJ_73-2023-3_19.pdf#page=5)
 
+A deterministic descent reduces all these unit frequencies to frequency one on varying odd moduli. The log magnitude there, to inverse-polylogarithmic accuracy, suffices for complete factoring. [Fixed-frequency descent and replay](fixed-frequency-salie.md)
+
 ## The shifted comparison at one dyadic center
 
 Suppose $n$ has exactly two distinct prime divisors. Let $r$ denote either of its two mixed roots of one, and take $2t\equiv c\pmod n$ at the desired dyadic center. The rational roots contribute explicitly:
@@ -91,6 +93,8 @@ $$
  \varphi(Q)-2A_Q=\prod_{p^e\parallel Q}\big(\chi_4(p^e)-\chi_4(p^{e-1})\big).
 $$
 On the full odd grid of size $D$ the signed count is $4\lfloor D/4\rfloor+2-D=\chi_4(D)$. Subtract the nonunits, then multiply the local signed counts by CRT. At $Q=n^2$, the right side is $\prod_{p\mid n}(1-\chi_4(p))$, between zero and $2^{\omega(n)}<n$ for $n>1$. Hence **$\varphi(n)=\lceil2A_{n^2}/n\rceil$**. For odd $n\ge5$ the totient is even and $2^{\omega(n)}/n\le2/5$ (for two or more distinct primes use $4/15$). An additive error below $n/4$ in the count still gives the totient by rounding $2A_{n^2}/n$ to the nearest even integer. Computing that aggregate at the required precision from unrestricted $n$ remains open.
+
+The aggregate $A_Q$ also equals the number of unit residues $c$ with the *public* cosine $s(c/Q)$ negative. Indeed, Möbius inversion applied to the signed count on the full grid gives $\sum_{d\mid Q}\mu(d)\chi_4(Q/d)$, exactly the product above by multiplicativity. The same equality holds on each prescribed $\gcd(c,Q)=d$ stratum for the root trace extended to all frequencies: the local grids reduce to the unit grids of the prime-power blocks of $Q/d$, and a vanished block contributes a positive factor. In particular a count at the nearby modulus $5n$ determines the totient exactly: $A_{5n}=2\varphi(n)$ when $5\nmid n$ and $2A_{5n}=5\varphi(n)$ when $5\mid n$. This aggregate can be written entirely as an interval count of coprime integers. Individual frequency signs can differ, as the disagreement formula shows.
 
 For blocks 101 and 103 the public comparison matches 7,600 of 10,200 unshifted signs and 5,000 mixed bits. The replay checks the count and the two-block triangle formula against individual unit frequencies. It includes primes, repeated prime powers, and inputs with three and four distinct primes. [Finite sign and count checks](../experiments/salie-quarter.py)
 

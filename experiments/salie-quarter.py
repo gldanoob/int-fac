@@ -66,7 +66,7 @@ def check_frequencies():
         orders = [p**e for p, e in blocks]
         q = prod(orders)
         inverses = [pow(q // d, -1, d) for d in orders]
-        negative = agreements = mixed_agreements = 0
+        negative = public_negative = agreements = mixed_agreements = 0
         if len(orders) == 2:
             u, v = orders
             first = (u + v) // 2
@@ -80,6 +80,7 @@ def check_frequencies():
             sign = prod(cosine_sign(x, d) for x, d in zip(local, orders))
             public = cosine_sign(c, q)
             negative += sign < 0
+            public_negative += public < 0
             agreements += public == sign
             if len(orders) == 2:
                 k = min(2*c % q, -2*c % q)
@@ -87,6 +88,7 @@ def check_frequencies():
                 mixed_agreements += public == cosine_sign(v*local[0] - u*local[1], q)
 
         phi = prod(d - d//p for d, (p, _) in zip(orders, blocks))
+        assert public_negative == negative
         chi4 = lambda d: 1 if d % 4 == 1 else -1
         assert phi - 2*negative == prod(chi4(d)-chi4(d//p)
                                         for d, (p, _) in zip(orders, blocks))
