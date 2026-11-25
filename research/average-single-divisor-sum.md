@@ -6,6 +6,8 @@ The same algorithm uses any supplied multiple of $p+1$ for every remaining prime
 
 Pomykała and Radziejewski obtained quantitative deterministic almost-all results from the Euler totient, using small compositeness and character witnesses. The argument here uses quadratic residue algebras to handle the different order supply furnished by one divisor sum. Publication priority for this average divisor-sum bound has not been established. [Pomykała–Radziejewski](https://nutmic2019.imj-prg.fr/confpapers/FactoringWitnesses.pdf)
 
+The result extends to the single ordinary value $\sigma(N^j)$ for every fixed positive integer $j$. The same proof gives average polynomial-time proper splitting from just one covered cyclotomic order. [All fixed indices and powers](average-cyclotomic-splitting.md)
+
 ### An algorithm which always terminates
 
 Use $Z$ equal to the power of two specified by the input bit length. At stage $L$, remove all prime factors through $L$ with their multiplicities. Start at a fixed large power of $\log Z$ and double $L$ until the factorization is complete. The residual factor is tested by deterministic primality tests and by the following gcds. Each gcd refines the current list of divisors by splitting any entry on which it is proper. Accept only verified primes accounting for the entire input. If needed, the stage $L\ge\sqrt Z$ suffices by small-factor extraction alone.

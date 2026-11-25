@@ -6,6 +6,8 @@ For $k=3$ this removes both congruence restrictions in the [conductor-seven proo
 
 For a balanced semiprime and a polynomially bounded multiple, a different argument removes the analytic hypothesis. In particular, an unfactored multiple of $p^2+p+1$ up to $N^2$ suffices for polynomial-time recovery on balanced pairs. [Intersection lattice and exact replay](hidden-divisor-lattices.md)
 
+Unconditionally, the one-prime promise at every fixed $k\ge2$ gives a deterministic proper split in polynomial **average** time over inputs of each bit length, uniformly over supplied multiples of bounded bit length. The input primes can be arbitrarily unbalanced. [Average theorem and literal gcds](average-cyclotomic-splitting.md)
+
 ## The search uses integer polynomials
 
 Write $d=M/2^{v_2(M)}$. At heights $T=1,2,4,\ldots$, run both steps.
