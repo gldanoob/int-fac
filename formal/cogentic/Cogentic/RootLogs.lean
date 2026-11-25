@@ -65,7 +65,7 @@ def markLog (A a : ℕ) (root : ℚ) (lowBits bits : ℕ) : Option ℚ :=
   let dist := |(a:ℚ)/A-root|
   if (1/2:ℚ)^(lowBits+1) ≤ dist then some (approxLog dist.num.natAbs dist.den bits) else none
 
-private lemma log_lipschitz {x y m : ℝ} (hm : 0 < m) (hx : m ≤ x) (hy : m ≤ y) :
+lemma log_lipschitz {x y m : ℝ} (hm : 0 < m) (hx : m ≤ x) (hy : m ≤ y) :
     |Real.log x-Real.log y| ≤ |x-y|/m := by
   have side (x y : ℝ) (mx : m ≤ x) (my : m ≤ y) : Real.log x-Real.log y ≤ |x-y|/m := by
     have xp := hm.trans_le mx

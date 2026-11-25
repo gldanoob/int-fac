@@ -3,7 +3,7 @@ import Cogentic.Concrete
 
 namespace Cogentic.Construction
 
-private theorem grid_separation {d A W a : ℕ} (scale : 16*d ≤ W) (grid : onGrid d A W a)
+theorem grid_separation {d A W a : ℕ} (scale : 16*d ≤ W) (grid : onGrid d A W a)
     (side : Bool) (j : Fin d) :
     (W:ℚ)⁻¹ ≤ |(a:ℚ)/A-center d side j.val| := by
   let t := (a:ℚ)/A

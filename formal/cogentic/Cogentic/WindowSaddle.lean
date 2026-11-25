@@ -1107,6 +1107,9 @@ private def saddleEnvelope (V H t : ℝ) : ℝ :=
 def saddleEdgeworthConstant : ℝ :=
   ∑ k ∈ Finset.range 5, envelopeCoefficient k*momentConstant (k+2)
 
+theorem saddleEdgeworthConstant_nonneg : 0 ≤ saddleEdgeworthConstant := by
+  norm_num [saddleEdgeworthConstant,Finset.sum_range_succ,envelopeCoefficient,momentConstant] <;> positivity
+
 private theorem saddleEnvelope_eq (V H t : ℝ) :
     let u := V*t^2
     let y := H*|t|
@@ -1634,7 +1637,7 @@ private theorem normalized_omitted_expansion {ι : Type*} [DecidableEq ι]
   have deleted := diff.trans (mul_le_mul_of_nonneg_left hD (by positivity))
   linarith only [m,deleted]
 
-private theorem normalized_omitted_near_one {ι : Type*} [DecidableEq ι]
+theorem normalized_omitted_near_one {ι : Type*} [DecidableEq ι]
     (J D : Finset ι) (r ell : ι → ℝ) (H a d : ℝ)
     (hH : 0 < H) (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1/2)
     (hband : ∀ p ∈ J, |ell p| ≤ H) (hV : 0 < poissonMoment J r ell 2) (ha : |a| ≤ 2*H)

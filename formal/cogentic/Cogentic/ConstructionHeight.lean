@@ -148,7 +148,7 @@ private theorem full_height {n m step leading A degree u v : ℕ} (hm : 0 < m) (
     have := Nat.le_mul_of_pos_right leading pos
     omega
 
-private theorem clog_three_upper (q : ℕ) : 3^(max 1 (Nat.clog 3 q)) ≤ 3*(q+1) := by
+theorem clog_three_upper (q : ℕ) : 3^(max 1 (Nat.clog 3 q)) ≤ 3*(q+1) := by
   by_cases small : q ≤ 1
   · have h := Nat.clog_le_of_le_pow (b := 3) (y := 0) (by simpa using small)
     have : Nat.clog 3 q = 0 := by omega
@@ -160,7 +160,7 @@ private theorem clog_three_upper (q : ℕ) : 3^(max 1 (Nat.clog 3 q)) ≤ 3*(q+1
       Nat.pow_succ]
     omega
 
-private theorem rootBase_bound {n : ℕ} (hn : 2 ≤ n) :
+theorem rootBase_bound {n : ℕ} (hn : 2 ≤ n) :
     let b := n.log2+1
     Fixed.rootBase n ≤ 2^(8*Fixed.v b) := by
   let b := n.log2+1
@@ -256,6 +256,9 @@ private theorem data_bounds {n : ℕ} (hn : 2 ≤ n) :
   exact ⟨leading,Apow,Psmall,msmall,by
     change Within v 110004 (4*b^2*Fixed.U b*Fixed.A b)
     exact ((within4.mul b2small).mul Usmall).mul Asmall⟩
+
+theorem leading_size {n : ℕ} (hn : 2 ≤ n) :
+    leadingCoefficient n ≤ 2^(111120*Fixed.v (n.log2+1)) := (data_bounds hn).1
 
 /-- Both coefficient lists pass the advertised height cap throughout the actual box. -/
 theorem box_height {n ell u₀ u₁ v₀ v₁ : ℕ} (hn : 2 ≤ n)

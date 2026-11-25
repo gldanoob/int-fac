@@ -116,6 +116,45 @@ theorem neighboring_rankin_saddles (J : Finset ℕ) (α β H : ℝ)
   rw [eq]
   exact ⟨loss.1,loss.2.trans bound,sub_nonneg.mpr loss.2,(sub_le_self _ loss.1).trans bound⟩
 
+/-- Relative stability of the leading density under microscopic movement
+    of the conditional center. The requirement on the base mass is just
+    positivity, so no asymptotic remainder is paid for this displacement. -/
+theorem central_density_stability {ι : Type*} [DecidableEq ι] (J D : Finset ι)
+    (r ell : ι → ℝ) (H μ X h α : ℝ) (hH : 0 < H) (ha : |α-1| ≤ 1) (hh : |h| ≤ 1)
+    (hr : ∀ p ∈ J, 0 ≤ r p) (hr' : ∀ p ∈ J, r p ≤ 1)
+    (mass : 0 < omittedMass J D r ell H (μ-X)) :
+    let Z := fun x => Real.exp ((α-1)*x) * omittedMass J D r ell H (μ-x)
+    |Z (X+h)/Z X-1| ≤ (2+6/(H^2*omittedMass J D r ell H (μ-X)))*|h| := by
+  let m := omittedMass J D r ell H (μ-X)
+  let n := omittedMass J D r ell H (μ-(X+h))
+  let k := (α-1)*h
+  have dh : |k| ≤ |h| := by
+    dsimp [k]
+    rw [abs_mul]
+    simpa only [one_mul] using mul_le_mul_of_nonneg_right ha (abs_nonneg h)
+  have ee := Real.abs_exp_sub_one_le (dh.trans hh)
+  have ek : Real.exp k ≤ 3 := by linarith [(abs_le.mp ee).2,dh,hh]
+  have df : |n-m| ≤ 2*|h|/H^2 := by
+    have z := omitted_mass_lipschitz J D r ell H (μ-(X+h)) (μ-X) hH hr hr'
+    rw [show μ-(X+h)-(μ-X) = -h by ring,abs_neg] at z
+    exact z
+  have mp : 0 < m := mass
+  let base := Real.exp ((α-1)*X)
+  have bp : 0 < base := Real.exp_pos _
+  have es : Real.exp ((α-1)*(X+h)) = base*Real.exp k := by
+    rw [mul_add,Real.exp_add]
+  dsimp only
+  rw [es]
+  change |base*Real.exp k*n/(base*m)-1| ≤ (2+6/(H^2*m))*|h|
+  rw [show base*Real.exp k*n/(base*m)-1 =
+    Real.exp k*((n-m)/m)+(Real.exp k-1) by field_simp; ring]
+  apply (abs_add_le ..).trans
+  rw [abs_mul,abs_of_pos (Real.exp_pos _),abs_div,abs_of_pos mp]
+  have d := div_le_div_of_nonneg_right df mp.le
+  have u := mul_le_mul ek d (div_nonneg (abs_nonneg _) mp.le) (by norm_num)
+  calc _ ≤ 3*(2*|h|/H^2/m)+2*|h| := by linarith [u,ee,dh]
+       _ = _ := by ring
+
 end
 
 end Cogentic.Window

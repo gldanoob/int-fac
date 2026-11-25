@@ -188,6 +188,42 @@ private theorem located_saddle_loss (lam u : ℝ) (hu : 10 ≤ u)
   calc _ = (u/4)/(288*(Real.log (8*u+1))^3) := by ring
        _ ≤ _ := div_le_div₀ (by linarith) numer (by positivity) denom
 
+/-- A finite estimate for the middle-arc exponent at any full-band
+saddle. It can be applied at the same tilt used for every omitted set. -/
+theorem middle_loss_at_saddle (line : DirichletLZerosOnLine) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (B α u : ℝ), 16 ≤ B → 199/200 ≤ α → α ≤ 1 → 10 ≤ u →
+      C*(1+Real.log (3*B))^2*B^(-19/400:ℝ) ≤ 1/4 →
+      let J := (Finset.Ioc ⌊Real.sqrt B⌋₊ ⌊B⌋₊).filter Nat.Prime
+      let H := Real.log B
+      let tilt := (1-α)*H
+      saddleMean J α=H*u →
+      u/(1152*(Real.log (8*u+1))^3) ≤ Real.exp (tilt-1)/(36*tilt^3) := by
+  obtain ⟨C,hC,est⟩ := tilted_prime_mass line
+  refine ⟨C,hC,fun B α u hB lo hi hu err => ?_⟩
+  intro J H lam mean
+  have bp : 0 < B := by linarith
+  have hp : 0 < H := Real.log_pos (by linarith)
+  have mass := est B α ∅ hB lo hi (Finset.empty_subset _)
+  simp only [Finset.sdiff_empty,Finset.card_empty,Nat.cast_zero,zero_mul,add_zero] at mass
+  have i := mean_integral_bounds H (1-α) hp (sub_nonneg.mpr hi)
+  have cmp := tilted_mean_bounds J H α hp.le (by linarith) (by
+    intro p mem
+    obtain ⟨bound,prime⟩ := Finset.mem_filter.mp mem
+    obtain ⟨l,h⟩ := Finset.mem_Ioc.mp bound
+    refine ⟨prime.one_le,?_,?_⟩
+    · dsimp [H]; rw [← Real.log_sqrt bp.le]
+      exact Real.log_le_log (Real.sqrt_pos.mpr bp) (Nat.lt_of_floor_lt l).le
+    · exact Real.log_le_log (by exact_mod_cast prime.pos) ((Nat.cast_le.mpr h).trans (Nat.floor_le bp.le)))
+  rw [mean] at cmp
+  change |(∑ p ∈ J, (p:ℝ)^(-α)) - (∫ v in H/2..H, Real.exp ((1-α)*v)/v)| ≤ _ at mass
+  obtain ⟨a,b⟩ := abs_le.mp (mass.trans err)
+  have upper := (mul_le_mul_iff_right₀ hp).mp cmp.2
+  have lower : H*( (∑ p ∈ J, (p:ℝ)^(-α))/4) ≤ H*u := by linarith [cmp.1]
+  have low := (mul_le_mul_iff_right₀ hp).mp lower
+  apply (located_saddle_loss lam u hu (by dsimp [lam]; linarith [i.2]) ?_).2
+  rw [show lam/2 = (1-α)*(H/2) by dsimp [lam]; ring]
+  linarith [i.1]
+
 /-- A saddle for the actual prime set and an off-center bound expressed only
     in its input scale u = log(Y)/log(B). The rate u/(log u)^3 suffices for
     the moderate-frequency exclusion at the fixed schedule. -/

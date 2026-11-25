@@ -25,6 +25,18 @@ import Cogentic.TargetUnits
 import Cogentic.FieldSpecialization
 import Cogentic.VerifiedCandidate
 import Cogentic.SearchScale
+import Cogentic.RankCoverage
+import Cogentic.MarkDensity
+import Cogentic.ProgressionCorrection
+import Cogentic.GaussianGeometry
+import Cogentic.SaddleConstructionScale
+import Cogentic.RelativeAffine
+import Cogentic.MarkTilts
+import Cogentic.FixedPairCovariance
+import Cogentic.ForcedRows
+import Cogentic.CleanArithmetic
+import Cogentic.GramPositivity
+import Cogentic.ModelRank
 import Lean.Util.CollectAxioms
 
 /-! Fail the build if any of these public deductions acquires an additional axiom. -/
@@ -37,17 +49,34 @@ run_cmd
     ``Cogentic.Window.principal_euler_frequency_bound, ``Cogentic.Window.saddle_integral_edgeworth,
     ``Cogentic.Window.principal_euler_saddle_mass, ``Cogentic.Window.poisson_exponent_expansion,
     ``Cogentic.Window.full_principal_mass, ``Cogentic.Window.neighboring_rankin_saddles,
+    ``Cogentic.Window.fixed_full_principal_mass, ``Cogentic.Window.fixed_central_mass_lower,
+    ``Cogentic.Window.fixed_relative_principal_mass, ``Cogentic.Window.fixed_character_relative,
+    ``Cogentic.Construction.constructed_class_relative, ``Cogentic.Construction.scalar_progression_relative,
+    ``Cogentic.Window.mark_prime_weight, ``Cogentic.Window.omitted_prime_mass_uniform,
+    ``Cogentic.Window.fixed_central_insertions, ``Cogentic.Window.fixed_all_shift_upper,
+    ``Cogentic.Window.affine_gaussian_reduced, ``Cogentic.Window.marked_prime_classMass,
+    ``Cogentic.Construction.one_point_window, ``Cogentic.Construction.two_point_window,
     ``Cogentic.Window.clean_residue_saddle_input,
+    ``Cogentic.Window.eventual_fixed_saddle_wings, ``Cogentic.Window.fixed_band_power_savings,
+    ``Cogentic.Window.fixed_middle_savings, ``Cogentic.Window.two_point_coprime_correction,
+    ``Cogentic.Window.fixed_construction_window, ``Cogentic.Window.two_point_schedule_widths,
     ``Cogentic.Window.coefficient_fiber_crt, ``Cogentic.Window.polynomial_conditional_probability,
     ``Cogentic.Window.polynomial_first_probability, ``Cogentic.Window.root_conditioned_joint_probability,
     ``Cogentic.Construction.box_inputGuard, ``Cogentic.Construction.stageOne_succeeds,
     ``Cogentic.Construction.constructed_field_places, ``Cogentic.Construction.constructed_mark_logs,
     ``Cogentic.Construction.constructed_column_accuracy, ``Cogentic.constructed_target_observation,
+    ``Cogentic.Construction.mark_density_from_critical_line, ``Cogentic.fixed_exponent_fits,
     ``Cogentic.Construction.MarkRing.order_from_affine_classes,
     ``Cogentic.computed_field_unit_minor, ``Cogentic.computed_helmert_unit_minor,
     ``Cogentic.ArchPrecision.fixed_selected_reconstruction, ``Cogentic.ArchPrecision.projected_mark_precision,
     ``Cogentic.Concrete.candidate_of_minor, ``Cogentic.Concrete.tryDivisor_of_coverage,
     ``Cogentic.Concrete.candidate_count_L_two_thirds,
+    ``Cogentic.Concrete.fast_split_of_box_rank,
+    ``Cogentic.fixed_nominal_grid_energy, ``Cogentic.stable_gram_deletion,
+    ``Cogentic.Construction.retained_true_log_error, ``Cogentic.fixed_centered_model_margin,
+    ``Cogentic.retained_norm_coordinates,
+    ``Cogentic.twoFieldGram_of_perpendicular, ``Cogentic.positiveMarkCore_of_perpendicular,
+    ``Cogentic.positiveMarkCore_of_centered_moments,
     ``Cogentic.certified_archimedean_reconstruction, ``Cogentic.RootLogs.markLog_error,
     ``Cogentic.Concrete.total_factorization, ``Cogentic.Concrete.tryDivisor_succeeds,
     ``Cogentic.stageTwo_height, ``Cogentic.Concrete.factor_of_box_coverage, ``Cogentic.Concrete.search_with_minor_choices,

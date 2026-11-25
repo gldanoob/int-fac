@@ -6,7 +6,7 @@ private theorem center_scale {d : ℕ} (dp : 0 < d) (side : Bool) (j : ℕ) :
     center d side j*(4*d) = (2*j + if side then 2 else 1 : ℕ) := by
   exact div_mul_cancel₀ _ (by positivity)
 
-private theorem center_gap {d i j : ℕ} (dp : 0 < d) (ij : i < j) (side : Bool) :
+theorem center_gap {d i j : ℕ} (dp : 0 < d) (ij : i < j) (side : Bool) :
     2/(4*d : ℚ) ≤ center d side j-center d side i := by
   apply (div_le_iff₀ (by positivity)).mpr
   rw [sub_mul,center_scale dp,center_scale dp]
@@ -109,7 +109,7 @@ private theorem bracket_scale {n : ℕ} (hn : 2 ≤ n) (big : 10004 ≤ Fixed.d 
   exact ⟨by positivity,one_div_le_one_div_of_le (by positivity) fQ,
     one_div_lt_one_div_of_lt (by positivity) sQ⟩
 
-private theorem center_range {j d : ℕ} (hj : j < d) (side : Bool) :
+theorem center_range {j d : ℕ} (hj : j < d) (side : Bool) :
     0 ≤ center d side j ∧ center d side j ≤ 1/2 := by
   have dp : 0 < d := by omega
   have amount : 2*j+(if side then 2 else 1 : ℕ) ≤ 2*d := by cases side <;> simp <;> omega
