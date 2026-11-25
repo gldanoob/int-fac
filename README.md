@@ -4,7 +4,7 @@ This repository investigates algorithms that return the smallest prime factor of
 
 ## Research
 
-The [November 25 continuation](research/2026-11-25-continuation.md) includes a [complete deterministic factoring algorithm with mean cost $\exp(O(\sqrt{b\log b}))$](research/mean-time-elliptic-factoring.md) over all $b$-bit inputs. Its analytic inputs are ordinary and Dirichlet RH as covered by the November 20 theorem. The [two-cut crossing bound](research/euclidean-crossing-barrier.md) rules out the proposed exact crossing seed for a stronger worst-case algorithm.
+The [November 25 continuation](research/2026-11-25-continuation.md) includes a [complete deterministic factoring algorithm with mean cost $\exp(O(\sqrt{b\log b}))$](research/mean-time-elliptic-factoring.md) over all $b$-bit inputs. Ordinary RH, covered by the November 20 theorem, suffices through a [classical large-sieve choice of rational conics](research/average-conic-signs.md). The [two-cut crossing bound](research/euclidean-crossing-barrier.md) rules out the proposed exact crossing seed for a stronger worst-case algorithm.
 
 The [November 25 morning handoff](research/2026-11-25-handoff/README.md) collects the average-time reductions, the exact height-five counterexample, the complete height-six search data and the remaining proof obligations.
 
