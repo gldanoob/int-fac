@@ -79,7 +79,7 @@ The unsieved count can be sharpened to \(\Theta(X^{1/4})\). The integral octic \
 
 There are fixed \(c_0,\eta>0\) such that for all sufficiently large \(X\), at least
 \[
- c_0\frac{X^{1/4}}{(\log X)^8}
+ c_0\frac{X^{1/4}}{(\log X)^4}
 \]
 distinct inputs \(N\le X\) from the primitive sector have every prime divisor greater than \(N^\eta\). Each of the four coprime sign blocks is comparable to \(N^{1/4}\), with fixed constants.
 
@@ -89,6 +89,6 @@ For squarefree \(q\) coprime to \(M\), CRT gives \(\rho(q)\le8^{\omega(q)}q\). I
 \[
  O\bigl(8^{\omega(q)}(K+q)\bigr).
 \]
-The total error up to \(K^{1/4}\) is \(K^{5/4+o(1)}\). The bound \(g(p)\le8/p\) and Mertens' estimate give the dimension-eight interval product bound for the fundamental lemma. Indeed \((1-g(p))^{-1}\le(1-1/p)^{-8}(1+O(p^{-2}))\), so the extra product over primes at least \(z\) is \(1+O(1/z)\). The full density product through \(y\) is at least a constant times \((\log y)^{-8}\). The lemma applies to the multiset of octic values indexed by parameter pairs. With fixed sufficiently large \(u\) and \(y=K^{1/(4u)}\), it leaves \(\gg K^2/(\log K)^8\) pairs with no prime divisor of \(N\) at most \(y\). [Lagarias, Fundamental Lemma of the Combinatorial Sieve](https://websites.umich.edu/~lagarias/675notes/Estimate5-2015.pdf)
+The total error up to \(K^{1/4}\) is \(K^{5/4+o(1)}\). The four quadratic discriminants are \(-4,-196,-900,-44100\), all negative squares. Outside the fixed primes dividing the leading coefficients, discriminants or mutual resultants, the projective roots are distinct. Thus \(g(p)=8/p+O(p^{-2})\) for \(p\equiv1\pmod4\) and \(g(p)=1/p^2\) for \(p\equiv3\pmod4\). Partial summation of the prime number theorem for the fixed modulus four gives \(\sum_{p\le z,\,p\equiv1\pmod4}1/p=\tfrac12\log\log z+C_4+O(1/\log z)\). Expanding \(-\log(1-g(p))\) gives the dimension-four interval product bound for the fundamental lemma and a full density product through \(y\) comparable to \((\log y)^{-4}\). The lemma applies to the multiset of octic values indexed by parameter pairs. With fixed sufficiently large \(u\) and \(y=K^{1/(4u)}\), it leaves \(\gg K^2/(\log K)^4\) pairs with no prime divisor of \(N\) at most \(y\). [Lagarias, Fundamental Lemma of the Combinatorial Sieve](https://websites.umich.edu/~lagarias/675notes/Estimate5-2015.pdf)
 
 A pair that remains and is not primitive has a common prime \(p>y\), since every common prime divides the homogeneous octic and no prime dividing \(M\) can divide \(\ell\). Also \(p\le2K\). Summing the elementary count \(O((K/p+1)^2)\) for both parameters divisible by \(p\) gives \(O(K^2/y+K\log(2K))\). This is negligible compared with the sieve count. For the remaining primitive pairs, \(N\asymp K^8\), so \(y>N^\eta\) for any fixed \(0<\eta<1/(32u)\) and all sufficiently large \(K\). Roughness gives \(\Omega(N)=O(1)\) and hence \(\tau(N)\le2^{\Omega(N)}=O(1)\). The representation argument above now bounds the multiplicity by a constant. Taking \(K\) a sufficiently small fixed multiple of \(X^{1/8}\) proves the asserted count of distinct values.
