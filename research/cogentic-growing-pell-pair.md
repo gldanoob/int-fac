@@ -80,7 +80,7 @@ V+U\sqrt c=(c+\sqrt c)(y+\tfrac12\sqrt c)^j
 \]
 for even $j\ge2$. The multiplier squared is $a+y\sqrt c$ with $a=2y^2-1$. Starting with $U=1$, $T=1$, where $T=V/c$, the $j/2$ steps are
 \[
-(U,T)\longmapsto(aU+ycT,,aT+yU).
+(U,T)\longmapsto(aU+ycT,aT+yU).
 \]
 In particular $V=cT$ and $U$ stays odd. The residue of $U$ modulo $c$ is a power of $a$, which is a unit because every odd prime dividing $c$ has $y^2\equiv1$, and $a$ is odd. The norm identity is again $V^2+c=c(U^2+c)$. We have $U\ge a+yc>c/2$ and $U>Y+1$ after the first step. Thus $1<V/U<Y$ and the same two proper gcds split $N=U^2+c$.
 
@@ -95,3 +95,13 @@ Modulo two $F=X^{2k}$ and $G=((X+1)J+1)^2=X^{2\ell+2}$. Their constants are resp
 With $m\in[j^{\kappa j^2},2j^{\kappa j^2}]$, the conjugate formula again gives $\log U=(j+1)\log Y+O(1)$. The degrees, coefficient heights and norm bounds have the same orders as before. The recurrence gives polynomials in $y$ of degrees $j+1$ for $U$ and $j$ for $T$ after the first step, and at $y=1$ it gives $U=T=1$, $c=0$. The polynomial $N$ therefore has degree $2(j+1)$ and value one at $y=1$ modulo every odd prime. Preassigning $m\equiv1$ at the small primes replaces $Y\equiv2$ in the sieve, and $y$ is an invertible affine function of the progression index at the remaining primes. The same counting proof gives infinitely many of these exact-value inputs with no prime factor through $\exp(\kappa^{2/3}W/32768)$. For input recognition, enumerate even $j$ through the bit length and binary search odd $m$ as before. Strict monotonicity follows from the positive recurrence, and $a\ge17$ bounds the number of steps for a hit.
 
 The replay checks $m=5,j=2$ with $N=12801=17\cdot753$, degrees six and eight, and both exact evaluations. It also verifies three larger exact-value examples. These fields are selected for this family. No conclusion about the canonical monic pair or arbitrary inputs follows.
+
+### Making both residue branches simple
+
+For one integer $s$, replace $P$ and $J$ by $P+2s(X-m)$ and $J+2s(X-m)$. This preserves their values at $m$, their degrees and parity, and the Eisenstein conditions on $F$ and $G$. The two root values are still $U,V$, and the shifts in the defining derivatives at $m$ are respectively $4sU$ and $4sV$.
+
+For each prime $p\mid N$, the two slopes are units modulo $p$, so at most two residue classes of $s$ make either derivative zero. Write $r$ for the number of distinct primes dividing $N$. If all are greater than $2r$, the interval $0\le s\le2r$ has distinct residues modulo each such prime, so at most $2r$ candidates are forbidden and at least one succeeds. On the rough subfamilies above, $r<\log N/\log Z=O(j^2)$ and every prime factor exceeds $2\operatorname{bitlength}(N)$ for sufficiently large $j$. It is enough to try $0\le s\le2\operatorname{bitlength}(N)$ using gcds with $N$, without knowing its factorization. The coefficient height grows by at most a factor $O(1+s)$ for the lifted roots, leaving the degree and logarithmic norm bounds unchanged.
+
+Both repaired derivatives being units gives simple roots at every prime dividing $N$. For each prime power, Hensel lifting selects a root congruent to $m$ modulo that prime power. The induced map on algebraic integers lands in the corresponding $p$-adic integer ring, and reduction followed by CRT gives the required maximal-order residue map. The square certificate itself continues to use only the power orders.
+
+At $m=9,j=2$, the original derivative gcds are $7$ and $1$ for $N=279937$, so the first already supplies a factor. The replay also repairs with $s=1$, checks both derivative gcds are one, verifies $F(m)=G(m)=N$, and recovers the unchanged square certificate with factors $49$ and $5713$.

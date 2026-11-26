@@ -40,6 +40,10 @@ def evaluate(coefficients, m):
     return value
 
 
+def derivative_at(coefficients, m):
+    return evaluate([i*c for i, c in enumerate(coefficients) if i], m)
+
+
 def multiply(left, right):
     coefficients = [0]*(len(left)+len(right)-1)
     for i, a in enumerate(left):
@@ -97,7 +101,7 @@ def recover(n):
     return None
 
 
-def check_exact_pair(m, j):
+def check_exact_pair(m, j, repair=False):
     y = (m+1)//2
     c = 4*(y*y-1)
     a = 2*y*y-1
@@ -119,6 +123,19 @@ def check_exact_pair(m, j):
     p = lift_value(m, u, [1, 1]+[0]*(k-2)+[1])
     q = lift_value(m, quotient, [1]*(degree+1))
     assert max(map(abs, p+q)) <= 2*m
+    df = 2*u*derivative_at(p, m)+2*(m+1)
+    dg = 2*v*derivative_at(q, m)+2*(m+1)*quotient**2
+    if (m, j) == (9, 2):
+        assert (gcd(df, n), gcd(dg, n)) == (7, 1)
+    if repair:
+        s = next((s for s in range(2*n.bit_length()+1)
+                  if gcd(df+4*s*u, n) == gcd(dg+4*s*v, n) == 1), None)
+        assert s is not None
+        if (m, j) == (9, 2):
+            assert s == 1
+        for root in (p, q):
+            root[0] -= 2*s*m
+            root[1] += 2*s
     c_poly = [-3, 2, 1]
     f = multiply(p, p)
     for i, coefficient in enumerate(c_poly):
@@ -129,6 +146,8 @@ def check_exact_pair(m, j):
     check_eisenstein(g)
     assert len(f) < len(g) and evaluate(f, m) == evaluate(g, m) == n
     assert evaluate(p, m) == u and evaluate(multiply(c_poly, q), m) == v
+    if repair:
+        assert gcd(derivative_at(f, m), n) == gcd(derivative_at(g, m), n) == 1
     return n, first, second, len(f)-1, len(g)-1
 
 
@@ -142,7 +161,8 @@ if __name__ == "__main__":
         print(f"{n.bit_length()} bits, degrees {d} and {e}, factor bits "
               f"{first.bit_length()} and {second.bit_length()}")
     assert check_exact_pair(5, 2) == (12801, 17, 753, 6, 8)
+    assert check_exact_pair(9, 2, repair=True) == (279937, 49, 5713, 6, 8)
     for m, j in ((5, 2), (17, 4), (1+(1 << 80), 8), (1+(1 << 521), 14)):
-        n, first, second, d, e = check_exact_pair(m, j)
+        n, first, second, d, e = check_exact_pair(m, j, repair=True)
         print(f"exact shared value, {n.bit_length()} bits, degrees {d} and {e}, "
               f"factor bits {first.bit_length()} and {second.bit_length()}")
