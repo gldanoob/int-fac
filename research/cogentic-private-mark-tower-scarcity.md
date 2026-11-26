@@ -53,13 +53,21 @@ For each sufficiently large odd input $N$, first take $\gcd(15,N)$. A nonunit gi
 
 For the primitive nonmonic case take $F_n=x^2[1+n(2(x+x^{-1})-5)(3(x+x^{-1})-10)]$ with $n>0$ and $n\equiv3\pmod{11}$. Its coefficients $6n,-35n,62n+1,-35n,6n$ have gcd one. Modulo eleven its monic normalization is $x^4+7x^3+7x+1$, coprime to $x^{121}-x$ and hence irreducible. The same intermediate generator gives a quadratic tower. The marks $2,1/2,3,1/3$ have homogeneous values $4,4,9,9$, while the leading coefficient grows without bound.
 
-## Growing quadratic towers with one unit mark
+## Growing towers with planted small norms
 
 For any power of two $d=2k\ge4$ and sufficiently large odd $N$, screen $\gcd(3,N)$. When it is one, choose $N\le t<5N$ with $t\equiv2\pmod4$ and $t\equiv 2^{-k}\pmod N$. The polynomial
 \[
  F(x)=(x-1)^{2k}-t x^k
 \]
 has a simple root modulo $N$ at two, since $F(2)=1-2^k t$ and $F'(2)\equiv 3k/2\pmod N$. The shift $F(x+1)=x^{2k}-t(x+1)^k$ is Eisenstein at two. If $\alpha$ is a root, then $\theta=(\alpha-1)^2/\alpha$ satisfies $\theta^k=t$. The power-of-two radical tower up to $\theta$ is quadratic at each step by Eisenstein. Its last extension to $\alpha$ is given by $x^2-(\theta+2)x+1$. The mark zero has value one and unit reduction. Taking $d=\Theta(D)$ gives a growing tower with log coefficient height $\Theta(\log N)$ and a polynomial-time construction. This single mark supplies no square-relation guarantee.
+
+One can plant more small marked norms by allowing a larger final step. Take powers of two $d=qk$, with $d=\Theta(D)$ and $k=\Theta(\log D)$, so that $q=\Theta(D/\log D)$. Put
+\[
+ g(x)=\prod_{j=0}^{q-2}(x-2j),\qquad F(x)=(x+1)^d-tg(x)^k.
+\]
+The marks $2j$ have values $(2j+1)^d$ with all prime factors at most $2q-3$. Use the radix $m=4q^2+1$ and write $U=m+1$, $J=qg(m)-Ug'(m)$. Here $J>0$ because $g'(m)/g(m)\le(q-1)/(m-2q+4)<q/U$. All of $U,g(m),J$ are positive and less than $N$ for large $N$, since their logarithms are $O(q\log q)$. Screen their gcds with $N$. Otherwise choose $N\le t<5N$ with $t\equiv2\pmod4$ and $t\equiv U^d/g(m)^k\pmod N$. The derivative then reduces to $kU^{d-1}J/g(m)$, a unit, and $m-2j$ is a unit at every mark since it divides $g(m)$.
+
+The shift $F(x-1)$ is Eisenstein at two because $g(-1)$ is odd. The relative generator $\theta=(\alpha+1)^q/g(\alpha)$ satisfies $\theta^k=t$, giving quadratic steps up to degree $k$ as before. The last step has degree $q$ and polynomial $(x+1)^q-\theta g(x)$. The coefficient of degree $k(q-1)$ is $\binom{d}{k}-t$, so the log height is $\Theta(\log N)$. This gives $q-1$ genuine small-norm marks in polynomial bit work with maximum relative degree $o(D)$. The marked rational norms are perfect powers, and the construction gives no guarantee of a productive relation.
 
 ## The unique affine root prescription
 
