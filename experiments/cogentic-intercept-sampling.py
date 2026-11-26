@@ -175,6 +175,31 @@ def check_affine_line_obstruction(lines):
     return len(lines) * slope_count, len(witnesses)
 
 
+def check_dyadic_origin_obstruction():
+    base, ell, width = 257, 11, 32
+    intercept_origin, slope_origin = 45, 16
+    lines = [(1, 0, 3), (2, 1, 5)]
+    modulus = prod(prime for _, _, prime in lines)
+    mark = next(a for a in range(1, modulus + 1)
+                if all((a + slope) % prime == 0 for _, slope, prime in lines))
+    step = 2 * ell * (mark - base)
+    # These fixed polynomials agree at base and have identical local reductions.
+    first = mark ** 2 + mark + 1
+    second = first + step
+    constants = [second + step * (intercept_origin + j * width + mark * slope_origin)
+                 for j in range(2 * ell)]
+    assert all((constant - second) % abs(step) == 0 for constant in constants)
+    assert gcd(second, step) == 1
+    constant = next(c for c in constants
+                    if all((c + step * intercept) % prime == 0
+                           for intercept, _, prime in lines))
+    for intercept, slope, prime in lines:
+        for y in range(width):
+            x = intercept + slope * y
+            if 0 <= x < width:
+                assert (constant + step * (x + mark * y)) % prime == 0
+
+
 def main():
     frequencies = 0
     for exponent in range(3, 11):
@@ -190,6 +215,8 @@ def main():
     line_points, witnesses = (sum(counts) for counts in zip(crossing, parallel))
     print(f'Affine-line obstruction passed for {line_points} rejected line points'
           f' and {witnesses} accepted box points')
+    check_dyadic_origin_obstruction()
+    print('Dyadic-origin CRT preserved the fixed marked residue')
 
 
 if __name__ == '__main__':
