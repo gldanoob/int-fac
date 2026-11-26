@@ -58,6 +58,7 @@ def run():
     assert check_pair(9, 2) == (3, (-6, 2, 1), (-6, 2, -2, 1))
     assert check_pair(11, 2)[1] == (2, 0, 1)
     assert check_pair(17, 2)[0] == 3  # even floor root rounds down
+    assert check_pair(77, 2) == (7, (-14, 6, 1), (-14, 6, -6, 1))
     assert check_pair(123, 3)[1][-2] == 10  # top quotient exceeds the radix
     for n, degree in ((7, 2), (10, 2), (9, 1), (9, 3)):
         try:

@@ -23,7 +23,7 @@ $$
 0\le m^{d-1}c_{d-1}\le K+m<d(m+2)^{d-1}+m.
 $$
 
-The last bound follows by telescoping $(m+2)^d-m^d$. When $d=2$, this gives $c_{d-1}<2+5/m$, hence $c_{d-1}\le3\le m$. When $m\ge4d$, it gives $c_{d-1}<d\exp(2(d-1)/m)+1<2d+1\le m$. Thus $F$ and $G$ both have coefficient height at most $2m$ in these cases.
+The last bound follows by telescoping $(m+2)^d-m^d$. When $d=2$, the sharper bound $K<2m+2$ follows by expanding $(m+2)^2-m^2$. Since $m\ge3$, the initial quotient $\lfloor K/m\rfloor$ is at most two. The parity carry adds at most one, giving $c_1\le3\le m$. When $m\ge4d$, it gives $c_{d-1}<d\exp(2(d-1)/m)+1<2d+1\le m$. Thus $F$ and $G$ both have coefficient height at most $2m$ in these cases.
 
 Let $\ell$ be the binary bit length of $N$ and $j$ the binary bit length of $\ell$. The replay takes $d=\max(2,\lfloor(\ell/j)^{1/3}\rfloor)$. At degree two, odd $N\ge9$ gives $m\ge3$. For $d\ge3$, $\ell\ge d^3j$, so the positive real $d$th root of $N$ is at least $2^{(\ell-1)/d}\ge2^{d^2-1}$. Rounding down to an odd integer loses less than two, giving $m\ge4d$. All scheduled inputs therefore satisfy the coefficient height bound, including perfect powers.
 
