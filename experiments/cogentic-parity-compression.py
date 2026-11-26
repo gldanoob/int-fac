@@ -32,14 +32,16 @@ print(f"uniform mean={uniform_mean}; even-support mean={even_mean}; gap={abs(uni
 
 
 def parity_modulus_bias_numerator(k, q, r):
-    """Return |P(X=r mod q | even)-1/q| as an exact Fraction pair."""
+    """Return |P(X=r mod q | even)-P(X=r mod q)| as an exact Fraction pair."""
     # The conditional support has exactly 2**(k-1) members for k >= 1.
     even_count = sum(x % 2 == 0 for x in range(1 << k))
     assert even_count == 1 << (k - 1)
     accepted = sum(x.bit_count() % 2 == 0 and x % q == r % q
                    for x in range(1 << k))
-    # Difference numerator over even_count*q.
-    return abs(accepted * q - even_count), even_count * q
+    all_count = 1 << k
+    unconditioned = sum(x % q == r % q for x in range(all_count))
+    # Difference numerator over even_count*all_count.
+    return abs(accepted * all_count - unconditioned * even_count), even_count * all_count
 
 
 def verify_affine_reduction(k, predicates):
@@ -78,15 +80,33 @@ for k in range(1, 11):
 
 # Affine systems include noninvertible coefficients, inconsistent rows, and offsets.
 systems = [
-    [(2, 3, 1, 8)],              # noninvertible coefficient: empty
+    [(2, 3, 2, 8)],              # noninvertible coefficient: empty
     [(2, 3, 5, 8)],              # noninvertible coefficient, one class mod 4
     [(3, 7, 1, 10), (2, 5, 1, 6)],
-    [(1, 11, 0, 4), (1, 3, 0, 4)],  # incompatible shifted classes
+    [(1, 0, 0, 4), (1, 1, 0, 4)],  # genuinely incompatible classes
 ]
 for system in systems:
     direct = [x for x in range(1 << 8)
               if all((a * x + b - c) % q == 0 for a, b, c, q in system)]
     assert verify_affine_reduction(8, system) == direct
 
-print("exact modular bias inequalities passed for k=1..10 and 11 moduli")
+# A fixed coefficient-word offset enters c+d(b+x) as d*b, not b.
+offset = 5
+coeff = 3
+constant = 7
+target = 2
+q = 11
+assert [x for x in range(32) if (constant + coeff * (offset + x) - target) % q == 0] == [x for x in range(32) if (coeff * x - (target - constant - coeff * offset)) % q == 0]
+
+# For k=3, residue 0 mod 3 has an endpoint discrepancy: the unconditioned
+# probability is 3/8, not 1/3. Verify both exact probabilities directly.
+k, q, r = 3, 3, 0
+even_count = sum(x.bit_count() % 2 == 0 for x in range(1 << k))
+even_residue_count = sum(x.bit_count() % 2 == 0 and x % q == r for x in range(1 << k))
+all_residue_count = sum(x % q == r for x in range(1 << k))
+assert (even_residue_count, even_count, all_residue_count) == (3, 4, 3)
+assert (even_residue_count / even_count) != (all_residue_count / (1 << k))
+
+print("exact conditional-vs-unconditioned bias inequalities passed for k=1..10 and 11 moduli")
 print("affine reduction cases passed, including nonunits and offsets")
+print("endpoint-discrepancy example passed: 3/4 conditioned versus 3/8 unconditioned")
