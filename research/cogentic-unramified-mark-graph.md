@@ -1,0 +1,41 @@
+# Prescribed unramified primes and units from a graph of smooth norms
+
+For every sufficiently large odd input, one can construct two distinct number fields with a common evaluation modulo the input, and prescribe squarefree two-prime norms at a growing number of marks in both fields. The finite valuations of the marked elements are the columns of any chosen simple bipartite graph of the size below. Its cycles give explicit algebraic units. An optional choice of real roots makes these units independent even modulo squares. [Earlier common norm-two construction](cogentic-planted-norm-two.md) · [Executable graph replay](../experiments/cogentic-unramified-mark-graph.py)
+
+## Fields and their marked norms
+
+Let $L=\log N$, $H=L^{1/3}(\log L)^{2/3}$, $V=L^{2/3}(\log L)^{1/3}$ and $h\asymp(L/\log L)^{1/3}$. Choose a simple bipartite graph with $r=O(h)$ edges, no isolated vertices, and minimum degree at least two. Label every vertex by a distinct odd prime in a chosen dyadic band $[B,2B]$ with $\log B\asymp H$. Such labels can be listed by a deterministic sieve in $e^{O(H)}$ bit operations. Given the labels, all remaining arithmetic in the construction takes polynomial bit time in $L$. Each edge joining primes $q,p$ has mark $a_e=qp$. These marks are distinct, have logarithmic size $O(H)$, and are positive. Put $P(X)=\prod_e(X-a_e)$ and $m=\lceil N^{1/h}\rceil$. Then $m>1+\max_e a_e$ for all sufficiently large inputs. If any $m-a_e$ shares a factor with $N$, its gcd gives a proper divisor because $0<m-a_e<N$. Otherwise $P(m)$ is a unit modulo $N$.
+
+Choose $d$ to be the smallest integer with $d>2r+1$, $d-r\ge h$, and $d\equiv1\bmod 2^s$, where $2^s$ is the smallest power of two at least $r$. A second degree $d+2^s$ gives a nonisomorphic field by the same construction. Both degrees are $O(h)$. Over $\mathbb F_2$, $P=(X+1)^r$ divides $X^d-X$ because $(X+1)^{2^s}=X^{2^s}-1$ divides $X^{d-1}-1$. Start with the monic binary lift of $(X^d-X)/P$, then change its zero constant coefficient to 2. Call the resulting polynomial $Q_0$. Choose $0\le t<N$ with
+\[
+4t\equiv -m/P(m)-Q_0(m)\pmod N.
+\]
+Write $t=\sum_{j<h}t_jm^j$ with $0\le t_j<m$, possible since $N\le m^h$. Set $Q=Q_0+4\sum_{j<h}t_j X^j$ and $F_0=X+PQ$. It is monic, has value zero at $m$ modulo $N$, and has value $a_e$ at each $a_e$. All nonleading coefficients are even and the constant term is 2 modulo 4. Eisenstein at 2 proves irreducibility.
+
+For the signature conclusion below use
+\[
+F_C(X)=F_0(X)+4C(X-m)P(X)^2.
+\]
+The bump has degree $2r+1<d$ and preserves all preceding conclusions. At each rational endpoint $x=a_e\pm1/3$ choose integer $C\ge1$ strictly greater than $F_0(x)/(4(m-x)P(x)^2)$. The signs at both endpoints are then negative and the sign at each mark is positive. Such $C$ has $O(d\log(2+\max a_e))$ bits. Indeed $|P(x)|\ge3^{-r}$, $|x|\le 1+\max a_e$, $m-x\ge1$ and $m/(m-x)\le 2+\max a_e$. Every coefficient of $Q$ has magnitude at most $4m+2$. Bound the two terms $x$ and $P(x)Q(x)$ separately in the displayed ratio. Taking the maximum of the exact rational floors plus one gives a deterministic choice. In particular the coefficient 1-norm of $F_C$ has logarithm $\log m+O(d\log(2+\max a_e))=O(V)$, including the factor $m$ in the bump. The homogeneous values at primitive marks of height $e^{O(H)}$ also have logarithmic size $O(V)$.
+
+The ordinary evaluation homomorphism $\mathbb Z[\theta]\to\mathbb Z/N$, $\theta\mapsto m$, already suffices for all cycle units. If a map on the full ring of integers is wanted, test $\gcd(F_C'(m),N)$. A proper gcd gives a divisor, and if this gcd equals $N$, increasing $C$ by one makes the derivative a unit because $4P(m)^2$ is a unit. Larger $C$ preserves the brackets. Make this choice independently in each field. [Simple-root extension to the full ring](cogentic-monic-index.md)
+
+## Exact finite and real valuations
+
+In the power order $R=\mathbb Z[\theta]$, define $I_q=(q,\theta)$ for each vertex. Its quotient is $\mathbb F_q$ because $q\mid F_C(0)$. Ideals of vertices with distinct labels are comaximal. For an edge $a=qp$, the element $a-\theta$ belongs to $I_q I_p$, and its signed field norm is $F_C(a)=qp$. Its principal ideal and $I_q I_p$ both have index $qp$ in $R$. Hence
+\[
+(a-\theta)=I_q I_p.
+\]
+Each vertex ideal is invertible as a factor of an invertible principal ideal. In the maximal order the supporting ideal over each vertex prime is unique for these marks and has norm $q$. More precisely, $P$ is divisible by $X^2$ modulo $q$, since the vertex has at least two incident edges. Thus $F_C(0)=0$ and $F_C'(0)=1$ modulo $q$. The simple root has a unique lift over $\mathbb Z_q$, giving a degree-one unramified prime above $q$ for this residue; the other factors of $F_C$ modulo $q$ are coprime to $X$. The construction makes no claim about primes associated with those other factors.
+
+The exponent vectors of signed edge products that have trivial finite ideal are exactly the integral kernel of the unsigned vertex-edge incidence matrix. If the graph has $v$ vertices and $c$ connected components, a spanning forest yields $r-v+c$ alternating fundamental cycles. They form an integral basis: eliminate each off-tree entry using its cycle, then peel leaves to see that the remaining forest entries vanish. The same elimination modulo two computes the entire finite-valuation parity kernel. In either field every alternating cycle gives an actual power-order unit, with residue
+\[
+ \rho(z)=\prod_e(a_e-m)^{z_e}\pmod N.
+\]
+Its inverse belongs to the same order. The replay computes both as integral polynomials in the field generator.
+
+Sort the marks. At a real embedding immediately right of the $j$th mark exactly the first $j$ elements $a_e-\theta$ are negative. A further embedding just left of the first mark sees them all positive. The rows determine every edge exponent parity by successive differences and detect a global minus sign. Thus the signed marked subgroup has square classes of dimension $r+1$ including $-1$. In particular the $r-v+c$ fundamental units give independent square classes. They also generate a free abelian group of that rank. A relation giving $1$ has all exponents even by signatures. After halving, the product could only be $1$ or $-1$, and the first embedding selects $1$. Iteration forces all exponents to vanish.
+
+For an explicit growing example, take $K_{k,k}$ with $k=\lfloor\sqrt h\rfloor$. There are $k^2$ simultaneous smooth marks and $(k-1)^2$ independent power-order units from them. A shared spanning tree consisting of a row and column gives rectangle cycles. Write $A=\max a_e$. Take nonnegative combinations of this fundamental basis with coefficient sum at most $s_0$. A positive or negative half of any such edge word has length at most $2s_0$. Their images are all distinct when $m^{4s_0}\le N$ and $2(1+A)^{4s_0}<m$. Indeed cross multiplication produces two positive integers less than $N$ (the empty case is immediate). Equality of their residues implies integer equality. Their product polynomials in $m$, written with factors $m-a_e$, have degree at most $4s_0$ and coefficient differences of magnitude below $m$. Repeated reduction modulo $m$ proves polynomial equality, hence equality of the words by unique factorization and independence of the cycle basis. With $s_0$ a sufficiently small constant times $h$, this yields $\binom{(k-1)^2+s_0}{s_0}=e^{\Omega(h)}$ distinct unit images.
+
+These statements give exact valuation relations and a count of distinct modular units. In the bracketed fields every square of a signed mark word has a canonical half-product as its root up to global sign. For the same word in both fields the canonical roots have the same reduction. Finding two reductions with different signs at different prime factors remains the extraction problem. Even a single rectangle illustrates the restriction: the difference of its two numerator products is $-m(q_1-q_2)(p_1-p_2)$, so a gcd of the unpowered unit minus one can only see factors of those three known integers. The finite replay uses $K_{2,3}$ at degrees 17 and 25 and verifies all six marks, both cycle units, their inverses and their reductions. [Graph replay](../experiments/cogentic-unramified-mark-graph.py)
