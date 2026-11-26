@@ -63,7 +63,74 @@ def prime_powers(n):
     return factors
 
 
+def replay_saturation():
+    n = 77
+    bases = (2, 3)
+    original = ((60, 60), (60, -60))
+
+    def word(coefficients):
+        return pow(bases[0], coefficients[0], n)*pow(bases[1], coefficients[1], n) % n
+
+    assert all(word(row) == 1 for row in original)
+    assert pooled_split(n, [(word(row), 1) for row in original]) is None
+    first = tuple(a+b for a, b in zip(*original))
+    second = tuple(a-b for a, b in zip(*original))
+    assert first == (120, 0) and second == (0, 120)
+    assert pooled_split(n, [(2, 120), (3, 120)]) in (7, 11)
+
+    n = 63
+    assert pow(5, 6, n) == 1 and pow(10, 6, n) == 1
+    assert all(pow(a, 3, 7) == 6 for a in (5, 10))
+    assert pooled_split(n, [(5, 6)]) is None
+    assert pooled_split(n, [(5, 6), (10, 6)]) in (7, 9)
+
+
+def replay_recursive_cosets():
+    fixtures = [63, 77, 231, 315, 455, 693, 1575]
+    checked = 0
+    for n in fixtures:
+        factors = prime_powers(n)
+        units = [a for a in range(1, n) if gcd(a, n) == 1]
+        negative = [
+            a for a in units
+            if sum(e for p, e in factors if pow(a, (p-1)//2, p) == p-1) % 2
+        ]
+        for mask in range(1, 1 << len(factors)):
+            inside = [i for i in range(len(factors)) if mask & (1 << i)]
+            if len(inside) < 2:
+                continue
+            block = 1
+            phi = 1
+            heights = []
+            for i in inside:
+                p, e = factors[i]
+                block *= p**e
+                phi *= (p-1)*p**(e-1)
+                heights.append(((p-1) & -(p-1)).bit_length()-1)
+            s = min(heights)
+            project = phi // (phi & -phi)
+            anchor = next(
+                pow(a, project, block) for a in units
+                if pow(a, project*(1 << (s-1)), block) == block-1
+            )
+            diagonal = {pow(anchor, j, block) for j in range(1 << s)}
+            stalled = [a for a in negative if pow(a, project, block) in diagonal]
+            outside_odd = any(e % 2 for i, (_, e) in enumerate(factors) if i not in inside)
+            inside_odd = sum(factors[i][1] for i, u in zip(inside, heights) if u == s) % 2
+            assert len(stalled)*(1 << (1+sum(heights)-s)) == (
+                len(units) if outside_odd or inside_odd else 0
+            )
+            certificates = [(a, order(a, n)) for a in stalled]
+            assert pooled_split(block, certificates) is None
+            if n == 231 and block == 21:
+                assert len(stalled)*4 == len(units)
+                assert pooled_split(n, certificates) is not None
+            checked += 1
+    return checked
+
+
 def replay():
+    replay_saturation()
     assert pooled_split(65, [(8, 12), (18, 20)]) in (5, 13)
     assert pooled_split(65, [(64, 2), (8, 4), (57, 8), (8, 4)]) is None
     assert pooled_split(65, [(16, 3), (1, 7)]) is None
@@ -109,7 +176,9 @@ def replay():
                 assert not negative
         assert pooled_split(n, [(a, orders[a]*(2*j+1)) for j, a in enumerate(admissible)]) is None
         signed_counts += 1
-    print(f"{lists} subgroup comparisons and {signed_counts} exact signed density checks")
+    recursive = replay_recursive_cosets()
+    print(f"{lists} subgroup comparisons, {signed_counts} signed density checks, "
+          f"{recursive} recursive cosets and two saturated-rank fixtures")
 
 
 if __name__ == "__main__":
