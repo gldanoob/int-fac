@@ -62,12 +62,18 @@ private theorem scan_range_cost {f : Nat → Probe α} {size cap : Nat}
 
 abbrev TryPair := Nat → Nat → Nat → Nat → Nat → Option Proposal
 
-/-- Visit [1,W₀] × [1,W₁] twice in lexicographic order, stopping at the first verified hit. -/
-def searchBox (n w₀ w₁ : Nat) (attempt : TryPair) (g : Nat) : Probe (Hit n g) :=
+/-- Visit the four nested ranges with a per-candidate charge. An early hit
+stops both the search and its accumulated work. -/
+def chargedBox (n w₀ w₁ : Nat) (attempt : TryPair)
+    (work : Nat → Nat → Nat → Nat → Nat → Nat) (g : Nat) : Probe (Hit n g) :=
   let slow := List.range' 1 w₀
   let fast := List.range' 1 w₁
   scan (fun a => scan (fun b => scan (fun c => scan (fun d =>
-    ⟨verify n g (attempt g a b c d), 1⟩) fast) slow) fast) slow
+    ⟨verify n g (attempt g a b c d), work g a b c d⟩) fast) slow) fast) slow
+
+/-- Visit [1,W₀] × [1,W₁] twice in lexicographic order, stopping at the first verified hit. -/
+def searchBox (n w₀ w₁ : Nat) (attempt : TryPair) (g : Nat) : Probe (Hit n g) :=
+  chargedBox n w₀ w₁ attempt (fun _ _ _ _ _ => 1) g
 
 def BoxWitness (n w₀ w₁ : Nat) (attempt : TryPair) (g : Nat) : Prop :=
   ∃ a b c d, (1 ≤ a ∧ a ≤ w₀) ∧ (1 ≤ b ∧ b ≤ w₁) ∧
@@ -77,12 +83,12 @@ theorem searchBox_complete {n w₀ w₁ g : Nat} {attempt : TryPair}
     (witness : BoxWitness n w₀ w₁ attempt g) : (searchBox n w₀ w₁ attempt g).answer ≠ none := by
   obtain ⟨a,b,c,d,ha,hb,hc,hd,hit⟩ := witness
   intro missing
-  simp only [searchBox, scan_none, List.mem_range'_1] at missing
+  simp only [searchBox, chargedBox, scan_none, List.mem_range'_1] at missing
   exact hit (missing a (by omega) b (by omega) c (by omega) d (by omega))
 
 theorem searchBox_cost (n w₀ w₁ g : Nat) (attempt : TryPair) :
     (searchBox n w₀ w₁ attempt g).calls ≤ w₀ * (w₁ * (w₀ * w₁)) := by
-  unfold searchBox
+  unfold searchBox chargedBox
   apply scan_range_cost
   intro a
   apply scan_range_cost
@@ -168,6 +174,55 @@ theorem collect_cost {n : Nat} (hn : 2 ≤ n) (search : (g : Nat) → Probe (Hit
     | some candidate =>
       cases candidate <;> simp only [collect, h, List.length_cons, Nat.succ_mul] <;> omega
 
+private theorem scan_answer_congr (xs : List Nat) {f g : Nat → Probe α}
+    (same : ∀ x, (f x).answer = (g x).answer) : (scan f xs).answer = (scan g xs).answer := by
+  induction xs with
+  | nil => rfl
+  | cons a xs ih => cases eq : (f a).answer <;> simp [scan,←same,eq,ih]
+
+private theorem scan_sum (xs : List Nat) (f : Nat → Probe α) (cap : Nat → Nat)
+    (bound : ∀ x, (f x).calls ≤ cap x) : (scan f xs).calls ≤ (xs.map cap).sum := by
+  induction xs with
+  | nil => simp [scan]
+  | cons a xs ih =>
+    have h := bound a
+    cases eq : (f a).answer <;> simp only [scan,eq,List.map_cons,List.sum_cons] <;> omega
+
+def rangeWork (w : Nat) (f : Nat → Nat) := ((List.range' 1 w).map f).sum
+
+theorem chargedBox_spec (n w₀ w₁ : Nat) (attempt : TryPair) (work) (g : Nat) :
+    (chargedBox n w₀ w₁ attempt work g).answer = (searchBox n w₀ w₁ attempt g).answer ∧
+    (chargedBox n w₀ w₁ attempt work g).calls ≤
+      rangeWork w₀ (fun a => rangeWork w₁ (fun b => rangeWork w₀ (fun c => rangeWork w₁ (work g a b c)))) := by
+  constructor
+  · unfold searchBox chargedBox
+    iterate 4 (apply scan_answer_congr; intro)
+    rfl
+  · unfold chargedBox rangeWork
+    iterate 4 (apply scan_sum; intro)
+    exact Nat.le_refl _
+
+/-- The collector returns the same certified output under these charges,
+including a divisor that stops the search before the remaining targets. -/
+theorem collect_chargedBox {n : Nat} (hn : 2 ≤ n) (w₀ w₁ : Nat) (attempt : TryPair)
+    (work) (gs : List Nat) :
+    let run := collect hn (chargedBox n w₀ w₁ attempt work) gs
+    run.1 = (collect hn (searchBox n w₀ w₁ attempt) gs).1 ∧
+    run.2 ≤ (gs.map (fun g => rangeWork w₀ (fun a => rangeWork w₁ (fun b =>
+      rangeWork w₀ (fun c => rangeWork w₁ (work g a b c)))))).sum := by
+  induction gs with
+  | nil => exact ⟨rfl,Nat.le_refl _⟩
+  | cons g gs ih =>
+    obtain ⟨same,cost⟩ := chargedBox_spec n w₀ w₁ attempt work g
+    obtain ⟨value,tail⟩ := ih
+    simp only [collect,same,List.map_cons,List.sum_cons]
+    cases hit : (searchBox n w₀ w₁ attempt g).answer with
+    | none => exact ⟨value,Nat.add_le_add cost tail⟩
+    | some found =>
+      cases found with
+      | divisor => exact ⟨rfl,Nat.le_trans cost (Nat.le_add_right ..)⟩
+      | exponent => exact ⟨by simp only [value],Nat.add_le_add cost tail⟩
+
 /-- The Cogentic box has coordinate bounds 2 L₀² U A and 2 L₀² U in each field. -/
 theorem gaussian_generator_search {n : Nat} (hn : 2 ≤ n) (L₀ U A : Nat)
     (generators : List Nat) (attempt : TryPair)
@@ -200,7 +255,7 @@ def Hit.exponentLe {n g : Nat} (cap : Nat) : Hit n g → Prop
 theorem searchBox_exponentLe (n w₀ w₁ g cap : Nat) (attempt : TryPair)
     (bounded : ∀ a b c d e, attempt g a b c d = some (.exponent e) → e ≤ cap) :
     ∀ h, (searchBox n w₀ w₁ attempt g).answer = some h → h.exponentLe cap := by
-  unfold searchBox
+  unfold searchBox chargedBox
   apply scan_preserves
   intro a
   apply scan_preserves
@@ -267,3 +322,4 @@ theorem collect_exponentLe {n cap : Nat} (hn : 2 ≤ n) (search : (g : Nat) → 
 end TwoThirdsSearch
 
 #print axioms TwoThirdsSearch.gaussian_generator_search
+#print axioms TwoThirdsSearch.collect_chargedBox
