@@ -37,3 +37,4 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-split.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-recenter.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-pair.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-pair.py --squares

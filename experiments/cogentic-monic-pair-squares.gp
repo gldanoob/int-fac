@@ -28,7 +28,7 @@ monic_square_replay(n,m,coefficients) = {
     ));
     listput(marks,[a,b,entries]);
   ));
-  if(!#marks, return([n,0,0,0,[],[]]));
+  if(!#marks, error("no simultaneous marks in square-search fixture ", n));
   my(M=matrix(rowcount,#marks));
   for(k=1,#marks,for(i=1,2,for(j=1,#marks[k][3][i],
     my(entry=marks[k][3][i][j]);
@@ -55,5 +55,7 @@ monic_square_replay(n,m,coefficients) = {
       break(2);
     );
   );
+  if(n==323 && (dim!=1 || tested!=1 || witness!=[[[-1,2]],[-1,9],[0,0;0,0]]),
+    error("lost the mixed-sign cubic dependency at 323"));
   [n,#marks,dim,tested,witness,certificate];
 }
