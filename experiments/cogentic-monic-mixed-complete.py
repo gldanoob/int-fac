@@ -211,6 +211,20 @@ def fixtures():
         assert result["status"] == ("complete-split" if split else "complete-no-split")
         assert result["surviving"] == result["square_basis"]
         print(json.dumps(result))
+
+    n = 895
+    m, (left, right, _) = scheduled_fields(n)
+    residual = (8191 * 2147483647)**4
+    constant = 2 * residual
+    # The mark (0, 1) has an even singular private tail in this third field.
+    linear = constant * (-(m**3 + 2*m*m + constant)*pow(constant*m, -1, n) % n)
+    result = search(n, m, (left, right, (constant, linear, 2, 1)), 20)
+    assert result["columns"] == [295, 200, 2]
+    certificate = result["certificate"]
+    assert result["status"] == "first-square-split" and certificate["divisor"] == 179
+    assert certificate["signs"] == [1, 1, 1]
+    print("895: singular cubic private tail retained in a verified mixed split")
+
     signed = search(65, 9, ((2, -2, 1), (82, 18, 1), (-70, 6, 1)), 1, stop_at_split=False)
     certificate = signed["certificate"]
     assert signed["status"] == "complete-split" and signed["square_basis"] == 1

@@ -10,6 +10,7 @@ from sage.all import GF, QQ, ZZ, PolynomialRing, identity_matrix, matrix, vector
 HERE = Path(__file__).resolve().parent
 GRID = run_path(str(HERE / "cogentic-monic-large-primes.py"))
 COMPOSITE = run_path(str(HERE / "cogentic-composite-private-parity.py"))
+NEWTON = run_path(str(HERE / "cogentic-cubic-newton-parity.py"))
 PowerBasis = COMPOSITE["PowerBasis"]
 lattice = COMPOSITE["lattice"]
 private_ideal_even = COMPOSITE["private_ideal_even"]
@@ -121,6 +122,12 @@ def bounded_parts(value, primes):
     return valuation, value
 
 
+def private_even(field, polynomial, a, b, residual):
+    if len(field) == 4:
+        return NEWTON["odd_residual_even"](NEWTON["mark_polynomial"](field, a, b), residual)
+    return private_ideal_even(polynomial, a, b, residual)
+
+
 def collect(n, m, fields, cutoff, *, height):
     """Yield deterministic (primitive unit grid point, odd ideal row labels) pairs."""
     fields = tuple(tuple(field) for field in fields)
@@ -150,7 +157,7 @@ def collect(n, m, fields, cutoff, *, height):
                 if isqrt(residual)**2 != residual:
                     break
                 if residual > 1 and gcd(residual, homogeneous(derivative, a, b)) != 1:
-                    if not private_ideal_even(polynomial, a, b, residual):
+                    if not private_even(field, polynomial, a, b, residual):
                         break
                 mark_parts.append(factors)
             else:
@@ -177,6 +184,8 @@ def row_supports(columns):
 
 
 def replay():
+    from unittest.mock import patch
+
     reference = run_path(str(HERE / "cogentic-all-ideal-reference.py"))["reference"]
 
     def compare(n, m, fields, cutoff, height):
@@ -192,20 +201,42 @@ def replay():
         assert row_supports([row for _, row in actual]) == row_supports([row for _, row in expected])
         return actual
 
+    def compare_cubic(n, m, fields, cutoff, height):
+        actual = compare(n, m, fields, cutoff, height)
+
+        def general_oracle(field, polynomial, a, b, residual):
+            return private_ideal_even(polynomial, a, b, residual)
+
+        with patch.dict(collect.__globals__, private_even=general_oracle):
+            assert actual == list(collect(n, m, fields, cutoff, height=height))
+        return actual
+
     m, left, right = GRID["CHECK_PAIR"](895, 2)
-    actual = compare(895, m, (left, right), 800, 20)
+    actual = compare_cubic(895, m, (left, right), 800, 20)
     columns = GRID["parity_words"]([rows for _, rows in actual])
     basis = GRID["eliminate"](columns, (1 << j for j in range(len(columns))))
     assert (len(columns), len(basis)) == (151, 7)
     print("895: 151 columns and nullity 7 match the factorizing reference")
 
+    m, left, right = GRID["CHECK_PAIR"](10403, 3)
+    actual = compare_cubic(10403, m, (left, right), 800, 20)
+    assert len(actual) == 47
+    print("10403: all 47 raw cubic/quartic columns agree with both references")
+
     seed = (2**13 - 1) * (2**31 - 1)**2
     for power in (1, 2):
         residual = seed**(2 * power)
         fields = ((residual, 0, 1), (residual, 0, 0, 1))
-        actual = compare(residual + 1, 1, fields, 8, 1)
+        actual = compare_cubic(residual + 1, 1, fields, 8, 1)
         assert actual == ([] if power == 1 else [((0, 1), [])])
         print(f"{residual.bit_length()}-bit square residual: {len(actual)} accepted columns")
+
+    for exponent in (2, 4):
+        residual = 247**exponent
+        field = (2 * residual, 0, 2, 1)
+        actual = compare_cubic(2 * residual + 3, 1, (field,), 8, 1)
+        assert any(point == (0, 1) for point, _ in actual) == (exponent == 4)
+    print("Singular cubic square tails: second power rejected and fourth power accepted")
 
 
 if __name__ == "__main__":
