@@ -4,15 +4,24 @@ monic_square_root(n, m, nf, product) = {
   if(!nfeltissquare(nf,product,&root), return([0]));
   root = nfbasistoalg(nf,root);
   if(root^2 != product, error("incorrect field square root"));
-  my(poly=lift(root), den=denominator(poly));
+  my(poly=lift(root), den=denominator(poly,1));
   if(gcd(den,n)!=1, return([1]));
   [2,lift(Mod(subst(den*poly,x,m),n)/den)];
+}
+
+monic_check_square_denominators() = {
+  my(F=x^3-28*x^2+54, nf=nfinit(F), beta=Mod((x^2-x+3)/15,F));
+  if(monic_square_root(895,29,nf,beta^2)!=[1], error("nonunit denominator passed"));
+  my(result=monic_square_root(8629,35,nf,beta^2));
+  if(result[1]!=2 || Mod(result[2],8629)^2!=(Mod(1193,8629)/15)^2,
+    error("unit denominator failed"));
 }
 
 monic_square_replay(n,m,coefficients) = {
   my(fields=apply(Polrev,coefficients), orders=apply(nfinit,fields));
   my(discs=apply(poldisc,fields), primeset=primes([2,151]), marks=List(), rows=Map(), rowcount=0);
   my(excluded=discs[1]*discs[2]);
+  monic_check_square_denominators();
   if(monic_square_root(n,m,orders[1],Mod(x,fields[1])^2)[1]!=2,error("square-root control failed"));
   for(a=-64,64,for(b=1,64,
     if(gcd(a,b)!=1 || gcd(a-b*m,n)!=1, next);
