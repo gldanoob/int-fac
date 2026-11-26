@@ -1,0 +1,48 @@
+# Coprime shifted exponents can cover different parts of a predecessor
+
+The single exponent $(N-2)(N-3)$ gives a polynomial-time split on an unconditional family of unbalanced semiprimes. The two shifts supply different cofactors of one hidden predecessor. Within this family the full pool of $N^k\pm1$ through any prescribed subpolynomial cutoff, even with a subpolynomial smooth prime base, can leave large residual orders at both primes for every base in a prescribed subpolynomial integer menu. [Pooled shifted powers](cogentic-pooled-shifted-powers.md)
+
+## Construction and factor recovery
+
+Take distinct primes $p,q$ with $P<p\le2P$ and $P^5<q\le2P^5$. Require $p\equiv3\pmod4$ and a prime $\ell$ with $P^{1/16}<\ell\le P^{1/8}$ dividing $p-1$ exactly once. Write $p-1=2\ell u$, with $u$ odd. Choose the reduced class for $q\bmod(p-1)$ by
+\[
+             q\equiv1\pmod2,\qquad q\equiv3\pmod\ell,\qquad q\equiv2\pmod u.
+\]
+The three moduli are coprime and the class is a unit for large $P$. With $N=pq$ and $E=(N-2)(N-3)$, each part of $p-1$ divides the indicated shifted factor: $u\mid N-2$ and $2\ell\mid N-3$. The linear polynomials have resultant of absolute value one, and their integer evaluations are coprime. Consequently $p-1\mid E$. The power map modulo $q$ has kernel of order
+\[
+               \gcd(q-1,E)=\gcd(q-1,(p-2)(p-3))=O(P^2).
+\]
+This follows from $N\equiv p\pmod{q-1}$. Let $B=\operatorname{bitlength}(N)^2$. The distinct products of exactly $\lfloor\log(q-1)/\log B\rfloor$ primes at most $B$ are all below $q$, and there are $q^{1/2+o(1)}$ of them by the prime number theorem and the binomial bound. This exceeds $O(P^2)$ since $q\asymp P^5$. At least one prime through $B$ lies outside the kernel, so testing $\gcd(a^E-1,N)$ for $2\le a\le B$ recovers $p$. The computation uses $N$ alone. The exponent has $O(\log N)$ bits.
+
+There are $\gg P/\log P$ possible first primes before selecting $q$. For each $\ell$ in the marker interval, impose the single reduced CRT class $p\equiv3\bmod4$, $p\equiv1\bmod\ell$. The sum of the expected von Mangoldt weights on $(P,2P]$ is $P\sum_\ell 1/\varphi(4\ell)\asymp P$ by the prime harmonic sum. Bombieri–Vinogradov bounds the sum of the errors by $O(P/(\log P)^3)$ because the largest modulus is $4P^{1/8}$. Summing all nonprime prime-power weights costs $O(P^{1/8}\sqrt P\log^2P)=o(P)$. Each prime occurs with at most $O(1)$ markers, since their product divides $p-1$. Finally, the number of integers in the dyad that are one modulo $\ell^2$ for any marker is $O(P\sum_{n>P^{1/16}}n^{-2}+P^{1/8})=o(P/\log P)$, so the exact valuation condition preserves the lower bound. Choose one surviving marker per prime. [Bombieri–Vinogradov](https://doi.org/10.1112/S0025579300005313)
+
+Use Bombieri–Vinogradov again at $X=P^5$ on the moduli $p-1\le2P$. It applies to the selected reduced class for each $p$. At most $O(P/(\log P)^3)$ moduli have absolute dyadic error in that class above $X/(4P)$. On the remaining choices the main term is $X/\varphi(p-1)\ge X/(2P)$ and the prime powers have negligible weight. This leaves $\gg P^5/(\varphi(p-1)\log P)\gg P^4/\log P$ partners per retained $p$. The disjoint prime intervals make distinct pairs give distinct inputs.
+
+## The older pool leaves large orders on the same inputs
+
+Fix $A,Y,R=P^{o(1)}$ for the small integer bases, smooth cutoff and largest power index. Enlarge $A$ to at least $(\log P)^{33}$ for the last claim below. Let $T=\lceil\max(Y,(R+1)^2(\log P)^4)\rceil$ and let $E_0$ be the prior odd pool of the $N^k\pm1$ through $R$ multiplied by the full odd smooth scalar through $Y$. The 2-part can be removed by $Q=2^{\operatorname{bitlength}(N)}$.
+
+At $p$, if a prime $r>T$ divides $p-1$ and an old shifted power, then $q\equiv2$ or $3\pmod r$, so $r$ divides the fixed nonzero integer
+\[
+        \prod_{k\le R}(2^{2k}-1)(3^{2k}-1)
+\]
+of log size $O(R^2)$. There are $O(R^2)$ candidate primes. For $r\le\sqrt P$, Brun–Titchmarsh gives exceptional proportion $O(1/r)$ among all first primes. Above $\sqrt P$, counting integers gives proportion $O(\log P/\sqrt P)$ per candidate. Thus the removal costs $o(P/\log P)$ first primes. Also discard the proportion $o(1)$ of first primes whose $T$-smooth predecessor part exceeds $P^{1/12}$, and those where any listed base has order at most $P^{1/3}$. The latter exceptions number at most $O(A P^{2/3}\log(2A)/\log P)$ by the product of $a^j-1$ through $j=\lfloor P^{1/3}\rfloor$. These losses leave $\gg P/\log P$ first primes after both progression estimates. [The smooth-part and low-order bounds](cogentic-partial-odd-orders.md#density-of-failure-for-short-integer-bases-and-the-shared-factor-scalar)
+
+Fix a surviving $p$ and let $m=p-1$. At $q$, any prime $r>T$ dividing $q-1$ and an old shifted power divides $C_p=\prod_{k\le R}(p^{2k}-1)$ of log size $O(R^2\log P)$. Such an $r$ is coprime to $m$, since every odd prime factor of $m$ sees a prescribed value of $q$ different from one. For $r\le P$, append $q\equiv1\bmod r$ to the selected class. Its joint modulus $mr\le2P^2$ is below $\sqrt X$ with $X=P^5$. Brun–Titchmarsh divided by the lower bound for the progression gives exceptional proportion $O(1/r)$. Their sum is $O(R^2\log P/T)=o(1)$. For $r>P$, counting integers in the joint class gives at most $1+X/(mr)$, and dividing by the same lower bound gives $O(\log P(P/X+1/r))$ per candidate. There are $O(R^2\log P)$ candidates, so these exclusions also cost only a fraction $o(1)$ of the progression. [Montgomery–Vaughan, Brun–Titchmarsh](https://personal.science.psu.edu/rcv4/personal/Publications/large_sieve.pdf)
+
+A compatible extra condition $q\equiv1\bmod r^j$ for any prime power $r^j$ has relative count $O(1/\varphi(r^j))$ when $\operatorname{lcm}(m,r^j)\le\sqrt X$. This follows from the same comparison. Odd primes dividing $m$ are incompatible, and for $r=2$ the overlap is two, with totient one. Sum the logarithmic contributions of powers at most $P^{1/4}$ of primes through $T$ to get $O(\log(2T))$. The first higher power of any such prime is at most $TP^{1/4}$, still within the joint modulus bound. The probability of any higher power is therefore $O(TP^{-1/4})=o(1)$. Markov's inequality gives $T$-smooth part at most $P^{1/12}$ outside another fraction $o(1)$. The same low-order product used at $p$ excludes only $P^{2/3+o(1)}$ candidates globally, negligible against this progression's $\gg P^4/\log P$ primes.
+
+Consequently there are $\gg P^5/(\log P)^2$ distinct retained inputs on which every tested $a^{QE_0}$ has order above $P^{1/4}$ at both primes. Every factor removed by $QE_0$ is in the full $T$-smooth predecessor part, so divide the raw order lower bound by $P^{1/12}$. The earlier bounded-residual search therefore misses across the prescribed subpolynomial base and exponent cutoffs.
+
+On each retained input, some base below $(\log P)^{33}$ also has a local order at $p$ that neither $N-2$ nor $N-3$ kills individually, even after multiplying the single shift by $QS_Y$ for the smooth scalar through $Y$. Indeed the elements with order prime to $\ell$ form a subgroup of size $(p-1)/\ell$. Products of distinct primes up to $(\log P)^{32}$ below $p$, with as many factors as this size constraint allows, give $p^{31/32+o(1)}$ distinct units by the same binomial argument. Since this exceeds the subgroup's size, some one small prime has order divisible by $\ell$. The shift $N-2$ is one modulo $\ell$. The shift $N-3$ is minus one modulo $u$, while the base has an order component on $u$ surviving the smooth scalar. Its size is at least $P^{1/3}/(P^{1/8}P^{1/12})=P^{1/8}$ after also dividing out the marker. This is a statement about these local certificates for the same base.
+
+## Size of an explicit common multiple of consecutive shifts
+
+For positive-degree integer polynomials $F,G$ coprime over $\mathbb Q$, the integer resultant is a polynomial combination of $F,G$ with integer coefficients, obtained from the Sylvester matrix adjugate. Thus $\gcd(F(N),G(N))$ divides that resultant. For a pairwise coprime family with nonzero evaluations, the quotient of the product of the absolute evaluations by their least common multiple divides $\prod_{i<j}|\operatorname{Res}(F_i,F_j)|$. At any prime, choose an evaluation of maximal valuation. Its pairwise gcds with all the others already account for the entire valuation of the quotient. For consecutive shifts $N+1,\dots,N+S$, a sharper collective bound is
+\[
+      \frac{\prod_{j=1}^S(N+j)}{\operatorname{lcm}_{1\le j\le S}(N+j)}
+                    \mid (S-1)! .
+\]
+At any prime and each of its powers $d$, the valuation excess counts the number of terms divisible by $d$ after subtracting one if that set is nonempty. This count is at most $\lfloor(S-1)/d\rfloor$. Sum over the powers to get the corresponding factorial valuation. In particular if $S=N^{o(1)}$, the bit length of any explicit common multiple is at least $(1-o(1))S\log_2 N$. Greatest common divisors among the consecutive evaluations can only save a lower-order part of the bit length of their product. This bound concerns retaining every shifted exponent as a divisor of one integer.
+
+For an exact example, $N=463{,}097{,}693=463\cdot1{,}000{,}211$, with $\ell=11$, splits at base two with the product of the two shifts. Each single shift gives gcd one even with $Y=3$ and the additional power of two. The old power pool through $R=2$ with the same smooth cutoff leaves local orders $77$ and $3449$ at base two. The finite check verified 96 CRT split certificates and 8,806 consecutive-shift least common multiples.
