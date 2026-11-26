@@ -29,7 +29,7 @@ def negate(point, modulus):
     return None if point is None else (point[0], -point[1] % modulus)
 
 
-def add(left, right, modulus):
+def add(left, right, modulus, a2=CURVE[2], a4=CURVE[1]):
     if left is None:
         return right
     if right is None:
@@ -43,12 +43,12 @@ def add(left, right, modulus):
             # At equal x, (y-v)(y+v)=0. Mixed signs expose a proper gcd.
             checked_gcd(y - v, modulus)
             raise AssertionError("mixed signs without a proper divisor")
-        numerator, denominator = 3*x*x + 2*CURVE[2]*x + CURVE[1], 2*y
+        numerator, denominator = 3*x*x + 2*a2*x + a4, 2*y
     else:
         numerator, denominator = v - y, u - x
     checked_gcd(denominator, modulus)
     slope = numerator * pow(denominator, -1, modulus) % modulus
-    w = (slope*slope - CURVE[2] - x - u) % modulus
+    w = (slope*slope - a2 - x - u) % modulus
     return w, (slope*(x - w) - y) % modulus
 
 

@@ -1,50 +1,23 @@
 #!/usr/bin/env python3
 """Replay the consecutive-Jacobi separation on rational congruent-number twists."""
 
-from math import gcd, prod
+from math import prod
+from pathlib import Path
+from runpy import run_path
 
 from sage.all import EllipticCurve, GF, jacobi_symbol, prime_range
 
 
-class FactorFound(Exception):
-    """A nonunit exposed a proper divisor."""
-
-
-def checked_gcd(value, modulus):
-    divisor = gcd(value, modulus)
-    if 1 < divisor < modulus:
-        raise FactorFound(divisor)
-    return divisor
-
-
-def add(left, right, d, modulus):
-    if left is None:
-        return right
-    if right is None:
-        return left
-    x, y = left
-    u, v = right
-    if x == u:
-        if (y + v) % modulus == 0:
-            return None
-        if y != v:
-            checked_gcd(y - v, modulus)
-            raise AssertionError("mixed signs without a proper divisor")
-        numerator, denominator = 3*x*x - d*d, 2*y
-    else:
-        numerator, denominator = v - y, u - x
-    checked_gcd(denominator, modulus)
-    slope = numerator * pow(denominator, -1, modulus) % modulus
-    w = (slope*slope - x - u) % modulus
-    return w, (slope*(x - w) - y) % modulus
+modular = run_path(str(Path(__file__).with_name("cogentic-elliptic-cycle-split.py")))
+FactorFound, checked_gcd, add = (modular[name] for name in ("FactorFound", "checked_gcd", "add"))
 
 
 def multiply(point, exponent, d, modulus):
     result = None
     for bit in bin(exponent)[2:]:
-        result = add(result, result, d, modulus)
+        result = add(result, result, modulus, 0, -d*d)
         if bit == "1":
-            result = add(result, point, d, modulus)
+            result = add(result, point, modulus, 0, -d*d)
     return result
 
 

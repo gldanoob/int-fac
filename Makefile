@@ -106,6 +106,7 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-elliptic-local-saturation.py
 	"$(PYTHON)" -B experiments/cogentic-cm-jacobi-triples.py
 	"$(PYTHON)" -B experiments/cogentic-varying-norm-torus.py
+	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-separation.py
 	"$(PYTHON)" -B experiments/cogentic-planted-square-masks.py
 	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks cogentic-common-cofactors-sparse-steps cogentic-rational-gaussian-seed-family cogentic-unit-corrected-family cogentic-joint-gaussian-orders; do \
 		printf 'iferr(read("experiments/%s.gp"), err, print(err); quit(1))\n' "$$script" | "$(GP)" -fq || exit 1; \
