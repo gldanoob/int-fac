@@ -1,0 +1,41 @@
+# Torsion certificates on algebraic charts modulo a composite
+
+A point with prescribed exact order on a modular curve has that order at every good prime dividing the input. A weaker certificate that the order divides a given integer can be productive when its local points fall on different exact-order loci. For a bounded catalog of algebraic marked charts, a density-one result extends this distinction to arbitrary roots chosen modulo the input. The construction can select local branches that are unavailable as rational points, but a productive smooth scalar then requires different characteristic-zero components. Evaluating their defining factors exposes the same split directly. [Smooth-order limits for small CM discriminants](cogentic-small-cm-smooth-orders.md)
+
+## Exact order and order dividing a given integer
+
+Work over \(\mathbb Z/N\mathbb Z\) with an elliptic curve of unit discriminant and a marked section \(P\). For \(\gcd(m,N)=1\), a noncuspidal \(\Gamma_1(m)\)-structure is a point whose exact order is \(m\) in every geometric fiber. This applies to a modular section even when no characteristic-zero point with its parameters is available. The test \([M]P=O\) therefore makes the same decision at all factors, according as \(m\mid M\). [Katz–Mazur, the \(\Gamma_1(m)\) moduli problem](https://math.bu.edu/people/jsweinst/AWS/Files/KatzMazurArithmeticModuli.pdf)
+
+If one forces only \([m]P=O\), local orders \(d_p,d_q\mid m\) can differ. Given the factorization of \(m\), this difference is detectable with a number of scalar multiplications polynomial in \(\log m\). In fact, for a prime \(\ell\mid m\) where \(v_\ell(d_p)\ne v_\ell(d_q)\), a test \([m/\ell^j]P\) kills precisely one of the two reductions for a suitable \(1\le j\le v_\ell(m)\). A projective identity coordinate or a failed checked inversion then gives a proper gcd. This test identifies a difference once the section is available. The order-dividing relation alone supplies no section with different local orders.
+
+## A bounded algebraic catalog
+
+At each size \(X\), fix a public list of marked charts. A chart consists of a monic squarefree \(f\in\mathbb Z[T]\) and a short Weierstrass model \(E\) with marked affine point \(P\) over \(\mathbb Q[T]/(f)\). Use polynomial representatives for the two coefficients and two point coordinates, with rational coefficients and degree less than \(\deg f\). Require a nonzero discriminant on each characteristic-zero component. Let the total explicit binary length of the catalog be \(X^{o(1)}\). The list may change with \(X\), while the choice of a chart and a root \(u\bmod N\) of \(f\) may depend arbitrarily on \(N\). Evaluate the displayed model and point at \(u\). It is also possible to choose a local twist if the marked point on the twist maps to the specified point under a geometric isomorphism, since this preserves its order.
+
+Let
+\[
+ W=(\log X)^{1/3}(\log\log X)^{2/3},\qquad
+ V=(\log X)^{2/3}(\log\log X)^{1/3},\qquad B=\exp(bW)
+\]
+for fixed \(b>0\). At the primes under consideration require the reduction to be supersingular or its ordinary Frobenius field to have fundamental discriminant of absolute value at most \(\exp(zW)\) for fixed \(z\). Consider any scalar \(M\) that is a product of a \(B\)-smooth integer and a positive integer at most \(\exp(cW)\) for fixed \(c\). There is a set comprising all but \(o(X/\log X)\) of the primes \(p\in[X,2X]\) with the following property, simultaneously for the entire catalog and every admissible choice of local root.
+
+- If the root selects a characteristic-zero component where \(P\) is torsion of order \(d\), the reduced point also has order \(d\).
+- If the root selects a component where \(P\) is nontorsion, no such \(M\) kills the reduced point.
+
+Consequently, on all but \(o(1)\) of the balanced semiprimes \(N=pq\), if a scalar test on a prescribed chart yields different identity decisions at \(p\) and \(q\), their roots select distinct irreducible factors of \(f\) over \(\mathbb Q\). Given the same chosen \(u\), factor \(f=\prod_i f_i\) over \(\mathbb Q\) and evaluate \(\gcd(f_i(u),N)\). At least one gives a proper divisor. This takes deterministic time polynomial in the chart's description length and \(\log N\) by rational polynomial factorization. In particular the computation costs \(\exp(O(W))\) when that length does. The statement only uses a supplied \(u\) and places no bound on the work required to find it. [Lenstra, Lenstra and Lovász, rational polynomial factorization](https://pub.math.leidenuniv.nl/~lenstrahw/PUBLICATIONS/1982f/art.pdf)
+
+## Why the statement is uniform in the modular choices
+
+Remove the primes of denominators of the chart, of \(\operatorname{disc}(f)\), and of the resultants of \(f\) with the numerator of the curve discriminant. Their total number is \(X^{o(1)}\) by the size of the presentations and the determinant bound for resultants. Every surviving root of \(f\bmod p\) is a simple root belonging to exactly one \(f_i\bmod p\). It gives a place over \(p\) of the field \(K_i=\mathbb Q[T]/(f_i)\) with residue field \(\mathbb F_p\), a good integral elliptic model, and unramified local field. The good reduction kernel on this unramified local field is torsion-free at odd \(p\), since the formal logarithm is injective on its maximal ideal. This proves the torsion assertion even when the catalog's characteristic-zero torsion orders have no fixed bound. [Silverman, *The Arithmetic of Elliptic Curves*, IV.6 and VII.2](https://www.math.ens.psl.eu/~benoist/refs/Silverman.pdf)
+
+By the CM smooth-order bound, away from \(o(X/\log X)\) additional primes, every eligible curve satisfies \(\gcd(M,\#E(\mathbb F_p))\le H\) with \(H=\exp(CV)\) for sufficiently large fixed \(C\). Thus an identity hit would put the reduced point at an actual numerical order \(k\le H\).
+
+For any characteristic-zero nontorsion component and \(1\le k\le H\), the multiple \([k]P\) has finite abscissa. On a good integral Weierstrass model it reduces to the identity precisely where that abscissa has negative valuation. The log norm of the denominator ideal is at most \([K_i:\mathbb Q]h(x([k]P))\), with \(h\) the absolute logarithmic height. The height is at most \((k+1)^{O(1)}\) times a polynomial in the chart length. For example, a binary addition chain uses a doubling and possibly an addition of \(P\) at each step. Each nonexceptional step bounds both coordinate heights by an absolute constant times the preceding heights and those of the model and \(P\). A nontorsion point excludes exceptional equalities with \(\pm P\) at the additions after doubling. The initial heights are bounded polynomially in the presentation by the usual root bound for the monic \(f\) and polynomial evaluation. The sum of the log norms over all the nontorsion components and all \(1\le k\le H\) is \(X^{o(1)}\), as \(H=X^{o(1)}\). Removing the primes dividing any of these denominator ideals proves the second assertion for every possible local choice of root. The root of \(f\) modulo \(N\) need never be computed or lifted in characteristic zero for this counting argument.
+
+## Two exact modular examples
+
+For \(f=T^2+1\), take \(E:y^2=x^3-x\) and \(P=(u,1-u)\) at a root \(u\). Its double is \((0,0)\), so \(P\) has exact order four at every odd prime of good reduction admitting such a root. For \(N=65=5\cdot13\), the root \(u=18\) reduces to \(3\) and \(5\). Both local roots belong to the same irreducible rational component and no scalar distinguishes their orders.
+
+For \(f=T(T-1)\), take \(E:y^2=x^3+1\) and \(P=(u-1,u)\). At \(u=0\) its exact order is two and at \(u=1\) its exact order is three, away from bad primes. Both components satisfy \([6]P=O\). For \(N=35=5\cdot7\), \(u=15\) selects different components and \([2]P\) gives an identity only at 5. The component test \(\gcd(u,N)=5\) already yields that factor.
+
+The argument addresses scalar identity tests on low-description finite algebraic charts, including independently chosen modular branches. It leaves open input-dependent presentations outside a fixed size catalog, higher-dimensional parameter spaces with a moving specialization, and methods exploiting information other than a marked point's order.
