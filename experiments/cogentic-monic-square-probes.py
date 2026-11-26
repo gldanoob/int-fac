@@ -3,6 +3,8 @@
 from math import gcd, prod
 from pathlib import Path
 from runpy import run_path
+from subprocess import TimeoutExpired
+from time import monotonic
 
 HERE = Path(__file__).resolve().parent
 GRID = run_path(str(HERE / "cogentic-monic-large-primes.py"))
@@ -50,7 +52,7 @@ def leading_unit_row(degree, points, norms, prime, root, derivative, squares):
 
 
 def prefilter(fields, points, signed_parity_basis, discriminant=None, *,
-              prime_cutoff=PRIME_CUTOFF, survivor_limit=0):
+              prime_cutoff=PRIME_CUTOFF, survivor_limit=0, deadline=None):
     """Return surviving support masks and counts of their exact probe constraints.
 
     The monic irreducible fields have degree at least two and use ascending
@@ -84,6 +86,8 @@ def prefilter(fields, points, signed_parity_basis, discriminant=None, *,
     for prime in growing_primes(prime_cutoff):
         if len(basis) <= survivor_limit:
             break
+        if deadline is not None and monotonic() >= deadline:
+            raise TimeoutExpired("local square probes", 0)
         if prime == 2 or (discriminant is not None and discriminant % prime == 0):
             continue
         last_prime = prime

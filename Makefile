@@ -65,3 +65,4 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-planted-sparse-signs.py
 	"$(PYTHON)" -B experiments/cogentic-composite-private-parity.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-exact-grid.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-dyadic-ascent.py

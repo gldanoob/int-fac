@@ -56,10 +56,11 @@ def adaptive(parity_basis, oracle, query_cap=QUERY_CAP, split_modulus=None):
     return "complete", tests, len(pivots), square_basis
 
 
-def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
+def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS, *, dyadic=False):
     deadline = monotonic() + time_cap if time_cap is not None else None
     sign_bit = 1 << len(marks)
     coefficients = [list(p) for p in fields]
+    local_roots = run_path(str(HERE / "cogentic-monic-dyadic-ascent.py"))["joint_roots"] if dyadic else None
 
     def decode(word):
         points = [list(marks[j][0]) for j in GRID["support"](word & ~sign_bit)]
@@ -67,6 +68,8 @@ def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
 
     def query(word):
         sign, points = decode(word)
+        if local_roots is not None:
+            return local_roots(n, m, fields, points, sign, deadline=deadline)
         seconds = deadline - monotonic() if deadline is not None else None
         if seconds is not None and seconds <= 0:
             raise TimeoutExpired("GP exact square oracle", time_cap)
@@ -76,9 +79,56 @@ def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
     return sign_bit, decode, query
 
 
+def complete_basis(signed, restrict, query, query_cap, split_modulus=None, deadline=None):
+    """Grow the probe bound until every surviving basis vector has exact roots."""
+    roots = {}
+    cutoff = 3
+    last_prime = 0
+
+    def partial(status):
+        pivots, witnesses = {}, []
+        for mask, pair in roots.items():
+            if pair is None:
+                continue
+            word = mask
+            while word and word.bit_length() in pivots:
+                word ^= pivots[word.bit_length()]
+            if word:
+                pivots[word.bit_length()] = word
+                witnesses.append((mask, pair))
+        return status, len(roots), witnesses, signed, last_prime
+
+    while True:
+        if deadline is not None and monotonic() >= deadline:
+            return partial("time-cap")
+        try:
+            signed, stats = restrict(signed, cutoff)
+        except TimeoutExpired:
+            return partial("time-cap")
+        last_prime = stats["last_prime"]
+        squares = []
+        for word in signed:
+            if word not in roots:
+                if query_cap is not None and len(roots) == query_cap:
+                    return partial("query-cap")
+                try:
+                    roots[word] = query(word)
+                except TimeoutExpired:
+                    return partial("time-cap")
+            pair = roots[word]
+            if pair is None:
+                break
+            squares.append((word, pair))
+            if split_modulus is not None and 1 < gcd(pair[0]-pair[1], split_modulus) < split_modulus:
+                return "first-square-split", len(roots), squares, signed, last_prime
+        else:
+            return "complete", len(roots), squares, signed, last_prime
+        cutoff *= 2
+
+
 def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
            query_cap=QUERY_CAP, time_cap=CASE_SECONDS, ramified_two=False,
-           mark_local=False, probe_cutoff=0, stop_at_factor=False, all_ideals=False):
+           mark_local=False, probe_cutoff=0, stop_at_factor=False, all_ideals=False, dyadic=False):
     discriminant = None
     if all_ideals:
         exact_collect = run_path(str(HERE / "cogentic-monic-exact-grid.py"))["collect"]
@@ -110,17 +160,27 @@ def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
         parity_basis = GRID["eliminate"](columns, (1 << j for j in range(len(marks))))
         assert all(GRID["combine"](word, columns) == 0 for word in parity_basis)
     result = dict(n=n, m=m, shift=shift, columns=total_marks, parity=len(parity_basis))
-    if not parity_basis:
+    if not parity_basis and any((len(field)-1) % 2 for field in fields):
         return dict(result, status="zero-parity", tests=0, basis=0, factors=[])
 
-    sign_bit, decode, query = exact_oracle(n, m, fields, marks, time_cap)
+    sign_bit, decode, query = exact_oracle(n, m, fields, marks, time_cap, dyadic=dyadic or all_ideals)
     signed = [sign_bit, *parity_basis]
-    if probe_cutoff:
+    if probe_cutoff or all_ideals:
         prefilter = run_path(str(HERE / "cogentic-monic-square-probes.py"))["prefilter"]
-        signed, stats = prefilter(fields, [entry[0] for entry in marks], signed, discriminant,
-                                  prime_cutoff=probe_cutoff)
-        result.update(probe_rank=stats["rank"], survivors=len(signed))
-    status, tests, rank, square_basis = adaptive(signed, query, query_cap, n if stop_at_factor else None)
+        points = [entry[0] for entry in marks]
+    if all_ideals:
+        deadline = monotonic()+time_cap if time_cap is not None else None
+        def restrict(masks, bound):
+            return prefilter(fields, points, masks, prime_cutoff=bound, deadline=deadline)
+        status, tests, square_basis, signed, last_prime = complete_basis(
+            signed, restrict, query, query_cap, n if stop_at_factor else None, deadline)
+        rank = 0 if status == "complete" else None
+        result.update(probe_rank=1+len(parity_basis)-len(signed), survivors=len(signed), last_prime=last_prime)
+    else:
+        if probe_cutoff:
+            signed, stats = prefilter(fields, points, signed, discriminant, prime_cutoff=probe_cutoff)
+            result.update(probe_rank=stats["rank"], survivors=len(signed))
+        status, tests, rank, square_basis = adaptive(signed, query, query_cap, n if stop_at_factor else None)
     if status == "complete":
         assert len(square_basis) + rank == len(signed)
         status = "kernel-trivial" if not square_basis else "basis-exhausted"
@@ -140,6 +200,11 @@ def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
 
 
 def fixtures():
+    # Keep an earlier split if the next basis is reordered and the query cap is hit.
+    def capped_probe(masks, bound):
+        return (masks if bound == 3 else [4, 1]), {"last_prime": bound}
+    capped = complete_basis([1, 2, 4], capped_probe, {1: (1, 4), 2: None}.__getitem__, 2)
+    assert capped[:3] == ("query-cap", 2, [(1, (1, 4))])
     cutoff = max(GRID["BASE"], 2 * GRID["HEIGHT"]**2)
     primes = tuple(GRID["primes_through"](cutoff))
     outside = 8209
@@ -158,8 +223,10 @@ def fixtures():
 
 
 def search(n, degree, height, query_cap, planted, relations_only, all_ideals=False):
-    if n < 2 or degree < 2 or height < 1 or query_cap < 0:
+    if n < 2 or degree < 2 or height < 1 or (query_cap is not None and query_cap < 0):
         raise ValueError("require N >= 2, degree >= 2, height >= 1, and a nonnegative query limit")
+    if query_cap is None and not all_ideals:
+        query_cap = QUERY_CAP
     def direct(stage, divisor):
         assert 1 < divisor < n and n % divisor == 0
         return dict(n=n, status=stage, divisor=divisor, cofactor=n // divisor)
@@ -192,7 +259,7 @@ def search(n, degree, height, query_cap, planted, relations_only, all_ideals=Fal
     primes = None if all_ideals or height >= 128 or n.bit_length() >= 255 else tuple(GRID["primes_through"](cutoff))
     result = replay(n, m, shift, fields, primes, cutoff, height=height, query_cap=query_cap,
                     time_cap=None, ramified_two=True, mark_local=True, probe_cutoff=257,
-                    stop_at_factor=not relations_only, all_ideals=all_ideals)
+                    stop_at_factor=not relations_only, all_ideals=all_ideals, dyadic=True)
     if planted:
         result["planted_cuts"] = cuts
     return result
@@ -206,13 +273,13 @@ if __name__ == "__main__":
     parser.add_argument("n", nargs="?", type=int, help="integer to split (omit for fixed replays)")
     parser.add_argument("--height", type=int, default=GRID["HEIGHT"], help="primitive box height")
     parser.add_argument("--degree", type=int, help="override the scheduled degree parameter")
-    parser.add_argument("--queries", type=int, default=QUERY_CAP, help="maximum joint square tests")
+    parser.add_argument("--queries", type=int, help="maximum joint square tests (default 128, unlimited with --all-ideals)")
     parser.add_argument("--planted", action="store_true", help="use the norm-two polynomial family")
     parser.add_argument("--relations-only", action="store_true", help="skip preliminary mark gcd splits")
     parser.add_argument("--all-ideals", action="store_true", help="use SageMath to compute complete ideal parity, including singular prime ideals")
     args = parser.parse_args()
     if args.n is None:
-        if args.planted or args.relations_only or args.all_ideals or args.degree is not None or args.height != GRID["HEIGHT"] or args.queries != QUERY_CAP:
+        if args.planted or args.relations_only or args.all_ideals or args.degree is not None or args.height != GRID["HEIGHT"] or args.queries not in (None, QUERY_CAP):
             parser.error("provide N for a configurable search")
         fixtures()
     else:

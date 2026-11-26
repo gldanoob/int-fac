@@ -129,6 +129,9 @@ def run():
         _, _, basis, _, cheap_nullity, active = compare("repaired", n, m, fields, height)
         if n == 67:
             assert cheap_nullity == 2 and len(basis) == 27 and active == 29
+            decision = search(n, 2, height, None, False, True, all_ideals=True)
+            assert decision["status"] == "basis-exhausted" and decision["basis"] == 25
+            assert decision["basis"] == decision["survivors"] and not decision["factors"]
     for n, degree in ((85, 4), (631, 4), (15629, 6)):
         m, _, f, g = PLANT(n, degree)
         compare("planted", n, m, (f, g), 16)
