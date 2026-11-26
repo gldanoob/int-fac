@@ -1,5 +1,7 @@
 """Match certified modular roots through rational square classes and integer lifts."""
 
+import argparse
+import json
 from fractions import Fraction
 from math import gcd, isqrt, prod
 from pathlib import Path
@@ -35,6 +37,85 @@ def matched_basis(n, witnesses):
         assert root*root % n == 1
         matched.append((mask, root))
     return matched
+
+
+def chart_matches(n, charts):
+    """Match explicit signed integer marks using the roots that can be reduced modulo N."""
+    from sage.all import PolynomialRing, QQ
+
+    square_kernel = run_path(str(Path(__file__).with_name("cogentic-order-square-kernel.py")))["square_kernel"]
+    if type(n) is not int or n <= 1 or n % 2 == 0:
+        raise ValueError("expected an odd modulus greater than one")
+    ring = PolynomialRing(QQ, "x")
+    x = ring.gen()
+    generators, local, unavailable = [], [], []
+    for index, chart in enumerate(charts):
+        m, coefficients, points = (chart[key] for key in ("m", "field", "points"))
+        if (type(m) is not int or len(coefficients) < 2 or coefficients[-1] != 1
+                or any(type(c) is not int for c in coefficients)):
+            raise ValueError("expected an integer base and a nonconstant monic integer polynomial")
+        field = ring(coefficients)
+        if field(m) % n or not field.is_irreducible():
+            raise ValueError("expected an irreducible polynomial vanishing at its base modulo N")
+        derivative = field.derivative()
+        derivative_value = int(derivative(m))
+        common = gcd(derivative_value, n)
+        if 1 < common < n:
+            return dict(status="derivative-gcd", chart=index, divisor=common, cofactor=n//common)
+        marks, labels, slots = [], [], []
+        points = tuple(points)
+        for slot, (a, b) in enumerate(points):
+            if type(a) is not int or type(b) is not int:
+                raise ValueError("expected integer marked coefficients")
+            value = a-b*m
+            mark_gcd = gcd(value, n)
+            if 1 < mark_gcd < n:
+                return dict(status="mark-gcd", chart=index, point=(a, b), divisor=mark_gcd, cofactor=n//mark_gcd)
+            if mark_gcd == 1:
+                marks.append(a-b*x)
+                labels.append(value)
+                slots.append(slot)
+        complete, roots, residual_rank, tests, first = square_kernel(field, [*marks, -1])
+        assert complete and len(roots) + residual_rank == first
+        local.append(dict(chart=index, first_dimension=first, square_dimension=len(roots),
+                          residual_rank=residual_rank, tests=tests))
+        labels.append(-1)
+        slots.append(len(points))
+        unresolved = False
+        for mask, root in roots:
+            support = list(GRID["support"](mask))
+            label = prod(labels[j] for j in support)
+            denominator = int(root.denominator())
+            denominator_gcd = gcd(denominator, n)
+            if denominator_gcd == 1:
+                numerator = denominator * root
+            elif common == 1:
+                # A square root of an integral product is integral in the field.
+                numerator = (derivative * root) % field
+                assert numerator.denominator() == 1
+                denominator = derivative_value
+            elif denominator_gcd < n:
+                return dict(status="denominator-gcd", chart=index, divisor=denominator_gcd,
+                            cofactor=n//denominator_gcd)
+            else:
+                unresolved = True
+                continue
+            residue = int(numerator(m)) * pow(denominator, -1, n) % n
+            assert residue*residue % n == label % n
+            original_mask = sum(1 << slots[j] for j in support)
+            generators.append(dict(chart=index, mask=original_mask, label=label, residue=residue,
+                                   root=[str(c) for c in root.list()]))
+        if unresolved:
+            unavailable.append(index)
+
+    basis = matched_basis(n, [(item["label"], item["residue"]) for item in generators])
+    result = dict(generators=generators, basis=basis, local=local, unavailable=unavailable,
+                  rational_rank=len(generators)-len(basis))
+    for mask, residue in basis:
+        divisor = gcd(residue-1, n)
+        if 1 < divisor < n:
+            return dict(result, status="square-split", match=mask, divisor=divisor, cofactor=n//divisor)
+    return dict(result, status="incomplete" if unavailable else "complete-no-split")
 
 
 def replay():
@@ -103,6 +184,44 @@ def replay():
     print(f"independent bases and a canonical lift split 93; {tested} subset matches checked; "
           "four auxiliary-label kernels agree with unrestricted gcd refinement")
 
+    cubic = dict(m=1, field=[49, 33, 10, 1], points=[(16, 9)])
+    quadratic = dict(m=2, field=[51, 19, 1], points=[(30, 1)])
+    positive = chart_matches(93, [cubic, quadratic])
+    assert positive["status"] == "square-split" and positive["divisor"] in (3, 31)
+    assert [(g["chart"], g["label"]) for g in positive["generators"]] == [(0, 7), (1, 28)]
+    same_sign = dict(m=3, field=[258, 35, 1], points=[(31, 1)])
+    negative = chart_matches(93, [cubic, same_sign])
+    assert negative["status"] == "complete-no-split" and negative["rational_rank"] == 1
+    (mask, residue), = negative["basis"]
+    assert mask == 3 and residue in (1, 92)
+    repeated = dict(cubic, points=[(93, 0), (2, 0), (2, 0), (2, 0)])
+    overlap = chart_matches(93, [repeated])
+    assert overlap["status"] == "complete-no-split"
+    assert [g["mask"] for g in overlap["generators"]] == [6, 10]
+    assert overlap["rational_rank"] == 0 and len(overlap["basis"]) == 2
+    singular = dict(m=0, field=[93**2, 0, 1], points=[])
+    unresolved = chart_matches(93, [singular, cubic, same_sign])
+    assert unresolved["status"] == "incomplete" and unresolved["unavailable"] == [0]
+    assert chart_matches(93, [singular, cubic, quadratic])["status"] == "square-split"
+    assert chart_matches(93, [dict(singular, field=[93, 93, 1])])["status"] == "complete-no-split"
+    exposed = chart_matches(93, [dict(singular, field=[93, 3, 1])])
+    assert exposed["status"] == "derivative-gcd" and exposed["divisor"] == 3
+    exposed = chart_matches(93, [dict(cubic, points=[(3, 0)])])
+    assert exposed["status"] == "mark-gcd" and exposed["divisor"] == 3
+    cleared = chart_matches(895, [dict(m=29, field=[54, 0, -28, 1], points=[(18, 13), (0, 1)])])
+    root, = cleared["generators"]
+    assert root["mask"] == 3 and root["label"] == 10411
+    assert all(Fraction(c).denominator == 5 for c in root["root"])
+    assert root["residue"]**2 % 895 == 10411 % 895
+    print("Cubic different-base match and rank-one negative certificate verified")
+
 
 if __name__ == "__main__":
-    replay()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--charts", type=Path, help="JSON object with n and explicit charts")
+    args = parser.parse_args()
+    if args.charts is None:
+        replay()
+    else:
+        library = json.loads(args.charts.read_text())
+        print(json.dumps(chart_matches(library["n"], library["charts"])))
