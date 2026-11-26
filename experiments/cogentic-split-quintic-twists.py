@@ -4,8 +4,10 @@
 import argparse
 import ast
 import os
-from math import isqrt, prod
+from functools import cache
+from math import gcd, isqrt, prod
 from pathlib import Path
+from runpy import run_path
 import subprocess
 import sys
 
@@ -49,13 +51,17 @@ torsion_test(data,scalar,n) = {
   0;
 }
 
+factor_payload(err) = {
+  if(errname(err)!="e_USER",error(err));
+  my(payload=component(err,1));
+  if(#payload!=2 || payload[1]!="factor ",error(err));
+  payload[2];
+}
+
 check_torsion(e,u,v,scalar,n) = {
   my(result=0);
   iferr(torsion_test(twist(e,u,v),scalar,n),err,
-    if(errname(err)!="e_USER",error(err));
-    my(payload=component(err,1));
-    if(#payload!=2 || payload[1]!="factor ",error(err));
-    result=payload[2];
+    result=factor_payload(err);
   );
   result;
 }
@@ -108,7 +114,7 @@ def run_gp(expression, extra=""):
     return ast.literal_eval(result.stdout)
 
 
-def find_split(modulus, bound, menu, roots=ROOTS, exponent=None):
+def find_split(modulus, bound, menu, roots=ROOTS, exponent=None, residual_order=None):
     """Return a proper divisor and its chart, or None after the bounded search."""
     if type(modulus) is not int or modulus < 3 or modulus % 2 == 0:
         raise ValueError("need an odd modulus at least 3")
@@ -118,14 +124,101 @@ def find_split(modulus, bound, menu, roots=ROOTS, exponent=None):
         raise ValueError("need five distinct integer roots")
     if exponent is not None and (type(exponent) is not int or exponent < 1 or exponent % 2 == 0):
         raise ValueError("the explicit multiplier must be a positive odd integer")
+    if residual_order is not None and (type(residual_order) is not int or residual_order < 1):
+        raise ValueError("the residual order bound must be a positive integer")
     square = isqrt(modulus)
     if square*square == modulus:
         return square, None
     divisor, u, v = run_gp(f"search_twists({modulus},{list(roots)},{bound},{menu},{exponent or 0})")
     if divisor == 0:
-        return None
+        return None if residual_order is None else stage_two_split(modulus, bound, menu, roots, exponent, residual_order)
     assert 1 < divisor < modulus and modulus % divisor == 0
     return divisor, (u, v) if v else None
+
+
+STAGE_TWO = r'''
+mumford_tuple(point) = {
+  my(u=point[1],v=point[2]);
+  [poldegree(u), lift(polcoef(u,0)), lift(polcoef(u,1)), lift(polcoef(v,0)), lift(polcoef(v,1))];
+}
+
+residual_lists(e,u,v,scalar,n,width) = {
+  my(chart=twist_class(e,u,v), one=Mod(1,n), identity=[one,Mod(0,n)]);
+  my(f=chart[1]*one, start=multiply_divisor(chart[2]*one,scalar,f,n));
+  for(k=1,logint(16*n^2,2)+1,
+    if(start[1]==1,return([0,1,[],[]]));
+    start=cantor(start,start,f,n);
+  );
+  if(start[1]==1,return([0,1,[],[]]));
+  my(step=identity, babies=List(), giants=List());
+  for(i=1,width,
+    step=cantor(step,start,f,n);
+    if(step[1]==1,return([0,i,[],[]]));
+    if(i<width,listput(babies,mumford_tuple(step)));
+  );
+  my(giant=identity);
+  for(j=1,width,
+    giant=cantor(giant,step,f,n);
+    if(giant[1]==1,return([0,j*width,[],[]]));
+    listput(giants,mumford_tuple(giant));
+  );
+  [0,0,Vec(babies),Vec(giants)];
+}
+
+residual_data(e,u,v,scalar,n,width) = {
+  my(result);
+  iferr(result=residual_lists(e,u,v,scalar,n,width),err,result=[factor_payload(err),0,[],[]]);
+  result;
+}
+'''
+
+
+@cache
+def tuple_collision():
+    try:
+        return run_path(str(HERE / "cogentic-unit-collision-search.py"))["tuple_collision"]
+    except ModuleNotFoundError as error:
+        if error.name == "sage":
+            raise ValueError("residual-order search requires SageMath Python") from error
+        raise
+
+
+def residual_split(modulus, scalar, bound, roots, u, v):
+    width = isqrt(bound - 1) + 1
+    request = f"residual_data({list(roots)},{u},{v},{scalar},{modulus},{width})"
+    divisor, relation, babies, giants = run_gp(request, STAGE_TWO)
+    if divisor:
+        return divisor, 0
+    if babies:
+        signed = [row for baby in babies for row in (baby, [*baby[:3], -baby[3], -baby[4]])]
+        hit = tuple_collision()(modulus, giants, signed)
+        if hit is not None:
+            if hit["status"] == "local-split":
+                return hit["factor"], 0
+            # A residual order r <= bound has r = j*width-i, 0 <= i < width.
+            i, sign = divmod(hit["right_index"], 2)
+            relation = (hit["left_index"] + 1)*width - (1 - 2*sign)*(i + 1)
+    if relation > 1:
+        multiplier = scalar * (relation // (relation & -relation))
+        divisor = run_gp(f"candidate({list(roots)},{u},{v},{multiplier},{modulus})")
+    return divisor, relation
+
+
+def stage_two_split(modulus, bound, menu, roots, exponent, residual_order):
+    if any(gcd(a-b, modulus) != 1 for i, a in enumerate(roots) for b in roots[:i]):
+        return None
+    scalar = exponent if exponent is not None else run_gp(f"odd_scalar({modulus},{bound})")
+    for height in range(1, menu + 1):
+        charts = [(u, height) for u in range(-height, height + 1)]
+        charts += [(u, v) for v in range(1, height) for u in (-height, height)]
+        for u, v in charts:
+            if gcd(u, v) != 1 or gcd(v*prod(u-v*root for root in roots), modulus) != 1:
+                continue
+            divisor, _ = residual_split(modulus, scalar, residual_order, roots, u, v)
+            if divisor:
+                assert 1 < divisor < modulus and modulus % divisor == 0
+                return divisor, (u, v)
+    return None
 
 
 REPLAY = r'''
@@ -198,6 +291,23 @@ def replay():
     print(f"Public bound-3 search splits {modulus} = {p} * {q}. The marked orders at c=-4 are 32 and 15238.")
 
 
+def replay_stage_two():
+    modulus = 29*37
+    data = run_gp(f"residual_data({list(ROOTS)},-1,1,1,{modulus},3)", STAGE_TWO)
+    assert data[:2] == [0, 0] and data[2] and data[3]
+    assert find_split(modulus, 1, 1) is None
+    assert find_split(modulus, 1, 1, residual_order=7) == (37, (-1, 1))
+
+    modulus = 37*79
+    e = list(ROOTS)
+    first, second = run_gp(f"[curve_order({e},-1,1,37),curve_order({e},-1,1,79)]", REPLAY)
+    assert first[1] == second[1] == 80
+    assert residual_split(modulus, 1, 5, ROOTS, -1, 1) == (37, 5)
+    assert find_split(modulus, 1, 1) is None
+    assert find_split(modulus, 1, 1, residual_order=5) == (37, (-1, 1))
+    print("Stage two splits 1073 by a batched Mumford collision and 2923 after a shared residual relation of 5.")
+
+
 def main():
     if hasattr(sys, "set_int_max_str_digits"):
         sys.set_int_max_str_digits(0)
@@ -208,12 +318,19 @@ def main():
     options.add_argument("--bound", type=int, default=3, help="odd smoothness cutoff, defaults to 3")
     parser.add_argument("--menu", type=int, default=12, help="maximum numerator or denominator magnitude")
     parser.add_argument("--roots", type=int, nargs=5, default=ROOTS, help="five distinct integer roots")
+    parser.add_argument("--residual-order", type=int, help="stage-two residual odd order bound (requires SageMath)")
+    parser.add_argument("--replay-stage-two", action="store_true", help="run the stage-two fixtures")
     args = parser.parse_args()
+    if args.replay_stage_two:
+        if args.N is not None:
+            parser.error("--replay-stage-two runs without N")
+        replay_stage_two()
+        return
     if args.N is None:
         replay()
         return
     try:
-        result = find_split(args.N, args.bound, args.menu, args.roots, args.exponent)
+        result = find_split(args.N, args.bound, args.menu, args.roots, args.exponent, args.residual_order)
     except ValueError as error:
         parser.error(str(error))
     if result is None:
