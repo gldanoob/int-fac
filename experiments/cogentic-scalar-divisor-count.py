@@ -1,8 +1,11 @@
 """Exact-integer checks for the scalar counting reduction and its logarithmic bins."""
 
+from cmath import exp
 from fractions import Fraction
 from itertools import combinations, product
-from math import gcd, isqrt, prod
+from math import gcd, isqrt, log, pi, prod
+from pathlib import Path
+from runpy import run_path
 
 
 def ceil_div(x, d):
@@ -145,6 +148,52 @@ def check_bins():
     return fixtures, loose, accurate
 
 
+def check_unit_reduction():
+    cases = rejected = nontrivial = 0
+    for B, omit in ((13, ()), (23, (7, 13))):
+        primes = [p for p in prime_band(B) if p not in omit]
+        P = prod(primes)
+        for q, first, length in product((1, 5, 7, 9, 15, 25, 35), (1, 5, 7, 25, 35), (1, 20, 50)):
+            last = first + (length-1)*q
+            g = gcd(first, q)
+            expected = sum(divisor(P, n) for n in range(first, last+1, q))
+            if P % g:
+                reduced = 0
+                rejected += 1
+            else:
+                Q = q // g
+                J = [p for p in primes if g % p and Q % p]
+                products = (prod(ps) for k in range(len(J)+1) for ps in combinations(J, k))
+                reduced = sum(first//g <= n <= last//g and (n-first//g) % Q == 0 for n in products)
+                nontrivial += g > 1 and reduced > 0
+            assert reduced == expected
+            cases += 1
+    assert rejected and nontrivial
+    return cases, rejected, nontrivial
+
+
+def check_sharp_contour():
+    integrate = run_path(str(Path(__file__).with_name("cogentic-smooth-windows.py")))["integrate_segment"]
+    comparisons = 0
+    for B, x in ((11, 20.5), (13, 99.5), (17, 199.5)):
+        primes = prime_band(B)
+        sigma, kappa, height = 0.69, 1.17, 40
+        def kernel(z):
+            return exp(z*log(x)) * prod(1 + exp(-z*log(p)) for p in primes) / z
+        def vertical(line, lo, hi):
+            return integrate(lambda t: kernel(line+1j*t).real, lo, hi) / pi
+
+        direct = vertical(kappa, 0, height)
+        principal = vertical(sigma, 0, B)
+        vertical_tail = vertical(sigma, B, height)
+        horizontals = integrate(lambda r: kernel(r+1j*height).imag, sigma, kappa) / pi
+        assert abs(direct - principal - vertical_tail - horizontals) < 2e-9
+        comparisons += 1
+    return comparisons
+
+
 if __name__ == "__main__":
     print("Projected two-mark counts, brackets, strict brackets", check_geometry())
     print("Log-bin bounds, strict overcounts, prescribed-accuracy checks", check_bins())
+    print("Unit-class reductions, rejected gcds, nontrivial hits", check_unit_reduction())
+    print("Finite-height sharp contour comparisons", check_sharp_contour())
