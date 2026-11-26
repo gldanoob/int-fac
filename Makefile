@@ -76,6 +76,7 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-216-benchmark.py --verify experiments/cogentic-monic-216-results.jsonl
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-local-squares.py --verify experiments/cogentic-sheared-results.jsonl
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-scaling.py --verify experiments/cogentic-sheared-scaling-results.jsonl
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-qs-witnesses.py --verify experiments/cogentic-sheared-qs-witness-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-rational-root-matching.py
 	"$(PYTHON)" -B experiments/cogentic-radix-grid-density.py
 	"$(PYTHON)" -B experiments/cogentic-near-cube-density.py
