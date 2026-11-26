@@ -94,6 +94,40 @@ def check_rectangle_bound(modulus):
     return count
 
 
+def check_common_intercept():
+    modulus, width = 16, 8
+    probabilities = [Fraction(1 + (x == 0), modulus + 1)
+                     for x in range(modulus)]
+    weighted_mass = []
+    for x in range(width):
+        mass = sum(probabilities[s] * probabilities[y1] * probabilities[y2]
+                   for s, y1, y2 in product(range(modulus), repeat=3)
+                   if (x + s) % modulus < width and y1 < width and y2 < width)
+        weighted_mass.append(mass * Fraction(modulus, width) ** 4 / modulus)
+    assert all(weight >= Fraction(1, 8 * width) for weight in weighted_mass)
+
+    # Distinct box origins give distinct failed intercepts for the same toy score.
+    origins = [32, 30, 27] + list(range(100, 161))
+    failed = [{x for x in range(width) if origin + x == 32} for origin in origins]
+    weighted_scores = [sum(weighted_mass[x] for x in target) for target in failed]
+    for target, score in zip(failed, weighted_scores):
+        assert Fraction(len(target), width) <= 8 * score
+    rho = 8 * sum(weighted_scores) / len(origins)
+    for size in (1, 2, 4, 8):
+        per_intercept = [Fraction(sum(x in target for target in failed), len(origins))
+                         for x in range(size)]
+        expect_fail = sum(per_intercept) / size
+        assert expect_fail <= rho * width / size
+        if size ** 2 >= rho * width ** 2:
+            assert expect_fail ** 2 <= rho
+        if size >= 8 * rho * width:
+            chance_bad = Fraction(sum(value > Fraction(1, 4)
+                                      for value in per_intercept), size)
+            assert chance_bad <= Fraction(1, 2)
+    assert 8 * rho * width < width
+    return len(origins)
+
+
 def main():
     frequencies = 0
     for exponent in range(3, 11):
@@ -103,6 +137,7 @@ def main():
             frequencies += check_harmonic_budget(modulus, exponent, primes)
     rectangle_cases = sum(check_rectangle_bound(modulus) for modulus in (4, 16))
     print(f'{frequencies} Fourier residue budgets and {rectangle_cases} rectangle bounds passed')
+    print(f'Common intercept bounds passed for {check_common_intercept()} targets')
 
 
 if __name__ == '__main__':
