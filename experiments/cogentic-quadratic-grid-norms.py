@@ -1,7 +1,8 @@
 """Compute exact norm squareclasses on a centered quadratic mark grid."""
 
 from fractions import Fraction
-from math import gcd, isqrt
+from itertools import chain
+from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
 from time import perf_counter
@@ -24,11 +25,12 @@ def norm_words(field, points, height):
     return bounded_words(values, (2 + abs(linear))*height**2)
 
 
-def bounded_words(values, cutoff):
-    """Return signed squareclass columns when distinct stripped tails are coprime."""
+def bounded_words(values, cutoff, *, extra_values=()):
+    """Encode coprime-or-equal grid tails, followed by arbitrary extra integer labels."""
+    extra_values = tuple(extra_values)
     primes = tuple(GRID["primes_through"](cutoff))
     bits, cached, words = {}, {}, []
-    for value in values:
+    for value in chain(values, extra_values):
         if not value:
             raise ValueError("squareclasses require nonzero integers")
         if value not in cached:
@@ -44,10 +46,28 @@ def bounded_words(values, cutoff):
                 if odd:
                     word |= 1 << bits.setdefault(p, len(bits)+1)
             if remaining > 1 and isqrt(remaining)**2 != remaining:
-                # Any residual at most cutoff is prime, and all larger shared tails are equal.
+                # A residual at most cutoff is prime. Larger grid tails are coprime or equal.
                 word |= 1 << bits.setdefault(remaining, len(bits)+1)
             cached[value] = word
         words.append(cached[value])
+    if not extra_values:
+        return words
+
+    # Only atoms meeting an extra label can lose the private-row property.
+    extra_product = prod(abs(v) for v in extra_values)
+    touched = [atom for atom in bits if atom > cutoff and gcd(atom, extra_product) > 1]
+    if not touched:
+        return words
+    rational_words = run_path(str(HERE / "cogentic-quadratic-square-kernel.py"))["rational_words"]
+    refined = rational_words(touched)
+    offset = len(bits) + 1
+    replacements = {1 << bits[atom]: exact << offset for atom, exact in zip(touched, refined, strict=True)}
+    touched_mask = sum(replacements)
+    for i, word in enumerate(words):
+        # Each integer has at most one nonsquare tail after bounded stripping.
+        old = word & touched_mask
+        if old:
+            words[i] = (word ^ old) | replacements[old]
     return words
 
 

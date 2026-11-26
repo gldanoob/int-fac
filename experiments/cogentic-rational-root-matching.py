@@ -76,7 +76,19 @@ def replay():
                 z = prod(r for _, r in selected) * pow(isqrt(value), -1, modulus) % modulus
                 assert (z-span[mask]) % modulus == 0 or (z+span[mask]) % modulus == 0
             tested += 1
-    print(f"independent bases and a canonical lift split 93; {tested} subset matches checked")
+    bounded = run_path(str(Path(__file__).with_name("cogentic-quadratic-grid-norms.py")))["bounded_words"]
+    large = [101*103, 107**2*109, (113*127)**2, -131*137]
+    grid_values = [1, -1, 2*large[0], *large, -large[1], large[0]]
+    # Squares, repeated and signed tails, partial gcds, and new public-only primes.
+    for extras in ([], [103*107], [103*131, 101*137, 2*109, 139],
+                   [-101*109, 107, 137*113, 139*149, 139, 149, 151**2]):
+        raw = [*grid_values, *extras]
+        encoded = bounded(grid_values, 13, extra_values=extras)
+        exact = SQUARES["rational_words"](raw)
+        masks = [1 << j for j in range(len(raw))]
+        assert GRID["eliminate"](encoded, masks) == GRID["eliminate"](exact, masks)
+    print(f"independent bases and a canonical lift split 93; {tested} subset matches checked; "
+          "four auxiliary-label kernels agree with unrestricted gcd refinement")
 
 
 if __name__ == "__main__":

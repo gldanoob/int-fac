@@ -17,6 +17,12 @@ Both numerator and denominator of $D(x)$ are units. The square of $z(x)$ is one.
 
 Writing the full product for an individual kernel vector uses no more bits than the sum of the bit lengths of its labels. On a library of $\exp(O(W))$ explicit quadratic fields and marks, with degrees fixed and defining coefficients and bases of polynomial bit length in $\log N$, the local quadratic kernels, the expanded basis labels, and the rational decision all take $\exp(O(W))$ bit work, where $W=(\log N)^{1/3}(\log\log N)^{2/3}$. For other fields the matching cost has the same polynomial dependence on supplied bases; the cost of constructing them is separate.
 
+## Joining a sheared grid to arbitrary public witnesses
+
+A sheared evaluation grid already has an exact bounded sieve: after stripping primes up to the determinant bound, any two distinct remaining grid tails are coprime or equal. Arbitrary additional integers may share only part of such a tail. Treating those partial overlaps as independent rows would discard valid matches. [Sheared-grid determinant bound](cogentic-sheared-local-squares.md)
+
+The combined encoder strips the same bounded primes from every label. It omits square tails. Among the remaining distinct large tails, retain for gcd refinement precisely those having nontrivial gcd with the product of the absolute auxiliary labels. This includes every nonsquare auxiliary tail. Every untouched grid tail is coprime to all auxiliary labels and to the other distinct grid tails. It can keep its original private row. On the retained list use the ordinary rational gcd-free algorithm, then replace each old tail bit by its new class vector. This gives the exact joint rational kernel without factoring any auxiliary integer. At most the bit length of the auxiliary product many distinct grid tails can meet it, since those tails are pairwise coprime and each intersection consumes a distinct prime divisor of the product. The work is polynomial in the explicit sizes and the bounded sieve limit. Its use for public witnesses requires no numerical upper bound on their unfactored residuals beyond their input bit lengths. [Joint encoder](../experiments/cogentic-quadratic-grid-norms.py)
+
 ## A match between two different bases
 
 Set $N=93$. Use one primitive marked element in each of two real quadratic fields. Both defining polynomials evaluate to exactly $N$.
