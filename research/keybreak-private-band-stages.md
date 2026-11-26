@@ -2,6 +2,8 @@
 
 Under Dirichlet GRH, the November 26 KeyBreak preprint's analytic inputs give a single-input randomized factoring schedule with expected bit time $L_N[1/3,2.510]$. The new step tests for a prescribed amount of prime factorization in each of a fixed number of bands, starting at the cheapest cutoff. Both coordinates must pass a stage before either is sent to the next. All factoring of partial coordinates, private root draws, field construction and extraction are charged to the current integer. The [single-band proof](keybreak-private-shape-work.md) gives the notation, first-split preprocessing, and cheap final square reconstruction. The source PDF has SHA-256 `2b534eaf77fb2b9712018879059d8d4667c40c0a4adf2fff90efc22fb356cfc9`. [KeyBreak, Appendices G–H](https://crypto.sjtu.edu.cn/factoring.pdf#page=105)
 
+A [joint public and private schedule](keybreak-joint-schedule.md) uses the same staged test with a different degree and public boxes to reach $2.430$.
+
 ## Good top parents throughout the bands
 
 Keep the public cutoffs, field distribution, descent boxes and factor base from (G.1)–(G.4), with $b=19/20$ the leading coefficient of $\log B$. Set $e_{\min}=\lceil0.5108 e_0\rceil$. This widens the set of permitted top parents. The proof of the good-parent assertion must cover the new bands.
