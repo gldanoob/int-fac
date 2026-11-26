@@ -192,8 +192,65 @@ def check_sharp_contour():
     return comparisons
 
 
+def totient_weight_interval(q, cutoff, primes):
+    """Enclose phi(q)/q using only the primes through cutoff."""
+    residual = q
+    retained = Fraction(1)
+    for p in primes:
+        if residual % p == 0:
+            retained *= Fraction(p - 1, p)
+            while residual % p == 0:
+                residual //= p
+    if residual == 1:
+        return retained, retained
+    if residual < (cutoff + 1)**2:
+        exact = retained * Fraction(residual - 1, residual)
+        return exact, exact
+
+    count = 0
+    power = 1
+    while power <= residual // (cutoff + 1):
+        power *= cutoff + 1
+        count += 1
+    return retained * Fraction(cutoff, cutoff + 1)**count, retained
+
+
+def check_score_weights():
+    primes_through = run_path(str(Path(__file__).with_name(
+        "cogentic-scalar-progression-sieve.py")))["primes_through"]
+    # Factor lists are independent witnesses for the exact reference values.
+    factors = [(), (2, 2, 3), (5, 37), (131,), (131, 131), (131, 137),
+               (2, 3, 131, 137), (7, 11, 263, 269, 271)]
+    moduli = [prod(ps) for ps in factors]
+    exact = [prod((Fraction(p-1, p) for p in set(ps)), start=Fraction(1)) for ps in factors]
+    width = max(q.bit_length() for q in moduli)
+    checked = strict = 0
+    for cutoff in (2, 11, 31, 127, 257, 277):
+        primes = primes_through(cutoff)
+        intervals = [totient_weight_interval(q, cutoff, primes) for q in moduli]
+        for ref, (lower, upper) in zip(exact, intervals):
+            assert lower <= ref <= upper
+            strict += lower < ref < upper
+        # Before collecting equal tests, check every signed monomial separately.
+        for arity in (0, 2, 4):
+            exact_sum = approx_sum = abs_sum = 0
+            for indices in product(range(len(moduli)), repeat=arity):
+                sign = (-1)**sum(indices)
+                true = sign * prod(exact[i] for i in indices)
+                approx = sign * prod(intervals[i][1] for i in indices)
+                assert abs(true - approx) <= abs(approx) * Fraction(arity*width, cutoff+1)
+                exact_sum += true
+                approx_sum += approx
+                abs_sum += abs(approx)
+                checked += 1
+            assert abs(exact_sum - approx_sum) <= abs_sum * Fraction(arity*width, cutoff+1)
+    assert strict
+    return checked, strict
+
+
 if __name__ == "__main__":
     print("Projected two-mark counts, brackets, strict brackets", check_geometry())
     print("Log-bin bounds, strict overcounts, prescribed-accuracy checks", check_bins())
     print("Unit-class reductions, rejected gcds, nontrivial hits", check_unit_reduction())
     print("Finite-height sharp contour comparisons", check_sharp_contour())
+    print("Signed score monomials and strict totient enclosures", check_score_weights())
