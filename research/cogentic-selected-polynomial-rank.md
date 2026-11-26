@@ -45,7 +45,7 @@ The separate replay uses the existing extractor's small-slope convention with th
 
 The smaller-norm pair split all six prespecified misses. The norm comparison explains the geometric difference between these parameter choices. It gives no uniform lower bound for smooth marks, rank, or certified splits.
 
-The pair is used only when both discriminants are negative and their product is not a perfect square. The first test excludes square inputs such as 9. The second excludes coincident quadratic fields, as for 88 with discriminants $-28$ and $-63$. The exact tests and both fixtures are in the replay. For each returned certificate Python checks the annihilating exponent, recomputes the modular squaring chain and verifies the proper divisor.
+The original fixed pair is admissible when both discriminants are negative and their product is nonsquare. Square inputs such as 9 fail the first condition. Input 88 gives coincident quadratic fields with discriminants $-28$ and $-63$, so it fails the second condition. The fallback below handles this case. For each returned certificate Python checks the annihilating exponent, recomputes the modular squaring chain and verifies the proper divisor.
 
 A separate fixed fresh batch used products of primes $(127,131)$, $(127,193)$, $(137,139)$, $(137,251)$, $(151,157)$ and $(151,331)$. These products supplied the input fixtures. Coefficient selection received just the six integers.
 
@@ -59,3 +59,18 @@ A separate fixed fresh batch used products of primes $(127,131)$, $(127,193)$, $
 | 49981 | 25 | 118 | 122 | 151 |
 
 The fresh batch split 3/6 with the same limits. The three misses had full column rank and no eligible target in the column span. `make check-one-third` runs both batches.
+
+
+## Admissible pair for every nonsquare input
+
+For every nonsquare integer $N\ge2$, take $m=\lfloor\sqrt N\rfloor$, $r=N-m^2$ and $f_s(X)=X^2+sX+r-sm$. For $s=0,-1,-2$, the absolute discriminants are respectively
+
+$$
+4r,\qquad 4r+4m-1,\qquad 4(r+2m-1).
+$$
+
+All three are positive, and each polynomial equals $N$ at $m$. Each constant lies in $[1,4m]$, since $1\le r\le2m$. The slopes have absolute value at most two.
+
+Two negative discriminants define the same quadratic field exactly when their absolute values have the same positive squarefree part. Suppose all three have the same squarefree part $d$. The middle absolute discriminant is $3\pmod4$, so $d$ is odd and greater than one. Since $d$ is odd, it divides $r$ and $r+2m-1$. It also divides $4r+4m-1$, so it divides both $2m-1$ and $4m-1$. Their combination $(4m-1)-2(2m-1)=1$ contradicts $d>1$.
+
+Keep slope zero and try slope $-1$ first, then $-2$ if the first discriminant product is an exact square. For a candidate slope $s$, compute `t = isqrt(abs(D0*Ds))` and keep the pair if `t*t != abs(D0*Ds)`. At most two integer square-root tests select two distinct imaginary fields. The implementation needs no squarefree-part computations. Input 88 takes the fallback and yields discriminants $-28$ and $-96$. The two factoring batches retain all their earlier choices. This argument guarantees admissibility and coefficient size. The relation span still depends on the input and the search limits.

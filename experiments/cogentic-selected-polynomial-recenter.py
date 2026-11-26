@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check one fixed small-discriminant pair on two finite batches."""
+"""Check deterministic small-discriminant pairs on two finite batches."""
 
 from math import isqrt
 from pathlib import Path
@@ -14,20 +14,21 @@ check_certificate = split["check_certificate"]
 MISSES = split["INPUTS"][3:] + split["HOLDOUT"][3:]
 # Three close-factor fixtures and three with wider separation.
 FRESH = (16637, 24511, 19043, 34387, 23707, 49981)
-SLOPES = (0, -1)
 
 
 def centered_pair(n):
     m = isqrt(n)
-    constants = tuple(n-m*m-slope*m for slope in SLOPES)
-    discs = tuple(slope*slope-4*constant for slope, constant in zip(SLOPES, constants))
-    if not all(disc < 0 for disc in discs):
+    r = n-m*m
+    if r == 0:
         return None
-    product = discs[0]*discs[1]
-    if isqrt(product)**2 == product:
-        return None
-    assert all(m*m+slope*m+constant == n for slope, constant in zip(SLOPES, constants))
-    return constants, discs
+    first_disc = -4*r
+    for slope in (-1, -2):
+        constant = r-slope*m
+        second_disc = slope*slope-4*constant
+        product = first_disc*second_disc
+        if isqrt(product)**2 != product:
+            return (0, slope), (r, constant), (first_disc, second_disc)
+    raise AssertionError("the three slopes produced the same field")
 
 
 def run(label, inputs):
@@ -37,13 +38,13 @@ def run(label, inputs):
         if pair is None:
             print({"batch": label, "n": n, "admissible": False}, flush=True)
             continue
-        constants, discs = pair
-        slopes, offsets = list(SLOPES), list(constants)
+        slopes, constants, discs = pair
+        slopes, offsets = list(slopes), list(constants)
         height, bound = split["RELATION_HEIGHT"], split["RELATION_BOUND"]
         scores = gp_call(f"rank_box_scores({n},{slopes},{offsets},[[[0,0]],[[0,0]]],{height},{bound})",
                          rank=True)
         targets, nullity, rank, columns = scores[0][0]
-        certificate = gp_certificate(n, SLOPES, constants)
+        certificate = gp_certificate(n, slopes, constants)
         check_certificate(n, certificate)
         assert nullity == columns-rank
         if certificate is not None:
@@ -56,8 +57,19 @@ def run(label, inputs):
 
 
 if __name__ == "__main__":
+    assert centered_pair(2) == ((0, -1), (1, 2), (-4, -7))
+    assert centered_pair(3) == ((0, -1), (2, 3), (-8, -11))
     assert centered_pair(9) is None  # square input
-    assert centered_pair(88) is None  # equal quadratic fields
+    assert centered_pair(88) == ((0, -2), (7, 25), (-28, -96))
+    for n in range(2, 1024):
+        m = isqrt(n)
+        if n == m*m:
+            continue
+        slopes, constants, discs = centered_pair(n)
+        assert all(0 < c <= 4*m and m*m+s*m+c == n for s, c in zip(slopes, constants))
+        assert all(disc < 0 for disc in discs)
+        product = discs[0]*discs[1]
+        assert isqrt(product)**2 != product
     recovered = run("previous misses", MISSES)
     assert recovered == len(MISSES)
     run("fresh batch", FRESH)
