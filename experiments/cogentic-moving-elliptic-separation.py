@@ -15,7 +15,9 @@ TORUS = run_path(str(HERE / "cogentic-varying-norm-torus.py"))
 norm_generator, primes_through, smooth_exponent, weighted_class_number = (
     TORUS[name] for name in ("norm_generator", "primes_through", "smooth_exponent", "weighted_class_number")
 )
-FactorFound, add, checked_gcd = (TORUS["saturation"][name] for name in ("FactorFound", "add", "checked_gcd"))
+FactorFound, add, checked_gcd, minimize_annihilator = (
+    TORUS["saturation"][name] for name in ("FactorFound", "add", "checked_gcd", "minimize_annihilator")
+)
 binary_rank = run_path(str(HERE / "cogentic-sparse-kernel.py"))["binary_rank"]
 INDICES = range(4)
 PAIRS = tuple(combinations(INDICES, 2))
@@ -188,13 +190,18 @@ def bounded_multiple(point, modulus, a2, a4, bound):
 
 
 def residual_multiple(roots, marked, exponent, modulus, bound):
+    """Return a common odd residual order or a miss, or raise FactorFound."""
     a2, a4 = coefficients(roots, modulus)
     point = multiply(exponent, tuple(c % modulus for c in marked), modulus, a2, a4)
     for _ in range((4*modulus).bit_length()):
         if point is None:
             return 1
         point = add(point, point, modulus, a2, a4)
-    return bounded_multiple(point, modulus, a2, a4, bound)
+    relation = bounded_multiple(point, modulus, a2, a4, bound)
+    if relation is None:
+        return None
+    odd_part = relation // (relation & -relation)
+    return minimize_annihilator(odd_part, lambda scalar: multiply(scalar, point, modulus, a2, a4) is None)
 
 
 def reciprocal_positions(positions):
@@ -234,8 +241,7 @@ def find_split(modulus, exponent, menu_bound, residual_order=None, reciprocal=Fa
                     relation = residual_multiple(roots, marked, exponent, modulus, residual_order)
                     if relation is not None and relation > 1:
                         stage = "residual-order continuation"
-                        odd_part = relation // (relation & -relation)
-                        split_curve(roots, marked, exponent*odd_part, modulus)
+                        split_curve(roots, marked, exponent*relation, modulus)
     except FactorFound as found:
         divisor, = found.args
         assert 1 < divisor < modulus and modulus % divisor == 0
@@ -339,7 +345,28 @@ def replay_stage_two():
     assert residual_multiple(roots, marked, 3, modulus, 11) == 11
     assert find_split(modulus, 3, 7) == (None, "menu limit")
     assert find_split(modulus, 3, 7, 11) == (269, "residual-order continuation")
+
+    modulus = 1861*1693
+    roots = (-34320, -2860, -2640)
+    marked = (-17160, -1887600)
+    a2, a4 = coefficients(roots, modulus)
+    point = multiply(1 << (4*modulus).bit_length(),
+                     tuple(c % modulus for c in marked), modulus, a2, a4)
+    for prime, order in ((1861, 21), (1693, 105)):
+        local = tuple(c % prime for c in point)
+        assert multiply(order, local, prime, a2, a4) is None
+        assert all(multiply(order//ell, local, prime, a2, a4) is not None
+                   for ell in (3, 5, 7) if order % ell == 0)
+    assert bounded_multiple(point, modulus, a2, a4, 225) == 105
+    assert split_curve(roots, marked, 105, modulus) is None
+    try:
+        residual_multiple(roots, marked, 1, modulus, 225)
+    except FactorFound as found:
+        assert found.args == (1861,)
+    else:
+        raise AssertionError("refining the common multiple should expose 1861")
     print("Stage two splits 2983 by a batched collision and 76127 after a shared residual relation of 11.")
+    print("Common-multiple refinement splits 3150673 at residual orders 21 and 105.")
 
 
 def main():
