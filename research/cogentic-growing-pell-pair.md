@@ -71,3 +71,27 @@ For each subset term in this expansion, CRT gives its expected count in the actu
 2J\log Z+O(j\log^2 j)=(\kappa/4+o(1))j^2\log j.
 \]
 The main lower bound is $\tfrac12K\exp(-88jB)=\exp((\kappa-o(1))j^2\log j)$ and exceeds this error. Hence some progression index avoids every prime through $Z$. The proof of existence still uses a selected Pell family. It supplies no claim that general inputs or the earlier scheduled monic pair admit a productive square relation.
+
+## A variant with both defining values equal to the input
+
+Use odd $m\ge5$, $Y=m+1$, $y=Y/2$, $C(X)=(X+1)^2-4$, and $c=C(m)=4(y^2-1)$. Set
+\[
+V+U\sqrt c=(c+\sqrt c)(y+\tfrac12\sqrt c)^j
+\]
+for even $j\ge2$. The multiplier squared is $a+y\sqrt c$ with $a=2y^2-1$. Starting with $U=1$, $T=1$, where $T=V/c$, the $j/2$ steps are
+\[
+(U,T)\longmapsto(aU+ycT,,aT+yU).
+\]
+In particular $V=cT$ and $U$ stays odd. The residue of $U$ modulo $c$ is a power of $a$, which is a unit because every odd prime dividing $c$ has $y^2\equiv1$, and $a$ is odd. The norm identity is again $V^2+c=c(U^2+c)$. We have $U\ge a+yc>c/2$ and $U>Y+1$ after the first step. Thus $1<V/U<Y$ and the same two proper gcds split $N=U^2+c$.
+
+Construct a monic lift $P(m)=U$ of degree $k$ with $m^k>U$ and parity $P\equiv X^k+X+1\pmod2$. This parity has the correct value at $m$. Since $T=V/c<U$, lift $J(m)=T$ of degree $\ell\in\{k,k+1\}$ with $J\equiv1+X+\cdots+X^\ell\pmod2$. Choose $\ell$ so that $\ell+1\equiv T\pmod2$, which makes the target parity compatible at $m$. The base-$m$ and $(X-m)$ adjustment above apply to any prescribed monic parity polynomial with the same value at $m$ and still give coefficient height at most $2m$.
+
+The defining polynomials are
+\[
+F=P^2+C,\qquad G=CJ^2+1.
+\]
+Modulo two $F=X^{2k}$ and $G=((X+1)J+1)^2=X^{2\ell+2}$. Their constants are respectively an odd square minus three and one minus three times an odd square, so both constants have valuation one at two. Both are monic Eisenstein, with distinct degrees $2k$ and $2\ell+2$. Now $F(m)=G(m)=N$ exactly, since $cT^2+1=(V^2+c)/c$. For roots $\alpha,\beta$ of $F,G$, the two square roots are $P(\alpha)$ and $C(\beta)J(\beta)$. The second identity is $(CJ)^2+C=CG$, which permits its defining polynomial to have the same exact value as the first. Both square roots represent the signed word $(1-X)(3+X)=-C(X)$ and reduce to $U,V$. In positive-$b$ orientation the marks are $(1,1),(-3,1)$ with shared sign $-1$. They are units since $\gcd(c,N)=1$.
+
+With $m\in[j^{\kappa j^2},2j^{\kappa j^2}]$, the conjugate formula again gives $\log U=(j+1)\log Y+O(1)$. The degrees, coefficient heights and norm bounds have the same orders as before. The recurrence gives polynomials in $y$ of degrees $j+1$ for $U$ and $j$ for $T$ after the first step, and at $y=1$ it gives $U=T=1$, $c=0$. The polynomial $N$ therefore has degree $2(j+1)$ and value one at $y=1$ modulo every odd prime. Preassigning $m\equiv1$ at the small primes replaces $Y\equiv2$ in the sieve, and $y$ is an invertible affine function of the progression index at the remaining primes. The same counting proof gives infinitely many of these exact-value inputs with no prime factor through $\exp(\kappa^{2/3}W/32768)$. For input recognition, enumerate even $j$ through the bit length and binary search odd $m$ as before. Strict monotonicity follows from the positive recurrence, and $a\ge17$ bounds the number of steps for a hit.
+
+The replay checks $m=5,j=2$ with $N=12801=17\cdot753$, degrees six and eight, and both exact evaluations. It also verifies three larger exact-value examples. These fields are selected for this family. No conclusion about the canonical monic pair or arbitrary inputs follows.
