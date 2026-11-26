@@ -95,6 +95,19 @@ def repair(n, A, B, d=None):
     for i, coefficient in enumerate(quotient):
         for j, w_coefficient in enumerate(W):
             polynomial[i + j] += coefficient * w_coefficient
+    slope = tuple(i * polynomial[i] for i in range(1, len(polynomial)))
+    common = gcd(homogeneous_value(slope, A, B, n), n)
+    if 1 < common < n:
+        return {"status": "factor", "factor": common}
+    if common == n:
+        # Adding 25(BX-A)W keeps the same root and changes the derivative by a unit.
+        quotient[0] -= 25*A
+        quotient[1] += 25*B
+        for i, w_coefficient in enumerate(W):
+            polynomial[i] -= 25*A*w_coefficient
+            polynomial[i+1] += 25*B*w_coefficient
+        slope = tuple(i * polynomial[i] for i in range(1, len(polynomial)))
+        assert gcd(homogeneous_value(slope, A, B, n), n) == 1
     check = homogeneous_value(polynomial, A, B, n)
     assert check == 0 and polynomial[-1] == 1
     assert all(coefficient % 5 == 0 for coefficient in polynomial[:-1])
