@@ -28,16 +28,8 @@ theorem concrete_factorization :
   Concrete.total_factorization LFunction_eq_zero_re
 
 /-- Apply the frozen critical-line theorem to the complete factoring bound. -/
-theorem binary_factorization_two_thirds (split : Companion.Splitter) {C₁ A : ℝ}
-    (hc : 0≤C₁) (ha : 0≤A) (spec : Companion.SplitterSpec split C₁ A) :
-    ∃ (k : ℕ) (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1)))),
-      (∀ n (hn : 2≤n),
-        let primes := (Companion.factorWords split k gen n hn).1.map BinaryDivision.value
-        primes.prod=n ∧ (∀ p∈primes, p.Prime) ∧ (∀ p, p.Prime → ∀ j, p^j∣n ↔ j≤primes.count p)) ∧
-      ∀ ε : ℝ, 0<ε → ∀ᶠ n : ℕ in Filter.atTop, ∀ hn : 2≤n,
-        ((Companion.factorWords split k gen n hn).2:ℝ) ≤
-          Real.exp ((max 6528665845 (C₁+12*A+131117)+ε)*CompanionSplitCost.scale n) :=
-  Companion.factor_words_two_thirds LFunction_eq_zero_re split hc ha spec
+theorem binary_factorization_two_thirds : Companion.LocalFactorizationBound :=
+  Companion.factor_words_two_thirds LFunction_eq_zero_re
 
 /-- The remaining hypothesis about candidate success quantifies over all large
     surviving inputs. The final inequality refers to supplied per-node charges. -/

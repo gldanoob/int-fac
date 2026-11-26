@@ -41,14 +41,19 @@ def run (k : ℕ) (lengthBits : List Bool) : List (List Bool) × ℕ :=
   let out := progression (1:ℕ).bits clock.1 (1:ℕ).bits
   (out.1,bs.2+2*k+1003+base.2+clock.2+out.2)
 
-theorem fixed_list (k b : ℕ) (hb : 0<b) (hk : k≤b) :
+private theorem run_budget (k b X : ℕ) (wu : (1000*(k+b+1)+1)^6 ≤ X) :
     (run k b.bits).1 = (List.range' 1 (polyCutoff k b)).map Nat.bits ∧
-    (run k b.bits).2 ≤ 2^(300*TwoThirdsCost.scale b) := by
-  let S := TwoThirdsCost.scale b
+    (run k b.bits).2 ≤ 2048*(X+1)^2 := by
   let seed := () :: List.replicate k () ++ (tokens b.bits).1
   let base := copies seed (List.replicate 1000 ())
   let cap := polyCutoff k b
   let u := 1000*(k+b+1)
+  have first : u+1 ≤ (u+1)^6 := by
+    simpa only [pow_one] using (Nat.pow_le_pow_right (Nat.succ_pos u) (by decide : 1≤6))
+  have wsub : u ≤ X := (Nat.le_succ _).trans (first.trans wu)
+  have strict : polyCutoff k b+1 ≤ (u+1)^6 :=
+    Nat.pow_lt_pow_left (Nat.lt_succ_self u) (by decide : 6 ≠ 0)
+  have hX := strict.trans wu
   have ⟨bl,bc⟩ := token_spec b.bits
   simp only [value_bits,Nat.size_eq_bits_len] at bl bc
   have se : seed.length=k+b+1 := by simp [seed,bl,Nat.add_assoc]
@@ -60,42 +65,59 @@ theorem fixed_list (k b : ℕ) (hb : 0<b) (hk : k≤b) :
   rw [len] at size cost
   change (powerClock base.1 6).1.length=cap at size
   let cpu := progression (1:ℕ).bits (powerClock base.1 6).1 (1:ℕ).bits
-  have zle : Fixed.z b≤S := (Nat.le_mul_of_pos_left _ (Fixed.degree_pos hb)).trans
-    ((Nat.le_mul_of_pos_left _ (Fixed.degree_pos hb)).trans (Fixed.scale_bounds hb).1)
-  have sp : 0<S := (Nat.succ_pos _).trans_le zle
-  have bw : b ≤ 2^S := Nat.lt_log2_self.le.trans (Nat.pow_le_pow_right Nat.zero_lt_two zle)
-  have pb := Nat.two_pow_pos S
-  have ub : u+1 ≤ 2^(13+S) := by dsimp only [u]; rw [pow_add]; norm_num; omega
-  let X := 2^(90*S)
-  have hX : cap+1 ≤ X := by
-    have e : cap≤2^((13+S)*6) := (Nat.pow_le_pow_left (Nat.le_of_succ_le ub) 6).trans_eq (Nat.pow_mul ..).symm
-    calc
-      _ ≤ 2^(1+(13+S)*6) := by rw [pow_add,pow_one,two_mul]; have := Nat.two_pow_pos ((13+S)*6); omega
-      _ ≤ _ := Nat.pow_le_pow_right Nat.zero_lt_two (by omega)
-  have wu : (u+1)^6 ≤ X := (Nat.pow_le_pow_left ub 6).trans
-    ((Nat.pow_mul ..).symm.le.trans (Nat.pow_le_pow_right Nat.zero_lt_two (by omega)))
-  have wsub : u≤X := (Nat.le_of_succ_le ub).trans (Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
   have sb : b.size ≤ b := Nat.size_le.mpr Nat.lt_two_pow_self
   obtain ⟨values,work⟩ := progression_spec 1 1 (powerClock base.1 6).1 X
-    ((by decide : (1:ℕ).size=1) ▸ Nat.two_pow_pos (90*S))
+    (by rw [show (1:ℕ).size = 1 by decide]; omega)
     (by simpa only [size,Nat.mul_one,Nat.add_comm 1] using ((Nat.size_le.mpr Nat.lt_two_pow_self : (cap+1).size≤cap+1).trans hX))
   change cpu.1=_ at values; change cpu.2≤_ at work
   rw [size] at values work
   change cpu.1=_ ∧ (tokens b.bits).2+2*k+1003+base.2+(powerClock base.1 6).2+cpu.2≤_
   refine ⟨values,?_⟩
-  have bX : b≤X := bw.trans (Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
   change (powerClock base.1 6).2≤19*(u+1)^6 at cost
   have h := cost.trans (Nat.mul_le_mul_left 19 wu)
-  have total : (tokens b.bits).2+2*k+1003+base.2+(powerClock base.1 6).2+cpu.2≤2048*(X+1)^2 := by
-    rw [gates]; dsimp only [u] at wsub
-    nlinarith only [bc,sb,bX,hk,work,Nat.mul_le_mul_right (9*X+6) (Nat.le_of_succ_le hX),h,wsub,sq_nonneg X]
-  have xp := Nat.two_pow_pos (90*S)
+  rw [gates]
+  dsimp only [u] at wsub
+  nlinarith only [bc,sb,work,Nat.mul_le_mul_right (9*X+6) (Nat.le_of_succ_le hX),h,wsub,sq_nonneg X]
+
+/-- The generator output and its bit cost are uniform even for b smaller than k. -/
+theorem local_polynomial (k b : ℕ) :
+    (run k b.bits).1 = (List.range' 1 (polyCutoff k b)).map Nat.bits ∧
+    (run k b.bits).2 ≤ (10000*(k+b+1))^16 := by
+  let u := 1000*(k+b+1)
+  let X := (u+1)^6
+  let Y := 10000*(k+b+1)
+  obtain ⟨values,work⟩ := run_budget k b X (le_refl _)
+  refine ⟨values,work.trans ?_⟩
+  have xy : X ≤ Y^6 := Nat.pow_le_pow_left (by dsimp [u,Y]; omega : u+1 ≤ Y) 6
+  have large : 8192 ≤ Y := by dsimp [Y]; omega
+  have positive : 1 ≤ Y^6 := Nat.one_le_pow _ _ (by omega)
+  have fourth : 8192 ≤ Y^4 :=
+    large.trans (by simpa only [pow_one] using (Nat.pow_le_pow_right (by omega : 1≤Y) (by decide : 1≤4)))
   calc
-    _ ≤ 2048*(X+1)^2 := total
-    _ ≤ 2048*(2*X)^2 := Nat.mul_le_mul_left _ (Nat.pow_le_pow_left (by omega) 2)
-    _ = 2^(13+90*S*2) := by dsimp only [X]; rw [pow_add,pow_mul 2 (90*S) 2]; ring
-    _ ≤ _ := Nat.pow_le_pow_right Nat.zero_lt_two (by change 13+90*S*2≤300*S; omega)
+    2048*(X+1)^2 ≤ 2048*(2*Y^6)^2 :=
+      Nat.mul_le_mul_left _ (Nat.pow_le_pow_left (by omega) 2)
+    _ = 8192*Y^12 := by ring
+    _ ≤ Y^4*Y^12 := Nat.mul_le_mul_right _ fourth
+    _ = Y^16 := by ring
+
+theorem fixed_list (k b : ℕ) (hb : 0<b) (hk : k≤b) :
+    (run k b.bits).1 = (List.range' 1 (polyCutoff k b)).map Nat.bits ∧
+    (run k b.bits).2 ≤ 2^(300*TwoThirdsCost.scale b) := by
+  let S := TwoThirdsCost.scale b
+  have zle : Fixed.z b≤S := (Nat.le_mul_of_pos_left _ (Fixed.degree_pos hb)).trans
+    ((Nat.le_mul_of_pos_left _ (Fixed.degree_pos hb)).trans (Fixed.scale_bounds hb).1)
+  have sp : 0<S := (Nat.succ_pos _).trans_le zle
+  have bw : b ≤ 2^S := Nat.lt_log2_self.le.trans (Nat.pow_le_pow_right Nat.zero_lt_two zle)
+  obtain ⟨values,work⟩ := local_polynomial k b
+  refine ⟨values,work.trans ?_⟩
+  have large : 10000*(k+b+1) ≤ 2^(16+S) := by
+    rw [pow_add]; norm_num; omega
+  calc
+    _ ≤ (2^(16+S))^16 := Nat.pow_le_pow_left large 16
+    _ = 2^((16+S)*16) := (Nat.pow_mul ..).symm
+    _ ≤ _ := Nat.pow_le_pow_right Nat.zero_lt_two (by omega)
 
 end Cogentic.BinaryGenerators
 
+#print axioms Cogentic.BinaryGenerators.local_polynomial
 #print axioms Cogentic.BinaryGenerators.fixed_list
