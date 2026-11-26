@@ -57,3 +57,26 @@ assert h1_squared < (target-algebraic_invocations)**2
 assert 7**9 < 2**26  # Strassen exponent below 26/9.
 assert b*F(26, 9) < target
 print("private-shape cap and 2.813 terminal ledger passed")
+
+theta = F(993, 1000)
+coordinate_budget = F(2804, 1000)-b-private_loss/theta
+assert coordinate_budget > 0
+per_test_square = F(20001, 10000)**2 * F(40, 81)*theta
+assert per_test_square < coordinate_budget**2
+print("tightened private band: coefficient", float(b+private_loss/theta)+float(per_test_square)**.5)
+
+# Only the eventual band containment needs a very large synthetic bit length.
+for power in (12000, 24000):
+    width = 2**power
+    k0 = 2**(power//3)
+    lx = (width-1)//2-2
+    e0 = (width-5)//(2*k0)-1
+    es = 993*e0//1000
+    ks = (lx+es-1)//es
+    ms = ks.bit_length()
+    k = ks+(ks+ms-1)//ms
+    offset = k*es-lx
+    last = 2*(offset+k)//k
+    assert es-last-1 >= (127*e0+127)//128
+    assert k <= 2*k0 and offset <= k*last//2 <= offset+k and 2*ms*(last+1) >= es
+print("eventual private band checks passed")
