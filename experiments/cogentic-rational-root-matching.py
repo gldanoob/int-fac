@@ -39,13 +39,17 @@ def matched_basis(n, witnesses):
     return matched
 
 
-def chart_matches(n, charts):
+def chart_matches(n, charts, *, primes=()):
     """Match explicit signed integer marks using the roots that can be reduced modulo N."""
     from sage.all import PolynomialRing, QQ
 
-    square_kernel = run_path(str(Path(__file__).with_name("cogentic-order-square-kernel.py")))["square_kernel"]
     if type(n) is not int or n <= 1 or n % 2 == 0:
         raise ValueError("expected an odd modulus greater than one")
+    primes = tuple(primes)
+    if primes:
+        restrictions = run_path(str(Path(__file__).with_name("cogentic-local-square-restriction.py")))
+    else:
+        square_kernel = run_path(str(Path(__file__).with_name("cogentic-order-square-kernel.py")))["square_kernel"]
     ring = PolynomialRing(QQ, "x")
     x = ring.gen()
     generators, local, unavailable = [], [], []
@@ -75,10 +79,18 @@ def chart_matches(n, charts):
                 marks.append(a-b*x)
                 labels.append(value)
                 slots.append(slot)
-        complete, roots, residual_rank, tests, first = square_kernel(field, [*marks, -1])
+        elements = [*marks, ring(-1)]
+        if primes:
+            masks, stats = restrictions["local_square_kernel"](field, elements, primes)
+            complete, roots, residual_rank, tests, first = restrictions["SQUARES"]["complete_square_kernel"](
+                field, elements, masks)
+        else:
+            complete, roots, residual_rank, tests, first = square_kernel(field, elements)
         assert complete and len(roots) + residual_rank == first
         local.append(dict(chart=index, first_dimension=first, square_dimension=len(roots),
                           residual_rank=residual_rank, tests=tests))
+        if primes:
+            local[-1]["restrictions"] = [(None if p is None else int(p), r, q) for p, r, q in stats]
         labels.append(-1)
         slots.append(len(points))
         unresolved = False
@@ -87,6 +99,9 @@ def chart_matches(n, charts):
             label = prod(labels[j] for j in support)
             denominator = int(root.denominator())
             denominator_gcd = gcd(denominator, n)
+            if 1 < denominator_gcd < n:
+                return dict(status="denominator-gcd", chart=index, divisor=denominator_gcd,
+                            cofactor=n//denominator_gcd)
             if denominator_gcd == 1:
                 numerator = denominator * root
             elif common == 1:
@@ -94,9 +109,6 @@ def chart_matches(n, charts):
                 numerator = (derivative * root) % field
                 assert numerator.denominator() == 1
                 denominator = derivative_value
-            elif denominator_gcd < n:
-                return dict(status="denominator-gcd", chart=index, divisor=denominator_gcd,
-                            cofactor=n//denominator_gcd)
             else:
                 unresolved = True
                 continue
@@ -208,11 +220,17 @@ def replay():
     assert exposed["status"] == "derivative-gcd" and exposed["divisor"] == 3
     exposed = chart_matches(93, [dict(cubic, points=[(3, 0)])])
     assert exposed["status"] == "mark-gcd" and exposed["divisor"] == 3
-    cleared = chart_matches(895, [dict(m=29, field=[54, 0, -28, 1], points=[(18, 13), (0, 1)])])
+    exposed = chart_matches(895, [dict(m=29, field=[54, 0, -28, 1], points=[(18, 13), (0, 1)])])
+    assert exposed["status"] == "denominator-gcd" and exposed["divisor"] == 5
+    cleared = chart_matches(15, [dict(m=4, field=[54, 0, -28, 1], points=[(24, -10)])])
     root, = cleared["generators"]
-    assert root["mask"] == 3 and root["label"] == 10411
-    assert all(Fraction(c).denominator == 5 for c in root["root"])
-    assert root["residue"]**2 % 895 == 10411 % 895
+    assert root["mask"] == 1 and root["label"] == 64
+    assert Fraction(root["root"][-1]).denominator == 15
+    assert root["residue"]**2 % 15 == 64 % 15
+    restricted = chart_matches(93, [cubic, quadratic], primes=(2, 3))
+    assert restricted["status"] == positive["status"] and restricted["basis"] == positive["basis"]
+    assert [p for p, _, _ in restricted["local"][0]["restrictions"]] == [None, 2, 3]
+    assert positive["local"][1]["residual_rank"] == 1 and restricted["local"][1]["residual_rank"] == 0
     print("Cubic different-base match and rank-one negative certificate verified")
 
 
@@ -224,4 +242,4 @@ if __name__ == "__main__":
         replay()
     else:
         library = json.loads(args.charts.read_text())
-        print(json.dumps(chart_matches(library["n"], library["charts"])))
+        print(json.dumps(chart_matches(library["n"], library["charts"], primes=library.get("primes", ()))))

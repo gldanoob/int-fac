@@ -49,6 +49,11 @@ def square_kernel(polynomial, elements, *, query_cap=None):
         raise ValueError("expected a nonnegative query cap")
     elements = [polynomial.parent()(z) % polynomial for z in elements]
     first = ideal_kernel(polynomial, elements, norm_sign=True)
+    return complete_square_kernel(polynomial, elements, first, query_cap=query_cap)
+
+
+def complete_square_kernel(polynomial, elements, first, *, query_cap=None):
+    """Recover exact roots from a basis already known to contain all square masks."""
     algebra = PowerBasis(polynomial)
     degree = polynomial.degree()
     operators = [algebra.multiplication(vector(QQ, z.padded_list(degree))) for z in elements]
