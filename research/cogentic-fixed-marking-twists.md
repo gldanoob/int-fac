@@ -9,7 +9,7 @@ Use the four coordinates \((0,1,b,c)\) and always mark \(c\). At the two odd pri
  z=L(-1),\quad a=L(b),\quad h=L(b-1),\quad
  u=L(c),\quad v=L(c-1),\quad w=L(c-b),\quad \omega=u+v+w.
 \]
-The norms in the existing menu prescribe \(a,h\) with \(a\ne0\), \(a\ne h\), \(a\ne z\), and \(h\ne z\). These inequalities hold in every row of its robust table. Put \(D=c(c-1)(c-b)\). The curve and point for this marking are
+The norms in the existing menu prescribe \(a,h\) with \(a\ne0\), \(a\ne h\), \(a\ne z\), and \(h\ne z\). These inequalities hold for the twelve pairs chosen in the norm-lift proof. Put \(D=c(c-1)(c-b)\). The curve and point for this marking are
 \[
  E_c:\ Y^2=X(X-D)(X-Db),\qquad R_c=(Dc,D^2).
 \]

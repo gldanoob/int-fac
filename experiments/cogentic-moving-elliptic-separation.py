@@ -224,7 +224,13 @@ def residual_multiple(roots, marked, exponent, modulus, bound):
     return bounded_multiple(point, modulus, a2, a4, bound)
 
 
-def find_split(modulus, exponent, menu_bound, residual_order=None):
+def reciprocal_positions(positions):
+    # Clear denominators in (0, 1, b, 1/b) for b = numerator/denominator.
+    _, denominator, numerator, _ = positions
+    return 0, denominator*numerator, numerator*numerator, denominator*denominator
+
+
+def find_split(modulus, exponent, menu_bound, residual_order=None, reciprocal=False):
     """Search the public moving curves and return a divisor and its source."""
     if modulus < 3 or modulus % 2 == 0 or exponent < 1 or exponent % 2 == 0 or menu_bound < 3:
         raise ValueError("need odd N >= 3, a positive odd exponent and a menu bound >= 3")
@@ -241,10 +247,12 @@ def find_split(modulus, exponent, menu_bound, residual_order=None):
                 return None, "menu limit"
         for _, _, positions in menu(primes):
             stage = "root difference"
+            if reciprocal:
+                positions = reciprocal_positions(positions)
             positions = tuple(x % modulus for x in positions)
             if max(checked_gcd(positions[j] - positions[i], modulus) for i, j in PAIRS) == modulus:
                 continue
-            for omitted in INDICES:
+            for omitted in ((3,) if reciprocal else INDICES):
                 roots, marked = curve(positions, omitted)
                 stage = "elliptic group"
                 split_curve(roots, marked, exponent, modulus)
@@ -290,6 +298,12 @@ def check_small_pairs():
                       for i, j in PAIRS}
             assert (labels[0, 2], labels[1, 2]) == (a, h) and separating(labels, z)
             check_rational(positions, p, q, labels)
+            reciprocal = reciprocal_positions(positions)
+            normalized = tuple(Fraction(x, reciprocal[1]) for x in reciprocal)
+            assert normalized[2]*normalized[3] == 1
+            reciprocal_labels = {(i, j): pair_label(normalized[j] - normalized[i], p, q)
+                                 for i, j in PAIRS}
+            assert separation_rank(label_rows(reciprocal_labels, z, 3)) == 3
             break
         else:
             raise AssertionError((p, q, "no separating chart"))
@@ -321,6 +335,7 @@ def check_group_split():
         raise AssertionError("different final torsion roots should expose 37")
     assert find_split(modulus, exponent, 31) == (41, "elliptic group")
     assert find_split(modulus, smooth_exponent(modulus, 3), 31) == (41, "elliptic group")
+    assert find_split(modulus, smooth_exponent(modulus, 3), 31, reciprocal=True) == (37, "elliptic group")
     assert find_split(101, 1, 31) == (None, "menu limit")
     assert find_split(53**2, 1, 31) == (53, "square input")
 
@@ -364,6 +379,7 @@ def main():
     options.add_argument("--bound", type=int, default=11, help="odd smoothness cutoff, defaults to 11")
     parser.add_argument("--menu", type=int, default=31, help="maximum discriminant prime and split prime")
     parser.add_argument("--residual-order", type=int, help="stage-two residual odd order bound (requires SageMath)")
+    parser.add_argument("--reciprocal-mark", action="store_true", help="mark 1/b on the roots 0, 1, b")
     parser.add_argument("--replay-stage-two", action="store_true", help="run the stage-two regression fixtures")
     args = parser.parse_args()
     if args.replay_stage_two:
@@ -376,7 +392,7 @@ def main():
         return
     try:
         exponent = args.exponent if args.exponent is not None else smooth_exponent(args.N, args.bound)
-        divisor, stage = find_split(args.N, exponent, args.menu, args.residual_order)
+        divisor, stage = find_split(args.N, exponent, args.menu, args.residual_order, args.reciprocal_mark)
     except ValueError as error:
         parser.error(str(error))
     if divisor is None:
