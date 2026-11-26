@@ -1,4 +1,4 @@
-"""Replay the common-root repair and the exact denominator-clearing examples."""
+"""Replay the common-root repair, denominator clearing, and square extraction."""
 
 import os
 import runpy
@@ -52,7 +52,39 @@ def run():
     assert outcomes[11][0] == 0
 
     script = """
-check(ok) = if(!ok, error("denominator-clearing replay failed"));
+check(ok) = if(!ok, error("common-root or square extraction replay failed"));
+power_square_root(P,Q) = {
+  if(Q==0, return([1,0]));
+  my(e=poldegree(P), n=2*e, h=denominator(Q,1), H=h^2*Q);
+  my(X=matrix(n,n), Y=matrix(n,n), one=vector(n,i,i==1)~, Z, powers);
+  for(j=1,e,
+    my(a=lift(Mod(x^j,P)), b=lift(Mod(x^(j-1)*H,P)));
+    for(i=1,e,
+      X[i,j]=X[e+i,e+j]=polcoef(a,i-1);
+      Y[i,e+j]=polcoef(b,i-1);
+    );
+    Y[e+j,j]=1;
+  );
+  for(t=0,n*(n-1)/2,
+    Z=Y+t*X;
+    powers=matrix(n,n);
+    my(v=one);
+    for(k=1,n, powers[,k]=v; v=Z*v);
+    if(matdet(powers)!=0,break);
+  );
+  check(matdet(powers)!=0);
+  my(factors=factor(charpoly(Z,y)));
+  if(matsize(factors)[1]==1, return([0]));
+  check(matsize(factors)[1]==2 && factors[,2]==[1,1]~);
+  my(f1=factors[1,1], f2=factors[2,1], bezout=gcdext(f1,f2));
+  check(poldegree(f1)==e && poldegree(f2)==e && bezout[3]==1);
+  my(g=2*bezout[1]*f1-1, yvector=Y*one, v=vector(n)~);
+  forstep(k=poldegree(g),0,-1,v=Z*v+polcoef(g,k)*yvector);
+  check(v[e+1..n]==vector(e)~);
+  my(root=Polrev(Vec(v[1..e]),x)/h);
+  check(Mod(root^2-Q,P)==0);
+  [1,root];
+};
 replay() = {
   my(P=x^3-28*x^2+54, N=895, m=29, D=deriv(P), beta=Mod((x^2-x+3)/15,P));
   check(poldisc(P)==4662900 && poldisc(P)==15^2*nfdisc(P));
@@ -61,6 +93,15 @@ replay() = {
   my(C=lift(D*beta));
   check(denominator(C,1)==1 && C==51*x^2-22*x-90);
   check(lift(Mod(subst(C,x,m),N)/subst(D,x,m))==472);
+  my(root=power_square_root(P,8*x^2+2*x-12)[2], gamma=lift(beta)+x+1);
+  check(root==gamma || root==-gamma);
+  C=lift(Mod(D*root,P));
+  check(denominator(C,1)==1);
+  my(value=Mod(subst(C,x,m),N)/subst(D,x,m));
+  check(value==502 || value==-502);
+  check(value^2==509 && gcd(lift(value),N)==1);
+  check(power_square_root(P,2)==[0] && power_square_root(P,0)==[1,0]);
+  check(power_square_root(P,(x+1)^2/49)[1]==1);
   P=x^3-2*x^2+2;
   check(poldisc(P)==-44 && gcd(poldisc(P),11)==11 && gcd(subst(deriv(P),x,3),11)==1);
 };
@@ -69,7 +110,7 @@ iferr(replay(), err, print(err); quit(1));
     result = subprocess.run([os.environ.get("GP", "gp"), "-fq"], input=script,
                             text=True, capture_output=True, timeout=15, check=True)
     assert not result.stderr, result.stderr
-    print(f"Verified common-root repair on {len(inputs)} inputs and four exact fixtures")
+    print(f"Verified common-root repair on {len(inputs)} inputs and exact square extraction fixtures")
 
 
 if __name__ == "__main__":
