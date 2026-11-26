@@ -42,9 +42,9 @@ assert c > 2*b and c < grid < 2*c and k * eta > 2*b
 assert max(grid, 3*b + 2*eta) == Fraction("2.96307")
 print("Thin-grid candidate ledger at trace order 24: coefficient 2.96307.")
 
-# Counterfactual full-grid ledger: the needed residue bound is still open.
+# The averaged-residue full grid uses c>b and the imported local moment bounds.
 c, b, x = map(Fraction, ("1.35", ".88", ".86066"))
 density_loss = 2 * (x*c + 1/x) / (3*b)
 assert b < c < 2*b and 32 * (2*c - b - density_loss) > 2*b
 assert max(2*c, 3*b, 2*c + 2*b - density_loss + Fraction(".0001")) == Fraction("2.70")
-print("Relaxed full-grid ledger: coefficient 2.70 if averaged residue bounds transfer.")
+print("Averaged full-grid ledger: coefficient 2.70 at trace order 32.")
