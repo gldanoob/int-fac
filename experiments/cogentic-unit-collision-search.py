@@ -2,8 +2,10 @@
 
 import argparse
 import json
-from itertools import combinations
+from bisect import bisect_left
+from itertools import combinations, groupby
 from math import gcd
+from operator import itemgetter
 
 from sage.all import PolynomialRing, Zmod
 
@@ -26,44 +28,55 @@ def evaluate(poly, tree):
     return [int(value[0]) for value in residues]
 
 
-def indexed_residues(n, values):
-    indices = {}
-    for i, value in enumerate(values):
-        indices.setdefault(value % n, i)
-    return indices
+def sorted_residues(n, values):
+    ordered = sorted((value % n, i) for i, value in enumerate(values))
+    return [next(group) for _, group in groupby(ordered, key=itemgetter(0))]
 
 
 def local_collision(n, left, right):
     """Return a witnessed proper gcd from a nonidentical cross difference."""
     if n < 2:
         raise ValueError("require modulus N >= 2")
-    left = indexed_residues(n, left)
-    right = indexed_residues(n, right)
+    return sorted_local_collision(n, sorted_residues(n, left), sorted_residues(n, right))
+
+
+def sorted_local_collision(n, left, right):
+    """Compare sorted (residue, index) pairs with distinct residues on each side."""
+    if n < 2:
+        raise ValueError("require modulus N >= 2")
     if not left or not right:
         return None
 
     ring = PolynomialRing(Zmod(n), "X", implementation="NTL")
     x = ring.gen()
-    polynomial = product_tree([x-y for y in right])[-1][0]
-    tree = product_tree([x-a for a in left])
+    polynomial = product_tree([x-y for y, _ in right])[-1][0]
+    tree = product_tree([x-a for a, _ in left])
     values = evaluate(polynomial, tree)
     derivatives = evaluate(polynomial.derivative(), tree)
 
-    for (a, i), value, derivative in zip(left.items(), values, derivatives, strict=True):
-        exact = a in right
+    row, cursor = None, 0
+    for (a, i), value, derivative in zip(left, values, derivatives, strict=True):
+        while cursor < len(right) and right[cursor][0] < a:
+            cursor += 1
+        exact = cursor < len(right) and right[cursor][0] == a
         bucket = gcd(derivative if exact else value, n)
-        if bucket == 1:
+        if bucket != 1 and (row is None or i < row[1]):
+            row = a, i, bucket, exact
+    if row is None:
+        return None
+    a, i, bucket, exact = row
+    # Recover the first original match even when the product gcd is saturated.
+    hit = None
+    for b, j in right:
+        if a == b:
             continue
-        # Recover a pair even when the product gcd is saturated.
-        for b, j in right.items():
-            if a == b:
-                continue
-            divisor = gcd(a-b, n)
-            if 1 < divisor < n:
-                return dict(factor=divisor, left_index=i, right_index=j,
-                            left=a, right=b, bucket_gcd=bucket, exact_root=exact)
+        divisor = gcd(a-b, n)
+        if 1 < divisor < n and (hit is None or j < hit["right_index"]):
+            hit = dict(factor=divisor, left_index=i, right_index=j,
+                       left=a, right=b, bucket_gcd=bucket, exact_root=exact)
+    if hit is None:
         raise ArithmeticError("nonunit bucket contained no nonidentical local hit")
-    return None
+    return hit
 
 
 def square_alignment(n, left, right):
@@ -104,11 +117,13 @@ def search_residues(n, left, right):
     if n < 2:
         raise ValueError("require modulus N >= 2")
     signed_right = [signed for y in right for signed in (y, -y)]
-    right_indices = indexed_residues(n, signed_right)
+    right_indices = sorted_residues(n, signed_right)
+    right_values = [value for value, _ in right_indices]
     exact_alignment = None
     for i, x in enumerate(left):
-        if x % n in right_indices:
-            j, sign_bit = divmod(right_indices[x % n], 2)
+        k = bisect_left(right_values, x % n)
+        if k < len(right_values) and right_values[k] == x % n:
+            j, sign_bit = divmod(right_indices[k][1], 2)
             exact_alignment = dict(i=i, j=j, sign=1-2*sign_bit, x=x % n, y=right[j] % n)
             break
 
@@ -161,6 +176,10 @@ def replay():
     assert hit["factor"] == 7 and hit["right_index"] == 2 and hit["exact_root"]
     hit = local_collision(35, [1], [6, 8])
     assert hit["factor"] == 5 and hit["bucket_gcd"] == 35
+    hit = local_collision(35, [9, 1], [6, 2])
+    assert (hit["left_index"], hit["right_index"], hit["factor"]) == (0, 1, 7)
+    hit = local_collision(35, [1], [8, 6])
+    assert (hit["right_index"], hit["factor"]) == (0, 7)
     hit = local_collision(35, [2], [2, 7, 9])
     assert hit["factor"] == 5 and hit["bucket_gcd"] == 35 and hit["exact_root"]
     hit = local_collision(125, [1], [6, 26])
