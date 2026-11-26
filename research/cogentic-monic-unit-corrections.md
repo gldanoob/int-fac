@@ -36,6 +36,8 @@ Both squares are $16$ modulo $323$. Since the original elements reduce to the sa
 
 Suppose two orders admit compatible reductions to $R=\mathbb Z/N\mathbb Z$ and their dependency products $s_i$ have the same invertible reduction. Given base identities $r_i^2=u_i s_i$ with order units $u_i$, put $q=\rho_1(r_1)/\rho_2(r_2)$. For any selected subgroups of the two unit groups let $J$ be the product of their images in $R^\times$. The ratios of corrected roots obtained by multiplying the base roots by these units are exactly $qJ$. A common corrected value exists within this family if $qJ$ meets $\{z\in R^\times:z^2=1\}$. A proper gcd from the two roots exists exactly when this intersection contains an element other than $1$ and $-1$. Indeed the root in the denominator is invertible, so the difference gcd is $\gcd(z-1,N)$. If that gcd equals $1$, $(z-1)(z+1)=0$ in $R$ forces $z=-1$, and if it equals $N$ then $z=1$.
 
+Equivalently, alignment is possible exactly when $q^2\in J^2$. If one alignment $z$ is known, the full set of aligned ratios is $zJ[2]$, where $J[2]=\{j\in J:j^2=1\}$. This follows because the quotient of any two alignments belongs to $J$ and has square one. In particular, after a trivial alignment $z=\pm1$, the full unit search can split exactly when $J[2]$ itself contains a nontrivial root of unity. This criterion has no unit word length bound.
+
 For maximal orders with reduction maps and their full unit groups, this criterion covers every unit correction. The quotient of any alternate root by the corresponding base root has square an order unit. That quotient and its inverse are algebraic integers, so the quotient itself is a unit of the maximal order. The certificate at $323$ only requires the two specified power orders.
 
 An explicitly supplied modular square root $t$ of a correction ratio can also rescale the second root. With $q$ now the ratio of the two chosen root residues, $t^2=q^2$, so the proper gcd criterion becomes $q/t\notin\{1,-1\}$. Taking $t=\pm q$ supplies only a trivial gcd. The displayed certificate uses equal correction residues directly.
@@ -61,7 +63,7 @@ The existing relation replay uses PARI for number-field initialization, ideal co
 ```sh
 gp -fq <<'GP'
 read("experiments/cogentic-monic-unit-corrections.gp");
-print(monic_unit_search(323,5,[x^3+8*x^2-2,x^4-4*x^3+8*x^2-2],[-1,2]));
+print(monic_unit_search(323,5,[x^3+8*x^2-2,x^4-4*x^3+8*x^2-2],[-1,2])[4]);
 GP
 ```
 
@@ -74,3 +76,29 @@ GP
 | 323 | 1 | $17,19$ |
 
 The finite certificate establishes that the mixed-sign obstruction for this dependency can be removed while preserving a common modular value. The replay gives no bound for finding suitable dependencies, base corrections or a splitting unit word as $N$ grows.
+
+## Fixed holdout
+
+The holdout inputs, in order, are $187,209,247,299,391,437,10403$. The fixed parameters are manual cubic and quartic degrees, the existing grid $|a|\le64$, $1\le b\le64$, smoothness bound $151$ and cap of $1023$ nonzero signed parity dependencies. The unit search advances only if the nullity is one, the dependency is a singleton and the sign check yields no certificate. It uses base roots $1$ and $X+c$ for $-8\le c\le8$, the same mirrored-mark unit candidates and total absolute exponent at most eight. All seven cases share the Python harness's 15-second GP timeout. These inputs and limits were set before execution.
+
+```sh
+python3 -B - <<'PY'
+import runpy
+
+run_gp = runpy.run_path("experiments/cogentic-monic-pair.py")["run_gp"]
+run_gp("monic_unit_holdout", (187, 209, 247, 299, 391, 437, 10403),
+       "cogentic-monic-pair-squares.gp", "cogentic-monic-unit-corrections.gp")
+PY
+```
+
+| $N$ | Retained marks | Parity nullity | Dependencies tested | Unit search started | Splits |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 187 | 16 | 0 | 0 | 0 | 0 |
+| 209 | 16 | 0 | 0 | 0 | 0 |
+| 247 | 14 | 0 | 0 | 0 | 0 |
+| 299 | 1 | 0 | 0 | 0 | 0 |
+| 391 | 17 | 0 | 0 | 0 | 0 |
+| 437 | 2 | 0 | 0 | 0 | 0 |
+| 10403 | 2 | 0 | 0 | 0 | 0 |
+
+The first holdout run took about $0.76$ seconds wall time. Every retained parity matrix had full column rank. No base roots, unit candidates or unit words were tested, so this holdout measures the lack of dependencies at these parameters. It leaves the success rate of unit correction given a dependency unmeasured.
