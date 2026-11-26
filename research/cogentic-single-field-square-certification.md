@@ -73,10 +73,17 @@ $$U\ge\frac{2+\alpha}{3\delta b}+\frac{\delta h}{3},\qquad U\le(2h-1)b,\qquad C_
 
 Indeed, a value with logarithm $sV_*$ has Dickman loss $s/(3b)$ at cutoff $B$. The rational height contributes $1/\delta$ to $s$, and the algebraic height contributes at least $(1+\alpha)/\delta+\delta h b$. At the published parameters $\alpha\to5/9$, $\delta\to3/4$ and $b=19/20$. The private term is then $9/20$, so $b+\delta/(3\alpha)=7/5$, the coefficient of the search-state bound in (H.35). The original mean test uses a strict positive margin. Allowing equality only enlarges the parameter region in this comparison. [KeyBreak, Proposition G.13](https://crypto.sjtu.edu.cn/factoring.pdf#page=123) · [Leading search costs (H.35)](https://crypto.sjtu.edu.cn/factoring.pdf#page=142)
 
-The inequalities imply $h>1/2$. Applying arithmetic–geometric mean to the $\delta$ and $1/\delta$ terms gives
+The sharp infimum of these three scalar constraints is
+$$
+ C_{\mathrm{raw}}\ \ge\ \left(\frac{20+14\sqrt7}{3}\right)^{1/3}=2.6690337752\ldots .
+$$
+To see this, put $l=\delta/(3b)$. Feasibility requires $0<l<2$. For fixed $l,b,\alpha$, the objective increases with $h$, so the relaxation's minimizing $h$ has $U=(2h-1)b$ and $b(2-l)h=b+(2+\alpha)/(9lb^2)$. Substitution gives
+$$
+ C_{\mathrm{raw}}\ge b\left(\frac{2}{2-l}+\frac l\alpha\right)
+       +\frac{2(2+\alpha)}{9l(2-l)b^2}.
+$$
+Minimizing the right-hand side in $b>0$ and cubing leaves $\frac32(2+\alpha)(2+y/\alpha)^2/[l(2-l)^3]$, with $y=l(2-l)$.
 
-$$C_{\mathrm{raw}}\ge b+\frac{2}{3}\sqrt{\frac{(1/\alpha+h)(2+\alpha)}b}.$$
-
-If $h\ge37/50$, then the numerator under the square root is at least $3(1+37/50)$, since $(1/\alpha+37/50)(2+\alpha)$ decreases on $0<\alpha\le1$. Optimizing in $b$ gives $C_{\mathrm{raw}}\ge3(29/50)^{1/3}=2.5018652746\ldots$. If $1/2<h<37/50$, the lower bound on $U$ gives $U\ge2/(3\sqrt b)$, and $U\le(12/25)b$ forces $b\ge(25/18)^{2/3}$. In this case $(1/\alpha+h)(2+\alpha)\ge9/2$, so $C_{\mathrm{raw}}\ge b+\sqrt{2/b}$. This expression increases for $b\ge(25/18)^{2/3}$, yielding $(25/18)^{2/3}+\sqrt2(18/25)^{1/3}=2.5123673260\ldots$. Both endpoints exceed $5/2$. The first comparison is $27(29/50)>125/8$. For the second, $(25/18)^{2/3}>31/25$ by cubing, and $31/25+\sqrt{50/31}>5/2$ by squaring.
+For fixed $\alpha$ the sign of the derivative in $l$ is the sign of $y+4\alpha l-2\alpha$. It has exactly one zero below $1/2$, is positive on $[1/2,2)$, and is already positive at $l=2/5$ for every $0<\alpha\le1$. Thus the minimizing $l$ is interior and below $2/5$. The partial derivative in $\alpha$ has sign $2\alpha^2-(\alpha+4)y$. At that $l$, use $y=2\alpha(1-2l)$ and $l<2/5\le2/(\alpha+4)$ to see this sign is negative. The minimized expression therefore decreases up to $\alpha=1$. There $l=3-\sqrt7$ and substitution gives the displayed value. Equality is attained by the scalar relaxation allowing $\alpha=1$ and zero mean margin. The original descent may impose additional restrictions. The [symbolic replay](../experiments/keybreak-raw-point-budget.py) verifies the derivative identities, endpoint, and feasibility of the minimizing parameters.
 
 Thus this raw point budget stays above $2.443$ even with free recognition, linear algebra and square certification. An output-sensitive proposal law, shared or selectively avoided bottom searches, a different private shape construction, or a smaller Gaussian width would require a corresponding change to the relation analysis. The bound applies to the specified expression for charging raw proposals.
