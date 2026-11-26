@@ -74,3 +74,17 @@ All three are positive, and each polynomial equals $N$ at $m$. Each constant lie
 Two negative discriminants define the same quadratic field exactly when their absolute values have the same positive squarefree part. Suppose all three have the same squarefree part $d$. The middle absolute discriminant is $3\pmod4$, so $d$ is odd and greater than one. Since $d$ is odd, it divides $r$ and $r+2m-1$. It also divides $4r+4m-1$, so it divides both $2m-1$ and $4m-1$. Their combination $(4m-1)-2(2m-1)=1$ contradicts $d>1$.
 
 Keep slope zero and try slope $-1$ first, then $-2$ if the first discriminant product is an exact square. For a candidate slope $s$, compute `t = isqrt(abs(D0*Ds))` and keep the pair if `t*t != abs(D0*Ds)`. At most two integer square-root tests select two distinct imaginary fields. The implementation needs no squarefree-part computations. Input 88 takes the fallback and yields discriminants $-28$ and $-96$. The two factoring batches retain all their earlier choices. This argument guarantees admissibility and coefficient size. The relation span still depends on the input and the search limits.
+
+## Norm lower bound and the one-third scale
+
+Write $Q_s(a,b)=a^2+sab+(r-sm)b^2$ for the homogeneous norm at slope $s\in\{0,-1,-2\}$. Completing the square gives
+
+$$
+Q_s(a,b)=(a+sb/2)^2+(r-sm-s^2/4)b^2\ \ge\ rb^2.
+$$
+
+Indeed, $-sm-s^2/4$ is respectively $0$, $m-1/4$ and $2m-1$. This bound holds at every integer mark, including every primitive mark with $b\ne0$. Take the infinite nonsquare family $N=m^2+m+1$ for $m\ge2$. Here $\lfloor\sqrt N\rfloor=m$, and $r=m+1>\sqrt N$. The subfamily $m\equiv1\pmod6$, $m\ge7$ consists of odd composites divisible by three. On the whole family, each searched norm exceeds $\sqrt N$, independently of grid height. This is a constraint on the norm formula, including on inputs which other factoring methods can split directly.
+
+Set $W=(\log N)^{1/3}(\log\log N)^{2/3}$ and $V=(\log N)^{2/3}(\log\log N)^{1/3}$. With smoothness bound $B=\exp(\beta W)$ for fixed $\beta>0$, a $B$-smooth norm on this family has at least $\log N/(2\beta W)$ prime factors counted with multiplicity. For a squarefree band mark these factors must be distinct. The norm formula also precludes an $\exp(O(V))$ norm bound even if the grid is restricted to one mark. These conclusions follow from size alone.
+
+**Smoothness heuristic.** If each norm of size $X$ has the Dickman-model smoothness rate $\exp(-(1+o(1))u\log u)$ for $u=\log X/\log B$, then a height $H=\exp(O(W))$ gives a modeled per-mark rate $\exp(-(1/(3\beta)+o(1))V)$ on this family. Indeed, $\sqrt N<Q_s(a,b)\le(4m+3)H^2$ for $|a|,|b|\le H$ and $b\ne0$, so $\log X=(1/2+o(1))\log N$ uniformly. The $O(H^2)$ marks then give vanishing modeled expectation for even one smooth norm. This prediction uses no independence between the two fields or between marks. Its input is the unproved application of a random-integer smoothness model to the norm values. The exact size bound alone leaves the actual smooth counts and ranks open. [De Bruijn’s Dickman asymptotic](https://pure.tue.nl/ws/files/2416706/597496.pdf)
