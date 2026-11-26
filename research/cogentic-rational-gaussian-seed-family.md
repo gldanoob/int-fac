@@ -73,11 +73,13 @@ For a fixed \(N\), the number of ordered representations \(N=(2S^2)^2+(D^2)^2\) 
 
 is uniquely determined since \(S-10D=(300\ell^2-76k\ell)/5\ne0\) in the sector. A positive primitive pair is recovered uniquely from its slope. Hence the multiplicity is \(N^{o(1)}\), and there are at least \(X^{1/4-o(1)}\) distinct inputs at most \(X\) with four certified sign blocks. This count uses supplied parameters. The one-variable recognizer above does not recover an arbitrary primitive pair from \(N\) in polynomial bit time.
 
+The unsieved count can be sharpened to \(\Theta(X^{1/4})\). The integral octic \(625N\) has four distinct irreducible quadratic factors with negative discriminants, so it has nonzero discriminant and no real linear factor. Stewart and Xiao's Lemma 2.4 and their exponent (1.9) bound the total number of integer representations of nonessential values of absolute size at most \(625X\) by \(O_{\epsilon}(X^{1/7+\epsilon})\). For an essential value, all representations lie in a single orbit of the finite group of rational automorphisms of the form. Choose \(\epsilon<1/4-1/7\) and apply this bound to the \(\Theta(X^{1/4})\) primitive sector pairs with values below \(X\). Almost all of those pairs represent essential values and each such value has bounded multiplicity. The upper bound follows from the number of parameter pairs. [Stewart and Xiao, On the representation of integers by binary forms](https://arxiv.org/pdf/1605.03427)
+
 ## Many values with no small prime divisor
 
-There is a fixed \(\eta>0\) such that for all sufficiently large \(X\), at least
+There are fixed \(c_0,\eta>0\) such that for all sufficiently large \(X\), at least
 \[
- \gg \frac{X^{1/4}}{(\log X)^8}
+ c_0\frac{X^{1/4}}{(\log X)^8}
 \]
 distinct inputs \(N\le X\) from the primitive sector have every prime divisor greater than \(N^\eta\). Each of the four coprime sign blocks is comparable to \(N^{1/4}\), with fixed constants.
 
