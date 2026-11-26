@@ -3,7 +3,8 @@
 import argparse
 import json
 from collections import Counter
-from math import gcd, prod
+from fractions import Fraction
+from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
 from time import monotonic
@@ -13,11 +14,18 @@ HERE = Path(__file__).resolve().parent
 MIXED = run_path(str(HERE / "cogentic-monic-mixed-grid.py"))
 GRID, PROBES, SQUARES = (MIXED[name] for name in ("GRID", "PROBES", "SQUARES"))
 COMPLETE = MIXED["DRIVER"]["complete_basis"]
+QUADRATIC = run_path(str(HERE / "cogentic-quadratic-square-kernel.py"))
 
 
 def scheduled_fields(n):
     m, f, g = GRID["CHECK_PAIR"](n, MIXED["SCHEDULED_DEGREE"](n))
     return m, (f, g, (g[0]-4*m, g[1]+4, *g[2:]))
+
+
+def centered_fields(n):
+    build = run_path(str(HERE / "cogentic-selected-polynomial-recenter.py"))["centered_pair"]
+    slopes, constants, _ = build(n)
+    return isqrt(n), tuple((b, a, 1) for a, b in zip(slopes, constants, strict=True))
 
 
 def parity_space(n, m, fields, height):
@@ -41,6 +49,38 @@ def parity_space(n, m, fields, height):
         blocks.append((offset, points))
         offset += len(points)+1
     return blocks, basis, sizes
+
+
+def quadratic_space(n, m, fields, height):
+    points = [(a, b) for a in range(-height, height+1) for b in range(1, height+1)
+              if gcd(a, b) == gcd(a-b*m, n) == 1]
+    blocks, incidence, local_masks = [], [], []
+    for i, (constant, linear, _) in enumerate(fields):
+        offset = i*(len(points)+1)
+        blocks.append((offset, points))
+        d = linear**2-4*constant
+        elements = [(a+Fraction(b*linear, 2), Fraction(-b, 2)) for a, b in points]
+        for mask in QUADRATIC["square_masks"](d, [*elements, (-1, 0)]):
+            incidence.append(mask)
+            local_masks.append(mask << offset)
+    return blocks, GRID["eliminate"](incidence, local_masks), [len(points)]*len(fields)
+
+
+def quadratic_numerator(field, value):
+    constant, linear, _ = field
+    d = linear**2-4*constant
+    radical = Fraction(value[1], 2)
+    element = (value[0]-linear*radical, radical)
+    root = QUADRATIC["square_root"](d, element)
+    if root is None:
+        return None
+    if QUADRATIC["multiply"](d, root, root) != element:
+        raise ArithmeticError("invalid quadratic square root")
+    x, y = root
+    # Multiplication by P'(alpha) = sqrt(d) clears the power-basis denominators.
+    cleared = (d*y+linear*x, 2*x)
+    assert all(c.denominator == 1 for c in cleared)
+    return [int(c) for c in cleared]
 
 
 def probe_rounds(fields, blocks):
@@ -75,7 +115,7 @@ def probe_rounds(fields, blocks):
     return restrict
 
 
-def exact_query(n, m, fields, derivatives, blocks, word):
+def exact_query(n, m, fields, derivatives, blocks, word, *, quadratics=False):
     counts, signs, supports, residues = Counter(), [], [], []
     for field, derivative, (offset, points) in zip(fields, derivatives, blocks, strict=True):
         mask = word >> offset
@@ -88,7 +128,7 @@ def exact_query(n, m, fields, derivatives, blocks, word):
         value = [sign]+[0]*(len(field)-2)
         for a, b in selected:
             value = SQUARES["multiply_mark"](field, value, a, b)
-        root = SQUARES["square_numerator"](field, value)
+        root = quadratic_numerator(field, value) if quadratics else SQUARES["square_numerator"](field, value)
         if root is None:
             return None
         residue = SQUARES["evaluate"](root, m)*pow(derivative, -1, n) % n
@@ -107,30 +147,41 @@ def exact_query(n, m, fields, derivatives, blocks, word):
 
 
 def search(n, m, fields, height, *, query_cap=None, stop_at_split=True):
-    """Decide one connected grid over at least two monic Eisenstein fields."""
+    """Decide a connected grid of quadratic fields or monic Eisenstein fields."""
     start = monotonic()
     fields = tuple(tuple(field) for field in fields)
     if n <= 1 or n % 2 == 0 or height < 1 or len(fields) < 2:
         raise ValueError("require odd N > 1, positive height and at least two fields")
+    quadratics = all(len(field) == 3 for field in fields)
     for field in fields:
-        if (len(field) < 3 or field[-1] != 1 or field[0] % 4 != 2
-                or any(c % 2 for c in field[:-1]) or SQUARES["evaluate"](field, m) % n):
-            raise ValueError("require monic Eisenstein polynomials vanishing at the shared root")
+        if len(field) < 3 or field[-1] != 1 or SQUARES["evaluate"](field, m) % n:
+            raise ValueError("require monic polynomials of degree at least two with a shared root")
+        if not quadratics and (field[0] % 4 != 2 or any(c % 2 for c in field[:-1])):
+            raise ValueError("higher-degree libraries require Eisenstein polynomials at two")
     derivatives = [SQUARES["evaluate"]([j*c for j, c in enumerate(field) if j], m)
                    for field in fields]
     gcds = [gcd(derivative, n) for derivative in derivatives]
     if any(value != 1 for value in gcds):
-        return dict(n=n, m=m, height=height, status="nonunit-derivative",
-                    derivative_gcds=gcds, certificate=None)
+        divisor = next((g for g in gcds if 1 < g < n), None)
+        return dict(n=n, m=m, height=height, status="derivative-split" if divisor else "nonunit-derivative",
+                    derivative_gcds=gcds, divisor=divisor, certificate=None)
     if query_cap is not None and query_cap < 0:
         raise ValueError("the exact query cap must be nonnegative")
-    blocks, ideal, sizes = parity_space(n, m, fields, height)
+    if quadratics:
+        blocks, initial, sizes = quadratic_space(n, m, fields, height)
+        def restrict(basis, _):
+            return basis, {"last_prime": 0}
+    else:
+        blocks, initial, sizes = parity_space(n, m, fields, height)
+        restrict = probe_rounds(fields, blocks)
     certificate = None
 
     def query(word):
         nonlocal certificate
-        witness = exact_query(n, m, fields, derivatives, blocks, word)
+        witness = exact_query(n, m, fields, derivatives, blocks, word, quadratics=quadratics)
         if witness is None:
+            if quadratics:
+                raise ArithmeticError("nonsquare mask in the quadratic kernel")
             return None
         product, normalization, ratio, signs, supports, residues = witness
         divisor = gcd(product-normalization, n)
@@ -141,10 +192,12 @@ def search(n, m, fields, height, *, query_cap=None, stop_at_split=True):
         return product, normalization
 
     status, queries, basis, survivors, last_prime = COMPLETE(
-        ideal, probe_rounds(fields, blocks), query, query_cap, n if stop_at_split else None)
+        initial, restrict, query, query_cap, n if stop_at_split else None)
     if status == "complete":
         status = "complete-split" if certificate else "complete-no-split"
-    return dict(n=n, m=m, height=height, status=status, columns=sizes, ideal=len(ideal),
+    return dict(n=n, m=m, height=height, status=status, columns=sizes,
+                method="quadratic-descent" if quadratics else "ideal-parity-and-probes",
+                ideal=None if quadratics else len(initial),
                 surviving=len(survivors), square_basis=len(basis), tests=queries,
                 last_prime=last_prime, certificate=certificate, seconds=round(monotonic()-start, 4))
 
@@ -166,6 +219,15 @@ def fixtures():
     word = sum(1 << offset for offset, _ in blocks)
     _, normalization, ratio, _, _, _ = exact_query(79, 9, ((-2, 0, 1),)*4, (18,)*4, blocks, word)
     assert normalization == (3-2*9)**2 % 79 and ratio in (1, 78)
+    for n, expected_dimension, split in ((77, 5, True), (187, 2, False)):
+        m, fields = centered_fields(n)
+        result = search(n, m, fields, 12, stop_at_split=False)
+        assert result["method"] == "quadratic-descent" and result["last_prime"] == 0
+        assert result["square_basis"] == expected_dimension
+        assert result["status"] == ("complete-split" if split else "complete-no-split")
+        if split:
+            assert result["certificate"]["divisor"] in (7, 11)
+        print(f"{n}: quadratic square dimension {expected_dimension}, {result['status']}")
 
 
 def main():
@@ -174,11 +236,21 @@ def main():
     parser.add_argument("--height", type=int, default=20)
     parser.add_argument("--queries", type=int)
     parser.add_argument("--basis", action="store_true", help="certify a full basis even after a split")
+    parser.add_argument("--quadratic", action="store_true", help="use the two near-square fields and rational norm descent")
     args = parser.parse_args()
     if args.n is None:
         fixtures()
         return
-    m, fields = scheduled_fields(args.n)
+    if args.quadratic:
+        if args.n < 3 or args.n % 2 == 0:
+            parser.error("the centered quadratic grid requires an odd input of at least 3")
+        root = isqrt(args.n)
+        if root*root == args.n:
+            print(json.dumps(dict(n=args.n, status="perfect-square", divisor=root)))
+            return
+        m, fields = centered_fields(args.n)
+    else:
+        m, fields = scheduled_fields(args.n)
     print(json.dumps(search(args.n, m, fields, args.height, query_cap=args.queries,
                             stop_at_split=not args.basis)))
 

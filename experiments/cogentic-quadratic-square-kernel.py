@@ -96,8 +96,8 @@ def square_root(d, value):
     return None
 
 
-def square_kernel(d, elements):
-    """Return (original mask, exact root) pairs for a basis of square dependencies."""
+def square_masks(d, elements):
+    """Return original masks spanning all square dependencies."""
     d = Fraction(d)
     elements = [tuple(map(Fraction, value)) for value in elements]
     if not d or rational_sqrt(d) is not None or any(not any(value) for value in elements):
@@ -105,9 +105,15 @@ def square_kernel(d, elements):
     norm_words = rational_words(norm(d, value) for value in elements)
     norm_basis = GRID["eliminate"](norm_words, (1 << k for k in range(len(elements))))
     scalars = [descent(d, masked_product(d, elements, mask))[0] for mask in norm_basis]
-    masks = GRID["eliminate"](rational_words([*scalars, d]), [*norm_basis, 0])
+    return GRID["eliminate"](rational_words([*scalars, d]), [*norm_basis, 0])
+
+
+def square_kernel(d, elements):
+    """Return (original mask, exact root) pairs for a basis of square dependencies."""
+    d = Fraction(d)
+    elements = [tuple(map(Fraction, value)) for value in elements]
     result = []
-    for mask in masks:
+    for mask in square_masks(d, elements):
         product = masked_product(d, elements, mask)
         root = square_root(d, product)
         assert root is not None and multiply(d, root, root) == product
