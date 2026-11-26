@@ -79,11 +79,12 @@ def sorted_local_collision(n, left, right):
     return hit
 
 
-def tuple_collision(n, left, right):
+def tuple_collision(n, left, right, *, prefer_split=False):
     """Find global tuple equality or a proper gcd of a single coordinate difference.
 
     A tuple match at any prime dividing n gives one of these outcomes. A gcd
     can come from a coordinate even when the two tuples have no common match.
+    Prefer a proper gcd over a global match when prefer_split is set.
     """
     n = index(n)
     if n < 2:
@@ -97,17 +98,21 @@ def tuple_collision(n, left, right):
         raise ValueError("require tuples of a common length")
 
     ordered = sorted((row, j) for j, row in enumerate(right))
+    match = None
     for i, row in enumerate(left):
         k = bisect_left(ordered, (row, -1))
         if k < len(ordered) and ordered[k][0] == row:
-            return dict(status="global-equal", left_index=i, right_index=ordered[k][1])
+            match = dict(status="global-equal", left_index=i, right_index=ordered[k][1])
+            if not prefer_split:
+                return match
+            break
 
     for coordinate in range(width):
         hit = local_collision(n, (row[coordinate] for row in left),
                               (row[coordinate] for row in right))
         if hit is not None:
             return dict(hit, status="local-split", coordinate=coordinate)
-    return None
+    return match
 
 
 def square_alignment(n, left, right):
@@ -258,6 +263,9 @@ def replay_tuples():
     hit = tuple_collision(125, [(0, 0)], [(0, 25)])
     assert (hit["factor"], hit["coordinate"], hit["left_index"], hit["right_index"]) == (25, 1, 0, 0)
     assert tuple_collision(35, [(0, 0)], [(5, 1)])["factor"] == 5
+    left, right = [(0, 0), (0, 1)], [(0, 0), (5, 1)]
+    assert tuple_collision(35, left, right)["status"] == "global-equal"
+    assert tuple_collision(35, left, right, prefer_split=True)["factor"] == 5
     assert tuple_collision(35, [()], [()])["status"] == "global-equal"
     try:
         tuple_collision(35, [(0,)], [(0, 0)])

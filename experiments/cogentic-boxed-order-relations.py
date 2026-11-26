@@ -20,8 +20,12 @@ def word_value(n, bases, word):
 
 
 def rectangles(bounds):
-    """Split the middle exponent into digits so each side has O(sqrt(volume)) words."""
-    widths = [2*b + 1 for b in bounds]
+    return interval_rectangles([range(-bound, bound+1) for bound in bounds])
+
+
+def interval_rectangles(ranges):
+    """Split nonempty unit-step ranges into lists of O(sqrt(volume)) words."""
+    widths = [len(entries) for entries in ranges]
     target = 1 + isqrt(prod(widths) - 1)
     prefix = 1
     for pivot, width in enumerate(widths):
@@ -30,11 +34,10 @@ def rectangles(bounds):
         prefix *= width
     radix = (target + prefix - 1) // prefix
     full, extra = divmod(width, radix)
-    b = bounds[pivot]
-    ranges = [range(-bound, bound+1) for bound in bounds]
+    first = ranges[pivot].start
     for start, stop, size in [(0, full, radix), (full, full+1, extra)]:
         if size:
-            left = ranges[:pivot] + [range(-b, -b+size)] + [(0,)] * (len(bounds)-pivot-1)
+            left = ranges[:pivot] + [range(first, first+size)] + [(0,)] * (len(ranges)-pivot-1)
             right = [(0,)] * pivot + [range(start*radix, stop*radix, radix)] + ranges[pivot+1:]
             yield left, right
 

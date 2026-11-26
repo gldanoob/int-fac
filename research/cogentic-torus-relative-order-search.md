@@ -41,3 +41,11 @@ Take \(D=3\), \(g=2+\sqrt3\) and \(h=(a+\sqrt3)/(a-\sqrt3)\) with the public int
 | \(2557,5113\) | 17 | 2556 | \(709,1579\) |
 
 The first joint image is \(C_{131}\times C_{131}\). The second has a nontrivial two-primary kernel on each projection. The search with \(U=\lfloor\sqrt N\rfloor+1\) reaches the relative stage in both rows and splits there. In the second row \((hg^{-709})^{213}\) is \(+1\) at 2557 and \(-1\) at 5113, since \(1579-709=870\) and \(2556/\gcd(2556,870)=426\). Its trace is \(13053487\) modulo \(13073941\), giving a class-five parameter. The relative relation already gives a factor before taking this additional power. An independent check with the monic collision backend also tested 170 small searches, including moduli with repeated primes and a complete common-kernel outcome.
+
+Run the public-input search with SageMath available in Python.
+
+```sh
+python3 -B experiments/cogentic-torus-relative-order-search.py 13073941 --bases 3 17
+```
+
+The arguments to `--bases` are the public parameters in \((a+\sqrt3)/(a-\sqrt3)\), with \(a=3\) giving \(g\). The command reports a factor or the search status in JSON, together with the box cap, number of prefixes tested, and total list entries built on this input. `--bound` sets the box cap. A common-kernel outcome lists all relative orders and the relations as pairs of one-based base indices and exponents. Omit \(N\) for the self-check. [Implementation](../experiments/cogentic-torus-relative-order-search.py)
