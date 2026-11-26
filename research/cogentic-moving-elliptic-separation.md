@@ -2,6 +2,8 @@
 
 Under Dirichlet RH, an odd input $N$ has a deterministic polynomial-bit-time menu with the following guarantee. For every pair of distinct prime divisors $p,q$, either menu construction finds a proper divisor or some curve in the menu has full rational two-torsion, one explicit rational point, and stacked Kummer rank three on those three generators at $p,q$. The menu does not need the primes or their characters. This supplies the separation condition in the elliptic saturation splitter. The odd local exponent still needs to be covered on a separating curve. [Fixed-curve saturation](cogentic-elliptic-local-halves.md) · [Odd-class norm construction](cogentic-cm-torus.md#a-uniform-discriminant-menu-for-smooth-p1-or-p-1)
 
+The same norm-lift conditions allow a single fixed marking at the reciprocal coordinate $c=1/b$. A conic gives many rational choices of the same marking while keeping the absolute local traces fixed. [Reciprocal marking and twist family](cogentic-fixed-marking-twists.md)
+
 ## Four choices of a marked coordinate
 
 Take four distinct integers $x_0,\ldots,x_3$. For each marked index $m$ set
