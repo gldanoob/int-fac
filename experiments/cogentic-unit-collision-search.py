@@ -99,6 +99,36 @@ def progression(n, first, multiplier, length):
     return values
 
 
+def search_residues(n, left, right):
+    """Report signed local gcds, full square agreement and exact signed equality."""
+    if n < 2:
+        raise ValueError("require modulus N >= 2")
+    signed_right = [signed for y in right for signed in (y, -y)]
+    right_indices = indexed_residues(n, signed_right)
+    exact_alignment = None
+    for i, x in enumerate(left):
+        if x % n in right_indices:
+            j, sign_bit = divmod(right_indices[x % n], 2)
+            exact_alignment = dict(i=i, j=j, sign=1-2*sign_bit, x=x % n, y=right[j] % n)
+            break
+
+    aligned, aligned_split = square_alignment(n, left, right)
+    hit = local_collision(n, left, signed_right)
+    result = dict(global_alignment=aligned, global_split=aligned_split, exact_alignment=exact_alignment)
+    if hit is None:
+        if aligned_split is not None:
+            raise ArithmeticError("globally aligned split missing from local search")
+        return dict(result, status="box-exhausted")
+    i = hit["left_index"]
+    j, sign_bit = divmod(hit["right_index"], 2)
+    x, y = left[i] % n, right[j] % n
+    divisor = hit["factor"]
+    return dict(result, status="local-split", factor=divisor, cofactor=n//divisor,
+                witness=dict(i=i, j=j, sign=1-2*sign_bit, x=x, y=y,
+                             globally_aligned=(x*x-y*y) % n == 0,
+                             bucket_gcd=hit["bucket_gcd"], exact_root=hit["exact_root"]))
+
+
 def search(n, t, left_length, right_length):
     if n < 2 or min(left_length, right_length) < 0:
         raise ValueError("require N >= 2 and nonnegative progression lengths")
@@ -121,21 +151,7 @@ def search(n, t, left_length, right_length):
     inverse_two = pow(2, -1, n)
     left = progression(n, (left_base+1)*inverse_two % n, left_base, left_length)
     right = progression(n, (right_base-1)*inverse_two % n, right_base, right_length)
-    aligned, aligned_split = square_alignment(n, left, right)
-    hit = local_collision(n, left, (signed for y in right for signed in (y, -y)))
-    result.update(global_alignment=aligned, global_split=aligned_split)
-    if hit is None:
-        if aligned_split is not None:
-            raise ArithmeticError("globally aligned split missing from local search")
-        return dict(result, status="box-exhausted")
-    i = hit["left_index"]
-    j, sign_bit = divmod(hit["right_index"], 2)
-    x, y = left[i], right[j]
-    divisor = hit["factor"]
-    return dict(result, status="local-split", factor=divisor, cofactor=n//divisor,
-                witness=dict(i=i, j=j, sign=1-2*sign_bit, x=x, y=y,
-                             globally_aligned=(x*x-y*y) % n == 0,
-                             bucket_gcd=hit["bucket_gcd"], exact_root=hit["exact_root"]))
+    return dict(result, **search_residues(n, left, right))
 
 
 def replay():
@@ -153,6 +169,9 @@ def replay():
     assert local_collision(p*q, [1], [1+p])["factor"] == p
     assert square_alignment(15, [2], [7])[1]["factor"] == 5
     assert square_alignment(25, [5], [5])[1]["factor"] == 5
+    shared = search_residues(35, [2], [33, 2, 9])
+    assert shared["exact_alignment"] == dict(i=0, j=0, sign=-1, x=2, y=33)
+    assert shared["factor"] == 7 and shared["global_split"] is None
 
     checked = 0
     for n in (2, 4, 6, 8, 9):
