@@ -46,4 +46,28 @@ The lift coefficients are bounded by $2m$, so a defining polynomial of degree $e
 
 For a promised parameter pair, the recurrence, lift and certificate take polynomial bit time. The parameters can also be found from $N$ alone. Enumerate $j\equiv1\pmod3$ through the bit length of $N$, which suffices because the recurrence increases $U$ by at least a factor eight every three steps. For each $j$, the expression $U^2+C$ strictly increases with odd $m\ge3$, since the initial values and positive recurrence coefficients increase with $m$. Binary search through $m\le\lfloor\sqrt N\rfloor$ therefore finds a hit if one exists. Intermediate bit lengths are $O((\log N)^2)$ for these search limits. A hit gives the gcd certificate above.
 
-One can avoid all primes through $j^2$ on an infinite subfamily. For each odd prime $p\le j^2$, impose $Y\equiv2\pmod p$. Then $C=V=0$ and $U=1$ in the residue recurrence, so $N\equiv1\pmod p$. The coprime congruences on $m$ and its odd parity have modulus of bit length $O(j^2\log j)$. Choosing the constant in $\log m\asymp j^2\log j$ large enough fits that modulus in the chosen size interval. This roughness estimate does not reach trial division through $\exp(cW)$ for any fixed $c>0$. The theorem gives productive examples at the growing degree and mark height, while uniform productivity and survival of that larger trial filter remain open.
+## Surviving the one-third trial-division bound
+
+Fix an integer $\kappa\ge1$. For all sufficiently large $j\equiv1\pmod3$, there is an odd admissible $m$ in
+\[
+[M,2M],\qquad M=j^{\kappa j^2},
+\]
+such that $N$ has no prime factor through $Z=j^{\kappa j/8192}$. Here $L=(2\kappa+o(1))j^3\log j$, so $W=((18\kappa)^{1/3}+o(1))j\log j$. Thus $Z\ge\exp(\kappa^{2/3}W/32768)$ for all sufficiently large $j$. Taking $\kappa$ large enough gives an infinite subfamily that survives any **fixed** threshold $\exp(cW)$. The degree remains $\Theta((L/\log L)^{1/3})$ with a constant depending on $\kappa$.
+
+For each odd prime $p\le j^2$, impose $Y\equiv2\pmod p$. Then $C=V=0$ and $U=1$ in the residue recurrence, so $N\equiv1\pmod p$. Also require $m$ odd. The resulting CRT class has modulus $D=\prod_{p\le j^2}p$ and meets $[M,2M]$ on a progression of $K\ge\exp((\kappa-o(1))j^2\log j)$ consecutive indices. To bound $D$, the primes between successive powers of two divide the corresponding central binomial coefficient. This gives $\sum_{p\le x}\log p\le4x\log 2<3x$ by summing dyadically up to the next power of two.
+
+The recurrence makes $N$ a polynomial in $Y$ of degree $2(j+1)\le4j$ with coefficients in $\mathbb Z[1/2]$. It is nonzero modulo each odd prime because its value at $Y=2$ is one. Since $D$ is a unit at $p>j^2$, the progression index has at most $h_p\le4j$ forbidden residues modulo $p$. Put $e_p=h_p/p$, which is at most $1/2$ for large $j$.
+
+Group the primes in $(j^2,Z]$ into bands $(\sqrt{x_i},x_i]$ with $x_i=Z^{2^{-i}}$, truncating the final band at $j^2$. The number $B$ of bands is $O(\log j)$ and $\sum_i\log x_i\le2\log Z$. The prime bound above gives $\pi(t)\le\sqrt t+6t/\log t\le7t/\log t$ for $t\ge2$. Partial summation consequently gives $\sum_{\sqrt{x_i}<p\le x_i}1/p\le11$ on these bands. Thus $\sum_{p\text{ in band }i}e_p\le44j$.
+
+For a progression index let $I_i$ be the indicator of avoiding the forbidden residues in band $i$. Take the even Bonferroni truncation $U_i$ through order $J=1024j$ and the odd truncation $L_i$ through order $J-1$. Then $0\le I_i\le U_i$ and $L_i\le I_i$. Telescoping products gives the pointwise lower bound
+\[
+\prod_i I_i\ \ge\ \prod_i U_i-\sum_i(U_i-L_i)\prod_{k\ne i}U_k.
+\]
+First compute its density in the product law of independent uniform residues. For each band, $\mathbb E U_i\ge\prod_p(1-e_p)\ge\exp(-88j)$, while $\mathbb E(U_i-L_i)$ is the sum of the order-$J$ subset products of the $e_p$. This is at most $(44j)^J/J!\le8^{-J}$. The block gap divided by $\mathbb E U_i$ is exponentially small in $j$. The product-law lower bound is therefore at least $\tfrac12\prod_{j^2<p\le Z}(1-e_p)\ge\tfrac12\exp(-88jB)$ for large $j$.
+
+For each subset term in this expansion, CRT gives its expected count in the actual interval of $K$ indices with error at most the product of the $h_p$ for the selected primes. Each block contributes at most $(J+1)(4j x_i)^J$ to the sum of absolute rounding errors, since at most $J$ primes occur there. Accounting for the $B+1$ products, the logarithm of the total error is at most
+\[
+2J\log Z+O(j\log^2 j)=(\kappa/4+o(1))j^2\log j.
+\]
+The main lower bound is $\tfrac12K\exp(-88jB)=\exp((\kappa-o(1))j^2\log j)$ and exceeds this error. Hence some progression index avoids every prime through $Z$. The proof of existence still uses a selected Pell family. It supplies no claim that general inputs or the earlier scheduled monic pair admit a productive square relation.
