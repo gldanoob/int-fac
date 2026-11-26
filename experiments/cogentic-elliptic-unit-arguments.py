@@ -17,6 +17,8 @@ SATURATION = run_path(str(HERE / "cogentic-elliptic-local-saturation.py"))
 repair = REPAIR["repair"]
 primes_through = SATURATION["primes_through"]
 smooth_exponent = SATURATION["smooth_exponent"]
+minimize_annihilator = SATURATION["minimize_annihilator"]
+checked_gcd = SATURATION["checked_gcd"]
 MARKS = REPAIR["MARKS"]
 C0 = prod(MARKS[0]-root for root in MARKS[1:])
 SEEDS = tuple(map(Fraction, (3, 4, 5, 7, 15, "3/2")))
@@ -102,24 +104,26 @@ def norm_torus():
 
 
 def residual_split(n, unit, exponent, bound):
-    """Split if two local two-heights differ and an odd residual is bounded.
+    """Test differences in local odd residual orders and two-primary heights.
 
     Raising to 2^h removes every local two-part. In the algebra X^2 = X,
     evaluation at 0 and 1 sends the pair below to (value, inverse(value)),
     so the split norm-one torus has exactly the residual order of value.
-    A shared annihilator supplies an odd multiplier at every prime, and
-    odd multipliers preserve the different heights used by multiplier_split.
+    Stripping a shared annihilator separates unequal projected local orders.
+    The remaining odd multiplier preserves the heights used by multiplier_split.
     """
     value = pow(unit, exponent << n.bit_length(), n)
     split_unit = (value, (pow(value, -1, n)-value) % n)
     torus = norm_torus()
     try:
         relation = torus["bounded_multiple"](n, 0, split_unit, bound)
-    except torus["FactorFound"] as found:
+        if relation is None:
+            return None
+        odd_relation = relation // (relation & -relation)
+        odd_relation = minimize_annihilator(
+            odd_relation, lambda e: checked_gcd(pow(value, e, n)-1, n) == n)
+    except (torus["FactorFound"], SATURATION["FactorFound"]) as found:
         return found.args[0]
-    if relation is None:
-        return None
-    odd_relation = relation // (relation & -relation)
     return multiplier_split(n, unit, exponent * odd_relation)
 
 
@@ -327,6 +331,20 @@ def replay_stage_two():
         assert split["status"] == "factor" and split["source"] == "residual order"
         assert split["unit"] == chart["unit"] and split["factor"] == expected_factor
     print("Stage one misses 1537 and 3683. Stage two splits them by a local gcd and a shared odd multiple.")
+
+    n = 5461
+    options["smooth_bound"] = 1
+    unit = search(n, **options)["unit"]
+    assert unit == 736
+    projected = pow(unit, 1 << n.bit_length(), n)
+    split_unit = (projected, (pow(projected, -1, n)-projected) % n)
+    multiple = norm_torus()["bounded_multiple"](n, 0, split_unit, 50)
+    assert multiple == 63 and pow(projected, multiple, n) == 1
+    assert multiplier_split(n, unit, multiple) is None
+    assert gcd(pow(projected, 21, n)-1, n) == 43
+    split = search(n, residual_order=50, **options)
+    assert (split["source"], split["unit"], split["factor"]) == ("residual order", unit, 43)
+    print("Stripping 63 to 21 splits 5461 on a unit with equal two-primary heights.")
 
 
 if __name__ == "__main__":

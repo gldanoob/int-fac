@@ -38,6 +38,31 @@ def smooth_exponent(modulus, bound):
     return powers[0] if powers else 1
 
 
+def minimize_annihilator(annihilator, is_identity):
+    """Strip prime factors from a verified global annihilator.
+
+    The predicate tests global identity and can raise on a one-sided identity.
+    If every test passes or fails at all primes together, the remaining
+    exponent is the exact global order.
+    """
+    if annihilator < 1:
+        raise ValueError("require a positive annihilator")
+    factors = []
+    remaining, candidate = annihilator, 2
+    while candidate*candidate <= remaining:
+        if remaining % candidate == 0:
+            factors.append(candidate)
+            while remaining % candidate == 0:
+                remaining //= candidate
+        candidate += 1
+    if remaining > 1:
+        factors.append(remaining)
+    for prime in factors:
+        while annihilator % prime == 0 and is_identity(annihilator // prime):
+            annihilator //= prime
+    return annihilator
+
+
 def multiple(n, point, modulus):
     result = None
     for bit in bin(n)[2:]:
@@ -126,6 +151,8 @@ def finite_relations(prime, exponent, generators=GENERATORS):
 
 
 def replay():
+    assert minimize_annihilator(1, lambda _: False) == 1
+    assert minimize_annihilator(3**4 * 5**2 * 11, lambda e: e % 45 == 0) == 45
     exponent = smooth_exponent(89*199, 5)
     assert exponent == 922640625
     assert finite_relations(89, exponent, AXES) == ((2, 2, 2), {(0, 0, 0), (1, 1, 0)})

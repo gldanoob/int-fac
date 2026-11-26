@@ -55,3 +55,15 @@ On $3683=29\cdot127$ the smooth multiplier alone misses. The second stage obtain
 ```sh
 python3 -B experiments/cogentic-elliptic-unit-arguments.py 3683 --degree 7 --height-bits 10 --count 1 --smooth-bound 3 --residual-order 7
 ```
+
+### Separating unequal odd residuals after a global hit
+
+The shared exponent can already split an input whose two-primary heights agree. Start with the odd part $m$ of the shared exponent. For each prime $\ell$ dividing $m$, test $g=\gcd(u^{m/\ell}-1,N)$ while $\ell$ divides the current exponent. A proper $g$ splits $N$. When $g=N$, replace $m$ by $m/\ell$ and continue. When $g=1$, leave the current $\ell$-valuation unchanged. The current exponent always annihilates $u$ globally, and after exhausting the primes it is the exact global order if no proper gcd occurred.
+
+If the projected orders differ at two primes, take an $\ell$ for which their valuations differ. On reaching the maximum local $\ell$-valuation, one more division gives the identity at the prime with smaller valuation and fails at a prime with maximal valuation. The resulting gcd is proper. For repeated prime factors, an earlier test that reaches only part of a prime power also gives a proper gcd. If no gcd splits, apply the two-height test using the minimized odd exponent. The bounded search supplies an exponent at most $D+2\lceil\sqrt D\rceil$, so trial division and at most $O(\log D)$ modular powers fit the same soft square-root bound.
+
+For $5461=43\cdot127$, the first chart gives $h=736$. With $U=1$ and $D=50$ the search recovers the shared exponent $63$, and the two-height test using $63$ misses on this chart. The projected orders are $21$ and $63$. Testing the exponent $63/3=21$ gives the proper gcd $43$.
+
+```sh
+python3 -B experiments/cogentic-elliptic-unit-arguments.py 5461 --degree 7 --height-bits 10 --count 1 --smooth-bound 1 --residual-order 50
+```
