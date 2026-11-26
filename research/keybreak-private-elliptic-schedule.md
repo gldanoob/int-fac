@@ -38,6 +38,32 @@ For elimination, take exact binary square multiplication with exponent strictly 
 
 The [arithmetic replay](../experiments/keybreak-private-elliptic-schedule.py) checks these costs with rational comparisons, including the square-root inequalities. It exercises the finite high-to-low transition, all local top cutoffs and private allocations at two symbolic input sizes. The conditional epoch success, verified output, and backup splitting argument follow the tiered schedule with the separate private recognition input.
 
+## A 2.157 retune with public elliptic recognition
+
+If the [public elliptic recognition transfer](keybreak-public-elliptic-recognition.md) supplies the required successful public trees after exceptional primes are excluded, use the coefficient 1.4143 in both the private and public tests. The following rational parameters keep the same integer rules, grid, private floor, factor cap, probe accounting and exact matrix implementation.
+
+| $\delta$ | $\kappa$ | $\beta$ | $\alpha$ | $\gamma$ | $h_T$ | $\lambda_H$ | $\lambda_L$ |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1.3609 | .8127 | .66025 | .5001 | .7007 | .64094 | 2.03 | 2.1718 |
+
+Take $\lambda_T(a)=1+.78a$ and $h_P=h_A=.77644>1.4143/\sqrt{3\kappa\delta}$. The actual Gaussian height is $.640899106\ldots$, the low fixed-point margin is $.000162750$, and the bottom mean margin is $.001168111\ldots$. The private factor-count ratio is $1.636259604\ldots<2$. The [replay](../experiments/keybreak-public-elliptic-schedule.py) checks these strict inequalities and the rounded geometry at both symbolic input sizes.
+
+| Work | Single-input coefficient, rounded up |
+|---|---:|
+| Private gates | 2.156508 |
+| Top raw trials and rational tests | 1.978430 |
+| Top algebraic tests | 2.117756 |
+| High raw trials and rational tests | 2.115770 |
+| High algebraic tests | 2.023881 |
+| Low raw trials and rational tests | 2.156531 |
+| Low algebraic tests | 1.883936 |
+| Character probe setup | .907267 |
+| Retained character evaluations | 1.805801 |
+| Exact binary elimination at $2.4b$ | 2.156483 |
+| Exact product, root and verification | 1.797069 |
+
+The elliptic public tests give room to retune the factor base and degree. The private gates, low raw search and binary elimination are within $.00005$ of the largest term. Varying the top ratio or separating the top and internal slopes has little effect in this range. The top mean still needs the top slope at least $1/2$ at leading order and the terminal low bound below is independent of the internal slope.
+
 ## Limits of retuning the preceding schedule
 
 With the original genus-two private coefficient the 2.250 schedule is already close to the continuous limit of its private gate and terminal per-request cost model. Put $x=\kappa\delta$, replace the private coefficient by its limiting lower value $h=2/\sqrt{3x}$, and write $P$ for the private cost excluding $b$. If $\tau(z)$ is the total weight in stages whose cutoff coordinate is at least $z$, then $\tau(z)\le(P-hz)_+$ wherever it might be positive. Hence

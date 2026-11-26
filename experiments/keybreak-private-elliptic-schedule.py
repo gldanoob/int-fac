@@ -6,10 +6,18 @@ from pathlib import Path
 from runpy import run_path
 
 
-def check_schedule():
-    delta, kappa, beta, alpha, gamma = map(F, "1.3032 .8786 .678 .5001 .7222".split())
-    top_slope, high_ratio, low_ratio, height = map(F, ".5005 2.15 2.2684 .70904".split())
-    h_private, h_algebraic, slack, target = map(F, ".7631 1.07918 .0001 2.159".split())
+def check_schedule(
+    *,
+    field="1.3032 .8786 .678 .5001 .7222",
+    descent=".5005 2.15 2.2684 .70904",
+    recognition=".7631 1.07918 .0001 2.159",
+    period_bounds=".7089 .452",
+    algebraic_exponent="2.0001",
+):
+    delta, kappa, beta, alpha, gamma = map(F, field.split())
+    top_slope, high_ratio, low_ratio, height = map(F, descent.split())
+    h_private, h_algebraic, slack, target = map(F, recognition.split())
+    height_lower, radix_upper = map(F, period_bounds.split())
     top_ratio = 1 + top_slope
     stages = 128
     grid = [F(".0662") + F(".9338") * i / (stages - 1) for i in range(stages)]
@@ -23,7 +31,7 @@ def check_schedule():
     slope_sum = alpha + gamma
     gaussian_height = radix * (1 + 2 * v0)
 
-    assert F(".7089") < gaussian_height < height and radix < F(".452")
+    assert height_lower < gaussian_height < height and radix < radix_upper
     assert 2 * v0 < 1 and y0 < 1
     fixed_point_margin = (low_ratio - slope_sum) * beta - height
     assert fixed_point_margin > 0 and (low_ratio - 1) * slope_sum * beta > height
@@ -41,7 +49,7 @@ def check_schedule():
         assert child <= y1 and 3 * child < 2 * v0 and 2 * box > parent
     assert max(g17) < -F(".1")
     mean = (2 * slope_sum - 1) * beta - low_ratio / 3 - radix / (3 * beta)
-    period = F(".49") * (F(".7089") + slope_sum * beta) - F("1.01") * F(".452")
+    period = F(".49") * (height_lower + slope_sum * beta) - F("1.01") * radix_upper
     assert mean > F(".001") and period > F(".04")
     print(f"height {float(gaussian_height):.9f}, fixed-point margin {float(fixed_point_margin):.9f}, "
           f"bottom mean {float(mean):.9f}, period margin {float(period):.9f}")
@@ -53,7 +61,7 @@ def check_schedule():
     fractions = [a * w / shape_loss for a, w in zip(scales, weights)]
     assert F("1.4143")**2 > 2
     assert F("1.4143")**2 * 2 * y0 / (3 * delta) < h_private**2
-    assert F("2.0001")**2 * 2 * y0 / (3 * delta) < h_algebraic**2
+    assert F(algebraic_exponent)**2 * 2 * y0 / (3 * delta) < h_algebraic**2
     count_ratio = sum(weights) / shape_loss
     assert min(weights) > 0 and sum(fractions) == 1 and count_ratio < 2
     private = [b + sum(weights[i:]) + h_private * grid[i] + slack for i in range(stages)]
