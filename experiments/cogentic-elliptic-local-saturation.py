@@ -11,11 +11,11 @@ from runpy import run_path
 HERE = Path(__file__).parent
 MODULAR = run_path(str(HERE / "cogentic-elliptic-cycle-split.py"))
 AXES = (*MODULAR["AXES"], (-280, 1216))
+GENERATORS = (*AXES, (-1496, 0), (-264, 0))
 BAD_PRIMES, FactorFound, add, checked_gcd, negate = (
     MODULAR[name] for name in ("BAD_PRIMES", "FactorFound", "add", "checked_gcd", "negate")
 )
 primes_through = run_path(str(HERE / "cogentic-scalar-progression-sieve.py"))["primes_through"]
-SUBSETS = tuple(cols for size in (1, 2, 3) for cols in combinations(range(3), size))
 
 
 def smooth_exponent(modulus, bound):
@@ -54,7 +54,7 @@ def word(coefficients, points, modulus):
     return result
 
 
-def find_split(modulus, exponent):
+def find_split(modulus, exponent, *, generators=GENERATORS):
     """Return (proper divisor or None, search stage) for an odd input and multiplier."""
     if modulus < 3 or modulus % 2 == 0 or exponent < 1 or exponent % 2 == 0:
         raise ValueError("need an odd modulus at least 3 and a positive odd exponent")
@@ -66,9 +66,10 @@ def find_split(modulus, exponent):
                 return None, stage
 
         stage = "odd multiplier"
-        points = [multiple(exponent, tuple(c % modulus for c in point), modulus) for point in AXES]
+        points = [multiple(exponent, tuple(c % modulus for c in point), modulus) for point in generators]
         stage = "individual doubling"
         basis = []
+        indices = range(len(points))
         limit = (4*modulus).bit_length()
         for i, point in enumerate(points):
             depth = 0
@@ -77,12 +78,13 @@ def find_split(modulus, exponent):
                 depth += 1
             if point is not None:
                 return None, "depth limit"
-            basis.append(tuple((1 << depth) if i == j else 0 for j in range(3)))
+            basis.append(tuple((1 << depth) if i == j else 0 for j in indices))
 
         stage = "mixed saturation"
+        subsets = tuple(cols for size in range(1, len(points) + 1) for cols in combinations(indices, size))
         while True:
-            for columns in SUBSETS:
-                total = tuple(sum(basis[i][j] for i in columns) for j in range(3))
+            for columns in subsets:
+                total = tuple(sum(basis[i][j] for i in columns) for j in indices)
                 if any(c % 2 for c in total):
                     continue
                 half = tuple(c // 2 for c in total)
@@ -98,9 +100,9 @@ def find_split(modulus, exponent):
         return divisor, stage
 
 
-def finite_relations(prime, exponent):
+def finite_relations(prime, exponent, generators=GENERATORS):
     cycles = []
-    for x, y in AXES:
+    for x, y in generators:
         generator = multiple(exponent, (x % prime, y % prime), prime)
         cycle = [None]
         point = generator
@@ -111,23 +113,36 @@ def finite_relations(prime, exponent):
     orders = tuple(map(len, cycles))
     assert all(order & (order - 1) == 0 for order in orders)
 
-    last = {point: k for k, point in enumerate(cycles[2])}
+    last = {point: k for k, point in enumerate(cycles[-1])}
     relations = set()
-    for (i, left), (j, right) in product(enumerate(cycles[0]), enumerate(cycles[1])):
-        need = negate(add(left, right, prime), prime)
+    for terms in product(*(enumerate(cycle) for cycle in cycles[:-1])):
+        point = None
+        for _, term in terms:
+            point = add(point, term, prime)
+        need = negate(point, prime)
         if need in last:
-            relations.add((i, j, last[need]))
+            relations.add((*[i for i, _ in terms], last[need]))
     return orders, relations
 
 
 def replay():
     exponent = smooth_exponent(89*199, 5)
     assert exponent == 922640625
-    assert finite_relations(89, exponent) == ((2, 2, 2), {(0, 0, 0), (1, 1, 0)})
-    assert finite_relations(199, exponent) == ((2, 2, 2), {(0, 0, 0), (0, 1, 1)})
+    assert finite_relations(89, exponent, AXES) == ((2, 2, 2), {(0, 0, 0), (1, 1, 0)})
+    assert finite_relations(199, exponent, AXES) == ((2, 2, 2), {(0, 0, 0), (0, 1, 1)})
     assert find_split(89*199, exponent) == (89, "mixed saturation")
-    assert finite_relations(23, 11)[0] == finite_relations(367, 11)[0] == (16, 8, 16)
+    assert finite_relations(23, 11)[0] == finite_relations(367, 11)[0] == (16, 8, 16, 2, 2)
     assert find_split(23*367, 11) == (23, "mixed saturation")
+
+    modulus = 179*349
+    exponent = smooth_exponent(modulus, 11)
+    assert finite_relations(179, exponent, AXES) == finite_relations(349, exponent, AXES)
+    assert find_split(modulus, exponent, generators=AXES) == (None, "saturated")
+    relation = (0, 0, 1, 0, 1)
+    assert relation in finite_relations(179, exponent)[1]
+    assert relation not in finite_relations(349, exponent)[1]
+    assert find_split(modulus, exponent) == (349, "mixed saturation")
+
     assert find_split(115, 1) == (5, "bad reduction")
     assert find_split(23, 1) == (None, "saturated")
     assert find_split(29, 1) == (None, "depth limit")
@@ -145,6 +160,7 @@ def replay():
         checked += 1
     print(f"Checked {checked} prime pairs and split all {forced} with different local relations.")
     print("N=17711 with B=5 split at mixed saturation despite identical individual doubling depths.")
+    print("N=62471 with B=11 split at mixed saturation after adding the two rational torsion points.")
 
 
 def main():
