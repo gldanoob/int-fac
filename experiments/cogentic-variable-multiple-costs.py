@@ -48,3 +48,12 @@ density_loss = 2 * (x*c + 1/x) / (3*b)
 assert b < c < 2*b and 32 * (2*c - b - density_loss) > 2*b
 assert max(2*c, 3*b, 2*c + 2*b - density_loss + Fraction(".0001")) == Fraction("2.70")
 print("Averaged full-grid ledger: coefficient 2.70 at trace order 32.")
+
+# A fixed rational tensor scheme exists below this strict arithmetic ceiling.
+omega, c, b, x, cap = map(Fraction, ("2.2501", "1.22155", "1.08577", ".9048", ".0001"))
+density_loss = 2 * (x*c + 1/x) / (3*b)
+assert c > b and x*x*c > 1 and 25000 * (2*c - b - density_loss) > 2*b
+assert max(2*c, omega*b, 2*c - density_loss + cap + (omega-1)*b) < Fraction("2.4433")
+limit_cubed = 8 * Fraction(27, 20)**2
+assert Fraction("2.44297585493541")**3 < limit_cubed < Fraction("2.44297585493542")**3
+print("Nine-fourths matrix exponent: strict capped coefficient below 2.4433.")

@@ -1,5 +1,6 @@
 """Check lifted transpose projections on the engineered two-field fixture."""
 
+from itertools import islice
 from pathlib import Path
 from runpy import run_path
 
@@ -9,6 +10,23 @@ from sage.all import GF, QQ, ZZ, RealField, lcm, matrix, rational_reconstruction
 HERE = Path(__file__).parent
 EXACT = run_path(str(HERE / "cogentic-real-extractor-sage.py"))
 pivot_lists = run_path(str(HERE / "cogentic-randomized-extraction.py"))["pivot_lists"]
+
+
+def batch_pivots(columns, prime, width):
+    """Retain an original column basis of each successive prefix."""
+    ring = GF(prime)
+    basis = []
+    if width < 1:
+        raise ValueError("batch width must be positive")
+    indexed = enumerate(columns)
+    while batch := list(islice(indexed, width)):
+        candidates = [*basis, *batch]
+        panel = matrix(ring, [column for _, column in candidates]).transpose()
+        basis = [candidates[i] for i in panel.pivots()]
+    if not basis:
+        return [], []
+    rows = matrix(ring, [column for _, column in basis]).pivots()
+    return list(rows), [index for index, _ in basis]
 
 
 def lifted_rows(system, right_sides, prime):
@@ -55,7 +73,18 @@ def replay():
     target_index = incidence.ncols() - 1
     columns = [list(map(int, column)) for column in incidence.columns()]
     prime = 11
-    rows, pivots = pivot_lists(columns[:-1], prime)
+    # Modulo 2 the integer incidence matrix can drop rank. Each batch must
+    # retain the exact modular span, including deficient and empty panels.
+    for modulus in (2, 3, prime):
+        for width in (1, 4, 19, len(columns)):
+            rows, pivots = batch_pivots(iter(columns[:-1]), modulus, width)
+            _, expected = pivot_lists(columns[:-1], modulus)
+            assert pivots == expected
+            minor = incidence.matrix_from_rows_and_columns(rows, pivots)
+            assert minor.change_ring(GF(modulus)).is_invertible()
+    assert batch_pivots([], prime, 4) == ([], [])
+    assert batch_pivots([[0, 0]] * 5, prime, 2) == ([], [])
+    rows, pivots = batch_pivots(iter(columns[:-1]), prime, 4)
     minor = incidence.matrix_from_rows_and_columns(rows, pivots)
     free = [j for j in range(target_index) if j not in pivots]
     assert len(free) >= 2
