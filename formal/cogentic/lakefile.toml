@@ -22,3 +22,6 @@ roots = ["ModularPower", "OrderQueries", "TwoThirdsCost", "TwoThirdsFactor", "Tw
 
 [[lean_lib]]
 name = "CogenticWithGRH"
+
+[[lean_lib]]
+name = "RandomizedFactoring"
