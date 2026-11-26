@@ -44,3 +44,14 @@ The generator doubles the seed until its argument reaches the requested bit heig
 ```sh
 python3 -B experiments/cogentic-elliptic-unit-arguments.py 2573 --seed-height 15 --degree 7 --height-bits 10 --smooth-bound 3
 ```
+
+
+## Recovering a bounded residual order
+
+Let $U$ be the odd smooth multiplier and $h$ the separating unit modulo $N$. Use $u=h^{U2^{\operatorname{bitlength}(N)}}$ to remove all local two-primary components. In the ring with $z^2=z$ the element $u+(u^{-1}-u)z$ has components $u,u^{-1}$ and norm one. The existing bounded order search in this ring finds a proper gcd or a nonzero global exponent $e$ whenever $u$ has order at most the supplied bound $D$ at one prime factor. In the global case the odd part of $e$ annihilates the remaining odd components. Applying the original doubling test to $h^{U\operatorname{odd}(e)}$ preserves the distinct two-primary orders and therefore yields a divisor. The list lengths are $O(\sqrt D)$, and fast polynomial multipoint evaluation gives the existing soft square-root cost up to factors polynomial in the input length. The availability of a small residual on a separating chart is still a hypothesis. [Shared order search](../experiments/cogentic-varying-norm-torus.py) · [Separating-unit CLI](../experiments/cogentic-elliptic-unit-arguments.py)
+
+On $3683=29\cdot127$ the smooth multiplier alone misses. The second stage obtains the shared odd multiple seven and returns 127 after testing the original two-primary orders.
+
+```sh
+python3 -B experiments/cogentic-elliptic-unit-arguments.py 3683 --degree 7 --height-bits 10 --count 1 --smooth-bound 3 --residual-order 7
+```

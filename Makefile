@@ -113,6 +113,7 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-split-quintic-twists.py --replay-stage-two
 	"$(PYTHON)" -B experiments/cogentic-paired-block-unit.py
 	"$(PYTHON)" -B experiments/cogentic-elliptic-unit-arguments.py
+	"$(PYTHON)" -B experiments/cogentic-elliptic-unit-arguments.py --replay-stage-two
 	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-separation.py
 	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-separation.py --replay-stage-two
 	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-conic.py
