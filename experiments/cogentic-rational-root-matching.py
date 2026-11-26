@@ -1,5 +1,6 @@
 """Match certified modular roots through rational square classes and integer lifts."""
 
+from fractions import Fraction
 from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
@@ -15,7 +16,9 @@ def matched_basis(n, witnesses):
         raise ValueError("expected an odd modulus greater than one")
     values, residues = [], []
     for value, root in witnesses:
-        if gcd(value, n) != 1 or (root*root-value) % n:
+        value = Fraction(value)
+        if (gcd(value.numerator, n) != 1 or gcd(value.denominator, n) != 1
+                or (root*root*value.denominator - value.numerator) % n):
             raise ValueError("each rational label needs a verified modular unit root")
         values.append(value)
         residues.append(root)
@@ -25,9 +28,10 @@ def matched_basis(n, witnesses):
     for mask in basis:
         indices = list(GRID["support"](mask))
         value = prod(values[i] for i in indices)
-        denominator = isqrt(value)
-        assert denominator**2 == value
-        root = prod(residues[i] % n for i in indices) * pow(denominator, -1, n) % n
+        scale = SQUARES["rational_sqrt"](value)
+        assert scale is not None and scale**2 == value
+        numerator = prod(residues[i] % n for i in indices) * scale.denominator
+        root = numerator * pow(scale.numerator, -1, n) % n
         assert root*root % n == 1
         matched.append((mask, root))
     return matched
@@ -51,6 +55,15 @@ def replay():
     ceil_sqrt = isqrt(n-1)+1
     lift = (ceil_sqrt**2 - n, ceil_sqrt)
     assert matched_basis(n, [witnesses[1], lift]) == [first]
+    # Replacing 7 by 7/4 changes its root by the same rational factor.
+    assert matched_basis(n, [(Fraction(7, 4), 5), witnesses[1]]) == [first]
+    for nonunit in (Fraction(7, 3), Fraction(31, 4)):
+        try:
+            matched_basis(n, [(nonunit, 2)])
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("a numerator or denominator shares a prime with the modulus")
 
     # A different representative of the same modular unit can introduce a match.
     assert matched_basis(65, [(56, 11), (79, 12)]) == []

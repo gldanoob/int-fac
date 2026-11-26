@@ -42,4 +42,4 @@ Alternatively, assign each local generator **one fixed lift** $E'_j\equiv E_j\pm
 
 Trying a prescribed list of full lift assignments costs one decision per assignment. Admitting all lifts as independent generators defines a larger valid domain, including products that use two different lifts of the same generator. An at-most-one-lift constraint per generator is a different decision problem. With replaced labels, the exact criterion concerns the chosen basis generators; arbitrary changes of local basis need not preserve those lifted labels.
 
-The [integer replay](../experiments/cogentic-rational-root-matching.py) checks the examples and compares the basis decision and its normalized signs to all 5,888 subsets of eight small modular witness lists. The field identities in both examples were also checked directly in PARI.
+The [exact replay](../experiments/cogentic-rational-root-matching.py) checks the examples, rational-unit normalizations and then compares the basis decision and its normalized signs to all 5,888 subsets of eight small modular witness lists. The field identities in both examples were also checked directly in PARI.
