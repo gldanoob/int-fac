@@ -1,6 +1,6 @@
 # Completing the finite monic primitive-grid split test
 
-For a prescribed finite grid, exact ideal parity, local probes and exact field-square testing give a terminating deterministic decision of whether any signed relation in that grid yields a proper difference gcd. Dedekind GRH for the quadratic extensions specified below gives an $\exp(O(W))$ time bound on the monic schedule. The output can be verified unconditionally. The existence of a productive relation on the prescribed grid for every composite input remains open.
+For a prescribed finite grid, exact ideal parity, local probes and exact field-square testing give a terminating deterministic decision of whether any signed relation in that grid yields a proper difference gcd. Dedekind GRH for the quadratic extensions specified below gives an $\exp(O(W))$ time bound on the monic schedule. The output can be verified unconditionally. For an odd prime power every square root of unity is a global sign. Even among inputs with at least two distinct prime factors, some prescribed fields and grids have no productive relation. A deterministic choice of fields and a grid of one-third height guaranteed to split every remaining composite is open. [Private-grid obstruction](cogentic-private-grid-density.md)
 
 ## The decision procedure
 
