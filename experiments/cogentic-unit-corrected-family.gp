@@ -60,3 +60,35 @@ unit_parameter_match(n,t,i,j) = {
   if(unit_parameter_match(341,2,0,0)!=[] || unit_parameter_match(35,2,2,2)!=[5,7],error("controls"));
   print(count," eligible charts checked; the fixed t=2 unit comparison splits 341")
 }
+
+\\ Test the compact equal-power certificate on the public repeated-squaring list.
+unit_chart_odd_exponent(n,e) = {
+  if(n<3 || n%2==0 || e<1 || e%2==0,error("expected odd N and a positive odd exponent"));
+  my(bits=logint(n,2)+1, i=(e-1)/2);
+  for(a=2,min(n-1,3*bits^2),
+    my(d=gcd(a,n));
+    if(1<d && d<n,return(["base-gcd",a,d,n/d]));
+    my(t=Mod(a,n));
+    for(j=0,bits-1,
+      my(v=lift(t),g);
+      if(v==1 || v==n-1,break);
+      foreach([v-1,v+1,v^2+1],z,g=gcd(z,n);if(1<g && g<n,return(["parameter-gcd",a,j,g,n/g])));
+      if(gcd(v^2+1,n)==1,
+        my(s=t^e);
+        if(s^2==1 && s!=1 && s!=-1,
+          my(parts=unit_parameter_match(n,v,i,i));
+          if(#parts!=2,error("unit certificate mismatch"));
+          return(["unit-powers",a,j,i,parts[1],parts[2]])
+        )
+      );
+      t=t^2
+    )
+  );
+  []
+};
+{
+  my(n=1000036000099,e=15625531251,res=unit_chart_odd_exponent(n,e));
+  if(res[1]!="unit-powers" || res[2]!=2 || res[3]!=2 || res[5]*res[6]!=n,error("uniform chart library"));
+  if(unit_chart_odd_exponent(101,25)!=[],error("unexpected prime split"));
+  print("Equal unit powers split ",n," using a public chart at t=16 and the supplied odd exponent")
+}
