@@ -7,6 +7,8 @@ Building on the deterministic companion, our current paper bound for complete fa
 
 ## Research
 
+On this branch a deterministic selector chooses four polynomial coefficients by exact conditional expectation. Modular conditions use lattice counts, and smoothness conditions reduce to counts on arithmetic progressions. Bounding the cost of those smoothness counts for every input remains open. Run `make check-one-third` for the finite replays. [Algorithm and cost bounds](research/cogentic-coefficient-selection.md)
+
 A separate deterministic construction now gives $L_X[1/3,O(1)]$ arithmetic mean time on $X<N\le2X$, including every exceptional input. Its fast path covers all but $\exp(O(b^{2/3}(\log b)^{1/3}))$ of the $b$-bit inputs and retains the original bit string across recursive splits. A reusable small list can also be prepared uniformly for worst-case batches. [Sampling proof, preprocessing and finite checks](research/cogentic-universal-score-sampler.md)
 
 The earlier elliptic algorithm for integers $X<N\le2X$ completely factors $N$ in arithmetic mean time $\exp((1+o(1))\sqrt{\ln X\,\ln\ln X})$. This paper bound includes exceptional inputs and the full recursion. Alpöge’s proved ordinary RH supplies the needed prime estimate. His Dirichlet GRH theorem supplies pointwise character witnesses. Sutherland independently verified both statements, including all Dirichlet characters and moduli. Older classical estimates alone give a mean of $\exp(O(b^{2/3}\log\log b/(\log b)^{2/3}))$. [Sharp mean-time proof and checks](research/sharp-elliptic-mean.md) · [Kernel verification of the zeta statements](https://math.mit.edu/~drew/grh/) · [Classical mean proof](research/smooth-integer-slot-hasse.md)

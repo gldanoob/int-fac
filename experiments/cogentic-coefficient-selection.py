@@ -101,41 +101,58 @@ def box_count(box, coset):
     return floor_sum(n, Q, -R, bottom+q) - floor_sum(n, Q, -R, bottom)
 
 
-def signed_cosets(conditions):
+def signed_hits(conditions):
     hits = tuple(test for test in conditions if test.equal)
     misses = tuple(test for test in conditions if not test.equal)
     for k in range(len(misses)+1):
         for extra in combinations(misses, k):
-            coset = hit_coset(hits+extra)
-            if coset is not None:
-                yield (-1)**k, coset
+            yield (-1)**k, hits+extra
 
 
 def field_count(box, factor, band):
     """Count one field's passing pairs by Euclidean sums or scalar sections."""
-    if not factor.smooth:
-        return sum(sign*box_count(box, coset) for sign, coset in signed_cosets(factor.modular))
+    marks = []
+    eligible = {}
+    products = {}
+    for test in sorted(set(factor.smooth), key=lambda test: test.mark):
+        eligible[test] = tuple(p for p in band if p not in test.omit)
+        products[test] = prod(eligible[test])
+        if test.step:
+            marks.append(test)
+        elif not test.offset or products[test] % abs(test.offset):
+            return 0
 
-    first, *rest = sorted(set(factor.smooth), key=lambda test: test.mark)
-    a = first.mark
-    first_band = prod(p for p in band if p not in first.omit)
-    if rest:
-        second = rest[0]
-        second_band = tuple(p for p in band if p not in second.omit)
-        dy = second.step*(second.mark-a)
-    transformed = tuple(Congruence(test.x, test.y-a*test.x, test.offset, test.modulus, test.equal)
-                        for test in factor.modular)
+    subsets = signed_hits(factor.modular)
+    if not marks:
+        return sum(sign*box_count(box, coset) for sign, hits in subsets
+                   if (coset := hit_coset(hits)) is not None)
+
     x, y, p, q = box
     x_end, y_end = x+p-1, y+q-1
-    u_min, u_max = x+a*y, x_end+a*y_end
 
-    def sections(coset):
-        u0, y0, P, R, Q = coset
+    def sections(hits):
+        # Each mark permits the change of variables u=x+a*y. Compare both
+        # projections before scanning: a congruence can fix only the larger mark.
+        choices = []
+        for first in marks:
+            a = first.mark
+            transformed = (Congruence(hit.x, hit.y-a*hit.x, hit.offset, hit.modulus)
+                           for hit in hits)
+            coset = hit_coset(transformed)
+            if coset is None:
+                return 0
+            u0, _, P, _, _ = coset
+            first_i = -((u0-x-a*y)//P)
+            last_i = (x_end+a*y_end-u0)//P
+            choices.append((last_i-first_i+1, first, coset, first_i, last_i))
+        _, first, (u0, y0, P, R, Q), first_i, last_i = min(choices, key=lambda item: item[0])
+        a = first.mark
+        second = next((test for test in marks if test != first), None)
         total = 0
-        for i in range(-((u0-u_min)//P), (u_max-u0)//P+1):
+        for i in range(first_i, last_i+1):
             u = u0+P*i
             value = first.offset+first.step*u
-            if not value or first_band % abs(value):
+            if not value or products[first] % abs(value):
                 continue
             lo, hi = y, y_end
             if a:
@@ -145,14 +162,15 @@ def field_count(box, factor, band):
             if start_y > hi:
                 continue
             length = (hi-start_y)//Q+1
-            if not rest:
+            if second is None:
                 total += length
             else:
+                dy = second.step*(second.mark-a)
                 start = second.offset+second.step*u+dy*start_y
-                total += progression_sieve(start, dy*Q, length, second_band)[0]
+                total += progression_sieve(start, dy*Q, length, eligible[second])[0]
         return total
 
-    return sum(sign*sections(coset) for sign, coset in signed_cosets(transformed))
+    return sum(sign*sections(hits) for sign, hits in subsets)
 
 
 def select(B, box, terms):
@@ -272,7 +290,14 @@ def check_mixed():
     factor = Factor((Smooth(1, 6-width, 1),),
                     (Congruence(6, 6, -6*(width-1), 6*modulus),))
     assert field_count(box, factor, band) == width
-    print("300 mixed boxes agree with enumeration, plus two large-period closed forms")
+    # Only the larger mark has a sparse projection.  The other ordinate
+    # decreases from 5 to 0 on the six points of x+y=5.
+    factor = Factor((Smooth(0, 0, 1), Smooth(1, 0, 1)),
+                    (Congruence(1, 1, -5, modulus),))
+    assert field_count(box, factor, band) == 2  # x=1 or x=5
+    for offset, expected in ((-35, width**2), (25, 0), (0, 0)):
+        assert field_count(box, Factor((Smooth(2, offset, 0),)), band) == expected
+    print("300 mixed boxes agree with enumeration, plus six large-box closed forms")
 
 
 def check_cases():

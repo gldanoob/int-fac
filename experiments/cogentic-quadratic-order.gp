@@ -42,9 +42,12 @@ rational_partial(value, primeset) = {
   [value,Vec(entries)];
 }
 
-quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
+quadratic_certificate_coeffs(n, slopes, constants, height, bound, {join_residues=0}) = {
   my(m = sqrtint(n), primeset = primes([2,bound]));
-  my(constants = vector(2,i,n - m^2 - slopes[i]*m));
+  if(#slopes != 2 || #constants != 2, error("need two quadratic coefficient pairs"));
+  for(i = 1, 2,
+    if((m^2 + slopes[i]*m + constants[i]) % n, error("polynomial misses common residue"))
+  );
   my(discs = vector(2,i,slopes[i]^2 - 4*constants[i]));
   if(vecmax(discs) >= 0, return([]));
   my(excluded = vector(2,i,prod(j=1,#primeset,
@@ -119,6 +122,11 @@ quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
     if(divisor > 1, return([base,exponent,divisor,#columns,#pc]));
   );
   [];
+}
+
+quadratic_certificate(n, slopes, height, bound, {join_residues=0}) = {
+  my(m=sqrtint(n),constants=vector(2,i,n-m^2-slopes[i]*m));
+  quadratic_certificate_coeffs(n,slopes,constants,height,bound,join_residues);
 }
 
 probe(n, height, bound, {join_residues=0}) = {

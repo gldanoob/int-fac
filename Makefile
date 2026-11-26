@@ -24,3 +24,14 @@ check-two-thirds: check-two-thirds-lean
 	"$(PYTHON)" -B experiments/cogentic-two-thirds-extraction-audit.py
 	"$(PYTHON)" -B experiments/cogentic-interval-grid-sage.py
 	"$(PYTHON)" -B experiments/cogentic-real-extractor-sage.py
+
+.PHONY: check-one-third
+check-one-third:
+	"$(PYTHON)" -B experiments/cogentic-parity-compression.py
+	"$(PYTHON)" -B experiments/cogentic-threshold-tests.py
+	"$(PYTHON)" -B experiments/cogentic-scalar-divisor-count.py
+	"$(PYTHON)" -B experiments/cogentic-scalar-progression-sieve.py
+	"$(PYTHON)" -B experiments/cogentic-intercept-sampling.py
+	"$(PYTHON)" -B experiments/cogentic-stratified-coefficients.py
+	"$(PYTHON)" -B experiments/cogentic-coefficient-selection.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-split.py
