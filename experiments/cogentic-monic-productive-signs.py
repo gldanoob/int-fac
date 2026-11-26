@@ -22,14 +22,18 @@ def run():
     odd_part = excluded // (excluded & -excluded)
     congruences = [(0, odd_part), (1, 2)]
 
-    auxiliary = (19, 23, 29, 47, 53, 59)
-    p, q = 67, 73
+    auxiliary = (47, 53, 59, 67, 73, 79)
+    cutoff = 80
+    p, q = 83, 89
+    primes = [r for r in range(2, q+1) if all(r % k for k in range(2, isqrt(r) + 1))]
+    assert cutoff < p < q < 2*cutoff
     for prime in (*auxiliary, p, q):
-        assert all(prime % k for k in range(2, isqrt(prime) + 1))
+        assert prime in primes
         assert odd_part % prime
 
     for x, prime in zip(slopes, auxiliary, strict=True):
         numerator, linear = affine[x]
+        assert (numerator**d + 2*linear**d) % prime
         residue = numerator * pow(linear, -1, prime) % prime
         lift = single_valuation_lift(residue, prime, lambda m: numerator - m*linear)
         congruences.append((lift, prime**2))
@@ -45,8 +49,11 @@ def run():
     j = next(j for j in range(1, 100) if d**3 * j < 2**j)
     base_limit = 2**(d*d*j)
     low = base_limit - base_limit // (4*d)
-    m = low + (residue - low) % modulus
-    assert 8*d*m <= (8*d-1)*base_limit
+    high = (8*d-1)*base_limit // (8*d)
+    first = low + (residue - low) % modulus
+    small_prime_product = prod(prime for prime in primes if prime <= cutoff)
+    m = next(candidate for candidate in range(first, high+1, modulus)
+             if gcd(candidate**d + 2, small_prime_product) == 1)
     n = m**d + 2
     assert constructor["scheduled_degree"](n) == d
     root_argument, f, g = constructor["check_pair"](n, d)
@@ -74,7 +81,8 @@ def run():
     assert prod(a-b*m for a, b in columns) == root**2
     assert gcd(root-root, n) == n and gcd(2*root, n) == 1
     print(f"Verified scheduled d={d}, height={height}, {len(slopes)} isolated slopes, "
-          f"and trivial signs at {n.bit_length()} bits with prime divisors {p}, {q}")
+          f"and trivial signs at {n.bit_length()} bits with prime divisors {p}, {q} "
+          f"and none through {cutoff}")
 
 
 if __name__ == "__main__":

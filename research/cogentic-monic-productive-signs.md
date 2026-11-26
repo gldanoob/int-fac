@@ -1,6 +1,8 @@
 # A growing-grid obstruction to productive signs
 
-There are infinitely many odd composite inputs for which the scheduled monic pair has unit derivatives at its common root and every simultaneous square of ordinary marks in a growing grid has a trivial sign class. The inputs have at least two distinct prime factors and are not perfect powers. For scheduled degree $d$, the grid includes all nonzero integer pairs $(a,b)$ with $|a|,|b|\le A=\lfloor\sqrt d/4\rfloor$. Every mark reduces to a unit modulo $N$. The conclusion allows signed products, negative exponents and nonprimitive marks.
+There are infinitely many odd composite inputs for which the scheduled monic pair has unit derivatives at its common root and every simultaneous square of ordinary marks in a growing grid has a trivial sign class. Each input has at least three distinct prime factors, two of which occur to exponent one. For scheduled degree $d$, the grid includes all nonzero integer pairs $(a,b)$ with $|a|,|b|\le A=\lfloor\sqrt d/4\rfloor$. Every mark reduces to a unit modulo $N$. The conclusion allows signed products, negative exponents and nonprimitive marks.
+
+The inputs can be chosen to have no prime divisor at most $Z=2^{\lfloor d^2/1000\rfloor}$.
 
 ## Norm valuations on primitive directions
 
@@ -48,7 +50,11 @@ where the product runs through the normalized grid slopes. This is nonzero since
 
 All nonzero grid marks have unit reductions. In fact, for a prime $p\mid N$ the content of a mark is a unit since $p>d$. For a primitive mark with $b>0$, the condition $a-bm\equiv0\pmod p$ would imply $p\mid a^d+2b^d$. All odd prime divisors of this norm belong to $U$ for nonzero $a$, and for $a=0$ the norm is $2$. The pure rational marks have no prime divisors larger than the grid height. Also $m$ is a unit modulo $N$. The derivatives at $m$ are $dm^{d-1}$ and $m^{d-1}(d+m)$. The first is a unit since $d\mid U$. If a prime divisor of $N$ divided $d+m$, it would divide $(-d)^d+2$ and therefore $U$. Both derivative gcds are one, so the [simple-root evaluation](cogentic-monic-index.md) applies to the unperturbed pair.
 
-Select the $\lambda_x$ and two further primes $p,q$ among primes at most $d^5$ that exceed $d$, avoid $U$ and all cross differences, and are not $1$ modulo $d$. There are at most $2A^2$ nonzero slopes. The product of $U$ and all absolute cross differences has $O(dA^4\log A+d^2\log d)=O(d^3\log d)$ bits, so it rules out at most that many primes. At most $d^4$ integers in the range are $1$ modulo $d$. The prime number theorem gives enough remaining primes for the $2A^2+2$ choices. Since $d$ is prime and $d\nmid p-1$, the map $m\mapsto m^d$ is bijective on $\mathbb F_p^\times$. Choose the residue $m^d=-2$ there and lift it modulo $p^2$ so $v_p(N)=1$. This is possible since $dm^{d-1}$ is a unit there. Do the same at $q$. Thus the resulting $N$ is composite with distinct prime divisors and is not a perfect power.
+Select the $\lambda_x$ among primes at most $d^5$ that exceed $d$ and avoid $U$, all cross differences, and all integers $B_x^d+2C_x^d$. This last exclusion ensures $N\not\equiv0\pmod{\lambda_x}$ for the prescribed class of $m$. The integers are nonzero since $X^d+2$ has no rational root. There are at most $2A^2$ nonzero slopes. The product of the absolute exclusions has $O((dA^4+d^2A^2)\log A+d^2\log d)=O(d^3\log d)$ bits, so it rules out at most that many primes. The prime number theorem supplies enough remaining primes.
+
+Select two further primes $p,q$ in $(Z,2Z)$ that avoid $U$ and are not $1$ modulo $d$. The interval contains asymptotically $Z/\log Z$ primes, at most $2Z/((d-1)\log(Z/d))$ of which are $1$ modulo $d$ by Brun–Titchmarsh. At most $\log_2 U$ primes divide $U$. This leaves enough choices, distinct from all $\lambda_x$ since $Z>d^5$ for large $d$. [Montgomery and Vaughan, *The large sieve*, Theorem 2](https://personal.science.psu.edu/rcv4/personal/Publications/large_sieve.pdf)
+
+Since $d$ is prime and $d\nmid p-1$, the map $m\mapsto m^d$ is bijective on $\mathbb F_p^\times$. Choose the residue $m^d=-2$ there and lift it modulo $p^2$ so $v_p(N)=1$. This is possible since $dm^{d-1}$ is a unit there. Do the same at $q$. These exact valuations rule out perfect powers.
 
 The congruences specify a single class modulo
 $$
@@ -57,7 +63,7 @@ $$
 Since $|a^d+2b^d|\le3A^d$ and $A\le\sqrt d/4$, the estimate is
 $$
 \log_2 T
-\le2d\log_2 d+2A^2\log_2(3A^d)+O((A^2+1)\log d)
+\le2d\log_2 d+2A^2\log_2(3A^d)+O(A^2\log d+d^2)
 \le(1/16+o(1))d^2\log_2 d.
 $$
 
@@ -65,12 +71,28 @@ Let $j$ be the smallest positive integer with $d^3<2^j/j$ and set $\ell=d^3j$. M
 $$
 \left[\left(1-\frac1{4d}\right)D,\ \left(1-\frac1{8d}\right)D\right]
 $$
-has length $D/(8d)>T$ for large $d$, hence contains an integer $m$ in the specified class. Bernoulli's inequality gives $m^d\ge(3/4)D^d$. The upper endpoint gives $m^d\le(1-1/(8d))D^d$, so $m^d+2$ has bit length $\ell$. Its scheduled degree $\lfloor(\ell/j)^{1/3}\rfloor$ is exactly $d$. The construction works for arbitrarily large odd prime $d$, yielding infinitely many inputs.
+has length $D/(8d)>T$ for large $d$, hence contains integers $m$ in the specified class. Bernoulli's inequality gives $m^d\ge(3/4)D^d$. The upper endpoint gives $m^d\le(1-1/(8d))D^d$, so $m^d+2$ has bit length $\ell$. Its scheduled degree $\lfloor(\ell/j)^{1/3}\rfloor$ is exactly $d$. Also $N>pq$ for large $d$ since $pq<4Z^2$, so the cofactor supplies at least one more distinct prime.
+
+## Excluding the remaining small prime factors
+
+The progression $m=m_0+Tt$ in this interval has $K\ge\exp(2d^2\log d)$ consecutive indices for large $d$. Indeed, $j>3\log_2 d$, while $\log_2 T\le(1/16+o(1))d^2\log_2 d$. The congruences already exclude from $N$ every prime at most $Z$ dividing $T$. For a prime $r\le Z$ coprime to $T$, there are $h_r$ forbidden classes of $t$ modulo $r$, corresponding to the solutions of $m^d=-2$ modulo $r$. Since $r>d$, there is at most one such class unless $r\equiv1\pmod d$, in which case there are at most $d$. In the latter case $r\ge2d+1$ since it is odd. Thus each density $e_r=h_r/r$ is at most $1/2$.
+
+Write $S=\sum_r e_r$. The ordinary reciprocal prime sum through $Z$ is at most $2\log\log Z+O(1)$ by partial summation and the prime number theorem. The additional contribution from primes $r\equiv1\pmod d$ with $r\le d^2$ is at most $d\sum_{k=1}^d 1/(kd+1)\le1+\log d$. For $t\ge d^2$, Brun–Titchmarsh gives $d\pi(t;d,1)\le6t/\log t$. Partial summation then bounds the additional contribution from $d^2<r\le Z$ by $6\log\log Z+O(1)$. Since $\log\log Z\le2\log d$ for large $d$, these estimates give $S\le20\log d$.
+
+For any set of these primes, the number of indices forbidden at every prime in the set is $K$ times the product of their densities, with error at most the product of the corresponding $h_r$. This follows by counting each CRT class in a consecutive interval. Apply inclusion-exclusion through the smallest odd integer $J\ge20(S+1)$, which gives a lower bound on the count avoiding every forbidden class. For sufficiently large $d$, $J\le410\log d$. The total rounding error through order $J$ is at most
+\[
+\sum_{k\le J}(dZ)^k\ <\ \exp\bigl(\tfrac12 d^2\log d\bigr),
+\]
+using $\log Z\le(d^2/1000)\log 2$. The full density product is at least $\exp(-2S)$ because $e_r\le1/2$. The discarded density terms have absolute sum at most $\sum_{k>J}S^k/k!$. For $k>J$, the factorial bound $k!\ge(k/e)^k$ gives $S^k/k!\le(e/20)^k$, so the tail is less than $\tfrac12\exp(-2S)$. The count of indices avoiding every small prime is therefore at least
+\[
+\tfrac12 K\exp(-2S)-\exp\bigl(\tfrac12 d^2\log d\bigr)>0
+\]
+for large $d$. Choosing one of these indices completes the construction for arbitrarily large odd prime $d$.
 
 ## Scope and replay
 
 The argument applies to all subsets of this grid, including pools filtered by smoothness, admissible roots or discriminant coprimality. It uses no assertions about the distribution of simultaneous smooth norms. Local tests that a common value is a square at primes dividing $N$ do not determine which of the two local roots a given global field root reduces to. Here the exact field-square identities force those choices to agree everywhere up to a global sign.
 
-The inputs deliberately have selected divisors at most $d^5$. They give an obstruction to an unconditional productivity claim at this grid height, even after perfect powers and nonunit common derivatives have been removed. The grid has $\log A=O(\log d)$, far below $\log A=cW$ for the one-third search with any fixed $c>0$. The method assigns a distinct prime greater than $A$ to each of $\Theta(A^2)$ slopes. Those prime powers alone give a modulus of bit length $\Omega(A^2\log A)$, while the interval for $m$ has bit length $O(d^2\log d)$. The interval-length guarantee cannot reach the one-third height. The obstruction applies to ordinary marks, so added unit corrections require separate analysis.
+The construction prescribes two divisors between $Z$ and $2Z$ and proves existence within the final progression by counting. Since $W\asymp d\log d$, it even excludes trial divisors through $\exp(cW)$ for every fixed $c>0$ and sufficiently large $d$. The grid, however, has $\log A=O(\log d)$, far below $\log A=cW$. The method assigns a distinct prime greater than $A$ to each of $\Theta(A^2)$ slopes. Those prime powers alone give a modulus of bit length $\Omega(A^2\log A)$, while the interval for $m$ has bit length $O(d^2\log d)$. The interval-length guarantee cannot reach the one-third height. The obstruction applies to ordinary marks, so added unit corrections require separate analysis.
 
-Run `python3 -B experiments/cogentic-monic-productive-signs.py` to verify a finite instance with scheduled degree five and grid height two. The replay verifies the exact pair, each isolated norm valuation, all bounded mark residues, both derivative residues, two exact prime valuations of $N$, and a three-column square relation whose roots give only trivial gcds. [Replay](../experiments/cogentic-monic-productive-signs.py)
+Run `python3 -B experiments/cogentic-monic-productive-signs.py` to verify a finite instance with scheduled degree five and grid height two. The replay verifies the exact pair, each isolated norm valuation, all bounded mark residues, both derivative residues, two exact prime valuations of $N$, absence of prime divisors through the fixture cutoff of 80, and a three-column square relation whose roots give only trivial gcds. [Replay](../experiments/cogentic-monic-productive-signs.py)
