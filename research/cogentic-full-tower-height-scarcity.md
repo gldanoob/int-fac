@@ -46,4 +46,14 @@ By Jensen's formula and Parseval, $M(P)\le\|P\|_2\le\sqrt{d+1}\|P\|_\infty$, whe
 
 More quantitatively, with maximum degree $d_{\max}=O(D)$ and the same radix bounds, covering a set of $X^{1-o(1)}$ inputs requires a log Mahler budget at least $(1-o(1))L/(3\log_2 d_{\max}+2)$, or $(1-o(1))L/(2\log_2 d_{\max}+1)$ for monic polynomials. Balanced semiprimes already give an input set of the required size. For the deduction it suffices to consider budgets $U\le L$, so homogeneous evaluated values still have $\exp(O(L))$ size. This lower bound also applies to log coefficient height up to $O(\log d_{\max})$. For a full projective mark box, height of this size prevents a uniform $\exp(O(V))$ norm bound. Fix a denominator $B_0$ large compared to $d$ and interpolate from $d+1$ numerator ratios spaced by $\gg1/d$ in a fixed subinterval of $[0,1]$. The coefficient height is at most $(Cd)^{O(d)}$ times the largest absolute value at those ratios. The corresponding homogeneous maximum is at least $B_0^d\|P\|_\infty/(Cd)^{O(d)}$. This implication concerns the full box and leaves smaller selected mark sets open.
 
+## Towers over an arbitrary base field
+
+Allow the tower to start at an arbitrary degree-$e_0$ field and take $r$ quadratic steps, so $d=2^r e_0$. The earlier recursion stops at $e_0$. At that degree the unrestricted polynomial count is $\exp((e_0+1)U+O(e_0^2))$ for log Mahler budget $U$, by the coefficient bound $2^{e_0}\exp(U)$. Including the growth of the budget at the higher levels bounds the log count at the top by
+$$
+ (e_0+1+3r)U+O\!\left(d^2\log(2+d)+d\log(2+U+d\log(2+d))\right).
+$$
+For $d=O(D)$ and $U=O(V)$, the same evaluated-value argument bounds the log count of represented inputs by $(e_0+1)U+o(L)$. Thus $e_0=o(D)$ still gives only $X^{o(1)}$ inputs. If $r$ is fixed and $e_0=\Theta(D)$, a digit-height bound $U\le(\kappa+o(1))L/d$ gives at most $X^{\kappa/2^r+o(1)}$ inputs. This implies scarcity when $\kappa<2^r$. A generic $O(V)$ budget in this fixed-step regime can make the bound vacuous.
+
+The count applies when the primitive irreducible polynomial defines the stated field tower. A norm formula is covered when its factors arise from the relative minimal polynomial in that tower. Reducible norm forms or word alignments that only give a divisibility condition on a product of factors fall outside this scope. A separate argument would have to track which factors carry the prime divisors of $N$.
+
 An exact arithmetic check compared the denominator-ideal norms, defined by lattice index, with both primitive leading coefficients on 320 real and imaginary quadratic fixtures. Of these, 319 gave irreducible quartic norm polynomials.
