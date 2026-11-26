@@ -1,0 +1,40 @@
+{
+  "seed": "int-fac/unit-collision-search/v1/8610921",
+  "parameters": [
+    2,
+    3,
+    5,
+    7
+  ],
+  "seconds_per_arm": 8,
+  "control_domain": "int-fac/unit-collision/hash-units/v1",
+  "groups": [
+    {
+      "bits": 40,
+      "length": 1024,
+      "inputs": [
+        945981244529,
+        821360312249,
+        780893696017
+      ]
+    },
+    {
+      "bits": 48,
+      "length": 4096,
+      "inputs": [
+        182527886769227,
+        170200260262387,
+        202569545954561
+      ]
+    },
+    {
+      "bits": 64,
+      "length": 16384,
+      "inputs": [
+        17253711084100655413,
+        13993257964720210747,
+        14613749908045635547
+      ]
+    }
+  ]
+}
