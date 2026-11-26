@@ -37,3 +37,5 @@ For good reduction of $\widehat P,\widehat Q$ at every prime of $N$, one can obt
 ## Small checks
 
 With $P=2X^2+X+25$, $Q=3Y^2+Y+5$ the residues $2,3$ are roots modulo 35. Using $G=Y-X-1$ gives $T=5075$. Using $G=XY+2X-10$ gives $T=767375$. Both are multiples of 35. Modulo 25 the roots $2,3$ of $5X^2+X+3$, $2Y^2+Y+4$ and the first alignment give $T=1025$, despite 5 dividing the first leading coefficient. The overlapping tower $P=X^4-2$, $Q=Y^2-2$, $G=X^2-Y$ gives $T=0$ exactly.
+
+The [component splitter](../experiments/cogentic-tensor-component-split.py) checks supplied roots of monic and nonmonic polynomials. For $N=1161359$, $P=Q=X^4-10X^2+1$, $u=1072857$ and $v=119483$ both $u-v$ and $u+v$ are units. At slope $h=2$ the tensor discriminant is coprime to $N$. The factor $Z^4-58Z^2+625$ evaluated at $u+2v$ gives gcd $1009$. The replay also recovers $1009$ from two nonmonic presentations and distinguishes same-component and bad-reduction examples. Its default search tries 16 slopes and reports an inconclusive result when that budget is exhausted.
