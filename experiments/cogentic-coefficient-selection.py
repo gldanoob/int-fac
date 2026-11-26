@@ -109,6 +109,46 @@ def signed_hits(conditions):
             yield (-1)**k, hits+extra
 
 
+def section_count(start, step, length, primes, primorial):
+    """Count a nonempty section using the shorter value or complementary window."""
+    if not step:
+        return length if start and primorial % abs(start) == 0 else 0
+    forced = gcd(start, step)
+    if primorial % forced:
+        return 0
+    start, step = start//forced, step//forced
+    if step < 0:
+        start += step*(length-1)
+        step = -step
+    primes = tuple(p for p in primes if forced % p and step % p)
+    limit = prod(primes)
+    first = max(0, -((limit+start)//step))
+    last = min(length-1, (limit-start)//step)
+    if first > last:
+        return 0
+    start += step*first
+    end = start+step*(last-first)
+    length = last-first+1
+    inverse = pow(start, -1, step)
+    windows = []
+    candidates = 0
+    for sign, lo, hi in ((1, start, end), (-1, -end, -start)):
+        lo = max(1, lo)
+        lo += (sign*start-lo) % step
+        if lo > hi:
+            continue
+        lower = (limit+hi-1)//hi
+        upper = limit//lo
+        # Inversion enforces the original residue on this sign after taking P/d.
+        lower += (sign*limit*inverse-lower) % step
+        if lower <= upper:
+            windows.append(range(lower, upper+1, step))
+            candidates += (upper-lower)//step+1
+    if candidates < length:
+        return sum(limit % d == 0 for window in windows for d in window)
+    return progression_sieve(start, step, length, primes)[0]
+
+
 def field_count(box, factor, band):
     """Count one field's passing pairs by Euclidean sums or scalar sections."""
     marks = []
@@ -167,7 +207,7 @@ def field_count(box, factor, band):
             else:
                 dy = second.step*(second.mark-a)
                 start = second.offset+second.step*u+dy*start_y
-                total += progression_sieve(start, dy*Q, length, eligible[second])[0]
+                total += section_count(start, dy*Q, length, eligible[second], products[second])
         return total
 
     return sum(sign*sections(hits) for sign, hits in subsets)
@@ -338,7 +378,44 @@ def check_cases():
     assert strict > 0
 
 
+def check_long_sections():
+    band = tuple(p for p in primes_through(997) if p > isqrt(997))
+    primorial = prod(band)
+    width, step = 1 << 256, 1 << 512
+    box = (0, 0, width, width)
+    fixed_x = Congruence(1, 0, 0, width)
+    divisor = primorial//band[-1]
+    offset = divisor-step*(width-1)
+    assert primorial//offset == band[-1]
+    for sign in (-1, 1):
+        factor = Factor((Smooth(0, 1, 1), Smooth(1, sign*offset, sign*step)), (fixed_x,))
+        assert field_count(box, factor, band) == 1
+
+    complement = 1
+    for prime in band:
+        complement *= prime
+        if complement.bit_length() >= (primorial.bit_length()-300)//2:
+            break
+    target = primorial//complement
+    offset = target-step*(width-1)
+    assert 1 << 400 < primorial//offset-complement < step
+    factor = Factor((Smooth(0, 1, 1), Smooth(1, offset, step)), (fixed_x,))
+    assert field_count(box, factor, band) == 1
+
+    forced = divisor
+    offset, step = forced*band[-1], forced*step
+    factor = Factor((Smooth(0, 1, 1), Smooth(1, offset, step)), (fixed_x,))
+    assert field_count(box, factor, band) == 1
+    factor = Factor((Smooth(0, 1, 1), Smooth(1, 25, 5)),
+                    (fixed_x, Congruence(0, 1, 0, 5)))
+    assert field_count(box, factor, band) == 0
+    assert section_count(-7, 7, 3, (7,), 7) == 2
+    assert section_count(-2, 7, 3, (2, 5, 7), 70) == 2
+    print("five closed-form counts on sections of length at least 2^253")
+
+
 if __name__ == "__main__":
     check_modular()
     check_mixed()
     check_cases()
+    check_long_sections()
