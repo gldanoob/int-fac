@@ -4,6 +4,7 @@
 import argparse
 import sys
 from fractions import Fraction
+from functools import cache
 from itertools import combinations, permutations, product
 from math import gcd, isqrt, prod
 from pathlib import Path
@@ -144,10 +145,91 @@ def split_curve(roots, marked, exponent, modulus):
         point = doubled
 
 
-def find_split(modulus, exponent, menu_bound):
+@cache
+def batch_tools():
+    try:
+        batch = run_path(str(HERE / "cogentic-elliptic-batch-search.py"))
+    except ModuleNotFoundError as error:
+        if error.name == "sage":
+            raise ValueError("residual-order search requires SageMath Python") from error
+        raise
+    return tuple(batch[name] for name in ("PolynomialRing", "Zmod", "value_tree", "evaluate_many"))
+
+
+def signed_multiple(first, second, i, j, modulus):
+    assert first[0] == second[0] and i != j
+    if first[1] == second[1]:
+        return abs(i - j)
+    checked_gcd(first[1] - second[1], modulus)
+    assert (first[1] + second[1]) % modulus == 0
+    return i + j
+
+
+def bounded_multiple(point, modulus, a2, a4, bound):
+    """Return a positive global multiple, raise a proper gcd, or report a miss."""
+    if point is None:
+        return 1
+    width = isqrt(bound - 1) + 1
+    # A local order r <= bound has r = j*width-i with 0 <= i < width.
+    babies = {}
+    baby = None
+    for i in range(1, width):
+        baby = add(baby, point, modulus, a2, a4)
+        if baby is None:
+            return i
+        if baby[0] in babies:
+            j, previous = babies[baby[0]]
+            return signed_multiple(baby, previous, i, j, modulus)
+        babies[baby[0]] = i, baby
+
+    step = add(baby, point, modulus, a2, a4)
+    if step is None:
+        return width
+    if not babies:
+        return None
+    giants = []
+    giant = None
+    for j in range(1, width + 1):
+        giant = add(giant, step, modulus, a2, a4)
+        if giant is None:
+            return j*width
+        giants.append(giant)
+
+    polynomial_ring, residue_ring, value_tree, evaluate_many = batch_tools()
+    ring = polynomial_ring(residue_ring(modulus), "x")
+    baby_tree = value_tree(ring, babies)
+    giant_tree = value_tree(ring, [giant[0] for giant in giants])
+    values = evaluate_many(baby_tree[-1][0], giant_tree)
+    for j, (giant, value) in enumerate(zip(giants, values, strict=True), 1):
+        if checked_gcd(int(value), modulus) == 1:
+            continue
+        node = 0
+        for row in reversed(baby_tree[:-1]):
+            node *= 2
+            if checked_gcd(int(row[node](giant[0])), modulus) == 1:
+                node += 1
+        assert baby_tree[0][node](giant[0]) == 0
+        i, baby = babies[giant[0]]
+        return signed_multiple(giant, baby, j*width, i, modulus)
+    return None
+
+
+def residual_multiple(roots, marked, exponent, modulus, bound):
+    a2, a4 = coefficients(roots, modulus)
+    point = multiply(exponent, tuple(c % modulus for c in marked), modulus, a2, a4)
+    for _ in range((4*modulus).bit_length()):
+        if point is None:
+            return 1
+        point = add(point, point, modulus, a2, a4)
+    return bounded_multiple(point, modulus, a2, a4, bound)
+
+
+def find_split(modulus, exponent, menu_bound, residual_order=None):
     """Search the public moving curves and return a divisor and its source."""
     if modulus < 3 or modulus % 2 == 0 or exponent < 1 or exponent % 2 == 0 or menu_bound < 3:
         raise ValueError("need odd N >= 3, a positive odd exponent and a menu bound >= 3")
+    if residual_order is not None and residual_order < 1:
+        raise ValueError("residual order bound must be positive")
     root = isqrt(modulus)
     if root*root == modulus:
         return root, "square input"
@@ -162,9 +244,17 @@ def find_split(modulus, exponent, menu_bound):
             positions = tuple(x % modulus for x in positions)
             if max(checked_gcd(positions[j] - positions[i], modulus) for i, j in PAIRS) == modulus:
                 continue
-            stage = "elliptic group"
             for omitted in INDICES:
-                split_curve(*curve(positions, omitted), exponent, modulus)
+                roots, marked = curve(positions, omitted)
+                stage = "elliptic group"
+                split_curve(roots, marked, exponent, modulus)
+                if residual_order is not None:
+                    stage = "residual-order collision"
+                    relation = residual_multiple(roots, marked, exponent, modulus, residual_order)
+                    if relation is not None and relation > 1:
+                        stage = "residual-order continuation"
+                        odd_part = relation // (relation & -relation)
+                        split_curve(roots, marked, exponent*odd_part, modulus)
     except FactorFound as found:
         divisor, = found.args
         assert 1 < divisor < modulus and modulus % divisor == 0
@@ -243,6 +333,27 @@ def replay():
     print("N=1517 splits in the elliptic group. With E=55 the selected chart has different final torsion roots.")
 
 
+def replay_stage_two():
+    assert find_split(2983, 1, 7) == (None, "menu limit")
+    assert find_split(2983, 1, 7, 5) == (19, "residual-order collision")
+
+    modulus = 269*283
+    roots, marked = curve((0, 25, 28, -25), 0)
+    a2, a4 = coefficients(roots, modulus)
+    start = tuple(c % modulus for c in marked)
+    point = multiply(3 << (4*modulus).bit_length(), start, modulus, a2, a4)
+    assert point == (67725, 23665)
+    assert multiply(11, point, modulus, a2, a4) is None
+    left = multiply(8, point, modulus, a2, a4)
+    right = multiply(3, point, modulus, a2, a4)
+    assert left[0] == right[0] and (left[1] + right[1]) % modulus == 0
+    assert residual_multiple(roots, marked, 3, modulus, 1) is None
+    assert residual_multiple(roots, marked, 3, modulus, 11) == 11
+    assert find_split(modulus, 3, 7) == (None, "menu limit")
+    assert find_split(modulus, 3, 7, 11) == (269, "residual-order continuation")
+    print("Stage two splits 2983 by a batched collision and 76127 after a shared residual relation of 11.")
+
+
 def main():
     if hasattr(sys, "set_int_max_str_digits"):
         sys.set_int_max_str_digits(0)
@@ -252,13 +363,20 @@ def main():
     options.add_argument("--exponent", type=int, help="public odd multiplier")
     options.add_argument("--bound", type=int, default=11, help="odd smoothness cutoff, defaults to 11")
     parser.add_argument("--menu", type=int, default=31, help="maximum discriminant prime and split prime")
+    parser.add_argument("--residual-order", type=int, help="stage-two residual odd order bound (requires SageMath)")
+    parser.add_argument("--replay-stage-two", action="store_true", help="run the stage-two regression fixtures")
     args = parser.parse_args()
+    if args.replay_stage_two:
+        if args.N is not None:
+            parser.error("--replay-stage-two runs without N")
+        replay_stage_two()
+        return
     if args.N is None:
         replay()
         return
     try:
         exponent = args.exponent if args.exponent is not None else smooth_exponent(args.N, args.bound)
-        divisor, stage = find_split(args.N, exponent, args.menu)
+        divisor, stage = find_split(args.N, exponent, args.menu, args.residual_order)
     except ValueError as error:
         parser.error(str(error))
     if divisor is None:
