@@ -52,10 +52,12 @@ def run(label, inputs):
         print({"batch": label, "n": n, "discriminants": discs, "targets": targets, "rank": rank,
                "columns": columns, "certificate": certificate}, flush=True)
     print(f"Verified splits on {label}: {hits}/{len(inputs)}", flush=True)
+    return hits
 
 
 if __name__ == "__main__":
     assert centered_pair(9) is None  # square input
     assert centered_pair(88) is None  # equal quadratic fields
-    run("previous misses", MISSES)
+    recovered = run("previous misses", MISSES)
+    assert recovered == len(MISSES)
     run("fresh batch", FRESH)
