@@ -35,3 +35,15 @@ $$
 Indeed $w_{k+1}=(w_k-Md_k)/P_*$ and every digit is between zero and $P_*-1$. Cramer's rule bounds the reduced numerators and denominators by $K=(sH_M)^s\max(1,\|w\|_\infty)$. Lift past modulus $2K^2$, reconstruct the coordinates, and check the integer equations. The common denominator divides the absolute pivot determinant, so all projected columns can be stored on one scale $D_0 2^P$. Here $D_0$ is the least common multiple of the reconstructed denominators and $P$ is the dyadic precision. Both $s$ and $\log K$ are at most $B\operatorname{poly}(L)$. The precision proof accounts for the projected rank decisions, the inhomogeneous target, and tape access. [Bounds and stopping rule](cogentic-transposed-log-precision.md)
 
 On the engineered quadratic fixture, the replay compares 38 transpose projections at precisions 64 and 192 against a direct rational solve. It selects two independent projected directions, lifts just those two primal right-hand sides and the target, and verifies the resulting modular order multiple and proper gcd. [Exact projection replay](../experiments/cogentic-transposed-extraction.py)
+
+## What an averaged residue estimate would buy
+
+There is a different possible improvement using the **full** grid and the transposed extractor. Denote $\rho=2(xc+1/x)/(3b)$. The grid, pivot setup, and expected column work then give the time coefficient
+$$
+ K=\max(2c,3b,2c-\rho+2b).
+$$
+The high-moment count still requires $2c>b+\rho$, with a strict margin for a fixed even trace order. The current proof of the progression estimates uses $c>2b$. Suppose those estimates, including cyclic products, the repeated-mark bounds and the target, could instead be proved at $c$ near $3b/2$. Then the cost formula would have infimum $2(3/2)^{2/3}=2.62074\ldots$ subject to this relaxed regime.
+
+Indeed, put $t=b/c$. Since $xc+1/x\ge 2\sqrt c$, feasibility implies $0<t<2$ and $c^{3/2}>4/[3t(2-t)]$. Multiply the resulting lower bound on $c$ by $\max(2,3t)$. This expression decreases up to $t=2/3$ and increases thereafter. At $t=2/3$, $x=1/\sqrt c$ and $c=(3/2)^{2/3}$, all three costs equal $2c$. Strict nearby schedules with $t=2/3$ and $c$ slightly larger approach that limit. This is the infimum of a proposed cost formula under relaxed rank constraints. Obtaining the requisite arithmetic estimates is an open step.
+
+For example, the rational parameters $(c,b,x)=(1.35,0.88,0.86066)$ give $K=2.70$ and satisfy $32(2c-b-\rho)>2b$. Even aborting when the retained column count exceeds its one-point exponential estimate by $\exp(0.0001H)$ leaves the maximum at 2.70. This schedule violates the existing $c>2b$ cell estimate. In particular, a two-dimensional variance estimate averaged over slopes would still have to survive the products of centered coefficients sharing row labels and the prime conditions in the score. [Exact arithmetic replay](../experiments/cogentic-variable-multiple-costs.py)
