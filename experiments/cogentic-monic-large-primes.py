@@ -55,10 +55,10 @@ def polynomial(values, x, mod):
     return result
 
 
-def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False):
+def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *, height=HEIGHT):
     retained = []
-    for a in range(-HEIGHT, HEIGHT + 1):
-        for b in range(1, HEIGHT + 1):
+    for a in range(-height, height + 1):
+        for b in range(1, height + 1):
             if gcd(a, b) != 1 or gcd(a - b*m, n) != 1:
                 continue
             small, large, smooth = [], [], True
