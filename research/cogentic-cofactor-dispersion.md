@@ -82,3 +82,34 @@ Now expand $\widehat C$ and $\widehat C^2$ for the enlarged fields. For each mar
 This transfers the actual grid normalization and mass penalty while the cofactor coordinates stay averaged. The centered Gram terms use other cofactor-dependent references, which are outside this calculation. The two-mark count also needs $K=\exp((2+o(1))V)$. Fixing the cofactor removes the full-cycle guarantee, and scanning it costs more than the saving in intercept length.
 
 The [finite replay](../experiments/cogentic-cofactor-dispersion.py) checks three two-mark pools on a cycle of 240 cofactor residues, including two prior congruence restrictions. An independent enumeration of 539 smooth marked values checks the prime-omission congruences, division by their selected product and the Bonferroni brackets.
+
+## Cofactor descent below a complete residue cycle
+
+For horizontal scalar slices with fixed prime omissions one can replace the full-cycle argument by a counting-norm bound. This works for a product of two scalar fractions even when the two residues are correlated. Let $k$ range over an arbitrary interval of $K'$ consecutive integers, and for each mark write the step as $q_i=gn_{a_i}$, with progression length $T_i$. Keep the unit condition modulo $q_i$ and delete its prime divisors from that mark's band. Assume the marked class is a unit modulo $g$ throughout, as in the preceding calculation. All omitted primes are fixed in this argument.
+
+Replace the shifted physical interval at each $k$ by the leftmost cofactor's integer interval of length $q_iT_i$, keeping the residue $r_i(k)$ modulo $q_i$. The error in the fraction is at most $O(R_{a_i}K'/(n_{a_i}T_i)+1/T_i)$ by the same endpoint count as (1). Additions and subtractions to the residue as $k$ changes give a single orbit of period $n_{a_i}$, because $r_i(k)$ changes by $\pm gR_{a_i}$ and $R_{a_i}$ is coprime to $n_{a_i}$. Hence each residue has probability at most $1/n_{a_i}+1/K'$.
+
+Write $C_i(r)$ for the count at a unit class in the common interval, $M_i=\sum_r C_i(r)$ for its total, and $E_i=O(w h_i^{\sigma_0})$ for the nonprincipal character bound at height $h_i$. Parseval gives
+\[
+ \sum_{r\in(\mathbb Z/q_i\mathbb Z)^\times}
+ \left|C_i(r)-M_i/\varphi(q_i)\right|^2\le E_i^2.
+\]
+Consequently the expectation over $k$, including only unit $r_i(k)$, of the absolute error after replacing $C_i(r_i(k))/T_i$ by $p_i=M_i/(\varphi(q_i)T_i)$ is at most
+\[
+ \frac{E_i}{T_i}\sqrt{\frac1{n_{a_i}}+\frac1{K'}}.
+\]
+Both fractions lie in $[0,1]$ because the common integer interval has exactly $T_i$ integers per residue. Set each to zero on nonunit residues. Telescoping a product of the two fractions shows that the expected product differs from
+\[
+ p_1p_2\Pr_k(r_1(k),r_2(k)\text{ both units})
+\]
+by at most the sum of their endpoint and counting-norm errors. No independence of the two residue maps is used. The one-mark version uses just its single unit probability. The sharp untwisted count and truncated totient estimate compute each $p_i$ to error $e^{-CH}$ in $e^{O(H)}$ time when $q_iT_i\ge h_i^{\sigma_0}e^{O_C(H)}$. Numerical approximations can be clipped to $[0,1]$. [Counting-norm and principal-term estimates](cogentic-weighted-smooth-count.md#weighted-scalar-estimate)
+
+The joint unit probability can be computed to error $e^{-CH}$ without factoring $n_{a_1}n_{a_2}$. For each prime dividing this product and coprime to $g$, the unit conditions forbid at most two classes of $k$. Test divisibility by primes through $Y^{1/2}$, with $Y=e^{D H}$ for a sufficiently large constant $D$, and ignore the rest. The ignored probability is $O(\omega(n_{a_1}n_{a_2})(Y^{-1/2}+1/K'))$. Expand the remaining avoidance predicates by inclusion–exclusion, pruning on the first included-prime product above $Y$. Any retained intersection is a union of at most $2^{\omega(d)}$ CRT classes modulo its squarefree product $d$ and has an exact floor count. A first-crossing branch has product $Y<d\le Y^{3/2}$, and the ignored descendants form a remaining avoidance predicate bounded by one on that intersection. Thus its contribution is bounded by $2^{\omega(d)}(1/d+1/K')$. Summing these upper bounds costs at most
+\[
+ Y^{-1/2}\prod_{p\mid n_{a_1}n_{a_2}}(1+2p^{-1/2})+Y^3/K'.
+\]
+The product is $e^{o(H)}$ since the number of distinct prime factors is $O(V)$ and $p_i\ge i+1$ for the ordered primes. Retained CRT enumeration costs a polynomial in $Y$ and the input bit lengths. Thus the unit probability has the claimed precision when $K'$ has any fixed positive leading exponent on the $V$ scale.
+
+On the fixed schedule let $\lambda=100001$ and $\log T_i=(\tau+o(1))V$ with $50000<\tau<50000.5$. For any fixed $\kappa$ with $\lambda-2\tau<\kappa<1$, the bound above evaluates both child averages during cofactor bisection down to length $\exp((\kappa+o(1))V)$. Indeed $h_i^{\sigma_0}=\exp((\lambda/2+o(1))V)$, $n_{a_i}=\exp((1+o(1))V)$, and $\kappa>\lambda-2\tau$ gives a strict margin in the counting-norm error. Even the original longest cofactor interval leaves the endpoint error exponentially small in $V$. The pooled physical interval also exceeds the untwisted threshold. Keeping the child with the larger computed fraction loses at most $2e^{-CH}$ per split. Starting with the populated one-mark child described above and choosing $C$ sufficiently large therefore preserves its positive exponential density. This reduces the cofactor width below a single residue cycle, even though the intercept is still below its individual square-root threshold.
+
+The remaining cofactor exponent $\kappa$ is positive for any fixed $\tau<\lambda/2$. An exhaustive scan over its cofactors and intercepts would cost $\exp((\kappa+\tau+o(1))V)$, with $\kappa+\tau>\lambda-\tau>\lambda/2$. The estimate does not supply a final fixed cofactor at one-third cost. It applies to the indicated scalar factors rather than the full Gram or changing-cofactor score.
