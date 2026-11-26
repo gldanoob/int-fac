@@ -43,3 +43,24 @@ For comparison, the unconditional product argument at the polynomial prime cutof
 As an exact example, take $N=899=29\cdot31$, $s=1$, and the primes through $23$. The products $6=2\cdot3$ and $35=5\cdot7$ agree modulo $29$ and differ modulo $31$. The word with coefficients $+1$ at $2,3$ and $-1$ at $5,7$ has support four. Its median decomposition uses these two disjoint pairs. The gcd of their difference is $29$.
 
 The finite replay compares the tree partition with exhaustive enumeration at every support limit in dimensions zero through eight. Across the 45 partitions it recovers all 34,445 signed words exactly once. [Combinatorial replay](../experiments/cogentic-sparse-support-partition.py)
+
+## How short can a productive word be?
+
+Write an unpowered word on distinct positive primes at most $B$ as the reduced ratio $U/V$. A nonempty signed support of size $k$ gives $U\ne V$ and $UV\le B^k$. If it is one modulo a prime $p$ dividing $N$, then $|U-V|\ge p$, so one sign side alone contains at least $\log(p+1)/\log B$ letters. On every balanced semiprime the least possible support for a proper gcd at cutoff $B=C(\log N)^2$, $C>e^{-2}$, is therefore $\Theta(\log N/\log\log N)$ for sufficiently large $N$. The upper bound is the local pigeonhole construction above. This rules out a uniform reduction of the unpowered support to the one-third enumeration range. A small local subgroup in the preceding unpowered sufficient condition can only help when the relevant prime is below the product-height bound.
+
+Public powering changes the necessary height. For any distinct positive $U,V$ coprime to $p$ and positive scalar $s$, suppose $(U/V)^s=1\bmod p$. With $d$ the order of $U/V\bmod p$ and $g_p=\gcd(s,p-1)$, one has
+\[
+       p\le |\Phi_d(U,V)|\le (U+V)^{\varphi(d)}
+          \le (U+V)^{\varphi(g_p)} .
+\]
+Here $\Phi_d$ is the homogenized cyclotomic polynomial. Of the factors of $U^d-V^d$, none indexed by a proper divisor of $d$ can vanish modulo $p$, by minimality of the order. Each complex linear factor of $\Phi_d$ has absolute value at most $U+V$, and $\varphi(d)\mid\varphi(g_p)$ since $d\mid g_p$. This necessary bound applies simultaneously to all such rational representatives for a given $p,s$.
+
+In particular, on almost all pairs of distinct primes $p,q\in[Y,2Y]$, **no** positive rational with distinct numerator and denominator at most $\exp(h)$ gives a local relation at either prime after the default powering, for any $h=o(\log Y)$. This holds simultaneously for every positive scalar whose odd part divides $N-1$, $N=pq$. The assertion includes signed equalities by doubling the scalar. For the proof set $X=\log Y/(2(h+\log 2))$, which tends to infinity. At $p$ the gcd of any allowed scalar with $p-1$ divides $a g_0$, where $a$ is the full power of two in $p-1$ and $g_0$ is the odd part of $\gcd(p-1,q-1)$. Indeed $N-1\equiv q-1\bmod(p-1)$. If $ag_0<X$, the displayed cyclotomic bound would give $p\le\sqrt Y$. The same argument works at $q$.
+
+For completeness the proportion where $a g_0\ge X$ at either prime is
+\[
+ O\!\left(\frac{\log(2X)}X+\frac{\log(2X)(\log Y)^2}{\sqrt Y}\right).
+\]
+The event $a>X$ is bounded by $O(1/X)$ by counting primes in one class modulo the first power of two above $X$. For each dyadic $a\le X$, sum over odd $d\ge X/a$ dividing both predecessors, including $d=g_0$. When $ad\le\sqrt Y$, Brun–Titchmarsh in the classes $p=1\bmod ad$, $q=1\bmod d$, normalized by the dyadic prime count, gives a total proportion $O(a^{-1}\sum_{d\ge X/a}\varphi(d)^{-2})=O(1/X)$. The tail estimate follows from $\sum_{n\le x}(n/\varphi(n))^2=O(x)$ by dyadic summation. For this mean bound expand $(n/\varphi(n))^2=\prod_{\ell\mid n}(1+c_\ell)$ with $c_\ell=(1-1/\ell)^{-2}-1=O(1/\ell)$, then bound the mean by $\prod_\ell(1+c_\ell/\ell)<\infty$. For $ad>\sqrt Y$, counting integer multiples in the two predecessors gives total proportion $O((\log Y)^2 a^{-1}\sum_{d>\sqrt Y/a}d^{-2})=O((\log Y)^2/\sqrt Y)$. Only moduli $ad\le2Y$ can occur. Sum over the $O(\log(2X))$ powers of two and interchange $p,q$. For the single scalar $s=N-1$ both local gcds equal $\gcd(p-1,q-1)$, so the same count with the common divisor alone omits the $\log(2X)$ factor. [Montgomery and Vaughan, The large sieve](https://doi.org/10.1112/S0025579300004708)
+
+For a polynomial-size menu of primes bounded by a power of $\log N$, any signed support $o(\log N/\log\log N)$ has logarithmic height $o(\log N)$. Thus on almost all balanced semiprimes the default scalar still gives zero nontrivial relations on the entire union of these short candidates, regardless of the search order. Other scalars and bases of greater rational height can change this conclusion. An exact finite check tested the displayed cyclotomic implication in 149,940 combinations of two primes, a scalar, a local prime and a reduced ratio, including 10,170 local equalities.
