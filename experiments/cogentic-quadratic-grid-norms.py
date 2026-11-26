@@ -16,15 +16,21 @@ def norm_words(field, points, height):
     constant, linear, leading = field
     if leading != 1 or linear not in (0, -1, -2) or height < 1:
         raise ValueError("expected a centered monic quadratic and positive grid height")
-    cutoff = (2 + abs(linear))*height**2
-    primes = tuple(GRID["primes_through"](cutoff))
-    bits, cached, words = {}, {}, []
+    values = []
     for a, b in points:
         if abs(a) > height or not 1 <= b <= height or gcd(a, b) != 1:
             raise ValueError("expected primitive marks in the given box")
-        value = a*a + linear*a*b + constant*b*b
+        values.append(a*a + linear*a*b + constant*b*b)
+    return bounded_words(values, (2 + abs(linear))*height**2)
+
+
+def bounded_words(values, cutoff):
+    """Return signed squareclass columns when distinct stripped tails are coprime."""
+    primes = tuple(GRID["primes_through"](cutoff))
+    bits, cached, words = {}, {}, []
+    for value in values:
         if not value:
-            raise ValueError("squareclasses require nonzero norms")
+            raise ValueError("squareclasses require nonzero integers")
         if value not in cached:
             word = int(value < 0)
             remaining = abs(value)
