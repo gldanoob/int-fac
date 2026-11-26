@@ -3,9 +3,9 @@
 import argparse
 import json
 from bisect import bisect_left
-from itertools import combinations, groupby
+from itertools import chain, combinations, groupby, product
 from math import gcd
-from operator import itemgetter
+from operator import index, itemgetter
 
 from sage.all import PolynomialRing, Zmod
 
@@ -77,6 +77,37 @@ def sorted_local_collision(n, left, right):
     if hit is None:
         raise ArithmeticError("nonunit bucket contained no nonidentical local hit")
     return hit
+
+
+def tuple_collision(n, left, right):
+    """Find global tuple equality or a proper gcd of a single coordinate difference.
+
+    A tuple match at any prime dividing n gives one of these outcomes. A gcd
+    can come from a coordinate even when the two tuples have no common match.
+    """
+    n = index(n)
+    if n < 2:
+        raise ValueError("require modulus N >= 2")
+    left = [tuple(index(value) % n for value in row) for row in left]
+    right = [tuple(index(value) % n for value in row) for row in right]
+    if not left or not right:
+        return None
+    width = len(left[0])
+    if any(len(row) != width for row in chain(left, right)):
+        raise ValueError("require tuples of a common length")
+
+    ordered = sorted((row, j) for j, row in enumerate(right))
+    for i, row in enumerate(left):
+        k = bisect_left(ordered, (row, -1))
+        if k < len(ordered) and ordered[k][0] == row:
+            return dict(status="global-equal", left_index=i, right_index=ordered[k][1])
+
+    for coordinate in range(width):
+        hit = local_collision(n, (row[coordinate] for row in left),
+                              (row[coordinate] for row in right))
+        if hit is not None:
+            return dict(hit, status="local-split", coordinate=coordinate)
+    return None
 
 
 def square_alignment(n, left, right):
@@ -218,6 +249,45 @@ def replay():
     assert search(35, 2, 3, 3)["status"] == "parameter-gcd"
     print(f"{checked} brute-force comparisons plus duplicate, saturation, prime-power and unit controls")
     print(json.dumps(result))
+    replay_tuples()
+
+
+def replay_tuples():
+    assert tuple_collision(35, [(1, -1), (0, 1)], [(0, 1), (36, 34), (1, 34)]) == dict(
+        status="global-equal", left_index=0, right_index=1)
+    hit = tuple_collision(125, [(0, 0)], [(0, 25)])
+    assert (hit["factor"], hit["coordinate"], hit["left_index"], hit["right_index"]) == (25, 1, 0, 0)
+    assert tuple_collision(35, [(0, 0)], [(5, 1)])["factor"] == 5
+    assert tuple_collision(35, [()], [()])["status"] == "global-equal"
+    try:
+        tuple_collision(35, [(0,)], [(0, 0)])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("mismatched tuple lengths were accepted")
+
+    checked = 0
+    for n in (2, 4, 6, 9):
+        points = list(product(range(n), repeat=2))
+        lists = [()] + [(point,) for point in points] + list(product(points[:4], repeat=2))
+        for left, right in product(lists, repeat=2):
+            pairs = list(product(left, right))
+            exact = any(a == b for a, b in pairs)
+            proper = any(1 < gcd(x-y, n) < n for a, b in pairs for x, y in zip(a, b))
+            hit = tuple_collision(n, left, right)
+            if not exact and not proper:
+                assert hit is None
+            else:
+                assert hit is not None
+                a, b = left[hit["left_index"]], right[hit["right_index"]]
+                if exact:
+                    assert hit["status"] == "global-equal" and a == b
+                else:
+                    k, divisor = hit["coordinate"], hit["factor"]
+                    assert hit["status"] == "local-split" and 1 < divisor < n
+                    assert divisor == gcd(a[k]-b[k], n)
+            checked += 1
+    print(f"{checked} brute-force tuple comparisons plus normalization and prime-power controls")
 
 
 if __name__ == "__main__":
