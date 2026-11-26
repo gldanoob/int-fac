@@ -71,3 +71,4 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-monic-fresh-cohort.py --validate experiments/cogentic-monic-fresh-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-monic-mixed-complete.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-quadratic-square-kernel.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-centered-quadratic-density.py
