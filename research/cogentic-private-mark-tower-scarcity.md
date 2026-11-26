@@ -53,6 +53,14 @@ For each sufficiently large odd input $N$, first take $\gcd(15,N)$. A nonunit gi
 
 For the primitive nonmonic case take $F_n=x^2[1+n(2(x+x^{-1})-5)(3(x+x^{-1})-10)]$ with $n>0$ and $n\equiv3\pmod{11}$. Its coefficients $6n,-35n,62n+1,-35n,6n$ have gcd one. Modulo eleven its monic normalization is $x^4+7x^3+7x+1$, coprime to $x^{121}-x$ and hence irreducible. The same intermediate generator gives a quadratic tower. The marks $2,1/2,3,1/3$ have homogeneous values $4,4,9,9$, while the leading coefficient grows without bound.
 
+## Growing quadratic towers with one unit mark
+
+For any power of two $d=2k\ge4$ and sufficiently large odd $N$, screen $\gcd(3,N)$. When it is one, choose $N\le t<5N$ with $t\equiv2\pmod4$ and $t\equiv 2^{-k}\pmod N$. The polynomial
+\[
+ F(x)=(x-1)^{2k}-t x^k
+\]
+has a simple root modulo $N$ at two, since $F(2)=1-2^k t$ and $F'(2)\equiv 3k/2\pmod N$. The shift $F(x+1)=x^{2k}-t(x+1)^k$ is Eisenstein at two. If $\alpha$ is a root, then $\theta=(\alpha-1)^2/\alpha$ satisfies $\theta^k=t$. The power-of-two radical tower up to $\theta$ is quadratic at each step by Eisenstein. Its last extension to $\alpha$ is given by $x^2-(\theta+2)x+1$. The mark zero has value one and unit reduction. Taking $d=\Theta(D)$ gives a growing tower with log coefficient height $\Theta(\log N)$ and a polynomial-time construction. This single mark supplies no square-relation guarantee.
+
 ## The unique affine root prescription
 
 The private-row construction also prescribes exactly one affine root, simple, modulo each assigned prime. A nontrivial complete quadratic tower cannot meet that prescription in a monic model. At any rational prime $p$, each $\mathbb Q_p$ factor degree is a power of two, since degrees multiply along completed quadratic towers. The total degree is even, so the number of local degree-one factors is even. Any simple root modulo $p$ lifts to a linear factor by Hensel's lemma. A second $\mathbb Q_p$ root is integral by monicity and reduces to a different affine root by uniqueness of the lift. For a primitive nonmonic model, the same argument uses projective roots with primitive $p$-adic coordinates. The additional root can be outside the marked set, so the local restriction still permits a private valuation among selected marks.
