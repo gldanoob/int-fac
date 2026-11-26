@@ -53,3 +53,4 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-ramified-two.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-square-probes.py
 	"$(PYTHON)" -B experiments/cogentic-planted-unit-signatures.py
+	"$(PYTHON)" -B experiments/cogentic-private-grid-density.py

@@ -2,7 +2,7 @@
 
 This repository investigates algorithms that return the smallest prime factor of every integer $N\ge2$. For a $b$-bit input, the public kernel-checked leaderboard bound is $2^{O(b/\sqrt{\log b})}$ deterministic bit operations. A November 25 Cogentic manuscript claims the stronger deterministic worst-case bound $2^{O(b^{3/4})}$. Its companion claims complete factorization in per-input expected time $L_N[1/3,105]$ using random bits. Both authors' release statements announce Lean proof sources separately. [Pinned manuscripts, models and verification status](research/cogentic-factoring-papers.md) · [Leaderboard](https://bigospeedrun.com/integer-factoring) · [Upstream factoring project](https://github.com/1337isnot1337/integer-factoring)
 
-Building on the deterministic companion, our current paper bound for complete factoring on every input is $\exp(O(b^{2/3}(\log b)^{1/3}))$. It uses the companion's order extractor and a new smooth-number estimate from proved Dirichlet GRH. The fixed four-coordinate construction has undergone internal review of its window estimates, rank certificate and bit cost. Lean checks a concrete deterministic program with trial division on a search miss, including the multiplicities of all returned prime factors. The fast worst-case claim still needs a proof that the search succeeds on every sufficiently large surviving input and a bound on the program’s bit operations. [Worst-case verification and Sage checks](research/cogentic-worst-case-verification.md) · [Derivation](research/cogentic-deterministic-two-thirds.md) · [Single certificate to factor](research/cogentic-dense-exponents.md) · [Executable two-field prototype](research/cogentic-quadratic-order.md)
+On the main branch, Lean 4.35.0 checks complete factorization and the deterministic worst-case bound $\exp(O(b^{2/3}(\log b)^{1/3}))$ in the same build as the readable GRH proof. The theorem uses the local exponent splitter and has no GRH or Cogentic theorem parameter. This branch develops the separate deterministic one-third search. [Pinned combined build and axiom audit](https://github.com/gldanoob/int-fac/blob/d77c21fc89ce983e917282b5b6ba165292a8b0d4/research/cogentic-worst-case-verification.md#combined-build-with-the-readable-grh-proof) · [Two-thirds derivation](research/cogentic-deterministic-two-thirds.md)
 
 
 ## Research
@@ -55,6 +55,8 @@ Start with the [known-results index](research/known-results.md), including the [
 | [Third parallel search](research/round-3.md) | Bounded CRT joins, Lenstra–Pomerance relation lifts, class-number windows, and global order multiples |
 
 ## Open problems by topic
+
+For the raw monic pair, infinitely many rough composite inputs have no productive ordinary square relation even on the full primitive grid of height $\exp(cW)$ for each fixed $0<c<1/\sqrt{12}$. Larger constants, field selection and independent unit corrections remain open. A 1,375-bit replay checks all 1,958 nonzero directions of a height-40 grid. [Density proof and precise scope](research/cogentic-private-grid-density.md)
 
 | Direction | What the current result still needs |
 | --- | --- |
