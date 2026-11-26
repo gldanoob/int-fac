@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Exact replay for divisor counting by sieving progression indices."""
 
-from math import gcd, isqrt
+from math import isqrt
 from random import Random
 
 
@@ -19,6 +19,8 @@ def primes_through(n):
 
 def progression_sieve(c, d, t, allowed_primes):
     """Count nonzero |c+d*j| that are squarefree products of allowed primes."""
+    if c == 0 and d == 0:
+        return 0, 0
     residual = [abs(c + d * j) for j in range(t)]
     squarefree = [True] * t
     visits = 0
@@ -87,9 +89,10 @@ def check_cases():
         slow = direct_count(c, d, t, allowed)
         assert fast == slow, (c, d, t, allowed, fast, slow)
         # Every p not dividing d visits at most ceil(T/p) indices; p|d visits T.
-        bound = sum(t if d % p == 0 and c % p == 0 else
-                    (0 if d % p == 0 else len(range((-c * pow(d, -1, p)) % p, t, p)))
-                    for p in allowed)
+        bound = (0 if c == 0 and d == 0 else
+                 sum(t if d % p == 0 and c % p == 0 else
+                     (0 if d % p == 0 else len(range((-c * pow(d, -1, p)) % p, t, p)))
+                     for p in allowed))
         assert visits == bound
 
     # Demonstrate the additive visit count on a long progression versus
