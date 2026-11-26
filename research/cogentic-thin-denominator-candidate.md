@@ -25,3 +25,13 @@ The proposed capped cost has coefficient \(\max(r,3b+2\eta)\) and workspace at m
 - Audit the full high-trace argument, including the diagonal and peeling steps, for every fixed smaller menu. In particular check that all uses of denominator averaging and exact coincidences are accounted for, including small-prime tails and identical denominators. The leading substitutions above do not by themselves prove this uniform transfer.
 - Give a complete precision and tape ledger for the lifted transposed rows, the incremental real rank test, and the final reconstruction with individually cleared denominators. The proposal needs the same guarantee on every full-rank modular pivot outcome, including poorly conditioned real projected columns.
 - Replay the segmented projective sieve and the transpose projection on exact fixtures. Neither the thinner-domain asymptotic nor the new extraction path has been tested here.
+
+## Exact transpose replay and the lifting cost
+
+For a square integer system (Mlambda=w) of dimension (s), put (H_M=max(1,max_{i,j}|M_{ij}|)). The residuals in base (P_*) satisfy
+[
+ |w_k|_inftyle P_*^{-k}|w|_infty+sH_M.
+]
+This follows from (w_{k+1}=(w_k-Md_k)/P_*) with every component of (d_k) between zero and (P_*-1). Cramer's rule bounds every reduced numerator and denominator by (K=(sH_M)^smax(1,|w|_infty)). Lift until the modulus exceeds (2K^2), reconstruct each coordinate, and check the integer equations. With (sle B,operatorname{poly}(L)) and (log Kle B,operatorname{poly}(L)), the modular products, integer residual updates, accumulation of residues and classical rational reconstruction together cost (B^{3+o(1)}) bit operations for polynomially many right-hand sides. Each denominator divides the pivot determinant. Their least common multiple (D_0) therefore has (B,operatorname{poly}(L)) bits, and all projected columns can be streamed as integer numerators on the one scale (D_0 2^P), where (P) is the dyadic precision.
+
+On the engineered quadratic fixture, the replay compares 38 transpose projections at precisions 64 and 192 against a direct rational solve. It selects two independent projected directions, lifts just those two primal right-hand sides and the target, and verifies the resulting modular order multiple and proper gcd. [Exact projection replay](../experiments/cogentic-transposed-extraction.py)
