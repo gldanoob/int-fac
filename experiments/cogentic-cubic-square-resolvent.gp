@@ -127,4 +127,4 @@ cubic_resolvent_replay() = {
   print(["verified square masks",tested]);
 };
 
-iferr(cubic_resolvent_replay(),err,print(err);quit(1));
+if(type(cogentic_as_library)!="t_INT",iferr(cubic_resolvent_replay(),err,print(err);quit(1)));
