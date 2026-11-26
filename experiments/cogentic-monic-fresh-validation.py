@@ -1,4 +1,4 @@
-"""Run the frozen fresh validation portfolio using public integers only."""
+"""Run the fixed monic portfolio on one integer or replay its frozen validation."""
 
 import argparse
 import json
@@ -9,7 +9,6 @@ from subprocess import CalledProcessError, TimeoutExpired
 from time import monotonic
 
 HERE = Path(__file__).resolve().parent
-INPUTS = tuple(json.loads((HERE / "cogentic-monic-fresh-inputs.json").read_text()))
 NEARBY = run_path(str(HERE / "cogentic-monic-nearby-bases.py"))
 DRIVER, GRID = NEARBY["DRIVER"], NEARBY["GRID"]
 SCHEDULED = run_path(str(HERE / "cogentic-monic-pair.py"))["scheduled_degree"]
@@ -29,6 +28,8 @@ def plan_shifts(n):
     trials = []
     for j in (1, 2):
         base = m-2*j
+        if base < 3:
+            continue
         fields = NEARBY["shifted_pair"](n, base)
         fixed = pair_trial(n, base, fields)
         score = NEARBY["local_score"](n, base, fields if isinstance(fixed, int) else fixed[1])
@@ -38,7 +39,6 @@ def plan_shifts(n):
 
 def raw(n):
     degree = SCHEDULED(n)
-    assert degree == 2
     m, f, g = GRID["CHECK_PAIR"](n, degree)
     fixed = pair_trial(n, m, (f, g))
     if isinstance(fixed, int):
@@ -72,15 +72,62 @@ def log(record):
     print(json.dumps(record), flush=True)
 
 
+def nearby_attempt(n, trial, budget):
+    result = measure(n, "nearby", NEARBY["measure"], trial, budget)
+    charged = (budget if result["status"] == "error" else
+               result.get("tests", 0) + (result["status"] in ("time-cap", "stack-cap")))
+    assert charged <= budget
+    return dict(result, charged_queries=charged)
+
+
+def ordinary_result(result):
+    n = result["n"]
+    candidates = [result["divisor"]] if "divisor" in result else []
+    candidates.extend(g for g in result.get("derivative_gcds", ()) if 1 < g < n)
+    if candidates:
+        assert all(1 < g < n and n % g == 0 for g in candidates)
+        result = dict(result, divisor=candidates[0], cofactor=n//candidates[0])
+    assert all(1 < cert["divisor"] < n and n % cert["divisor"] == 0 for cert in result["factors"])
+    log(result)
+    return bool(candidates or result["factors"])
+
+
+def run_single(n):
+    if n in (2, 3, 5, 7):
+        log(dict(n=n, stage="precheck", status="prime", factors=[]))
+        return
+    if n % 2 == 0:
+        ordinary_result(dict(n=n, stage="precheck", status="even", divisor=2, factors=[]))
+        return
+    degree = SCHEDULED(n)
+    if ordinary_result(dict(measure(n, "raw", raw), degree=degree)):
+        return
+    plans = plan_shifts(n) if degree == 2 else []
+    if not plans:
+        reason = "scheduled-degree" if degree != 2 else "no-odd-base-at-least-three"
+        log(dict(n=n, stage="nearby", status="skipped", reason=reason, factors=[]))
+    budget = PAIR_CAP
+    for trial in plans:
+        result = nearby_attempt(n, trial, budget)
+        budget -= result["charged_queries"]
+        if ordinary_result(result):
+            return
+        if not budget:
+            break
+    if not ordinary_result(measure(n, "mixed", mixed)):
+        log(dict(n=n, stage="portfolio", status="exhausted", factors=[]))
+
+
 def run():
-    plans = {n: plan_shifts(n) for n in INPUTS}
-    unresolved = set(INPUTS)
-    for n in INPUTS:
+    inputs = tuple(json.loads((HERE / "cogentic-monic-fresh-inputs.json").read_text()))
+    plans = {n: plan_shifts(n) for n in inputs}
+    unresolved = set(inputs)
+    for n in inputs:
         result = measure(n, "raw", raw)
         log(result)
         if result["factors"]:
             unresolved.remove(n)
-    for n in INPUTS:
+    for n in inputs:
         if n not in unresolved:
             log(dict(n=n, stage="nearby", status="skipped-after-square", factors=[]))
             continue
@@ -90,15 +137,12 @@ def run():
                 log(dict(n=n, j=trial[0], stage="nearby", status="skipped-after-square" if n not in unresolved
                          else "skipped-after-budget", factors=[]))
                 continue
-            result = measure(n, "nearby", NEARBY["measure"], trial, budget)
-            charged = (budget if result["status"] == "error" else
-                       result.get("tests", 0) + (result["status"] in ("time-cap", "stack-cap")))
-            assert charged <= budget
-            budget -= charged
-            log(dict(result, charged_queries=charged))
+            result = nearby_attempt(n, trial, budget)
+            budget -= result["charged_queries"]
+            log(result)
             if result["factors"]:
                 unresolved.remove(n)
-    for n in INPUTS:
+    for n in inputs:
         if n not in unresolved:
             log(dict(n=n, stage="mixed", status="skipped-after-square", factors=[]))
             continue
@@ -123,9 +167,14 @@ def verify_saved(path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("n", nargs="?", type=int, help="public integer for a single search")
     parser.add_argument("--verify", type=Path, help="independently verify saved certificates")
     args = parser.parse_args()
-    if args.verify:
+    if args.n is not None:
+        if args.n < 2 or args.verify:
+            parser.error("provide N >= 2 without --verify")
+        run_single(args.n)
+    elif args.verify:
         verify_saved(args.verify)
     else:
         run()
