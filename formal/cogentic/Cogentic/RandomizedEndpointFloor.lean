@@ -12,14 +12,14 @@ theorem finite_grid_schedule_floor_of_endpoint {n : ℕ} (z w : ℕ → ℝ)
     (hstep : ∀ i < n, z i ≤ z (i + 1))
     (htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ 215463/100000 - b - h * z (i + 1))
     (hmoment : 4 / (9 * curve^2) ≤ ∑ i ∈ Finset.range n, z (i + 1)^2 * w i)
-    (hslope : 0 ≤ 2 * (b / δ) - 1 / 3)
+    (hratio : 0 ≤ ratio)
     (hheight : (1 + δ * Z^2 / (2 * (2 / (3 * curve^2)))) / δ^3 ≤ height)
     (hbox : height + v ≤ ratio * (b / δ))
     (hmean : ratio / 3 + 1 / (3 * δ^2 * b) ≤ 2 * v - b / δ)
     (hraw : b + δ * ratio / 3 + 1 / (3 * δ * b) ≤ 215463/100000) : False := by
   refine finite_grid_schedule_floor (n := n) (fun i ↦ z i / Z) w b δ (curve * Z) (h * Z)
     ratio v height hb hd (mul_pos hc hZ) (mul_le_mul_of_nonneg_right hh hZ.le)
-    (by simp [hz0]) (by simp [hzn, hZ.ne']) ?_ ?_ ?_ hslope ?_ hbox hmean hraw
+    (by simp [hz0]) (by simp [hzn, hZ.ne']) ?_ ?_ ?_ hratio ?_ hbox hmean hraw
   · exact fun i hi ↦ div_le_div_of_nonneg_right (hstep i hi) hZ.le
   · intro i hi
     have he : h * Z * (z (i + 1) / Z) = h * z (i + 1) := by field_simp

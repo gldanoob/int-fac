@@ -12,9 +12,9 @@ def check_schedule(
     descent=".5005 2.15 2.2684 .70904",
     recognition=".7631 1.07918 .0001 2.159",
     period_bounds=".7089 .452",
-    algebraic_exponent="2.0001",
+    algebraic_exponent="2.0001", private_exponent="1.4143",
     stages=128, first_knot=".0662", first_floor=".0043", minimum_mean=".001",
-    matrix_exponent="2.4",
+    matrix_exponent="2.4", rounded_exponents=(12_000, 16_000),
 ):
     delta, kappa, beta, alpha, gamma = map(F, field.split())
     top_slope, high_ratio, low_ratio, height = map(F, descent.split())
@@ -61,8 +61,8 @@ def check_schedule(
     weights = [h_private * (right - left) for left, right in zip(grid, grid[1:])]
     weights.append(shape_loss - sum(a * w for a, w in zip(scales, weights)))
     fractions = [a * w / shape_loss for a, w in zip(scales, weights)]
-    assert F("1.4143")**2 > 2
-    assert F("1.4143")**2 * 2 * y0 / (3 * delta) < h_private**2
+    assert F(private_exponent)**2 > 2
+    assert F(private_exponent)**2 * 2 * y0 / (3 * delta) < h_private**2
     assert F(algebraic_exponent)**2 * 2 * y0 / (3 * delta) < h_algebraic**2
     count_ratio = sum(weights) / shape_loss
     assert min(weights) > 0 and sum(fractions) == 1 and count_ratio < 2
@@ -96,7 +96,7 @@ def check_schedule(
     print(f"private factor-count ratio: {float(count_ratio):.9f} of the 2 limit")
 
     replay = run_path(str(Path(__file__).with_name("keybreak-tiered-descent.py")))["check_integer_schedule"]
-    for exponent in (12_000, 16_000):
+    for exponent in rounded_exponents:
         replay(
             2**exponent, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=gamma,
             top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,

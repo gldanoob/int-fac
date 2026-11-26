@@ -11,7 +11,7 @@ namespace Cogentic.Randomized
 two-variable tradeoff, even if the height and box dimensions can be retuned. -/
 theorem terminal_tradeoff_of_search (b δ x ratio v height C : ℝ)
     (hb : 0 < b) (hd : 0 < δ) (hx : 0 < x)
-    (hslope : 0 ≤ 2 * (b / δ) - 1 / 3)
+    (hratio : 0 ≤ ratio)
     (hheight : (1 + δ / (2*x)) / δ^3 ≤ height)
     (hbox : height + v ≤ ratio * (b / δ))
     (hmean : ratio / 3 + 1 / (3*δ^2*b) ≤ 2*v - b/δ)
@@ -19,6 +19,10 @@ theorem terminal_tradeoff_of_search (b δ x ratio v height C : ℝ)
     1 / x + 4 / δ + C * δ ≤ 6 * b * (C - b) := by
   have hlo : b/δ + 2*((1 + δ/(2*x))/δ^3) + 1/(3*δ^2*b) ≤
       (2*(b/δ) - 1/3)*ratio := by linarith
+  have hslope : 0 ≤ 2*(b/δ) - 1/3 := by
+    by_contra! hneg
+    have hpos : 0 < b/δ + 2*((1 + δ/(2*x))/δ^3) + 1/(3*δ^2*b) := by positivity
+    linarith only [hpos, hlo, mul_nonpos_of_nonpos_of_nonneg hneg.le hratio]
   have hupper : ratio ≤ 3*(C-b)/δ - 1/(δ^2*b) := by
     field_simp at hraw ⊢
     nlinarith
@@ -73,14 +77,14 @@ theorem finite_grid_schedule_floor {n : ℕ} (z w : ℕ → ℝ)
     (hstep : ∀ i < n, z i ≤ z (i+1))
     (htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ 215463/100000 - b - h*z (i+1))
     (hmoment : 4/(9*curve^2) ≤ ∑ i ∈ Finset.range n, z (i+1)^2*w i)
-    (hslope : 0 ≤ 2*(b/δ) - 1/3)
+    (hratio : 0 ≤ ratio)
     (hheight : (1 + δ/(2*(2/(3*curve^2))))/δ^3 ≤ height)
     (hbox : height + v ≤ ratio*(b/δ))
     (hmean : ratio/3 + 1/(3*δ^2*b) ≤ 2*v-b/δ)
     (hraw : b + δ*ratio/3 + 1/(3*δ*b) ≤ 215463/100000) : False := by
   have hgrid := Cogentic.finite_stage_private_floor z w (hc.le.trans hh) hz0 hzn hstep htail
   have hterminal := terminal_tradeoff_of_search b δ (2/(3*curve^2)) ratio v height
-    (215463/100000) hb hd (by positivity) hslope hheight hbox hmean hraw
+    (215463/100000) hb hd (by positivity) hratio hheight hbox hmean hraw
   have hinv : 1/(2/(3*curve^2)) = 3*curve^2/2 := by field_simp
   rw [hinv] at hterminal
   exact sparse_schedule_floor b δ curve hd hc (by linarith only [hgrid,hmoment,hh]) hterminal
