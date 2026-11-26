@@ -69,3 +69,4 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-mixed-certificate-check.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-fresh-validation.py --verify experiments/cogentic-monic-fresh-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-monic-fresh-cohort.py --validate experiments/cogentic-monic-fresh-results.jsonl
+	"$(PYTHON)" -B experiments/cogentic-monic-mixed-complete.py
