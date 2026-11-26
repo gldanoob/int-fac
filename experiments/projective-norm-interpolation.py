@@ -28,6 +28,12 @@ def check_form(coefficients, marks, target):
     radius = max(abs(det(target, mark)) for mark in marks)
     maximum = max(map(abs, evaluations))
     assert actual == reconstructed and abs(actual) <= (degree + 1) * maximum * radius**degree
+    coefficient_bound = sum(
+        abs(y) * prod(Fraction(abs(other[0]) + abs(other[1]), abs(det(mark, other)))
+                      for other in marks if other != mark)
+        for mark, y in zip(marks, evaluations)
+    )
+    assert sum(map(abs, coefficients)) <= coefficient_bound
     if target[1] == 1 and all(b == 1 for _, b in marks):
         assert factorial(degree) * abs(actual) <= maximum * (2 * radius)**degree
 
@@ -45,6 +51,14 @@ def main():
             integer_marks = [(a, 1) for a in rng.sample(range(-15, 16), degree + 1)]
             check_form(coefficients, integer_marks, (rng.randrange(20, 50), 1))
             integer += 1
+    # The slopes differ by as little as order M^-2.
+    for degree in range(2, 10):
+        for size in (101, 10007):
+            near = [(size-1+j, size+j) for j in range(degree+1)]
+            assert [((size*a-(size-1)*b)**degree - 2*(b-a)**degree) for a, b in near] == [
+                j**degree-2 for j in range(degree+1)
+            ]
+            assert size**degree-2*(-1)**degree > (size//2)**degree
     exceptional_marks = range(1, 5)
     test = lambda x: 1 + 59 * prod(x - a for a in exceptional_marks)
     assert test(5) == 1417 == 13 * 109 and all(test(a) == 1 for a in exceptional_marks)
