@@ -92,7 +92,7 @@ def check_costs():
     print(f"private factor-count ratio: {float(count_ratio):.9f} of the 2 limit")
 
 
-def first_degree(n, mb):
+def first_degree(n, mb, delta):
     degree_cube = delta**3 * n / mb
     radicand = floor(degree_cube)
     d = 1 << ((radicand.bit_length() + 2) // 3)
@@ -106,9 +106,14 @@ def first_degree(n, mb):
     return max(3, d | 1)
 
 
-def check_integer_schedule(n):
+def check_integer_schedule(
+    n, *, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=gamma,
+    top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,
+    h=h, target=target, scales=scales, fractions=fractions, top_ratio_slope=F(0),
+    factor_cap=2, first_scale=F(0),
+):
     mb = n.bit_length()
-    d = first_degree(n, mb)
+    d = first_degree(n, mb, delta)
     assert (d - 2)**3 * mb < delta**3 * n <= d**3 * mb
     t = d * mb
     k0 = ceil(kappa * d)
@@ -123,7 +128,7 @@ def check_integer_schedule(n):
         child = max(base, ceil((raw_box + F(th, d)) / ratio))
         assert child < parent and box >= child + 6 and box > base + 1 and 2 * box >= parent
         assert ratio * d * child >= th + d * raw_box
-        curve_budget = target - b - delta * ratio / 3 - 2 * slack
+        curve_budget = target - delta * beta - delta * ratio / 3 - 2 * slack
         assert curve_budget > 0 and h**2 * child / e0 < curve_budget**2
         return box, child
 
@@ -147,12 +152,12 @@ def check_integer_schedule(n):
 
     target_bits = (n - 1) // 2 - 2
     remaining = target_bits
-    previous_upper = base
+    previous_upper = max(base, ceil(first_scale * e0))
     total_factors = 0
     passed_levels = set()
     for i, (a, fraction) in enumerate(zip(scales, fractions)):
         upper = floor(a * e0)
-        size = remaining if i == stages - 1 else floor(fraction * target_bits)
+        size = remaining if i == len(scales) - 1 else floor(fraction * target_bits)
         remaining -= size
         count_base = ceil(F(size, upper))
         count_bits = count_base.bit_length()
@@ -160,7 +165,8 @@ def check_integer_schedule(n):
         shortfall = count * upper - size
         width = 2 * (shortfall + count) // count
         lower = upper - width - 1
-        local_box, local_child = descent(upper, top_ratio)
+        local_ratio = top_ratio - top_ratio_slope * (1 - a)
+        local_box, local_child = descent(upper, local_ratio)
         assert lower >= previous_upper and lower >= local_box
         assert local_child <= global_child and local_child < lower
         assert shortfall <= count * width // 2 <= shortfall + count
@@ -176,9 +182,9 @@ def check_integer_schedule(n):
         assert local_child <= cutoffs[level]
         assert local_child == base or local_child > cutoffs[level + 1]
 
-    assert remaining == 0 and total_factors <= 2 * k0
+    assert remaining == 0 and total_factors <= factor_cap * k0
     assert min(passed_levels) == 0 and max(passed_levels) > 0
-    print(f"rounded schedule: {high_count} high, {low_count} low, {stages} private allocations, "
+    print(f"rounded schedule: {high_count} high, {low_count} low, {len(scales)} private allocations, "
           f"up to {max(passed_levels)} identity levels for a band maximum")
 
 
