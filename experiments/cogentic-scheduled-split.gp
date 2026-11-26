@@ -8,8 +8,19 @@ scheduled_root(nf, product) = {
 
 scheduled_reduce(n,m,field,root) = {
   my(derivative=deriv(field), numerator=lift(Mod(derivative*lift(root),field)));
-  if(denominator(numerator)!=1, error("derivative failed to clear a denominator"));
+  if(denominator(numerator,1)!=1, error("derivative failed to clear a denominator"));
   Mod(subst(numerator,x,m),n)/subst(derivative,x,m);
+}
+
+scheduled_check_denominators() = {
+  my(field=x^2-2, element=Mod((9+4*x)/7,field));
+  if(polresultant(field,lift(element))!=1 || monic_power_unit(field,element),
+    error("nonintegral norm-one element was accepted as a power-order unit"));
+  my(unit_rejected=iferr(monic_unit_reduce(element,5,23);0,err,
+    errname(err)=="e_USER" && component(err,1)==["element outside the power order"]));
+  my(root_rejected=iferr(scheduled_reduce(23,5,field,element);0,err,
+    errname(err)=="e_USER" && component(err,1)==["derivative failed to clear a denominator"]));
+  if(!unit_rejected || !root_rejected, error("nonintegral numerator was accepted"));
 }
 
 scheduled_certificate(n,values,common) = {

@@ -16,6 +16,7 @@ def run():
         'read("cogentic-monic-pair-relations.gp");',
         'read("cogentic-monic-unit-corrections.gp");',
         'read("cogentic-scheduled-split.gp");',
+        'iferr(scheduled_check_denominators(),err,print(err);quit(1));',
     ]
     for n in (187, 209, 247, 299, 391, 437, 10403):
         degree = constructor["scheduled_degree"](n)

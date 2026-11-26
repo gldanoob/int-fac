@@ -1,7 +1,7 @@
 \\ Bounded follow-up to monic_square_replay on the same five fixtures.
 monic_power_unit(field, element) = {
   my(poly=lift(element));
-  denominator(poly)==1 && abs(polresultant(field,poly))==1;
+  denominator(poly,1)==1 && abs(polresultant(field,poly))==1;
 }
 
 monic_unit_base_root(field, product) = {
@@ -16,7 +16,7 @@ monic_unit_base_root(field, product) = {
 
 monic_unit_reduce(element,m,n) = {
   my(poly=lift(element));
-  if(denominator(poly)!=1, error("element outside the power order"));
+  if(denominator(poly,1)!=1, error("element outside the power order"));
   Mod(subst(poly,x,m),n);
 }
 
