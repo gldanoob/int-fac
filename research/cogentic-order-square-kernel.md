@@ -15,9 +15,35 @@ For a masked product with even ideal valuations, the exponent of every nonsquare
 The determinant sign is independent of the atom presentation. On the even-ideal quotient by field squares, the half-ideal map has kernel represented by units, of binary dimension \(r_1+r_2\). Positive norm removes at least one unit dimension when the field degree is odd because \(-1\) has negative norm. Therefore the actual residual rank is bounded by
 \[
  r\le r_1+r_2-\mathbf 1_{d\text{ odd}}
-     +\min\bigl(\dim\operatorname{Cl}(K)[2],,k-c\bigr).
+     +\min\bigl(\dim\operatorname{Cl}(K)[2],k-c\bigr).
 \]
 In particular \(k-c\) is a rank certificate that uses the already computed composite ideal data. This complements the [rank certificate from named support primes](cogentic-adaptive-square-kernel.md#rank-certificates-from-principal-ideal-relations).
+
+### Integer relations and sign rows
+
+Keeping the integer atom exponents gives a sharper certificate. Let \(A=(b_j e_{ji})\) have \(n\) input columns, put \(C=A\mathbb Z^n\subseteq\mathbb Z^k\), and write \(Q=\mathbb Z^k/C\). Set \(\rho=\operatorname{rank}_{\mathbb Q} A\), \(V=\ker(A\bmod2)\), and \(U=(\ker_{\mathbb Z}A)\bmod2\). The map
+\[
+ V\longrightarrow Q[2],\qquad v\longmapsto A\widetilde v/2\pmod C
+\]
+is well-defined for any integer lift \(\widetilde v\), since changing the lift changes its image by a column combination. It is onto: if \(2x=Aw\), take \(v=w\bmod2\). Its kernel is \(U\), since \(A\widetilde v/2=Aw\) implies \(\widetilde v-2w\in\ker_{\mathbb Z} A\). The integer kernel is saturated and has rank \(n-\rho\), so \(U\) has this binary dimension. Equivalently, the dimension of \(Q[2]\) is \(\rho-c\), the number of nonzero even entries in the integer Smith form. The free part of \(Q\) contributes nothing. All accessible half-ideal classes in the actual class group are images of this map.
+
+For any imposed sign rows \(S\), let \(\delta=\operatorname{rank}(S|_V)\) and \(\delta_u=\operatorname{rank}(S|_U)\). The allowed domain is \(V\cap\ker S\), and its image in \(Q[2]\) has dimension
+\[
+ t_+=\rho-c-\delta+\delta_u.
+\]
+The kernel of this map on the allowed domain has dimension \(n-\rho-\delta_u\). A lift in \(\ker_{\mathbb Z} A\) gives a unit by taking the product with those integer exponents, because its entire ideal is trivial. Other lifts of the same mask differ only by a field square. Thus for the norm-sign row one can take \(u_+=r_1+r_2-\max(\mathbf1_{d\text{ odd}},\delta_u)\) as an upper bound on the dimension of all positive-norm unit classes. Here \(\delta_u=1\) itself certifies a unit of negative norm, even in even degree. Two valid bounds on the residual rank are
+\[
+ r\le u_+ + \min\bigl(\dim\operatorname{Cl}(K)[2],t_+\bigr),
+ \qquad
+ r\le t_+ + \min\bigl(u_+,n-\rho-\delta_u\bigr).
+\]
+The first uses the actual half-ideal class map. The second bounds the image of the certified unit subspace and adds its codimension. The cap \(n-\rho-\delta_u\) applies to certified units because some additional half ideals may be principal in the actual field. Both sign ranks are obtainable by binary linear algebra after computing a saturated integer nullspace. The signature is obtained by real root isolation of \(P\). If the odd-degree sign column \(-1\) is present, the norm-sign row already acts on \(U\) and does not further reduce \(t_+\).
+
+For example, the rational inputs \(pq,qr,(pq)^2\) for three distinct primes have three atoms but \(\rho=c=2\), leaving an old deficit of one and zero accessible Smith torsion. In \(\mathbb Q(\sqrt{10})\), the lone column \(1+\sqrt{10}\) has norm \(-9\) and ideal equal to the square of one of the primes above 3. Its matrix is \([2]\), and the negative norm removes the sole accessible torsion direction.
+
+There can be no strict universal improvement from the principal relation matrix, rational norms and signature alone. Compare the lists \((-1,2+\sqrt{-5})\) and \((-1,(1+\sqrt{-2})^2)\) in their respective imaginary quadratic fields. Both have matrix \([0,2]\) and norms \((1,9)\). In the first field the half ideal of \(2+\sqrt{-5}\) is a nonprincipal prime above 3, since \(x^2+5y^2=3\) has no integral solution. Its square class is independent of \(-1\), so both slots in the bound are attained. In the second field the second column is already a square. Taking all integer powers of the supplied relations gives exactly \(C\). Saturating \(C\) at 2 would incorrectly declare the first half ideal principal. Odd saturation preserves the two-primary torsion and supplies no additional saving by itself.
+
+Higher powers in the Smith entries can help with separate cardinality information. If the even entries have two-adic orders \(a_1\le\cdots\le a_t\) and \(|G|\le B\), then \(s\) independent images in \(G[2]\) require \(\sum_{i=1}^s a_i\le\log_2 B\). Choose \(s\) cyclic summands with independent images of their order-two elements. Their direct sum injects into \(G\), since a nonzero kernel in a finite two-group contains an element of order two. An explicit bound is obtained by taking \(M=2^d\lceil\sqrt{|\operatorname{disc}(P)|}\rceil\), which exceeds Minkowski's class representative norm bound. The number of integral ideals of norm \(n\) is at most the number of ordered \(d\)-tuples of positive integers with product \(n\), by comparing Euler factors prime by prime. The sum of these tuple counts through \(M\) is at most \(M(1+\log M)^{d-1}\), which gives a factor-free choice of \(B\). Additional certified principal relations can also shrink the available image. After adjoining them to \(C\), reduce the actual half-ideal vectors from a basis of \(V\cap\ker S\) in the enlarged quotient. Its entire two-torsion may then include directions outside the original image.
 
 ## Recovering a root from a degree-\(2d\) polynomial
 
