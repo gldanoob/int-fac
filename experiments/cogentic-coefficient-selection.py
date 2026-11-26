@@ -5,16 +5,14 @@ from dataclasses import dataclass
 from fractions import Fraction
 from functools import cache
 from itertools import combinations, product
-from math import gcd, isqrt, lcm, prod
+from math import gcd, isqrt, prod
 from pathlib import Path
 from random import Random
 from runpy import run_path
 
 HERE = Path(__file__).resolve().parent
 scalar = run_path(str(HERE / "cogentic-scalar-progression-sieve.py"))
-geometry = run_path(str(HERE / "cogentic-scalar-divisor-count.py"))
 primes_through, progression_sieve = scalar["primes_through"], scalar["progression_sieve"]
-panels, in_class = geometry["panels"], geometry["in_class"]
 
 
 @dataclass(frozen=True)
@@ -66,8 +64,8 @@ def floor_sum(n, m, a, b):
         m, a = a, m
 
 
-def hit_count(box, hits):
-    """Intersect congruences in a triangular lattice coset and clip to the box."""
+def hit_coset(hits):
+    """Intersect congruences in a triangular lattice coset."""
     x0, y0, P, R, Q = 0, 0, 1, 0, 1
     for test in hits:
         # On (x0 + P*i, y0 + R*i + Q*j), the new constraint is a*i + b*j + c.
@@ -78,7 +76,7 @@ def hit_count(box, hits):
         g = gcd(b, m)
         h = gcd(a, g)
         if c % h:
-            return 0
+            return None
         stride_i, stride_j = g//h, m//g
         i0 = (-c//h * pow(a//h, -1, stride_i)) % stride_i
         inverse = pow(b//g, -1, stride_j)
@@ -91,7 +89,11 @@ def hit_count(box, hits):
         Q *= stride_j
         y0 %= Q
         R %= Q
+    return x0, y0, P, R, Q
 
+
+def box_count(box, coset):
+    x0, y0, P, R, Q = coset
     x, y, p, q = box
     first = -((x0-x)//P)
     n = (x+p-1-x0)//P - first + 1
@@ -99,52 +101,58 @@ def hit_count(box, hits):
     return floor_sum(n, Q, -R, bottom+q) - floor_sum(n, Q, -R, bottom)
 
 
-def modular_count(box, conditions):
+def signed_cosets(conditions):
     hits = tuple(test for test in conditions if test.equal)
     misses = tuple(test for test in conditions if not test.equal)
-    return sum((-1)**k * hit_count(box, hits+extra) for k in range(len(misses)+1)
-               for extra in combinations(misses, k))
+    for k in range(len(misses)+1):
+        for extra in combinations(misses, k):
+            coset = hit_coset(hits+extra)
+            if coset is not None:
+                yield (-1)**k, coset
 
 
 def field_count(box, factor, band):
-    """Count one field's passing pairs by lattice or scalar projection."""
+    """Count one field's passing pairs by Euclidean sums or scalar sections."""
     if not factor.smooth:
-        return modular_count(box, factor.modular)
+        return sum(sign*box_count(box, coset) for sign, coset in signed_cosets(factor.modular))
 
-    tests = {test.mark: (test, tuple(p for p in band if p not in test.omit))
-             for test in factor.smooth}
-    marks = set(tests)
-    for extra in (0, 1):
-        if len(marks) < 2:
-            marks.add(extra)
-    a, b = sorted(marks)
-    delta = b-a
-    period = delta*lcm(*(condition.modulus for condition in factor.modular))
-    residues = []
-    for u0 in range(period):
-        allowed = []
-        for v0 in range(u0 % delta, period, delta):
-            y = (v0-u0)//delta
-            if all(test.accepts(u0-a*y, y) for test in factor.modular):
-                allowed.append(v0)
-        if allowed:
-            residues.append((u0, allowed))
+    first, *rest = sorted(set(factor.smooth), key=lambda test: test.mark)
+    a = first.mark
+    first_band = prod(p for p in band if p not in first.omit)
+    if rest:
+        second = rest[0]
+        second_band = tuple(p for p in band if p not in second.omit)
+        dy = second.step*(second.mark-a)
+    transformed = tuple(Congruence(test.x, test.y-a*test.x, test.offset, test.modulus, test.equal)
+                        for test in factor.modular)
+    x, y, p, q = box
+    x_end, y_end = x+p-1, y+q-1
+    u_min, u_max = x+a*y, x_end+a*y_end
 
-    def count(mark, indices):
-        if not indices or mark not in tests:
-            return len(indices)
-        test, primes = tests[mark]
-        return progression_sieve(test.offset + test.step*indices.start,
-                                 test.step*indices.step, len(indices), primes)[0]
+    def sections(coset):
+        u0, y0, P, R, Q = coset
+        total = 0
+        for i in range(-((u0-u_min)//P), (u_max-u0)//P+1):
+            u = u0+P*i
+            value = first.offset+first.step*u
+            if not value or first_band % abs(value):
+                continue
+            lo, hi = y, y_end
+            if a:
+                lo = max(lo, -((x_end-u)//a))
+                hi = min(hi, (u-x)//a)
+            start_y = lo+(y0+R*i-lo) % Q
+            if start_y > hi:
+                continue
+            length = (hi-start_y)//Q+1
+            if not rest:
+                total += length
+            else:
+                start = second.offset+second.step*u+dy*start_y
+                total += progression_sieve(start, dy*Q, length, second_band)[0]
+        return total
 
-    total = 0
-    # shortcut: singleton panels for exact geometry, use certified wider panels to reduce scalar calls.
-    for lo, hi, vlo, vhi, _, _ in panels(*box, a, b, 1):
-        for u0, allowed in residues:
-            left = count(a, in_class(lo, hi, u0, period))
-            if left:
-                total += left*sum(count(b, in_class(vlo, vhi, v0, period)) for v0 in allowed)
-    return total
+    return sum(sign*sections(coset) for sign, coset in signed_cosets(transformed))
 
 
 def select(B, box, terms):
@@ -235,6 +243,38 @@ def check_modular():
     print(f"{len(fixtures)} modular boxes agree with enumeration, plus a 2049-bit closed-form box")
 
 
+def check_mixed():
+    rng = Random(20261127)
+    band = (5, 7, 11, 13)
+    empty = Factor()
+    for _ in range(300):
+        x, y = (rng.randrange(-9, 10) for _ in range(2))
+        p, q = (rng.randrange(1, 11) for _ in range(2))
+        marks = rng.sample(range(5), rng.randrange(1, 3))
+        smooth = tuple(Smooth(a, rng.randrange(-9, 10), rng.randrange(-4, 5),
+                              tuple(rng.sample(band, rng.randrange(len(band)+1)))) for a in marks)
+        modular = tuple(Congruence(*(rng.randrange(-6, 7) for _ in range(3)),
+                                   rng.randrange(1, 9), bool(rng.randrange(2)))
+                        for _ in range(rng.randrange(4)))
+        factor = Factor(smooth, modular)
+        direct = sum(direct_score(band, (i, j, 0, 0), ((1, factor, empty),))
+                     for i in range(x, x+p) for j in range(y, y+q))
+        assert field_count((x, y, p, q), factor, band) == direct
+
+    width, modulus = 1 << 1024, (1 << 2048)-1
+    box = (0, 0, width, width)
+    # The nonunit first hit fixes x+y=5. The second hit leaves y in {1,3,5}.
+    # The second smooth values are then 3,7,11, and only 11 is accepted.
+    modular = (Congruence(6, 6, -30, 6*modulus), Congruence(0, 4, -4, 8))
+    factor = Factor((Smooth(1, 0, 1), Smooth(3, -4, 1, (7,))), modular)
+    assert field_count(box, factor, band) == 1
+    # A single accepted u=x+y=width-1 leaves the entire y interval.
+    factor = Factor((Smooth(1, 6-width, 1),),
+                    (Congruence(6, 6, -6*(width-1), 6*modulus),))
+    assert field_count(box, factor, band) == width
+    print("300 mixed boxes agree with enumeration, plus two large-period closed forms")
+
+
 def check_cases():
     const = Factor()
     pair = Factor((Smooth(0, -1, 1, (5,)), Smooth(2, 10, -1, (7,))),
@@ -275,4 +315,5 @@ def check_cases():
 
 if __name__ == "__main__":
     check_modular()
+    check_mixed()
     check_cases()
