@@ -28,6 +28,18 @@ The outer scan therefore costs $\operatorname{poly}(w,\pi(B))(1+\min_a\min(T'_a,
 
 The cost can still equal the full projected length. With a one-row box, both mark tests can have the value $1+x$. If $x$ runs from $0$ to $T-1$ and the band product $P'$ exceeds $2T$, the clipped ordinary count is $T$ and the complementary window contains $P'-\lceil P'/T\rceil+1\ge T$ unrestricted candidates for $T\ge2$. This certifies that the short-window criterion alone supplies no uniform one-third count, even when the two projections agree.
 
+## Limits of a complete-period modular prefilter
+
+Consider the nonproportional tests $F=1+x$ and $G=1+x+y$ on $0\le x,y<T$. Before evaluating smoothness, filter each test by any selected forbidden-prime exclusions $p\nmid F,G$ or square exclusions $p^2\nmid F,G$. Let $M$ be the common modulus of these tests, with $2M\le T$. For each mark $H\in\{F,G\}$ let $R_H$ be its number of accepted residues modulo $M$. The Chinese remainder theorem gives
+\[
+\frac{R_H}{M}\ \ge\ \prod_{p\mid M}(1-1/p)\ \ge\ \frac{1}{1+\log_2 T}.
+\]
+For the first inequality each prime removes at most a fraction $1/p$ from a mark's residues. For the second, if $p_i$ are the $k$ distinct primes in increasing order, then $p_i\ge i+1$, so the product is at least $1/(k+1)$, and $2^k\le M\le T$.
+
+The two tests are independent on a complete residue box because the map $(x,y)\mapsto(F,G)$ is invertible modulo $M$. When $M\mid T$, the number of locally passing pairs is exactly $(T/M)^2R_FR_G$. For every admissible first value $F$, the $y$ interval spans a complete period, so some $y$ makes $G$ pass. This leaves at least $\lfloor T/M\rfloor R_F$ first-mark positions. On the $G$ projection, the diagonal $x+y=u$ has at least $M$ values of $x$ for $M-1\le u\le 2T-1-M$. For each allowed $G$ in this middle interval, some $x$ makes $F$ pass. The interval contains at least $T$ consecutive ordinates, hence at least $\lfloor T/M\rfloor R_G$ projected positions survive.
+
+Thus on these boxes a counter that computes complete-period wheel feasibility, even exactly by floor sums, and then visits every surviving projected position must still visit at least $T/(2(1+\log_2 T))$ positions whichever mark it chooses. This applies to dyadic boxes as well. If both band products exceed $4T$, the clipped and complementary windows also choose the ordinary scans for these unit-step tests. For $T=\exp(\Theta(V))$ the wheel bound rules out a one-third running time for this visit-every-survivor strategy. Algorithms that aggregate smooth counts across surviving positions or use moduli longer than the box fall outside this bound.
+
 ## From selected polynomials to a factor
 
 The finite replay takes $m=\lfloor\sqrt N\rfloor$ and two monic imaginary quadratics with common root $m$ modulo $N$. It selects $u_i\in\{0,1,2,3\}$ and $v_i\in\{0,1\}$ in the perturbation $f_i(X)+N(u_i+v_iX)$. The score counts marks $1\le a\le100$ with $\gcd(a-m,N)=1$ for which both evaluations are squarefree products of primes between $\sqrt{300}$ and $300$. The selector minimizes the negative of that count. The extractor uses the selected polynomial pair with homogeneous relation height 250 and smoothness bound 300. It can also use relations outside the selector's mark set. Python independently checks each exponent, the modular squaring chain and the returned divisor. [Runnable experiment](../experiments/cogentic-selected-polynomial-split.py)

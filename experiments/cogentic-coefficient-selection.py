@@ -479,9 +479,28 @@ def check_projection_values():
     print("1800 signed projection value lists match direct enumeration")
 
 
+def check_modular_prefilter():
+    modulus, width = 150, 512
+    allowed_f = {v for v in range(modulus) if v % 2 and v % 25}
+    allowed_g = {v for v in range(modulus) if v % 2 and v % 3 and v % 25}
+    pairs = [(1+x, 1+x+y) for x in range(width) for y in range(width)
+             if (1+x) % modulus in allowed_f and (1+x+y) % modulus in allowed_g]
+    periods = width//modulus
+    complete_pairs = sum(f <= periods*modulus and g-f < periods*modulus for f, g in pairs)
+    assert complete_pairs == periods**2*len(allowed_f)*len(allowed_g)
+    first = {f for f, _ in pairs}
+    assert first == {f for f in range(1, width+1) if f % modulus in allowed_f}
+    assert len(first) >= periods*len(allowed_f)
+    middle = {g for _, g in pairs if modulus <= g <= 2*width-modulus}
+    assert middle == {g for g in range(modulus, 2*width-modulus+1) if g % modulus in allowed_g}
+    assert len(middle) >= periods*len(allowed_g)
+    print("complete-period prefilter pair and projection counts match enumeration")
+
+
 if __name__ == "__main__":
     check_modular()
     check_mixed()
     check_cases()
     check_long_sections()
     check_projection_values()
+    check_modular_prefilter()
