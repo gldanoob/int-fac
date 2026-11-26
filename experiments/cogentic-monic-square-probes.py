@@ -9,6 +9,25 @@ GRID = run_path(str(HERE / "cogentic-monic-large-primes.py"))
 PRIME_CUTOFF = 257
 
 
+def parity_probe_cutoff(fields):
+    """Uniform Dedekind-GRH cutoff for masks of even ideal parity."""
+    size = 10
+    for coefficients in fields:
+        degree = len(coefficients) - 1
+        height_bits = max(2, *(abs(c) for c in coefficients)).bit_length()
+        size += (degree + (degree - 1) * (height_bits + (degree + 1).bit_length())
+                 + degree * (height_bits + (degree**2).bit_length()))
+    log_bits = (2 * size - 1).bit_length()
+    return (10**6 * size * log_bits**2)**2
+
+
+def growing_primes(limit):
+    lower, upper = 1, min(32, limit)
+    while lower < upper:
+        yield from (prime for prime in GRID["primes_through"](upper) if prime > lower)
+        lower, upper = upper, min(2 * upper, limit)
+
+
 def leading_unit_row(degree, points, norms, prime, root, derivative, squares):
     row = (prime % 4 == 3) << len(points)
     inverse = pow(derivative, -1, prime)
@@ -30,17 +49,20 @@ def leading_unit_row(degree, points, norms, prime, root, derivative, squares):
     return row, nonunit
 
 
-def prefilter(fields, points, signed_parity_basis, discriminant, *, prime_cutoff=PRIME_CUTOFF):
+def prefilter(fields, points, signed_parity_basis, discriminant=None, *,
+              prime_cutoff=PRIME_CUTOFF, survivor_limit=0):
     """Return surviving support masks and counts of their exact probe constraints.
 
     The monic irreducible fields have degree at least two and use ascending
-    coefficients. The nonzero discriminant is a multiple of every defining
-    discriminant. The bit just above the last mark represents shared -1.
+    coefficients. An optional nonzero discriminant multiple excludes its
+    prime factors. The bit just above the last mark represents shared -1.
     """
     fields, points = tuple(fields), tuple(points)
     basis = list(signed_parity_basis)
-    if not discriminant or any(len(f) < 3 or f[-1] != 1 for f in fields):
-        raise ValueError("need monic fields of degree at least two and a nonzero discriminant product")
+    if discriminant == 0 or not fields or any(len(f) < 3 or f[-1] != 1 for f in fields):
+        raise ValueError("need monic fields of degree at least two and a nonzero optional discriminant")
+    if prime_cutoff < 0 or survivor_limit < 0:
+        raise ValueError("prime cutoff and survivor limit must be nonnegative")
     if any(a == b == 0 for a, b in points):
         raise ValueError("marked elements must be nonzero")
     if any(word < 0 or word.bit_length() > len(points) + 1 for word in basis):
@@ -56,11 +78,15 @@ def prefilter(fields, points, signed_parity_basis, discriminant, *, prime_cutoff
             raise ValueError("marked elements must have nonzero norm")
         field_data.append((coefficients, degree, derivative, norms))
 
-    columns = [0] * len(basis)
+    initial_dimension = len(basis)
     probes = rational_primes = nonunit_probes = 0
-    for prime in GRID["primes_through"](prime_cutoff):
-        if prime == 2 or discriminant % prime == 0:
+    last_prime = 0
+    for prime in growing_primes(prime_cutoff):
+        if len(basis) <= survivor_limit:
+            break
+        if prime == 2 or (discriminant is not None and discriminant % prime == 0):
             continue
+        last_prime = prime
         before = probes
         squares = {r * r % prime for r in range(1, prime)}
         for coefficients, degree, derivative, norms in field_data:
@@ -68,18 +94,32 @@ def prefilter(fields, points, signed_parity_basis, discriminant, *, prime_cutoff
                 if GRID["polynomial"](coefficients, root, prime):
                     continue
                 derivative_at_root = GRID["polynomial"](derivative, root, prime)
+                if not derivative_at_root:
+                    continue
                 row, nonunit = leading_unit_row(
                     degree, points, norms, prime, root, derivative_at_root, squares)
-                bit = 1 << probes
-                for index, word in enumerate(basis):
+                pivot = 0
+                restricted = []
+                for word in basis:
                     if (row & word).bit_count() % 2:
-                        columns[index] |= bit
+                        if not pivot:
+                            pivot = word
+                            continue
+                        word ^= pivot
+                    restricted.append(word)
+                if pivot:
+                    basis = restricted
                 probes += 1
                 nonunit_probes += nonunit
+                if len(basis) <= survivor_limit:
+                    break
+            if len(basis) <= survivor_limit:
+                break
         rational_primes += probes > before
-    surviving = GRID["eliminate"](columns, basis)
-    return surviving, dict(probes=probes, rational_primes=rational_primes,
-                           nonunit_probes=nonunit_probes, rank=len(basis) - len(surviving))
+    return basis, dict(probes=probes, rational_primes=rational_primes,
+                       nonunit_probes=nonunit_probes, rank=initial_dimension - len(basis),
+                       last_prime=last_prime,
+                       stopped="survivor-limit" if len(basis) <= survivor_limit else "prime-cutoff")
 
 
 def fixtures():
@@ -88,6 +128,14 @@ def fixtures():
     assert nonunit and row == 0b111011
     # The two conjugate factors multiply to 7, so their product with 7 is square.
     assert (row & 0b0111).bit_count() % 2 == 0
+    field = ((2, 2, 0, 1),)
+    points = ((2, 0), (4, 0))
+    # Modulo five this Eisenstein cubic has a repeated root at 1 and a simple root at 3.
+    surviving, stats = prefilter(field, points, [1, 2],
+                                 prime_cutoff=parity_probe_cutoff(field), survivor_limit=1)
+    assert surviving == [2] and stats["last_prime"] == 5
+    assert stats["probes"] == 1 and stats["stopped"] == "survivor-limit"
+    assert prefilter(field, points, [1, 2], -140, prime_cutoff=5)[0] == [1, 2]
 
     driver = run_path(str(HERE / "cogentic-monic-kernel-driver.py"))
     repair = driver["REPAIR"]
@@ -113,6 +161,11 @@ def fixtures():
         signed = [1 << len(marks), *parity]
         _, base_stats = prefilter(fields, points, signed, discriminant, prime_cutoff=GRID["BASE"])
         surviving, stats = prefilter(fields, points, signed, discriminant)
+        if n in (323, 247):
+            early, early_stats = prefilter(fields, points, signed, discriminant,
+                                           survivor_limit=len(surviving))
+            assert early == surviving and early_stats["stopped"] == "survivor-limit"
+            stats["handoff_prime"] = early_stats["last_prime"]
         _, decode, query = driver["exact_oracle"](n, m, fields, marks)
         status, tested, _, square_basis = driver["adaptive"](surviving, query)
         assert all(GRID["combine"](word & ((1 << len(marks)) - 1), columns) == 0
