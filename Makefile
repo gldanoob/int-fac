@@ -82,6 +82,7 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-compatible-quadratic-charts.py
 	"$(PYTHON)" -B experiments/cogentic-gaussian-smooth-seed-charts.py
 	"$(PYTHON)" -B experiments/cogentic-unit-collision-search.py
+	"$(PYTHON)" -B experiments/cogentic-deep-unequal-unit-chart.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-unit-collision-verify.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-cubic-newton-parity.py
 	"$(PYTHON)" -B experiments/cogentic-cubic-order-kernel.py
