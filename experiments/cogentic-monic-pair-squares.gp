@@ -1,20 +1,28 @@
-\\ Status 0 means nonsquare, 1 means a nonunit denominator, 2 includes a residue.
+\\ Status 0 means nonsquare, 1 unavailable, 2 direct residue, 3 derivative-cleared residue.
 monic_square_root(n, m, nf, product) = {
   my(root);
   if(!nfeltissquare(nf,product,&root), return([0]));
   root = nfbasistoalg(nf,root);
   if(root^2 != product, error("incorrect field square root"));
   my(poly=lift(root), den=denominator(poly,1));
-  if(gcd(den,n)!=1, return([1]));
-  [2,lift(Mod(subst(den*poly,x,m),n)/den)];
+  if(gcd(den,n)==1, return([2,lift(Mod(subst(den*poly,x,m),n)/den)]));
+  my(D=deriv(nf.pol), derivative=subst(D,x,m));
+  if(gcd(derivative,n)!=1, return([1]));
+  my(numerator=lift(D*root));
+  if(denominator(numerator,1)!=1, error("square root did not clear in the power basis"));
+  [3,lift(Mod(subst(numerator,x,m),n)/derivative)];
 }
 
 monic_check_square_denominators() = {
   my(F=x^3-28*x^2+54, nf=nfinit(F), beta=Mod((x^2-x+3)/15,F));
-  if(monic_square_root(895,29,nf,beta^2)!=[1], error("nonunit denominator passed"));
   my(result=monic_square_root(8629,35,nf,beta^2));
   if(result[1]!=2 || Mod(result[2],8629)^2!=(Mod(1193,8629)/15)^2,
     error("unit denominator failed"));
+  result=monic_square_root(895,29,nf,Mod(8*x^2+2*x-12,F));
+  if(result[1]!=3 || (Mod(result[2],895)!=502 && Mod(result[2],895)!=-502),
+    error("derivative-cleared residue failed"));
+  if(monic_square_root(2385,47,nfinit(x^2+2*x+82),-1)!=[1],
+    error("unavailable evaluation returned a residue"));
 }
 
 monic_square_replay(n,m,coefficients) = {
@@ -55,7 +63,7 @@ monic_square_replay(n,m,coefficients) = {
     tested++;
     if(!#witness, witness=[points,vector(2,i,nfeltnorm(orders[i],products[i])),matrix(2,2,j,i,roots[j,i][1])]);
     for(j=1,2,
-      if(roots[j,1][1]!=2 || roots[j,2][1]!=2, next);
+      if(roots[j,1][1]<2 || roots[j,2][1]<2, next);
       my(left=roots[j,1][2], right=roots[j,2][2], sign=2*j-3);
       if(Mod(left,n)^2!=sign*common || Mod(right,n)^2!=sign*common,error("bad modular square"));
       my(divisor=gcd(left-right,n));
