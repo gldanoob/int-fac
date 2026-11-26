@@ -14,6 +14,7 @@ from time import monotonic
 HERE = Path(__file__).resolve().parent
 GRID = run_path(str(HERE / "cogentic-monic-large-primes.py"))
 REPAIR = run_path(str(HERE / "cogentic-monic-index.py"))["repair"]
+PAIR = run_path(str(HERE / "cogentic-monic-pair.py"))
 INPUTS = (35, 77, 143, 221, 323, *GRID["INPUTS"])
 QUERY_CAP = 128
 CASE_SECONDS = 5
@@ -234,6 +235,10 @@ def search(n, degree, height, query_cap, planted, relations_only, all_ideals=Fal
         return dict(n=n, status="prime")
     if n % 2 == 0:
         return direct("even", 2)
+    if not relations_only:
+        divisor = PAIR["perfect_power_divisor"](n)
+        if divisor is not None:
+            return direct("perfect-power", divisor)
     if planted:
         build = run_path(str(HERE / "cogentic-planted-norm-two.py"))["monic_plants"]
         fixed = build(n, degree)
@@ -283,8 +288,7 @@ if __name__ == "__main__":
             parser.error("provide N for a configurable search")
         fixtures()
     else:
-        scheduled = run_path(str(HERE / "cogentic-monic-pair.py"))["scheduled_degree"]
-        degree = scheduled(args.n) if args.degree is None and args.n >= 2 else args.degree
+        degree = PAIR["scheduled_degree"](args.n) if args.degree is None and args.n >= 2 else args.degree
         try:
             print(json.dumps(search(args.n, degree, args.height, args.queries, args.planted, args.relations_only, args.all_ideals)))
         except ModuleNotFoundError as error:

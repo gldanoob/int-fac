@@ -11,7 +11,8 @@ from time import monotonic
 HERE = Path(__file__).resolve().parent
 NEARBY = run_path(str(HERE / "cogentic-monic-nearby-bases.py"))
 DRIVER, GRID = NEARBY["DRIVER"], NEARBY["GRID"]
-SCHEDULED = run_path(str(HERE / "cogentic-monic-pair.py"))["scheduled_degree"]
+PAIR = run_path(str(HERE / "cogentic-monic-pair.py"))
+SCHEDULED = PAIR["scheduled_degree"]
 MIXED = run_path(str(HERE / "cogentic-monic-mixed-grid.py"))["search"]
 HEIGHT, CUTOFF, PROBES, PAIR_CAP, MIXED_CAP, EXACT_SECONDS = 256, 131072, 257, 3, 4, 5
 
@@ -98,6 +99,10 @@ def run_single(n):
         return
     if n % 2 == 0:
         ordinary_result(dict(n=n, stage="precheck", status="even", divisor=2, factors=[]))
+        return
+    divisor = PAIR["perfect_power_divisor"](n)
+    if divisor is not None:
+        ordinary_result(dict(n=n, stage="precheck", status="perfect-power", divisor=divisor, factors=[]))
         return
     degree = SCHEDULED(n)
     if ordinary_result(dict(measure(n, "raw", raw), degree=degree)):

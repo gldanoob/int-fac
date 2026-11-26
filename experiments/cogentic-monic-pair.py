@@ -3,7 +3,9 @@
 import argparse
 import os
 import subprocess
+from math import isqrt
 from pathlib import Path
+from runpy import run_path
 
 
 def integer_root(n, degree):
@@ -16,6 +18,22 @@ def integer_root(n, degree):
         else:
             high = middle
     return low
+
+
+def perfect_power_divisor(n):
+    """Return a proper exact power base, or None if n is no perfect power."""
+    if n < 4:
+        return None
+    root = isqrt(n)
+    if root*root == n:
+        return root
+    primes_through = run_path(str(Path(__file__).with_name("cogentic-scalar-progression-sieve.py")))["primes_through"]
+    # An exponent has a prime divisor, and a base at least two bounds it by log2(n).
+    for exponent in primes_through(n.bit_length()-1)[1:]:
+        root = integer_root(n, exponent)
+        if root**exponent == n:
+            return root
+    return None
 
 
 def scheduled_degree(n):
@@ -78,6 +96,9 @@ def run_gp(function, inputs, *files):
 
 
 def run():
+    assert perfect_power_divisor(1031**3) == 1031
+    assert perfect_power_divisor(1_000_000_007**2) == 1_000_000_007
+    assert perfect_power_divisor(1_000_000_007*1_000_000_009) is None
     assert check_pair(9, 2) == (3, (-6, 2, 1), (-6, 2, -2, 1))
     assert check_pair(11, 2)[1] == (2, 0, 1)
     assert check_pair(17, 2)[0] == 3  # even floor root rounds down
