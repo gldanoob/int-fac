@@ -92,3 +92,28 @@ unit_chart_odd_exponent(n,e) = {
   if(unit_chart_odd_exponent(101,25)!=[],error("unexpected prime split"));
   print("Equal unit powers split ",n," using a public chart at t=16 and the supplied odd exponent")
 }
+
+\\ Replay consecutive-chart identities and a split requiring several charts.
+{
+  my(q=30, b=vector(q,t,if(t>1,(t-1)/(t*(t+1)))), base=vector(q+1));
+  base[1]=1; base[2]=1/(25*b[5]*b[4]); base[3]=1/(base[2]*b[2]);
+  for(t=2,q-1,base[t+2]=base[t-1]/((t+1)^2*b[t]*b[t+1]));
+  if(base!=vector(q+1,i,i),error("consecutive unit identities"));
+
+  my(n=29*101, odd=175, charts=vector(3,i,unit_parameter_chart(n,i+1)));
+  if(vecmin(vector(3,i,#charts[i]))!=5,error("consecutive chart eligibility"));
+  my(a=vector(3,i,Mod(charts[i][4],n)), b=vector(3,i,Mod(charts[i][5],n)));
+  for(i=1,3,
+    my(g=a[i]^odd, h=b[i]^odd, v=Mod(-i-1,n)^odd);
+    if(g^4!=1 || h^4!=1 || v^2!=g/h,error("single-chart projection"));
+    for(j=0,3,for(k=0,3,for(l=0,1,
+      my(z=g^j*h^k*v^l);
+      if(z^2==1 && z!=1 && z!=-1,error("unexpected single-chart split"))
+    )))
+  );
+  my(r=vector(3,i,(a[i]+1)/2), s=vector(3,i,(b[i]-1)/2));
+  my(left=r[2]*(r[1]*a[1]^-3)*s[1]*r[3]*s[3]);
+  my(right=s[2]*(s[1]*b[1])*r[1]*(s[3]*b[3])*r[3]);
+  if(left/right!=Mod(2524,n) || left^2!=right^2 || gcd(lift(left-right),n)!=29,error("pooled split"));
+  print("Consecutive units generate bases through ",q+1," and split ",n," using charts at 2, 3 and 4")
+}
