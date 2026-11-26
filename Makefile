@@ -107,6 +107,7 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-cm-jacobi-triples.py
 	"$(PYTHON)" -B experiments/cogentic-varying-norm-torus.py
 	"$(PYTHON)" -B experiments/cogentic-varying-norm-torus.py --replay-stage-two
+	"$(PYTHON)" -B experiments/cogentic-torus-shifted-windows.py
 	"$(PYTHON)" -B experiments/cogentic-cm-linear-forms.py
 	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-separation.py
 	"$(PYTHON)" -B experiments/cogentic-moving-elliptic-separation.py --replay-stage-two
