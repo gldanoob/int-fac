@@ -142,13 +142,18 @@ mumford_tuple(point) = {
   [poldegree(u), lift(polcoef(u,0)), lift(polcoef(u,1)), lift(polcoef(v,0)), lift(polcoef(v,1))];
 }
 
-residual_lists(e,u,v,scalar,n,width) = {
-  my(chart=twist_class(e,u,v), one=Mod(1,n), identity=[one,Mod(0,n)]);
-  my(f=chart[1]*one, start=multiply_divisor(chart[2]*one,scalar,f,n));
+odd_projection(point,scalar,f,n) = {
+  my(start=multiply_divisor(point,scalar,f,n));
   for(k=1,logint(16*n^2,2)+1,
-    if(start[1]==1,return([0,1,[],[]]));
+    if(start[1]==1,break);
     start=cantor(start,start,f,n);
   );
+  start;
+}
+
+residual_lists(e,u,v,scalar,n,width) = {
+  my(chart=twist_class(e,u,v), one=Mod(1,n), identity=[one,Mod(0,n)]);
+  my(f=chart[1]*one, start=odd_projection(chart[2]*one,scalar,f,n));
   if(start[1]==1,return([0,1,[],[]]));
   my(step=identity, babies=List(), giants=List());
   for(i=1,width,
@@ -170,6 +175,13 @@ residual_data(e,u,v,scalar,n,width) = {
   iferr(result=residual_lists(e,u,v,scalar,n,width),err,result=[factor_payload(err),0,[],[]]);
   result;
 }
+
+odd_identity(e,u,v,scalar,n,m) = {
+  my(chart=twist_class(e,u,v), one=Mod(1,n), f=chart[1]*one, result);
+  iferr(result=[0,multiply_divisor(odd_projection(chart[2]*one,scalar,f,n),m,f,n)[1]==1],
+    err,result=[factor_payload(err),0]);
+  result;
+}
 '''
 
 
@@ -181,6 +193,36 @@ def tuple_collision():
         if error.name == "sage":
             raise ValueError("residual-order search requires SageMath Python") from error
         raise
+
+
+@cache
+def annihilator_tools():
+    saturation = run_path(str(HERE / "cogentic-elliptic-local-saturation.py"))
+    return saturation["minimize_annihilator"], saturation["FactorFound"]
+
+
+def continue_relation(modulus, scalar, relation, roots, u, v):
+    minimize_annihilator, factor_found = annihilator_tools()
+    odd = relation // (relation & -relation)
+
+    def is_identity(candidate):
+        divisor, identity = run_gp(f"odd_identity({list(roots)},{u},{v},{scalar},{modulus},{candidate})", STAGE_TWO)
+        if divisor:
+            raise factor_found(divisor)
+        return identity == 1
+
+    try:
+        if not is_identity(odd):
+            raise ArithmeticError("the residual hit did not give a global annihilator")
+        reduced = minimize_annihilator(odd, is_identity)
+    except factor_found as found:
+        return found.args[0]
+
+    divisor = run_gp(f"candidate({list(roots)},{u},{v},{scalar*reduced},{modulus})")
+    if not divisor and reduced != odd:
+        # A redundant multiplier can still expose a gcd along a different addition path.
+        divisor = run_gp(f"candidate({list(roots)},{u},{v},{scalar*odd},{modulus})")
+    return divisor
 
 
 def residual_split(modulus, scalar, bound, roots, u, v):
@@ -199,8 +241,7 @@ def residual_split(modulus, scalar, bound, roots, u, v):
             i, sign = divmod(hit["right_index"], 2)
             relation = (hit["left_index"] + 1)*width - (1 - 2*sign)*(i + 1)
     if relation > 1:
-        multiplier = scalar * (relation // (relation & -relation))
-        divisor = run_gp(f"candidate({list(roots)},{u},{v},{multiplier},{modulus})")
+        divisor = continue_relation(modulus, scalar, relation, roots, u, v)
     return divisor, relation
 
 
@@ -244,6 +285,12 @@ normalization(e,u,v) = {
 comparison_orders(p) = {
   my(a=ellcard(ellinit([0,-4,0,3,0],p)));
   [p-1,p+1,a,2*p+2-a];
+}
+
+top_label(e,u,v,p,order) = {
+  my(chart=twist_class(e,u,v), one=Mod(1,p), roots=twist(e,u,v)[1]);
+  my(top=multiply_divisor(chart[2]*one,order/2,chart[1]*one,p));
+  sum(i=1,#roots,2^(i-1)*(subst(top[1],x,roots[i])==0));
 }
 '''
 
@@ -306,6 +353,21 @@ def replay_stage_two():
     assert find_split(modulus, 1, 1) is None
     assert find_split(modulus, 1, 1, residual_order=5) == (37, (-1, 1))
     print("Stage two splits 1073 by a batched Mumford collision and 2923 after a shared residual relation of 5.")
+
+    p, q, exponent = 277, 1213, 359819
+    modulus = p*q
+    first, second, labels = run_gp(f"[curve_order({e},-1,1,{p}),curve_order({e},-1,1,{q}),"
+                                   f"[top_label({e},-1,1,{p},10470),top_label({e},-1,1,{q},92790)]]", REPLAY)
+    assert (first[1], second[1], labels) == (10470, 92790, [8, 8])
+    orders = [marked_order // gcd(marked_order, exponent) // 2 for marked_order in (first[1], second[1])]
+    assert orders == [15, 45]
+    assert run_gp(f"candidate({e},-1,1,{exponent*45},{modulus})") == 0
+    assert run_gp(f"[odd_identity({e},-1,1,{exponent},{modulus},45),"
+                  f"odd_identity({e},-1,1,{exponent},{modulus},15)]", STAGE_TWO) == [[0, 1], [p, 0]]
+    assert residual_split(modulus, exponent, 49, ROOTS, -1, 1) == (p, 45)
+    assert find_split(modulus, 1, 1, exponent=exponent) is None
+    assert find_split(modulus, 1, 1, exponent=exponent, residual_order=49) == (p, (-1, 1))
+    print("Testing 15 after the shared odd multiple 45 splits 336001. Both top torsion labels are equal.")
 
 
 def main():
