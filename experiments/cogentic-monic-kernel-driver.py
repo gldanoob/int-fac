@@ -32,7 +32,7 @@ def gp_value(expression, timeout, setup=""):
     return line
 
 
-def adaptive(parity_basis, oracle, query_cap=QUERY_CAP):
+def adaptive(parity_basis, oracle, query_cap=QUERY_CAP, split_modulus=None):
     pivots, square_basis, tests = [], [], 0
     for word in parity_basis:
         for selection in range(1 << len(pivots)):
@@ -48,6 +48,8 @@ def adaptive(parity_basis, oracle, query_cap=QUERY_CAP):
             tests += 1
             if roots:
                 square_basis.append((candidate, roots))
+                if split_modulus is not None and 1 < gcd(roots[0]-roots[1], split_modulus) < split_modulus:
+                    return "first-square-split", tests, len(pivots), square_basis
                 break
         else:
             pivots.append(word)
@@ -76,7 +78,7 @@ def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
 
 def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
            query_cap=QUERY_CAP, time_cap=CASE_SECONDS, ramified_two=False,
-           mark_local=False, probe_cutoff=0):
+           mark_local=False, probe_cutoff=0, stop_at_factor=False):
     left, right = map(list, fields)
     try:
         line = gp_value(f"poldisc(Polrev({left}))*poldisc(Polrev({right}))", time_cap)
@@ -85,8 +87,13 @@ def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
     except GPStackLimit:
         return dict(n=n, m=m, shift=shift, status="discriminant-stack-cap", tests=0, factors=[])
     discriminant = int(line)
-    marks = GRID["relations"](n, m, fields, discriminant, primes, cutoff, complete_parity=True,
-                              height=height, include_ramified_two=ramified_two, mark_local=mark_local)
+    if primes is None:
+        collect = run_path(str(HERE / "cogentic-monic-lattice-sieve.py"))["collect"]
+        marks = collect(n, m, fields, discriminant, cutoff, height=height,
+                        include_ramified_two=ramified_two, mark_local=mark_local)
+    else:
+        marks = GRID["relations"](n, m, fields, discriminant, primes, cutoff, complete_parity=True,
+                                  height=height, include_ramified_two=ramified_two, mark_local=mark_local)
     columns = GRID["parity_words"]([small + large for _, small, large, _ in marks])
     parity_basis = GRID["eliminate"](columns, (1 << j for j in range(len(marks))))
     result = dict(n=n, m=m, shift=shift, columns=len(marks), parity=len(parity_basis))
@@ -101,7 +108,7 @@ def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
         signed, stats = prefilter(fields, [entry[0] for entry in marks], signed, discriminant,
                                   prime_cutoff=probe_cutoff)
         result.update(probe_rank=stats["rank"], survivors=len(signed))
-    status, tests, rank, square_basis = adaptive(signed, query, query_cap)
+    status, tests, rank, square_basis = adaptive(signed, query, query_cap, n if stop_at_factor else None)
     if status == "complete":
         assert len(square_basis) + rank == len(signed)
         status = "kernel-trivial" if not square_basis else "basis-exhausted"
@@ -169,9 +176,11 @@ def search(n, degree, height, query_cap, planted, relations_only):
                     if 1 < divisor < n:
                         return direct("direct-mark-gcd", divisor)
     cutoff = max(GRID["BASE"], 2*height**2)
-    primes = tuple(GRID["primes_through"](cutoff))
+    # The root lattice repays its setup on larger boxes or wide input coefficients.
+    primes = None if height >= 128 or n.bit_length() >= 255 else tuple(GRID["primes_through"](cutoff))
     result = replay(n, m, shift, fields, primes, cutoff, height=height, query_cap=query_cap,
-                    time_cap=None, ramified_two=True, mark_local=True, probe_cutoff=257)
+                    time_cap=None, ramified_two=True, mark_local=True, probe_cutoff=257,
+                    stop_at_factor=not relations_only)
     if planted:
         result["planted_cuts"] = cuts
     return result

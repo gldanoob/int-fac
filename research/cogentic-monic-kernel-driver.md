@@ -14,6 +14,8 @@ The first command uses the scheduled degree and returns the direct factor 13. Th
 
 The JSON result identifies construction and mark gcds separately from square certificates. Each square certificate lists the marks, common sign, two residues, their common square and a proper divisor. The search checks the congruence and divisibility. A single-input run uses the [mark-local test and square-tail rule](cogentic-monic-local-roots.md), includes the [known dyadic ideals](cogentic-monic-ramified-two.md), and applies the [leading-unit probes](cogentic-monic-square-probes.md) through 257 before exact arithmetic. The default box height is 64 and the exact query cap is 128, adjustable with `--height` and `--queries`. A cap reports incomplete search. A completely exhausted basis only covers the admitted marks in that box. The single-input command has no wall-clock cutoff.
 
+The single-input search uses the projective root-lattice collector at heights of at least 128 or inputs of at least 255 bits. With either collector the row identities and order agree. A search with the default preliminary gcd checks returns at the first verified split. The relation-only mode examines the supplied basis up to its query limit. [Sieve comparison](cogentic-monic-lattice-sieve.md)
+
 ## Original fixed comparison
 
 Run `python3 -B experiments/cogentic-monic-kernel-driver.py` from the repository root. The bounded cubic and quartic replay uses the original five fixtures followed by the seven fixed holdouts. It repairs the common root before collecting relations. A proper derivative gcd returns a direct factor. The grid discards nonunit mark residues and extracts no direct factors from them. [Derivative repair](cogentic-monic-index.md)
