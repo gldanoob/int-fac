@@ -5,17 +5,6 @@ import Cogentic.TrueLogModel
 namespace Cogentic.Construction
 open Real Finset
 
-/-- The field and index of a root in the spatially interleaved grid. -/
-noncomputable def gridPlace {d : ℕ} (j : Fin (2*d)) : Bool × Fin d :=
-  ((interleavePlaces d).symm j).elim (fun i => (false,i)) (fun i => (true,i))
-
-theorem gridPlace_center {d : ℕ} (j : Fin (2*d)) :
-    nominalCenter d j = (center d (gridPlace j).1 (gridPlace j).2.val:ℝ) := by
-  obtain ⟨i,rfl⟩ := (interleavePlaces d).surjective j
-  cases i with
-  | inl k => simpa [gridPlace] using (interleaved_centers k).1
-  | inr k => simpa [gridPlace] using (interleaved_centers k).2
-
 /-- Perturb an affine log grid by at most ε in each entry, with one actual mark per cell. -/
 private theorem energy_of_perturbation {ι : Type*} [Fintype ι] (old new : Option ι → ι → ℝ)
     (ε t : ℝ) (v : ι → ℝ)

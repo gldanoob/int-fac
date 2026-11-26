@@ -1,45 +1,13 @@
 import Cogentic.BranchInsertionProfiles
 import Cogentic.OrdinaryBranchNormalizer
+import Cogentic.MeshNumerator
 
 namespace Cogentic.Construction
 open Finset Real Window
 open scoped Classical
 noncomputable section
 
-/-- Centering by the unconditional raw-mesh numerator incurs only the mass
-drift of the conditional model. This uses the same scalar center across all
-cells, target root classes, and ordinary prescriptions. -/
-theorem mesh_numerator_center_error {C B : Type*} [Fintype C] [Fintype B]
-    (M : ℕ) (mp : 0<M) [Nonempty C] (f z : C→B→ℕ→ℝ) (μ : B→ℝ) (η : ℝ)
-    (norm : ∀ c j, j<M → |(∑ h,μ h*f c h j)-1|≤η) :
-    let count := (Fintype.card C:ℝ)*M
-    let θ := (∑ c,∑ h,μ h*(∑ j∈range M,z c h j*f c h j))/count
-    |∑ c,∑ h,μ h*(∑ j∈range M,(z c h j-θ)*f c h j)|≤|θ| * count*η := by
-  intro count θ
-  have cp : 0<count := mul_pos (Nat.cast_pos.mpr Fintype.card_pos) (Nat.cast_pos.mpr mp)
-  let d := ∑ c : C,∑ h : B,μ h*(∑ j∈range M,f c h j)
-  have drift : |d-count|≤count*η := by
-    have eq : d-count=∑ c : C,∑ j∈range M,((∑ h : B,μ h*f c h j)-1) := by
-      dsimp only [d,count]
-      simp only [mul_sum,sum_sub_distrib,sum_const,card_range,nsmul_eq_mul,mul_one,card_univ]
-      congr 1
-      apply sum_congr rfl;intro c _
-      exact sum_comm
-    rw [eq]
-    apply (abs_sum_le_sum_abs ..).trans
-    trans ∑ c : C,∑ j∈range M,|(∑ h : B,μ h*f c h j)-1|
-    · apply sum_le_sum;intro c _;exact abs_sum_le_sum_abs ..
-    have v := sum_le_sum (s:=univ) (fun (c:C) _=>sum_le_sum (s:=range M) (fun j hj=>norm c j (mem_range.mp hj)))
-    simpa only [sum_const,card_range,nsmul_eq_mul,card_univ,count,mul_assoc] using v
-  have numerator : (∑ c,∑ h,μ h*(∑ j∈range M,z c h j*f c h j))=θ*count := by
-    dsimp only [θ];field_simp
-  have id : (∑ c : C, ∑ h : B, μ h*(∑ j∈range M,(z c h j-θ)*f c h j))=θ*(count-d) := by
-    simp only [sub_mul,sum_sub_distrib,mul_sub,←mul_sum,sum_sub_distrib]
-    rw [numerator];dsimp only [d]
-    simp only [mul_sum,mul_left_comm]
-  rw [id,abs_mul,abs_sub_comm count d]
-  exact (mul_le_mul_of_nonneg_left drift (abs_nonneg _)).trans_eq (mul_assoc ..).symm
-
+set_option maxHeartbeats 800000 in
 /-- Each cell and ordinary/target hit pattern may carry a different observable.
 On a fixed prescribed pair, cancellation of its explicit independent mesh mean
 bounds its physical Gaussian second moment, with no loss in the sizes of the
@@ -173,6 +141,182 @@ theorem physical_pair_centered_observable (line : DirichletLZerosOnLine) (K : �
     (vlim fa absvar) (signed ▸ small) unsgn
   exact q.trans savings
 
+private theorem pair_branch_envelopes (x y t : ℝ)
+    (hx : x∈Set.Icc (0:ℝ) 1) (hy : y∈Set.Icc (0:ℝ) 1) (ht : t∈Set.Icc (0:ℝ) 1) :
+    let w := fun (g : ℝ→Bool→ℝ) (h : Bool×Bool×Bool)=>g x h.1*g y h.2.1*g t h.2.2
+    (∀ h, |w residueBranchMass h|≤w residueBranchEnvelope h) ∧
+      1≤∑ h,w residueBranchEnvelope h ∧ ∑ h,w residueBranchEnvelope h≤27 := by
+  intro w
+  have comp (a : ℝ) (ha : a∈Set.Icc (0:ℝ) 1) (i : Bool) :
+      |residueBranchMass a i|≤residueBranchEnvelope a i := by
+    cases i <;> simp [residueBranchMass,residueBranchEnvelope,abs_of_nonneg ha.1,abs_of_nonneg (sub_nonneg.mpr ha.2)]
+    linarith only [ha.1]
+  constructor
+  · intro h
+    simp only [w,abs_mul]
+    have n := fun a ha i=>(abs_nonneg _).trans (comp a ha i)
+    exact mul_le_mul (mul_le_mul (comp _ hx _) (comp _ hy _) (abs_nonneg _) (n _ hx _))
+      (comp _ ht _) (abs_nonneg _) (mul_nonneg (n _ hx _) (n _ hy _))
+  · have e : (∑ h,w residueBranchEnvelope h)=(1+2*x)*(1+2*y)*(1+2*t) := by
+      simp only [Fintype.sum_prod_type,Fintype.sum_bool,w,residueBranchEnvelope,if_true,if_false,Bool.false_eq_true];ring
+    rw [e]
+    have lo (a : ℝ) (hn : 0≤a) : 1≤1+2*a := by linarith
+    have hi (a : ℝ) (hn : a≤1) : 1+2*a≤3 := by linarith
+    constructor
+    · exact one_le_mul_of_one_le_of_one_le (one_le_mul_of_one_le_of_one_le (lo _ hx.1) (lo _ hy.1)) (lo _ ht.1)
+    · calc _ ≤ (3:ℝ)*3*3 := by gcongr <;> first | positivity | exact hi _ hx.2 | exact hi _ hy.2 | exact hi _ ht.2 | linarith only [hx.1] | linarith only [hy.1] | linarith only [ht.1]
+           _ = _ := by norm_num
+
+/-- Mixture over the target root classes preserves the ordinary normalizer error. -/
+private theorem target_mixed_normalizer (x y t E : ℝ) (ht : t∈Set.Icc (0:ℝ) 1)
+    (F : Bool×Bool×Bool→ℝ)
+    (norm : ∀ k : Bool, |(∑ i : Bool,∑ j : Bool,residueBranchMass x i*residueBranchMass y j*F (i,j,k))-1|≤E) :
+    |(∑ h : Bool×Bool×Bool,
+      residueBranchMass x h.1*residueBranchMass y h.2.1*residueBranchMass t h.2.2*F h)-1|≤E := by
+  let err := fun k : Bool=>(∑ i : Bool,∑ j : Bool,residueBranchMass x i*residueBranchMass y j*F (i,j,k))-1
+  have id : (∑ h : Bool×Bool×Bool,
+      residueBranchMass x h.1*residueBranchMass y h.2.1*residueBranchMass t h.2.2*F h)-1 =
+      t*err true+(1-t)*err false := by
+    simp only [Fintype.sum_prod_type,Fintype.sum_bool,err,residueBranchMass,if_true,if_false,Bool.false_eq_true];ring
+  rw [id]
+  apply (abs_add_le ..).trans
+  simp only [abs_mul,abs_of_nonneg ht.1,abs_of_nonneg (sub_nonneg.mpr ht.2)]
+  exact (add_le_add (mul_le_mul_of_nonneg_left (norm true) ht.1)
+    (mul_le_mul_of_nonneg_left (norm false) (sub_nonneg.mpr ht.2))).trans_eq (by ring)
+
+set_option maxHeartbeats 800000 in
+/-- Second moment after subtracting the explicit mesh numerator. The amplitude
+retains the two independent ordinary hit probabilities in every branch. -/
+theorem physical_pair_mesh_numerator (line : DirichletLZerosOnLine) (K : ℝ) (hk : 1≤K) :
+    ∃ C : ℝ, 0<C ∧ ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    ∀ {p q : ℕ}, p∈sieveBand n ell 1 → q∈sieveBand n ell 1 → p≠q → p≠ell → q≠ell →
+    ∀ (r s : ℕ) (R T : PrescribedRows n ell),
+    (∀ U∈[R,T], U.primes⊆{p,q} ∧ (p∈U.primes → U.residue p ≡ r [MOD p]) ∧ (q∈U.primes → U.residue q ≡ s [MOD q])) →
+    let b := n.log2+1; let M := cellMarkCount b; let L := firstCellMark b; let d := (Fixed.d b:ℝ)
+    let A := 3*(1760*d+4)^4; let V := 40*d^2*(1760*d+4)^4*(24+32*sqrt (110*d))
+    let P := 3*A^2+2*A*V; let e := exp (-K*(Fixed.z b:ℝ)^2)
+    let Cell := Option (Bool×Fin (Fixed.d b)); let Bit := Bool×Bool×Bool
+    let μ := fun (g : ℝ→Bool→ℝ) (h : Bit)=>g (p:ℝ)⁻¹ h.1*g (q:ℝ)⁻¹ h.2.1*g (d/ell) h.2.2
+    let X := univ.biUnion (constructorCellMarks n ell)
+    let O := PrescribedRows.unrestricted n ell
+    let branch := fun a=>(decide (a ≡ r [MOD p]),decide (a ≡ s [MOD q]),hitsTarget n ell a false)
+    let F := fun (c : Cell) (h : Bit) j=>
+      fullBandInsertion b (R.pairBranchProduct p q h.1 h.2.1) (branchMeshSaddle n ell (L c+j) h.2.2 false)*
+      fullBandInsertion b (T.pairBranchProduct p q h.1 h.2.1) (branchMeshSaddle n ell (L c+j) h.2.2 true)
+    ∀ (Z : Cell→Bit→ℕ→ℝ) (D : Cell→Bit→ℝ),
+    (∀ c h, 0≤D c h ∧ (∀ j<M, |Z c h j|≤D c h) ∧
+      (∑ j∈range (M-1),|Z c h (j+1)-Z c h j|)≤D c h) →
+    let N := ∑ c : Cell,∑ h : Bit,μ residueBranchEnvelope h*D c h
+    let θ := (∑ c : Cell,∑ h : Bit,μ residueBranchMass h*(∑ j∈range M,Z c h j*F c h j)) /
+      ((Fintype.card Cell:ℝ)*M)
+    let w := pooledMarkWeight univ (constructorCellMarks n ell) (fun c a=>Z c (branch a) (a-L c)-θ)
+    |θ| * Fintype.card Cell≤N*A^2 ∧
+    twoFieldSecond R T X (fun a=>w a/smoothMarkProbability O O a) (smoothMarkEvent R false) (smoothMarkEvent T true)
+      ≤ C*(N*(1+27*A^2)*P*M)^2*e := by
+  obtain ⟨C,cp,n₁,phys⟩ := physical_pair_centered_observable line K hk
+  obtain ⟨_,_,_,_,n₂,law⟩ := physical_pair_branch_second line K hk
+  obtain ⟨b₁,profiles⟩ := two_field_branch_profiles line
+  obtain ⟨b₂,normalize⟩ := ordinary_branch_normalizer K hk
+  refine ⟨C,cp,max (max n₁ n₂) (max 2 (2^(max b₁ b₂))),?_⟩
+  intro n big ell target comp sieve p q pm qm pq pe qe r s R T cover b M L d A V P e Cell Bit μ X O branch F Z D regular N θ w
+  obtain ⟨old,more⟩ := max_le_iff.mp big
+  obtain ⟨hn,lg⟩ := max_le_iff.mp more
+  have ⟨bprof,bnorm⟩ := max_le_iff.mp (((Nat.le_log2 (by omega : n≠0)).mpr lg).trans (Nat.le_succ _))
+  have pb := (mem_filter.mp pm).1
+  have qb := (mem_filter.mp qm).1
+  obtain ⟨α,β,actual,_⟩ := law n (max_le_iff.mp old).2 ell target comp sieve pm qm pq pe qe r s
+  obtain ⟨γ,same,ranges,_,size,_⟩ := profiles bprof hn target pb qb pq r s R T cover α β actual
+  have ins c h j (jm : j<M) : |F c h j|≤A^2 := by
+    simpa only [F,same _ _ _ _ jm] using size c h j jm
+  have ep : (0:ℝ)<ell := by exact_mod_cast (mem_dyadicTargets.mp target).1.pos
+  have tprob : d/(ell:ℝ)∈Set.Icc (0:ℝ) 1 :=
+    ⟨by positivity,(div_le_one ep).mpr (by dsimp only [d,b];exact_mod_cast (target_gt_degree target).le)⟩
+  have frac k (km : k∈primeBand b) : (k:ℝ)⁻¹∈Set.Icc (0:ℝ) 1 :=
+    ⟨by positivity,inv_le_one_of_one_le₀ (by exact_mod_cast (mem_primeBand.mp km).1.one_le)⟩
+  have env := pair_branch_envelopes _ _ _ (frac _ pb) (frac _ qb) tprob
+  have norm c j (jm : j<M) : |(∑ h : Bit,μ residueBranchMass h*F c h j)-1|≤20*e := by
+    apply target_mixed_normalizer _ _ _ _ tprob (fun h=>F c h j)
+    intro k
+    have v := normalize (n:=n) (ell:=ell) bnorm (fun side=>γ c k side j)
+      (fun side=>(ranges c k side j jm).1) (fun side=>(ranges c k side j jm).2) p pb q qb R T
+    simpa only [F,same _ _ _ _ jm] using v
+  have mp : 0<M := Nat.pow_pos (by decide : 0<2)
+  have en : 0≤e := (exp_pos _).le
+  have bnd := mesh_numerator_budget mp (μ residueBranchMass) (μ residueBranchEnvelope) F Z D
+    (A^2) (20*e) env.1 env.2 (sq_nonneg _) (mul_nonneg (by norm_num) en) ins
+    (fun c h=>(regular c h).2.1) norm
+  let Dc := fun c h=>D c h+|θ|
+  let Nc := ∑ c : Cell,∑ h : Bit,μ residueBranchEnvelope h*Dc c h
+  have nc : 0≤Nc := sum_nonneg (fun c _=>sum_nonneg (fun h _=>mul_nonneg
+    ((abs_nonneg _).trans (env.1 h)) (add_nonneg (regular c h).1 (abs_nonneg θ))))
+  have reg c h : 0≤Dc c h ∧ (∀ j<M, |Z c h j-θ|≤Dc c h) ∧
+      (∑ j∈range (M-1),|(Z c h (j+1)-θ)-(Z c h j-θ)|)≤Dc c h := by
+    refine ⟨add_nonneg (regular c h).1 (abs_nonneg _),fun j jm=>(abs_sub ..).trans
+      (add_le_add ((regular c h).2.1 j jm) le_rfl),?_⟩
+    simpa only [sub_sub_sub_cancel_right] using (regular c h).2.2.trans (le_add_of_nonneg_right (abs_nonneg θ))
+  have Ap : 3≤A := by
+    have dn : 0≤d := Nat.cast_nonneg _
+    have v : 1≤(1760*d+4)^4 := one_le_pow₀ (by linarith only [dn] : (1:ℝ)≤1760*d+4)
+    dsimp only [A];linarith only [v]
+  have vp : 0≤V := by dsimp only [V,d];positivity
+  have pp : 20≤P := by
+    dsimp only [P];nlinarith only [Ap,mul_nonneg (by linarith only [Ap] : 0≤A) vp,sq_nonneg (A-3)]
+  have lim : Nc*M*(20*e)≤Nc*P*M*e := by
+    have u := mul_le_mul_of_nonneg_left pp nc
+    have v := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right u (Nat.cast_nonneg M)) en
+    linarith only [v]
+  have result := phys n (max_le_iff.mp old).1 ell target comp sieve pm qm pq pe qe r s R T cover
+    (fun c h j=>Z c h j-θ) Dc reg (bnd.2.2.trans lim)
+  refine ⟨bnd.1,result.trans ?_⟩
+  have v : Nc≤N*(1+27*A^2) := bnd.2.1
+  have pp' : 0≤P := (by norm_num : (0:ℝ)≤20).trans pp
+  have lb := mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right v pp') (Nat.cast_nonneg M)
+  have lp := mul_nonneg (mul_nonneg nc pp') (Nat.cast_nonneg M)
+  exact mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ lp lb 2) cp.le) en
+
+/-- Arbitrary logarithmic-square precision absorbs the insertion profile costs. -/
+theorem physical_pair_mesh_numerator_sharp (line : DirichletLZerosOnLine) (K : ℝ) (hk : 1≤K) :
+    ∃ C : ℝ, 0<C ∧ ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    ∀ {p q : ℕ}, p∈sieveBand n ell 1 → q∈sieveBand n ell 1 → p≠q → p≠ell → q≠ell →
+    ∀ (r s : ℕ) (R T : PrescribedRows n ell),
+    (∀ U∈[R,T], U.primes⊆{p,q} ∧ (p∈U.primes → U.residue p ≡ r [MOD p]) ∧ (q∈U.primes → U.residue q ≡ s [MOD q])) →
+    let b := n.log2+1; let M := cellMarkCount b; let L := firstCellMark b; let d := (Fixed.d b:ℝ)
+    let A := 3*(1760*d+4)^4; let e := exp (-K*(Fixed.z b:ℝ)^2)
+    let Cell := Option (Bool×Fin (Fixed.d b)); let Bit := Bool×Bool×Bool
+    let μ := fun (g : ℝ→Bool→ℝ) (h : Bit)=>g (p:ℝ)⁻¹ h.1*g (q:ℝ)⁻¹ h.2.1*g (d/ell) h.2.2
+    let X := univ.biUnion (constructorCellMarks n ell)
+    let O := PrescribedRows.unrestricted n ell
+    let branch := fun a=>(decide (a ≡ r [MOD p]),decide (a ≡ s [MOD q]),hitsTarget n ell a false)
+    let F := fun (c : Cell) (h : Bit) j=>
+      fullBandInsertion b (R.pairBranchProduct p q h.1 h.2.1) (branchMeshSaddle n ell (L c+j) h.2.2 false)*
+      fullBandInsertion b (T.pairBranchProduct p q h.1 h.2.1) (branchMeshSaddle n ell (L c+j) h.2.2 true)
+    ∀ (Z : Cell→Bit→ℕ→ℝ) (D : Cell→Bit→ℝ),
+    (∀ c h, 0≤D c h ∧ (∀ j<M, |Z c h j|≤D c h) ∧
+      (∑ j∈range (M-1),|Z c h (j+1)-Z c h j|)≤D c h) →
+    let N := ∑ c : Cell,∑ h : Bit,μ residueBranchEnvelope h*D c h
+    let θ := (∑ c : Cell,∑ h : Bit,μ residueBranchMass h*(∑ j∈range M,Z c h j*F c h j)) /
+      ((Fintype.card Cell:ℝ)*M)
+    let w := pooledMarkWeight univ (constructorCellMarks n ell) (fun c a=>Z c (branch a) (a-L c)-θ)
+    |θ| * Fintype.card Cell≤N*A^2 ∧
+    twoFieldSecond R T X (fun a=>w a/smoothMarkProbability O O a) (smoothMarkEvent R false) (smoothMarkEvent T true)
+      ≤ C*(N*M)^2*e := by
+  obtain ⟨C,cp,n₀,moment⟩ := physical_pair_mesh_numerator line (K+54) (by linarith)
+  refine ⟨C*2048^54,by positivity,n₀,?_⟩
+  intro n big ell target comp sieve p q pm qm pq pe qe r s R T cover b M L d A e Cell Bit μ X O branch F Z D regular N θ w
+  have h := moment n big ell target comp sieve pm qm pq pe qe r s R T cover Z D regular
+  let V := 40*d^2*(1760*d+4)^4*(24+32*sqrt (110*d))
+  let P := 3*A^2+2*A*V
+  have acc := branch_mesh_accuracy b (Nat.succ_pos _) K
+  change ((1+27*A^2)*P)^2*exp (-(K+54)*(Fixed.z b:ℝ)^2) ≤ (2048:ℝ)^54*e at acc
+  refine ⟨h.1,h.2.trans ?_⟩
+  change C*(N*(1+27*A^2)*P*M)^2*exp (-(K+54)*(Fixed.z b:ℝ)^2) ≤ _
+  have scaled := mul_le_mul_of_nonneg_left acc (mul_nonneg cp.le (sq_nonneg (N*M)))
+  linear_combination scaled
+
 end
 end Cogentic.Construction
 #print axioms Cogentic.Construction.physical_pair_centered_observable
+#print axioms Cogentic.Construction.physical_pair_mesh_numerator
+#print axioms Cogentic.Construction.physical_pair_mesh_numerator_sharp

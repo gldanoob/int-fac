@@ -7,40 +7,6 @@ open Finset Real Window
 open scoped Classical
 noncomputable section
 
-/-- The prior on individual marks induced by a mixture of constructor cells.
-In the event of overlap both cell contributions belong to the mark. -/
-def constructorMixturePrior (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ) : ℕ→ℝ :=
-  pooledMarkWeight univ (constructorCellMarks n ell) (fun c _=>mix c/(constructorCellMarks n ell c).card)
-
-/-- Finite integration against the single prior is exactly the mixture of
-the within-cell averages. This identity also covers empty cells. -/
-theorem constructor_mixture_prior_sum (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ)
-    (f : ℕ→ℝ) :
-    (∑ a∈univ.biUnion (constructorCellMarks n ell),constructorMixturePrior n ell mix a*f a) =
-    ∑ c,mix c*((∑ a∈constructorCellMarks n ell c,f a)/(constructorCellMarks n ell c).card) := by
-  simp only [constructorMixturePrior,pooledMarkWeight,sum_mul,ite_mul,zero_mul]
-  rw [sum_comm]
-  apply sum_congr rfl
-  intro c _
-  rw [←sum_filter,filter_mem_eq_inter,inter_eq_right.mpr (subset_biUnion_of_mem _ (mem_univ c)),←mul_sum]
-  ring
-
-theorem constructor_mixture_prior_nonneg (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ)
-    (pos : ∀ c, 0 ≤ mix c) (a : ℕ) : 0≤constructorMixturePrior n ell mix a := by
-  unfold constructorMixturePrior pooledMarkWeight
-  exact sum_nonneg (fun c _=>by split <;> first | exact div_nonneg (pos c) (Nat.cast_nonneg _) | rfl)
-
-theorem constructor_mixture_prior_mass_le (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ)
-    (pos : ∀ c, 0 ≤ mix c) (norm : (∑ c,mix c)=1) :
-    (∑ a∈univ.biUnion (constructorCellMarks n ell),|constructorMixturePrior n ell mix a|)≤1 := by
-  simp_rw [abs_of_nonneg (constructor_mixture_prior_nonneg n ell mix pos _)]
-  have law := constructor_mixture_prior_sum n ell mix (fun _=>1)
-  simp only [sum_const,nsmul_one,mul_one] at law
-  rw [law,←norm]
-  apply sum_le_sum
-  intro c _
-  exact mul_le_of_le_one_right (pos c) (div_self_le_one _)
-
 /-- The denominator on the actual draw uses the identical physical weights
 as the discarded-column energy. -/
 theorem retained_denominator_eq_prior (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ)

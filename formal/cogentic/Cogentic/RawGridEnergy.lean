@@ -1,5 +1,5 @@
-import Cogentic.RawGridModel
-import Cogentic.RetainedArchRank
+import Cogentic.RawMesh
+import Cogentic.ModelRank
 
 namespace Cogentic.Construction
 open Real Finset

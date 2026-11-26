@@ -79,6 +79,36 @@ theorem admitted_ordinary_rows_eq {n ell : ℕ} (hn : 2≤n) (hd : 3≤Fixed.d (
     rw [id] at atBase
     exact excluded (((baseSpec.2.1.dvd_mul.mp atBase).resolve_right qn).trans cof)
 
+/-- The ordinary mass selected on the coefficient draw controls every subset
+of executable ordinary rows left after peeling. -/
+theorem surviving_ordinary_mass {n ell : ℕ} (hn : 2≤n) (hd : 3≤Fixed.d (n.log2+1))
+    (composite : ¬n.Prime) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (sieved : presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none)
+    (x y : ℤ×ℤ) (bx : inCoefficientBox n x) (by' : inCoefficientBox n y) (β u : ℝ)
+    (window : u≤110*(Fixed.d (n.log2+1):ℝ))
+    (mass : (∑ i∈admittedOrdinaryRows n ell x y,(bandRowPrime i:ℝ)^(-β))<128*u) :
+    let input := TryPair.fixedInput n ell (construct n ell x.1.toNat x.2.toNat y.1.toNat y.2.toNat)
+    ∀ A : Finset Marking.Row, A⊆input.rows.toFinset → (∀ i∈A,i.q≠ell) →
+      (∀ i∈A,i.q∈primeBand (n.log2+1)) ∧ (∑ i : A,(i.val.q:ℝ)^(-β))≤15000*(Fixed.d (n.log2+1):ℝ) := by
+  classical
+  intro input A sub ordinary
+  let row := fun i : BandRow (n.log2+1)=>Marking.Row.mk i.1 (bandRowPrime i) i.2.2.val
+  let S := admittedOrdinaryRows n ell x y
+  have imageEq := admitted_ordinary_rows_eq hn hd composite target sieved x y bx by'
+  change S.image row=input.rows.toFinset.filter (fun r=>r.q≠ell) at imageEq
+  have cover : A⊆S.image row := by
+    rw [imageEq]
+    exact fun i hi=>mem_filter.mpr ⟨sub hi,ordinary i hi⟩
+  constructor
+  · intro i hi
+    obtain ⟨j,_,rfl⟩ := mem_image.mp (cover hi)
+    exact j.2.1.property
+  · rw [sum_coe_sort A (fun r : Marking.Row=>(r.q:ℝ)^(-β))]
+    have nn (r : Marking.Row) : 0≤(r.q:ℝ)^(-β) := rpow_nonneg (Nat.cast_nonneg _) _
+    have small := sum_le_sum_of_subset_of_nonneg cover (f:=fun r : Marking.Row=>(r.q:ℝ)^(-β)) (fun r _ _=>nn r)
+    have whole := sum_image_le_of_nonneg (s:=S) (g:=row) (f:=fun r : Marking.Row=>(r.q:ℝ)^(-β)) (fun r _=>nn r)
+    exact (small.trans whole).trans (mass.le.trans (by linarith only [window,Nat.cast_nonneg (α:=ℝ) (Fixed.d (n.log2+1))]))
+
 /-- Simultaneous admission of two distinct ordinary primes, on their indicated fields. -/
 def ordinaryPairPrescription {n ell : ℕ} (i j : BandRow (n.log2+1))
     (hi : OrdinaryAdmissible (n:=n) (ell:=ell) i) (hj : OrdinaryAdmissible (n:=n) (ell:=ell) j)
@@ -197,14 +227,63 @@ theorem admissible_pair_spec {n ell : ℕ} (k : ↥(admissibleOrdinaryPairs n el
 def ordinaryPairOnField {n ell : ℕ} (a : ↥(admissibleOrdinaryPairs n ell)) (s : Bool) : PrescribedRows n ell :=
   ordinaryPairPrescription a.val.1 a.val.2 (admissible_pair_spec a).1 (admissible_pair_spec a).2.1 (admissible_pair_spec a).2.2 s
 
-def boxedPhysicalPairScore {n ell : ℕ} (a : ↥(admissibleOrdinaryPairs n ell))
+def boxedAdmittedScore {n ell : ℕ} (admit : (ℤ×ℤ)→(ℤ×ℤ)→Prop)
     (w : ℕ→ℝ) (x y : ℤ×ℤ) : ℝ :=
   let O := PrescribedRows.unrestricted n ell
-  if inCoefficientBox n x ∧ inCoefficientBox n y ∧ a.val.1∈admittedOrdinaryRows n ell x y ∧ a.val.2∈admittedOrdinaryRows n ell x y then
+  if inCoefficientBox n x ∧ inCoefficientBox n y ∧ admit x y then
     twoFieldScore (univ.biUnion (constructorCellMarks n ell)) w (smoothMarkEvent O false) (smoothMarkEvent O true) x y else 0
+
+def boxedPhysicalPairScore {n ell : ℕ} (a : ↥(admissibleOrdinaryPairs n ell))
+    (w : ℕ→ℝ) (x y : ℤ×ℤ) : ℝ :=
+  boxedAdmittedScore (n:=n) (ell:=ell)
+    (fun x y=>a.val.1∈admittedOrdinaryRows n ell x y ∧ a.val.2∈admittedOrdinaryRows n ell x y) w x y
 
 def boxedPhysicalPairCost {n ell : ℕ} (α : ℝ) (w : ↥(admissibleOrdinaryPairs n ell)→ℕ→ℝ) (x y : ℤ×ℤ) : ℝ :=
   ∑ a : ↥(admissibleOrdinaryPairs n ell),(bandRowPrime a.val.1:ℝ)^(-α)*(bandRowPrime a.val.2:ℝ)^(-α)*(boxedPhysicalPairScore a (w a) x y)^2
+
+/-- Restrict an unrestricted score to boxed draws admitting its prescriptions.
+The zero extension still pays only the probability of the prescribed roots. -/
+private theorem boxed_admitted_second {n ell : ℕ} (hn : 2≤n) (hd : 10004≤Fixed.d (n.log2+1))
+    (comp : ¬n.Prime) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (absent : presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none)
+    (R T : PrescribedRows n ell) (admit : (ℤ×ℤ)→(ℤ×ℤ)→Prop)
+    (compat : ∀ x y, admit x y → R.compatible false x.1 x.2 ∧ T.compatible true y.1 y.2)
+    (w : ℕ→ℝ) (ε : ℝ) (ep : 0≤ε) :
+    let X := univ.biUnion (constructorCellMarks n ell)
+    twoFieldSecond R T X w (smoothMarkEvent R false) (smoothMarkEvent T true) ≤ ε →
+    let O := PrescribedRows.unrestricted n ell
+    let Ω := O.CoeffPoint false × O.CoeffPoint true
+    let err := fun (t : Ω)=>boxedAdmittedScore (n:=n) (ell:=ell) admit w t.1.val t.2.val
+    let obs := fun t : Ω=>twoFieldWeight O O t*(err t)^2
+    HasSum obs (∑' t,obs t) ∧ (∑' t,obs t) ≤ 4*ε/((prodPrimes R.primes:ℝ)*prodPrimes T.primes) := by
+  classical
+  intro X conditional O Ω err obs
+  let W := twoFieldWeight O O
+  let E := smoothMarkEvent O false
+  let F := smoothMarkEvent O true
+  let l := fun j (k : ℤ×ℤ)=>R.compatible false k.1 k.2 ∧ smoothMarkEvent R false j k
+  let r := fun j (k : ℤ×ℤ)=>T.compatible true k.1 k.2 ∧ smoothMarkEvent T true j k
+  have hs := twoField_score_second O O target X w l r
+  have wp (t : Ω) : 0≤W t := mul_nonneg (O.pointMass_nonneg false _) (O.pointMass_nonneg true _)
+  have dom (t : Ω) : obs t≤W t*(twoFieldScore X w l r t.1.val t.2.val)^2 := by
+    apply mul_le_mul_of_nonneg_left _ (wp t)
+    dsimp only [err,boxedAdmittedScore]
+    split
+    next h =>
+      obtain ⟨left,right⟩ := compat _ _ h.2.2
+      have eq : twoFieldScore X w E F t.1.val t.2.val=twoFieldScore X w l r t.1.val t.2.val := by
+        apply sum_congr rfl
+        intro j hj
+        obtain ⟨c,_,hc⟩ := mem_biUnion.mp hj
+        have mark := (mem_filter.mp hc).2
+        have eqL := boxed_prescribed_smooth_iff R false hn hd comp target absent mark ⟨t.1.val,left⟩ h.1
+        have eqR := boxed_prescribed_smooth_iff T true hn hd comp target absent mark ⟨t.2.val,right⟩ h.2.1
+        simp only [l,r,left,right,true_and,eqL,eqR,E,F,O]
+      exact (congrArg (·^2) eq).le
+    next => simpa only [zero_pow (by decide : 2≠0)] using sq_nonneg (twoFieldScore X w l r t.1.val t.2.val)
+  have sm := Summable.of_nonneg_of_le (fun t=>mul_nonneg (wp t) (sq_nonneg (err t))) dom hs.summable
+  exact ⟨sm.hasSum,(hasSum_le dom sm.hasSum hs).trans
+    (admitted_second_bound R T target X w (smoothMarkEvent R false) (smoothMarkEvent T true) ε ep conditional)⟩
 
 /-- All distinct ordinary-pair estimates are paid for on the original coefficient
 law, summing only the actual admitted rows of each boxed tuple. This cost can
@@ -227,48 +306,24 @@ theorem admitted_physical_gram_budget {n ell : ℕ} (hn : 2≤n) (hd : 10004≤F
   let b := n.log2+1; let X := univ.biUnion (constructorCellMarks n ell); let I := admissibleOrdinaryPairs n ell
   let valid := @admissible_pair_spec n ell
   let R := @ordinaryPairOnField n ell
-  let E := smoothMarkEvent O false; let F := smoothMarkEvent O true
   let m := fun i : BandRow b=>(bandRowPrime i:ℝ)^(-α)
   let err := fun (a : ↥I) (t : Ω)=>boxedPhysicalPairScore a (w a) t.1.val t.2.val
   let cost := fun (t : Ω)=>∑ a : ↥I,m a.val.1*m a.val.2*(err a t)^2
   change ∃ μ : ℝ, (∀ t : Ω,0≤cost t) ∧ HasSum (fun t : Ω=>twoFieldWeight O O t*cost t) μ ∧ _
   let W := twoFieldWeight O O
-  have wp (t : Ω) : 0≤W t := mul_nonneg (O.pointMass_nonneg false _) (O.pointMass_nonneg true _)
   have mn (i) : 0 ≤ m i := rpow_nonneg (Nat.cast_nonneg _) _
   let mass := fun (a : ↥I)=>m a.val.1*m a.val.2
   have massPos (a) : 0 ≤ mass a := mul_nonneg (mn _) (mn _)
   let V := fun a : ↥I=>∑' t : Ω,W t*(err a t)^2
   have est (a : ↥I) : HasSum (fun t : Ω=>W t*(err a t)^2) (V a) ∧
       V a ≤ 4*ε/((bandRowPrime a.val.1:ℝ)*bandRowPrime a.val.2) := by
-    let l := fun j (k : ℤ×ℤ)=>(R a false).compatible false k.1 k.2 ∧ smoothMarkEvent (R a false) false j k
-    let r := fun j (k : ℤ×ℤ)=>(R a true).compatible true k.1 k.2 ∧ smoothMarkEvent (R a true) true j k
-    have hs := twoField_score_second O O target X (w a) l r
     have pair := ordinary_pair_admission a.val.1 a.val.2 (valid a).1 (valid a).2.1 (valid a).2.2
-    have dom (t : Ω) : W t*(err a t)^2≤W t*(twoFieldScore X (w a) l r t.1.val t.2.val)^2 := by
-      apply mul_le_mul_of_nonneg_left _ (wp t)
-      dsimp only [err,boxedPhysicalPairScore]
-      split
-      next h =>
-        obtain ⟨left,right⟩ := (pair.2.2 t.1.val t.2.val).mpr h.2.2
-        change (R a false).compatible false t.1.val.1 t.1.val.2 at left
-        change (R a true).compatible true t.2.val.1 t.2.val.2 at right
-        have eq : twoFieldScore X (w a) E F t.1.val t.2.val=twoFieldScore X (w a) l r t.1.val t.2.val := by
-          apply sum_congr rfl; intro j hj
-          obtain ⟨c,_,hc⟩ := mem_biUnion.mp hj
-          have mark := (mem_filter.mp hc).2
-          have eqL := boxed_prescribed_smooth_iff (R a false) false hn hd comp target absent mark ⟨t.1.val,left⟩ h.1
-          have eqR := boxed_prescribed_smooth_iff (R a true) true hn hd comp target absent mark ⟨t.2.val,right⟩ h.2.1
-          simp only [l,r,left,right,true_and,eqL,eqR,E,F,O]
-        rw [eq]
-      next => exact (by simpa only [zero_pow (by decide : 2≠0)] using sq_nonneg (twoFieldScore X (w a) l r t.1.val t.2.val))
-    have sm := Summable.of_nonneg_of_le (fun t=>mul_nonneg (wp t) (sq_nonneg _)) dom hs.summable
-    have bound := admitted_second_bound (R a false) (R a true) target X (w a)
-      (smoothMarkEvent (R a false) false) (smoothMarkEvent (R a true) true) ε ep (conditional a)
-    change twoFieldSecond O O X (w a) l r≤4*ε/((prodPrimes (R a false).primes:ℝ)*prodPrimes (R a true).primes) at bound
+    have est := boxed_admitted_second hn hd comp target absent (R a false) (R a true)
+      (fun x y=>a.val.1∈admittedOrdinaryRows n ell x y ∧ a.val.2∈admittedOrdinaryRows n ell x y)
+      (fun x y=>(pair.2.2 x y).mpr) (w a) ε ep (conditional a)
     have id : (prodPrimes (R a false).primes:ℝ)*prodPrimes (R a true).primes=
         (bandRowPrime a.val.1:ℝ)*bandRowPrime a.val.2 := by exact_mod_cast pair.1
-    refine ⟨sm.hasSum,?_⟩
-    exact (hasSum_le dom sm.hasSum hs).trans (id ▸ bound)
+    exact ⟨est.1,id ▸ est.2⟩
   let bw := bandRowWeight (b:=b) α
   have scale (a : ↥I) : mass a*V a≤4*ε*(bw a.val.1*bw a.val.2) :=
     (mul_le_mul_of_nonneg_left (est a).2 (massPos a)).trans_eq (by dsimp [mass,m,bw,bandRowWeight];ring)
@@ -287,24 +342,106 @@ theorem admitted_physical_gram_budget {n ell : ℕ} (hn : 2≤n) (hd : 10004≤F
     rw [←mul_sum] at bd
     exact bd.trans ((mul_le_mul_of_nonneg_left totals (by positivity : 0≤4*ε)).trans_eq (by ring))
 
+def admissibleOrdinaryRows (n ell : ℕ) := (univ : Finset (BandRow (n.log2+1))).filter
+  (OrdinaryAdmissible (n:=n) (ell:=ell))
+
+def ordinarySingleOnField {n ell : ℕ} (i : ↥(admissibleOrdinaryRows n ell)) : Bool→PrescribedRows n ell :=
+  singleOrdinaryPrescription i.val
+
+def boxedPhysicalSingleCost {n ell : ℕ} (α : ℝ) (w : ↥(admissibleOrdinaryRows n ell)→ℕ→ℝ)
+    (x y : ℤ×ℤ) : ℝ :=
+  ∑ i : ↥(admissibleOrdinaryRows n ell),(bandRowPrime i.val:ℝ)^(-α)*
+    (boxedAdmittedScore (n:=n) (ell:=ell) (fun x y=>i.val∈admittedOrdinaryRows n ell x y) (w i) x y)^2
+
+/-- The singleton version of the admission budget also controls the normalized
+Gram diagonal. A row exceeding a diagonal tolerance is charged its saddle mass. -/
+theorem admitted_physical_single_budget {n ell : ℕ} (hn : 2≤n) (hd : 10004≤Fixed.d (n.log2+1))
+    (comp : ¬n.Prime) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (absent : presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none)
+    (α u ε : ℝ) (ap : 0≤α) (ep : 0≤ε)
+    (saddle : saddleMean (primeBand (n.log2+1)) α=log (Fixed.B (n.log2+1))*u)
+    (w : ↥(admissibleOrdinaryRows n ell)→ℕ→ℝ)
+    (conditional : ∀ i, twoFieldSecond (ordinarySingleOnField i false) (ordinarySingleOnField i true)
+      (univ.biUnion (constructorCellMarks n ell)) (w i) (smoothMarkEvent (ordinarySingleOnField i false) false)
+      (smoothMarkEvent (ordinarySingleOnField i true) true) ≤ ε) :
+    let O := PrescribedRows.unrestricted n ell
+    let Ω := O.CoeffPoint false × O.CoeffPoint true
+    ∃ μ : ℝ, (∀ t : Ω,0≤boxedPhysicalSingleCost α w t.1.val t.2.val) ∧
+      HasSum (fun t : Ω=>twoFieldWeight O O t*boxedPhysicalSingleCost α w t.1.val t.2.val) μ ∧ μ≤32*u*ε := by
+  classical
+  intro O Ω
+  let b := n.log2+1; let I := admissibleOrdinaryRows n ell
+  let R := @ordinarySingleOnField n ell
+  let err := fun (i : ↥I) (t : Ω)=>boxedAdmittedScore (n:=n) (ell:=ell)
+    (fun x y=>i.val∈admittedOrdinaryRows n ell x y) (w i) t.1.val t.2.val
+  let cost := fun t : Ω=>∑ i : ↥I,(bandRowPrime i.val:ℝ)^(-α)*(err i t)^2
+  change ∃ μ : ℝ, (∀ t : Ω,0≤cost t) ∧ HasSum (fun t : Ω=>twoFieldWeight O O t*cost t) μ ∧ _
+  let m := fun i : ↥I=>(bandRowPrime i.val:ℝ)^(-α)
+  let W := twoFieldWeight O O
+  let v := fun i : ↥I=>∑' t : Ω,W t*(err i t)^2
+  have mn (i : ↥I) : 0 ≤ m i := rpow_nonneg (Nat.cast_nonneg _) _
+  have est (i : ↥I) : HasSum (fun t : Ω=>W t*(err i t)^2) (v i) ∧ v i≤4*ε/(bandRowPrime i.val:ℝ) := by
+    have q := boxed_admitted_second hn hd comp target absent (R i false) (R i true)
+      (fun x y=>i.val∈admittedOrdinaryRows n ell x y)
+      (fun _ _ h=>(mem_filter.mp h).2.2) (w i) ε ep (conditional i)
+    have modEq : (prodPrimes (R i false).primes:ℝ)*prodPrimes (R i true).primes=bandRowPrime i.val := by
+      exact_mod_cast single_modulus i.val (mem_filter.mp i.property).2
+    exact ⟨q.1,modEq ▸ q.2⟩
+  have bp : 1<(Fixed.B b:ℝ) := by exact_mod_cast (Nat.one_lt_pow
+    (Nat.mul_ne_zero (by decide) (Nat.mul_ne_zero (Fixed.degree_pos (Nat.succ_pos n.log2)).ne' (Nat.succ_ne_zero _))) (by decide) : 1<Fixed.B b)
+  have mass : (∑ i : ↥I,bandRowWeight α i.val)≤8*u := by
+    rw [sum_coe_sort I (bandRowWeight α)]
+    exact (sum_le_sum_of_subset_of_nonneg (subset_univ I) (fun i _ _=>div_nonneg
+      (rpow_nonneg (Nat.cast_nonneg _) _) (Nat.cast_nonneg _))).trans (band_row_weight_sum bp ap saddle)
+  have both := hasSum_sum (s:=univ) (fun i _=>(est i).1.mul_left (m i))
+  refine ⟨_,fun t=>sum_nonneg (fun i _=>mul_nonneg (mn i) (sq_nonneg _)),both.congr_fun (fun t=>?_ ),?_⟩
+  · simp only [cost,mul_sum]
+    apply sum_congr rfl
+    intro i _
+    dsimp only [m,W]
+    ring
+  · calc
+      _ ≤ ∑ i : ↥I,4*ε*bandRowWeight α i.val := sum_le_sum fun i _=>
+        (mul_le_mul_of_nonneg_left (est i).2 (mn i)).trans_eq (by dsimp [m,bandRowWeight];ring)
+      _ ≤ 4*ε*(8*u) := by rw [←mul_sum];exact mul_le_mul_of_nonneg_left mass (by positivity)
+      _ = _ := by ring
+
+/-- Loss of ordinary-row mass and energy on the marks rejected by stage one. -/
+def RejectedRowControl (n ell : ℕ) (mix : Option (Bool×Fin (Fixed.d (n.log2+1)))→ℝ)
+    (mass scale : Marking.Row→ℝ) (x y : ℤ×ℤ) : Prop :=
+  let b := n.log2+1; let e := exp (-(Fixed.z b:ℝ)^2)
+  let O := PrescribedRows.unrestricted n ell
+  let input := TryPair.fixedInput n ell (construct n ell x.1.toNat x.2.toNat y.1.toNat y.2.toNat)
+  let rows := input.rows.toFinset.filter (fun i=>i.q≠ell)
+  let X := univ.biUnion (constructorCellMarks n ell)
+  let Y := X.filter (fun a=>rejectedSmoothMark O O a x y)
+  let wt := fun a=>constructorMixturePrior n ell mix a/smoothMarkProbability O O a
+  let z := fun (i : Marking.Row) (a : ℕ)=>if a%i.q=i.r then scale i else 0
+  let bad := rows.filter (fun i=>e ≤ ∑ a∈Y,wt a*(z i a)^2)
+  (∑ a∈Y,wt a)<e^3 ∧ (∑ i∈bad,mass i)≤b*e^2 ∧
+  ∀ v : Marking.Row→ℝ, (∑ a∈Y,wt a*(∑ i∈rows\bad,z i a*v i)^2)≤
+    (b:ℝ)*e*(∑ i∈rows\bad,(v i)^2)
+
 /-- The same draw supports the protected rank and the ordinary mass bound.
 Half the probability budget is available for further empirical Gram tests. -/
-theorem protected_rank_ordinary_mass (line : DirichletLZerosOnLine) :
+theorem protected_rank_ordinary_mass_peeling (line : DirichletLZerosOnLine) :
     ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
     presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
     let b := n.log2+1
     let O := PrescribedRows.unrestricted n ell; let Ω := O.CoeffPoint false × O.CoeffPoint true
     ∀ (α u : ℝ), 0≤α → 0<u → saddleMean (primeBand b) α=log (Fixed.B b)*u →
     ∀ mix : Option (Bool×Fin (Fixed.d b))→ℝ, (∀ c,0 ≤ mix c) → (∑ c,mix c)=1 →
+    ∀ (mass scale : Marking.Row→ℝ), (∀ i,i.q.Prime → mass i*scale i^2=1) →
     ∀ (cost : Ω→ℝ) (budget : ℝ), (∀ k,0 ≤ cost k) →
     HasSum (fun k=>twoFieldWeight O O k*cost k) budget → budget≤1/2 →
     ∃ k : Ω, retainedDenominatorGood n ell mix k.1.val k.2.val ∧
       protectedDrawRank n ell k.1.val k.2.val ∧ cost k<1 ∧
-      (∑ i∈admittedOrdinaryRows n ell k.1.val k.2.val,(bandRowPrime i:ℝ)^(-α))<128*u := by
+      (∑ i∈admittedOrdinaryRows n ell k.1.val k.2.val,(bandRowPrime i:ℝ)^(-α))<128*u ∧
+      RejectedRowControl n ell mix mass scale k.1.val k.2.val := by
   obtain ⟨n₁,choose⟩ := protected_rank_denominator_peeling line 16 (by decide)
   obtain ⟨b₂,tiny⟩ := retained_denominator_budget_vanishes 16 (by decide)
   refine ⟨max n₁ (max 2 (2^b₂)),?_⟩
-  intro n big ell target comp sieve b O Ω α u ap up saddle mix pos norm cost budget cn avg bound
+  intro n big ell target comp sieve b O Ω α u ap up saddle mix pos norm mass scale unit cost budget cn avg bound
   obtain ⟨old,lim⟩ := max_le_iff.mp big
   obtain ⟨hn,lg⟩ := max_le_iff.mp lim
   have small := tiny b (((Nat.le_log2 (by omega : n≠0)).mpr lg).trans (Nat.le_succ _))
@@ -322,11 +459,30 @@ theorem protected_rank_ordinary_mass (line : DirichletLZerosOnLine) :
     have d := div_nonneg (by norm_num : (0:ℝ)≤256) (Nat.cast_nonneg (α:=ℝ) (Fixed.d b))
     have B := one_div_nonneg.mpr (Nat.cast_nonneg (α:=ℝ) (Fixed.B b))
     linarith only [small,d,B,bound,qbound]
-  obtain ⟨k,den,rank,tests,_⟩ := choose n old ell target comp sieve mix pos norm (fun _=>1) (fun _=>1)
-    (by simp) (fun k=>cost k+M k/(128*u)) _ (fun k=>add_nonneg (cn k) (div_nonneg (nonneg k) cap.le)) both fit
-  refine ⟨k,den,rank,(le_add_of_nonneg_right (div_nonneg (nonneg k) cap.le)).trans_lt tests,?_⟩
+  obtain ⟨k,den,rank,tests,loss,smallBad,energy⟩ := choose n old ell target comp sieve mix pos norm mass scale
+    unit (fun k=>cost k+M k/(128*u)) _ (fun k=>add_nonneg (cn k) (div_nonneg (nonneg k) cap.le)) both fit
+  refine ⟨k,den,rank,(le_add_of_nonneg_right (div_nonneg (nonneg k) cap.le)).trans_lt tests,?_,loss,smallBad,energy⟩
   have less := (le_add_of_nonneg_left (cn k)).trans_lt tests
   exact (div_lt_one cap).mp less
+
+theorem protected_rank_ordinary_mass (line : DirichletLZerosOnLine) :
+    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    let b := n.log2+1
+    let O := PrescribedRows.unrestricted n ell; let Ω := O.CoeffPoint false × O.CoeffPoint true
+    ∀ (α u : ℝ), 0≤α → 0<u → saddleMean (primeBand b) α=log (Fixed.B b)*u →
+    ∀ mix : Option (Bool×Fin (Fixed.d b))→ℝ, (∀ c,0 ≤ mix c) → (∑ c,mix c)=1 →
+    ∀ (cost : Ω→ℝ) (budget : ℝ), (∀ k,0 ≤ cost k) →
+    HasSum (fun k=>twoFieldWeight O O k*cost k) budget → budget≤1/2 →
+    ∃ k : Ω, retainedDenominatorGood n ell mix k.1.val k.2.val ∧
+      protectedDrawRank n ell k.1.val k.2.val ∧ cost k<1 ∧
+      (∑ i∈admittedOrdinaryRows n ell k.1.val k.2.val,(bandRowPrime i:ℝ)^(-α))<128*u := by
+  obtain ⟨m,draw⟩ := protected_rank_ordinary_mass_peeling line
+  refine ⟨m,?_⟩
+  intro n large ell target comp absent b O Ω α u ap up saddle mix pos norm cost budget cn avg bound
+  obtain ⟨k,den,rank,cheap,mass,_⟩ := draw n large ell target comp absent α u ap up saddle mix pos norm
+    (fun _=>1) (fun _=>1) (by simp) cost budget cn avg bound
+  exact ⟨k,den,rank,cheap,mass⟩
 
 end
 end Cogentic.Construction

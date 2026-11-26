@@ -114,6 +114,21 @@ theorem positiveMarkCore_of_centered_moments {N ell a b c d : ℕ} (hn : 2 ≤ N
   change F+arch ≤ 768*u*cells*actual at margin
   exact pos_of_mul_pos_right (pos.trans_le margin) factor.le
 
+namespace Construction
+
+/-- The field and index of a root in the spatially interleaved grid. -/
+noncomputable def gridPlace {d : ℕ} (j : Fin (2*d)) : Bool × Fin d :=
+  ((interleavePlaces d).symm j).elim (fun i => (false,i)) (fun i => (true,i))
+
+theorem gridPlace_center {d : ℕ} (j : Fin (2*d)) :
+    nominalCenter d j = (center d (gridPlace j).1 (gridPlace j).2.val:ℝ) := by
+  obtain ⟨i,rfl⟩ := (interleavePlaces d).surjective j
+  cases i with
+  | inl k => simpa [gridPlace] using (interleaved_centers k).1
+  | inr k => simpa [gridPlace] using (interleaved_centers k).2
+
+end Construction
+
 end Cogentic
 
 #print axioms Cogentic.positiveMarkCore_of_centered_moments

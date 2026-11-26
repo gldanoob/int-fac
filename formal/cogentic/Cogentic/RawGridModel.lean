@@ -1,6 +1,6 @@
 import Cogentic.OrdinaryModelBlocks
 import Cogentic.TargetBranchEnergy
-import Cogentic.TargetResidue
+import Cogentic.AuxiliaryBranchPrime
 
 namespace Cogentic.Construction
 open Finset Real Window

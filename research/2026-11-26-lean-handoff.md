@@ -1,5 +1,7 @@
 # Deterministic factoring Lean handoff, 26 November 2026
 
+After this handoff the local proof reached the [two-thirds factoring theorem](../formal/cogentic/Cogentic/TwoThirdsFactorization.lean). The [verification report](cogentic-worst-case-verification.md) gives its hypotheses, running time and reproduction commands. The checkpoints below describe the earlier paused session.
+
 The main goal is paused at the user's request. Resume the proof of the deterministic worst-case two-thirds factoring bound, allowing the pinned results of Cogentic as inputs. The open local assertion is that sufficiently many dyadic targets on every sufficiently large input surviving the preliminary tests have a successful tuple in the four-coordinate box. The existing conditional endpoint still takes that assertion as a hypothesis. The concrete binary cost proof also needs its final modules built and audited. The separate one-third branch is exploratory.
 
 ## Checkpoints and worktrees

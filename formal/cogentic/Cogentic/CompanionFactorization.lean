@@ -88,6 +88,25 @@ theorem factorization_of_dense_box_hits (line : DirichletLZerosOnLine)
   have cost := ((results n large).2 tree).2.2.2
   rwa [show T+ε/2+ε/2 = T+ε by ring] at cost
 
+/-- The degree threshold and the preliminary search tests suffice to turn
+eventual rank on every target into the density required by the driver. -/
+theorem dense_hits_of_box_rank (line : DirichletLZerosOnLine) {k : ℕ}
+    (gen : ∀ n, 2 ≤ n → generatesUnits n (List.range' 1 (polyCutoff k (n.log2+1))))
+    (ranks : ∀ᶠ n : ℕ in atTop, ReachesSearch k n → ¬n.Prime →
+      ∀ ell ∈ dyadicTargets (Fixed.beta (n.log2+1)), BoxHasRank n ell) :
+    ∀ᶠ n : ℕ in atTop, ReachesSearch k n → DenseBoxHits n := by
+  obtain ⟨b₀,grow⟩ := Fixed.degree_grows 130000
+  obtain ⟨n₁,dense⟩ := dense_of_all_hits line
+  filter_upwards [ranks,eventually_ge_atTop (2^b₀),eventually_ge_atTop n₁] with n rank large enough gate
+  apply dense n enough
+  intro ell ht
+  have hn := gate.1
+  have bits := (Nat.le_log2 (show n≠0 by omega)).mpr large
+  have composite : ¬n.Prime := fun hp=>by
+    have yes := (primeCheck_correct _ _ (gen n hn)).mpr hp
+    simp [gate.2.2.1] at yes
+  exact witness_of_box_rank hn (grow _ (by omega)) composite ht gate.2.2.2.2.2 (rank gate composite ell ht)
+
 /-- Complete factorization by the guarded driver with the companion backend.
 The supplied front charge covers the other local operations. Full rank is only
 required where the executable gates reach the fixed search. -/
@@ -106,18 +125,8 @@ theorem factorization_of_box_rank (line : DirichletLZerosOnLine)
         (n₀ ≤ n → (tree.work (fun a => frontWork a + backendWork split k a) : ℝ) ≤
           exp ((max D (C₁+12*A+131117) + ε) * scale n)) := by
   obtain ⟨k,gen,finish⟩ := factorization_of_dense_box_hits line split hc ha spec
-  obtain ⟨b₀,grow⟩ := Fixed.degree_grows 130000
-  refine ⟨k,gen,fun ranks=>finish ?_⟩
-  obtain ⟨n₁,dense⟩ := dense_of_all_hits line
-  filter_upwards [ranks,eventually_ge_atTop (2^b₀),eventually_ge_atTop n₁] with n rank large enough gate
-  apply dense n enough
-  intro ell ht
-  have hn := gate.1
-  have bits := (Nat.le_log2 (show n≠0 by omega)).mpr large
-  have composite : ¬n.Prime := fun hp=>by
-    have yes := (primeCheck_correct _ _ (gen n hn)).mpr hp
-    simp [gate.2.2.1] at yes
-  exact witness_of_box_rank hn (grow _ (by omega)) composite ht gate.2.2.2.2.2 (rank gate ell ht)
+  refine ⟨k,gen,fun ranks => finish (dense_hits_of_box_rank line gen ?_)⟩
+  exact ranks.mono (fun _ rank gate _ => rank gate)
 
 end Cogentic.Companion
 

@@ -49,6 +49,7 @@ theorem grid_empty_insertion :
     exact ((div_lt_one (lt_trans (by norm_num) up)).mpr up).not_ge atom
   simpa only [fullBandInsertion,Nat.cast_one,log_one,one_rpow,one_mul] using div_self pos
 
+set_option maxHeartbeats 600000 in
 /-- On either target branch, conditioning on up to two ordinary roots changes
 the mesh mean of the common smooth denominator by an arbitrarily small
 logarithmic-square error. The estimate holds at each raw mesh position. -/
@@ -74,7 +75,7 @@ theorem ordinary_branch_normalizer (K : ℝ) (hk : 1≤K) :
       (Nat.mul_ne_zero (Fixed.degree_pos (Nat.succ_pos n.log2)).ne' (Nat.succ_ne_zero _))) (by decide) : 1<Fixed.B b)
   have Bp : 0<B := zero_lt_one.trans B1
   have Hp : 0<H := log_pos B1
-  have window (s : Bool) : 90*(Fixed.d b:ℝ)≤saddleMean (primeBand b) (α s)/H ∧
+  have window (s : Bool) : 90*(Fixed.d b:ℝ) ≤ saddleMean (primeBand b) (α s)/H ∧
       saddleMean (primeBand b) (α s)/H≤110*(Fixed.d b:ℝ) := by
     have h := centers s
     exact ⟨(le_div_iff₀ Hp).mpr (by simpa only [mul_comm] using h.1),

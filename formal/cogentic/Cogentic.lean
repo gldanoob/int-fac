@@ -71,6 +71,8 @@ import Cogentic.PowerScanCost
 import Cogentic.CandidateMarkConstruction
 import Cogentic.FactorBaseCost
 import Cogentic.LocalFactorizationCost
+import Cogentic.TwoThirdsFactorization
+import Cogentic.TargetRankExtension
 import Cogentic.MinorVerificationWork
 import Cogentic.BinaryMaskCost
 import Cogentic.SharedInsertionProfile
@@ -131,6 +133,11 @@ run_cmd
     ``Cogentic.Construction.unrestricted_all_cells_rank,
     ``Cogentic.SealedSquareSupport.square_fibers_of_failed_gcd_scan,
     ``Cogentic.SealedSquareSupport.blind_decoder_on_small_support,
+    ``Cogentic.BinaryRelations.assembled_rows, ``Cogentic.Concrete.search_trace_spec,
+    ``Cogentic.Companion.factor_words_of_dense_hits, ``Cogentic.Companion.factor_words_two_thirds,
+    ``Cogentic.Construction.eventual_box_has_rank, ``Cogentic.Construction.simultaneous_miss_gram_draw,
+    ``Cogentic.Construction.miss_entry_bounds, ``Cogentic.Construction.miss_draw_peeling,
+    ``Cogentic.Construction.boxHasRank_of_miss_entries, ``Cogentic.positiveMarkCore_of_target_witnesses,
     ``Cogentic.Construction.protected_target_cells_rank, ``Cogentic.Construction.retained_arch_energy,
     ``Cogentic.Construction.exists_retained_arch_rank, ``Cogentic.Construction.exists_protected_rank,
     ``Cogentic.Construction.retained_common_denominator_failure, ``Cogentic.Construction.protected_rank_denominator_peeling,

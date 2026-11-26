@@ -38,7 +38,7 @@ theorem matrix_overlap_crt (rel : Marking.Relations) (i j : Fin rel.rows.length)
   intro k _
   rw [matrix_row_residueEntry rel i k hi,matrix_row_residueEntry rel j k hj,residueEntry_product cop]
 
-private theorem correction_coprime_band {b p q : ℕ} (hp : p∈pairCorrectionPrimes b) (hq : q∈primeBand b) : p.Coprime q := by
+theorem correction_coprime_band {b p q : ℕ} (hp : p∈pairCorrectionPrimes b) (hq : q∈primeBand b) : p.Coprime q := by
   obtain ⟨pp,_,lim⟩ := mem_pairCorrectionPrimes.mp hp
   obtain ⟨qp,_,large⟩ := mem_primeBand.mp hq
   apply (Nat.coprime_primes pp qp).mpr
@@ -47,9 +47,6 @@ private theorem correction_coprime_band {b p q : ℕ} (hp : p∈pairCorrectionPr
   calc p^2 ≤ (2^(200*Fixed.h b))^2 := Nat.pow_le_pow_left lim _
        _ = 2^(200*Fixed.h b*2) := (Nat.pow_mul ..).symm
        _ ≤ Fixed.B b := Nat.pow_le_pow_right (by decide) (by dsimp [Fixed.beta];omega)
-
-def meshVariation (L M : ℕ) (f : ℕ → ℝ) : ℝ :=
-  |f (L+(M-1))| + ∑ j∈range (M-1), |f (L+(j+1))-f (L+j)|
 
 /-- The local contrast is the joint ordinary row hit, centered by the same
 mark profile. The denominator is the prescribed smooth marginal. -/
@@ -141,26 +138,6 @@ theorem normalized_overlap_budget {n ell b : ℕ} (R T : PrescribedRows n ell)
   dsimp only [c,bandRowWeight]
   rw [div_pow,Real.sq_sqrt (mul_nonneg (rpow_nonneg pi.le _) (rpow_nonneg pj.le _))]
   field_simp
-
-private theorem mesh_product_variation {L M : ℕ} (mp : 0<M) (f g : ℕ→ℝ) (A J : ℝ) (ap : 0≤A)
-    (fb : ∀ i<M, |f i|≤A) (gb : ∀ i<M, |g i|≤A)
-    (fv : (∑ j∈range (M-1), |f (j+1)-f j|)≤J)
-    (gv : (∑ j∈range (M-1), |g (j+1)-g j|)≤J) :
-    meshVariation L M (fun a=> f (a-L)*g (a-L)) ≤ A^2+2*A*J := by
-  have m : M-1<M := by omega
-  have step j (hj : j∈range (M-1)) : |f (j+1)*g (j+1)-f j*g j|≤A*|g (j+1)-g j|+A*|f (j+1)-f j| := by
-    obtain hj := mem_range.mp hj
-    rw [show f (j+1)*g (j+1)-f j*g j=f (j+1)*(g (j+1)-g j)+(f (j+1)-f j)*g j by ring]
-    apply (abs_add_le ..).trans
-    rw [abs_mul,abs_mul]
-    exact add_le_add (mul_le_mul_of_nonneg_right (fb _ (by omega)) (abs_nonneg _)) (by
-      rw [mul_comm];exact mul_le_mul_of_nonneg_right (gb j (by omega)) (abs_nonneg _))
-  have sum := sum_le_sum step
-  rw [sum_add_distrib,←mul_sum,←mul_sum] at sum
-  have tail := sum.trans (add_le_add (mul_le_mul_of_nonneg_left gv ap) (mul_le_mul_of_nonneg_left fv ap))
-  dsimp only [meshVariation]
-  simp only [Nat.add_sub_cancel_left,abs_mul (f (M-1))]
-  exact (add_le_add (mul_le_mul (fb _ m) (gb _ m) (abs_nonneg _) ap) tail).trans_eq (by ring)
 
 private theorem overlapError_mono {b : ℕ} {K C D u v : ℝ} (up : 0≤u) (uv : u≤v) :
     overlapError b K C D u ≤ overlapError b K C D v := by

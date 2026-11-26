@@ -150,15 +150,8 @@ theorem boxHit_of_annihilator {n ell : ℕ} {u v : ℤ×ℤ} {rel : Relations} (
       RootLogs.normalized s.A (s.coeffs side) (x side i)=0) →
     CompatibleRelations s rel x → Companion.BoxHit n ell := by
   intro s marked x roots compat
-  let b := n.log2+1
-  have ranges (k : ℤ×ℤ) (box : Construction.inCoefficientBox n k) :
-      (1≤k.1.toNat ∧ k.1.toNat≤2*b^2*Fixed.U b*Fixed.A b) ∧
-      (1≤k.2.toNat ∧ k.2.toNat≤2*b^2*Fixed.U b) := by
-    obtain ⟨hp,hu,hq,hv⟩ := box
-    exact ⟨⟨by omega,Int.toNat_le.mpr (by exact_mod_cast hu)⟩,
-      ⟨by omega,Int.toNat_le.mpr (by exact_mod_cast hv)⟩⟩
-  obtain ⟨a,c⟩ := ranges u bu
-  obtain ⟨e,f⟩ := ranges v bv
+  obtain ⟨a,c⟩ := bu.nat_ranges
+  obtain ⟨e,f⟩ := bv.nat_ranges
   refine ⟨_,_,_,_,a,c,e,f,candidate_of_annihilator hn big composite target sieved
     ⟨a.2,c.2,e.2,f.2⟩ ?_⟩
   intro rel' same

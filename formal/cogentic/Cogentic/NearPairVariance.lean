@@ -1,5 +1,5 @@
 import Cogentic.TwoFieldMoments
-import Cogentic.MarkIntervals
+import Cogentic.MeshPrior
 import Cogentic.GaussianMeans
 import Cogentic.SmoothBox
 
@@ -100,12 +100,6 @@ theorem near_pair_cell_sum (b : ℕ) (cell : Option (Bool × Fin (Fixed.d b))) (
   apply (mul_le_mul_of_nonneg_right total (by linarith : 0≤z)).trans_eq
   rw [show 8*M*r*D*z=8*D*M*(r*z) by ring,eq]
   ring
-
-/-- The actual executable mark set in a fixed cell. -/
-def constructorCellMarks (n ell : ℕ) (cell : Option (Bool × Fin (Fixed.d (n.log2+1)))) : Finset ℕ :=
-  let b := n.log2+1
-  let lo := firstCellMark b cell
-  (Ico lo (lo+cellMarkCount b)).filter (fun a=>a∈(construct n ell 0 0 0 0).marks)
 
 /-- Covariance of the two rectangular mark indicators under the two
 independent prescribed coefficient laws. -/

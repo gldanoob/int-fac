@@ -1,4 +1,4 @@
-import Cogentic.DistinctPrimeGram
+import Cogentic.RawMesh
 import Cogentic.MarkSeparation
 
 namespace Cogentic.Construction
@@ -72,21 +72,51 @@ theorem raw_log_profile_bounds {n : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d (n.
   have size (j : ℕ) (jm : j<M) : |f s i (L+j)*f t k (L+j)|≤D^2 := by
     rw [abs_mul,sq];exact mul_le_mul (bound s i j jm) (bound t k j jm) (abs_nonneg _) Dp
   refine ⟨size,?_⟩
-  have product (j : ℕ) (jm : j∈range (M-1)) :
-      |f s i (L+(j+1))*f t k (L+(j+1))-f s i (L+j)*f t k (L+j)| ≤
-      D*|f s i (L+(j+1))-f s i (L+j)|+D*|f t k (L+(j+1))-f t k (L+j)| := by
-    have len := mem_range.mp jm
-    rw [show _-_=f t k (L+j)*(f s i (L+(j+1))-f s i (L+j))+
-      f s i (L+(j+1))*(f t k (L+(j+1))-f t k (L+j)) by ring]
-    exact (abs_add_le ..).trans (by simp only [abs_mul];exact
-      add_le_add (mul_le_mul_of_nonneg_right (bound t k j (by omega)) (abs_nonneg _))
-        (mul_le_mul_of_nonneg_right (bound s i (j+1) (by omega)) (abs_nonneg _)))
-  have diff := sum_le_sum (s:=range (M-1)) product
-  rw [sum_add_distrib,←mul_sum,←mul_sum] at diff
-  dsimp only [meshVariation]
-  nlinarith only [size (M-1) (by omega),diff,mul_le_mul_of_nonneg_left (variation s i) Dp,mul_le_mul_of_nonneg_left (variation t k) Dp]
+  have h := mesh_product_variation (L:=L) Mp (fun j=>f s i (L+j)) (fun j=>f t k (L+j))
+    D 1 Dp (bound s i) (bound t k) (variation s i) (variation t k)
+  simpa only [meshVariation,Nat.add_sub_cancel_left,mul_one] using h
+
+/-- The constant coordinate is indexed by `none`. Both kinds of row use the
+physical position of the mark. -/
+def nominalLogFactor (b : ℕ) (row : Option (Bool×Fin (Fixed.d b))) (a : ℕ) : ℝ :=
+  match row with
+  | none => 1
+  | some (side,i) => log |(a:ℝ)/Fixed.A b-(center (Fixed.d b) side i.val:ℝ)|
+
+/-- Uniform amplitude and total variation for every entry of the raw
+intercept/logarithm Gram block, including squares of matching roots. -/
+theorem raw_log_entry_regular {n : ℕ} (hn : 2≤n) (big : 10004≤Fixed.d (n.log2+1)) :
+    let b := n.log2+1; let M := cellMarkCount b; let D := 3*(Fixed.h b:ℝ)+1
+    ∀ (cell i k : Option (Bool×Fin (Fixed.d b))), let L := firstCellMark b cell
+    let f := fun a=>nominalLogFactor b i a*nominalLogFactor b k a
+    (∀ j<M, |f (L+j)|≤D^2+2*D) ∧ meshVariation L M f≤D^2+2*D := by
+  intro b M D cell i k L f
+  have bd := raw_log_profile_bounds hn big cell
+  have dn : 0≤3*(Fixed.h b:ℝ) := by positivity
+  have one : 1≤D := by dsimp only [D];linarith
+  have sup (s : Option (Bool×Fin (Fixed.d b))) (j : ℕ) (jm : j<M) :
+      |nominalLogFactor b s (L+j)|≤D := by
+    rcases s with _|⟨side,i⟩
+    · simpa [nominalLogFactor] using one
+    · exact ((bd.1 side i).1 j jm).trans (by dsimp only [D];linarith)
+  have var (s : Option (Bool×Fin (Fixed.d b))) :
+      (∑ j∈range (M-1),|nominalLogFactor b s (L+(j+1))-nominalLogFactor b s (L+j)|)≤1 := by
+    rcases s with _|⟨side,i⟩
+    · simp [nominalLogFactor]
+    · exact (bd.1 side i).2.1
+  constructor
+  · intro j jm
+    dsimp only [f];rw [abs_mul]
+    have h := mul_le_mul (sup i j jm) (sup k j jm) (abs_nonneg _) (zero_le_one.trans one)
+    nlinarith only [h,one]
+  · have mp : 0<M := Nat.pow_pos (by decide)
+    have h := mesh_product_variation (L:=L) mp (fun j=>nominalLogFactor b i (L+j))
+      (fun j=>nominalLogFactor b k (L+j)) D 1 (zero_le_one.trans one) (sup i) (sup k) (var i) (var k)
+    simpa only [f,meshVariation,Nat.add_sub_cancel_left,mul_one] using h
 
 end
 end Cogentic.Construction
 
 #print axioms Cogentic.Construction.raw_log_profile_bounds
+
+#print axioms Cogentic.Construction.raw_log_entry_regular

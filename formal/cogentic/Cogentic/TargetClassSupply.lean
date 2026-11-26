@@ -256,8 +256,8 @@ theorem target_class_score_error (line : DirichletLZerosOnLine) (k : ℕ) (kp : 
 
 /-- For a family of at most four times the degree plus four prescribed
 classes, a single nonnegative test of arbitrarily small expected cost
-certifies all the retained count bounds on any boxed draw passing it. -/
-theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0<k) :
+certifies the retained counts and inverse-marginal mass on every selected class. -/
+theorem target_class_mass_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0<k) :
     ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
     presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
     let b := n.log2+1
@@ -270,7 +270,10 @@ theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0
         ∃ rel : Marking.Relations,
           Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))=some rel ∧
           ∀ i, let Y := (constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ residue i [MOD ell] ∧ a∈rel.marks)
-            4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card := by
+            4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card ∧
+            (cellMarkCount b:ℝ)/(16*ell) ≤
+              ∑ a∈Y with smoothMarkEvent O false a u ∧ smoothMarkEvent O true a v,
+                (smoothMarkProbability O O a)⁻¹ := by
   classical
   obtain ⟨b₁,count⟩ := target_class_score_error line (262144*k) (Nat.mul_pos (by decide) hk)
   obtain ⟨n₂,marks⟩ := grid_cells_have_marks line
@@ -373,7 +376,8 @@ theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0
   let stage := Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))
   let retained (a : ℕ) := ∃ rel,stage=some rel ∧ a∈rel.marks
   let yes (a : ℕ) := E a u ∧ F a v ∧ retained a
-  have lower (c : I) : 2*M ≤ B^2*((X c).filter yes).card := by
+  have lower (c : I) : 2*M ≤ B^2*((X c).filter yes).card ∧
+      M/32≤∑ a∈(X c).filter yes,w a := by
     let hits := (X c).filter yes
     have result := (single_le_sum (s:=(univ:Finset I)) (f:=fun i=>fc i t) (fun i _=>f0 i t) (mem_univ c)).trans_lt cheap
     have scoreSmall : (s c t-m c)^2/(M/64)^2<1 :=
@@ -418,12 +422,12 @@ theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0
         and_true,and_false,not_true_eq_false,not_false_eq_true,if_true,if_false,mul_one,mul_zero,zero_add,add_zero]
     have upper := sum_le_sum (s:=hits) (fun a h=>pw a (mem_filter.mp h).1)
     rw [sum_const,nsmul_eq_mul] at upper
-    change 2*M≤B^2*(hits.card:ℝ)
-    linarith only [near,lowerMean,upper,lossCap,eq]
+    change 2*M≤B^2*(hits.card:ℝ) ∧ M/32≤∑ a∈hits,w a
+    constructor <;> linarith only [near,lowerMean,upper,lossCap,eq]
   cases hs : stage with
   | none =>
     have no (a : ℕ) : ¬yes a := fun h=>by obtain ⟨_,hh,_⟩ := h.2.2; simp [hs] at hh
-    have contradiction := lower (Classical.arbitrary I)
+    have contradiction := (lower (Classical.arbitrary I)).1
     simp [no] at contradiction; linarith
   | some rel =>
     refine ⟨rel,hs,?_⟩
@@ -433,10 +437,39 @@ theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0
       obtain ⟨am,_,_,rr,hh,hr⟩ := mem_filter.mp mem
       cases Option.some.inj (hh.symm.trans hs)
       exact mem_filter.mpr ⟨(mem_filter.mp am).1,(mem_filter.mp am).2,hr⟩
-    have q := (lower c).trans (mul_le_mul_of_nonneg_left (Nat.cast_le.mpr (card_le_card sub)) (sq_nonneg _))
+    have q := (lower c).1.trans (mul_le_mul_of_nonneg_left (Nat.cast_le.mpr (card_le_card sub)) (sq_nonneg _))
     have eq : 2*M*(ell:ℝ)=4*(cellMarkCount b:ℝ) := by dsimp only [M]; field_simp; ring
-    change 4*(cellMarkCount b:ℝ)≤(ell:ℝ)*B^2*Y.card
-    linarith only [mul_le_mul_of_nonneg_right q ep'.le,eq]
+    constructor
+    · change 4*(cellMarkCount b:ℝ)≤(ell:ℝ)*B^2*Y.card
+      linarith only [mul_le_mul_of_nonneg_right q ep'.le,eq]
+    · have both : (X c).filter yes ⊆ Y.filter (fun a=>E a u ∧ F a v) := by
+        intro a ha
+        exact mem_filter.mpr ⟨sub ha,(mem_filter.mp ha).2.1,(mem_filter.mp ha).2.2.1⟩
+      have bound := (lower c).2.trans (sum_le_sum_of_subset_of_nonneg both (fun a _ _=>pw0 a))
+      exact (show (cellMarkCount b:ℝ)/(16*ell)=M/32 by dsimp only [M]; field_simp; ring).le.trans bound
+
+theorem target_class_count_test (line : DirichletLZerosOnLine) (k : ℕ) (hk : 0<k) :
+    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    let b := n.log2+1
+    ∀ (I : Type*) [Fintype I] [Nonempty I], Fintype.card I≤4*Fixed.d b+4 →
+    ∀ (cell : I → Option (Bool×Fin (Fixed.d b))) (residue : I → ℕ),
+    let O := PrescribedRows.unrestricted n ell; let Ω := O.CoeffPoint false × O.CoeffPoint true
+    ∃ (test : Ω→ℝ) (μ : ℝ), (∀ t,0≤test t) ∧ HasSum (fun t=>twoFieldWeight O O t*test t) μ ∧ μ≤1/(k:ℝ) ∧
+      ∀ t : Ω, let u := t.1.val; let v := t.2.val
+        inCoefficientBox n u → inCoefficientBox n v → test t<1 →
+        ∃ rel : Marking.Relations,
+          Marking.stageOne (TryPair.fixedInput n ell (construct n ell u.1.toNat u.2.toNat v.1.toNat v.2.toNat))=some rel ∧
+          ∀ i, let Y := (constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ residue i [MOD ell] ∧ a∈rel.marks)
+            4*(cellMarkCount b:ℝ) ≤ (ell:ℝ)*(Fixed.B b:ℝ)^2*Y.card := by
+  obtain ⟨m,law⟩ := target_class_mass_count_test line k hk
+  refine ⟨m,?_⟩
+  intro n large ell target comp absent b I _ _ num cell residue O Ω
+  obtain ⟨f,μ,fn,avg,rate,pass⟩ := law n large ell target comp absent I num cell residue
+  refine ⟨f,μ,fn,avg,rate,?_⟩
+  intro t u v bu bv cheap
+  obtain ⟨rel,stage,counts⟩ := pass t bu bv cheap
+  exact ⟨rel,stage,fun i=>(counts i).1⟩
 
 /-- A single positive coefficient tuple realizes every prescribed cell and target
 residue in any family of at most four times the degree plus four constraints. -/

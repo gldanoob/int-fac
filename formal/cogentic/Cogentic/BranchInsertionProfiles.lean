@@ -52,6 +52,33 @@ private theorem branch_mesh_saddle_eq {n ell a : ℕ} (hit side : Bool) {α : �
   exact un ((mul_pos (log_pos B1) (by exact_mod_cast (Nat.mul_pos (by decide : 0<90) dp) : (0:ℝ)<90*(Fixed.d b:ℝ))).trans_le range.1)
     (eq.trans ex.choose_spec.2.symm)
 
+/-- Every common cell branch has the unique saddle in the comparison range. -/
+theorem canonical_mesh_saddle_range (line : DirichletLZerosOnLine) :
+    ∃ b₀ : ℕ, ∀ {n ell : ℕ}, let b := n.log2+1
+    b₀≤b → 2≤n → ell∈dyadicTargets (Fixed.beta b) →
+    ∀ (c : Option (Bool×Fin (Fixed.d b))) (hit side : Bool) (j : ℕ), j<cellMarkCount b →
+    let a := firstCellMark b c+j; let γ := branchMeshSaddle n ell a hit side
+    γ∈Set.Icc (199/200:ℝ) 1 ∧ InMarkSaddleRange n (saddleMean (primeBand b) γ) := by
+  obtain ⟨b₁,mesh⟩ := constructor_cell_insertion_total_variation line
+  obtain ⟨b₂,grow⟩ := Fixed.degree_grows 10004
+  refine ⟨max b₁ b₂,?_⟩
+  intro n ell b big hn target c ht side j jm a γ
+  let D := if !side && ht then (ell:ℝ) else 1
+  have bp : 1≤(Fixed.B b:ℝ) := by exact_mod_cast (Nat.one_le_two_pow : 1≤Fixed.B b)
+  have ep : 1≤(ell:ℝ) := by exact_mod_cast (mem_dyadicTargets.mp target).1.one_le
+  have eb : (ell:ℝ)≤Fixed.B b := by exact_mod_cast (mem_dyadicTargets.mp target).2.2
+  have bound : 1≤D ∧ D≤Fixed.B b := by dsimp only [D];split <;> aesop
+  have lim : D≤(Fixed.A b:ℝ)*(Fixed.B b:ℝ)^40 := bound.2.trans ((le_self_pow₀ bp (by decide)).trans
+    (le_mul_of_one_le_left (by positivity) (by exact_mod_cast (Nat.one_le_two_pow : 1≤Fixed.A b))))
+  obtain ⟨β,eq,_⟩ := mesh (max_le_iff.mp big).1 hn target c side D bound.1 lim
+  have point := (fixed_grid_interval (Fixed.degree_pos (b:=b) (Nat.succ_pos n.log2)) c a
+    (mem_Ico.mpr ⟨Nat.le_add_right _ _,Nat.add_lt_add_left jm _⟩)).2
+  have win := grid_center_range hn (grow b (max_le_iff.mp big).2) target side point.1 point.2 D bound.1 bound.2
+  have rng : InMarkSaddleRange n (saddleMean (primeBand b) (β j)) := (eq j jm).2 ▸ win
+  have id := branch_mesh_saddle_eq ht side (eq j jm).1 rng (eq j jm).2
+  rw [← show β j=γ from id]
+  exact ⟨(eq j jm).1,rng⟩
+
 /-- Markwise two-field insertion profiles on every raw cell and target branch.
 Their actual values agree with the physical prescribed mark probabilities'
 saddle insertions. Supremum and total variation have polynomial cost independent

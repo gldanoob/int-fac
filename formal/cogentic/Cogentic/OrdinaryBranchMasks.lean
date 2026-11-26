@@ -420,6 +420,27 @@ theorem prescribed_pair_branch_partition {n ell p q : ℕ} (hn : 2≤n) (hd : 10
       apply sum_congr rfl;intro ht _
       rw [(ordinary_target_branch_masks hn hd composite target sieve pp qp pq pe qe r s hp hq ht).2.2 a]
 
+/-- A clean row can share its prime and residue with no distinct listed row,
+including those removed by the stage-one cleanliness test. -/
+theorem clean_row_eq_of_labels {s : Marking.Input} {a b : Marking.Row}
+    (ha : a∈s.clean) (hb : b∈s.rows) (eqQ : a.q=b.q) (eqR : a.r=b.r) : a=b := by
+  rcases a with ⟨side,p,r⟩
+  rcases b with ⟨other,q,t⟩
+  dsimp only at eqQ eqR
+  subst q
+  subst t
+  have root := (Marking.mem_rows.mp hb).2.2
+  have exclude := (Marking.mem_clean.mp ha).2.2
+  cases side <;> cases other <;> simp_all
+
+/-- Distinct rows at one prime already have zero raw overlap on every mark as
+soon as one row survives cleaning. The other row may be in the deletion set. -/
+theorem clean_same_prime_no_overlap {s : Marking.Input} {a b : Marking.Row}
+    (ha : a∈s.clean) (hb : b∈s.rows) (eqQ : a.q=b.q) (ne : a≠b) (k : ℕ) :
+    ¬(k%a.q=a.r ∧ k%b.q=b.r) := by
+  rintro ⟨left,right⟩
+  exact ne (clean_row_eq_of_labels ha hb eqQ (left.symm.trans ((congrArg (k%·) eqQ).trans right)))
+
 /-- Distinct retained rows at the same prime have disjoint supports, even when
 they come from different fields. The diagonal is exactly the retained row mass. -/
 theorem retained_same_prime_gram {s : Marking.Input} {rel : Marking.Relations} (stage : Marking.stageOne s=some rel)
@@ -431,14 +452,6 @@ theorem retained_same_prime_gram {s : Marking.Input} {rel : Marking.Relations} (
   have rows := (Marking.rows_and_guards stage).2.2.2.1
   have clean (k : Fin rel.rows.length) : rel.rows.get k∈s.clean := rows ▸ rel.rows.get_mem k
   have nd : rel.rows.Nodup := by rw [rows]; exact (List.nodup_dedup _).filter _
-  have uniq {a b : Marking.Row} (ha : a∈s.clean) (hb : b∈s.clean) (eqQ : a.q=b.q) (eqR : a.r=b.r) : a=b := by
-    rcases a with ⟨side,p,r⟩
-    rcases b with ⟨other,q,t⟩
-    dsimp only at eqQ eqR
-    subst q; subst t
-    have root := (Marking.mem_rows.mp (Marking.mem_clean.mp hb).1).2.2
-    have exclude := (Marking.mem_clean.mp ha).2.2
-    cases side <;> cases other <;> simp_all
   split
   next eq =>
     subst j
@@ -448,7 +461,7 @@ theorem retained_same_prime_gram {s : Marking.Input} {rel : Marking.Relations} (
     split <;> simp
   next diff =>
     have distinct : (rel.rows.get i).r ≠ (rel.rows.get j).r := fun h=>
-      diff (nd.get_inj_iff.mp (uniq (clean i) (clean j) prime h))
+      diff (nd.get_inj_iff.mp (clean_row_eq_of_labels (clean i) (Marking.mem_clean.mp (clean j)).1 prime h))
     apply sum_eq_zero
     intro k _
     simp only [Marking.Relations.matrix,Fin.cases_succ,prime]

@@ -1,4 +1,5 @@
 import Cogentic.FirstResidueLoss
+import Cogentic.AuxiliaryBranchPrime
 
 namespace Cogentic.Construction
 open Cogentic.Window Finset
@@ -87,17 +88,6 @@ theorem target_hit_first_step_coprime {n ell a : ℕ}
   have dvd := Int.natAbs_dvd_natAbs.mpr ((target_hits_iff n ell a side 0).mp hit)
   have co := affine_fixed_coprime hn big comp target absent mark side 0
   exact (Nat.Coprime.of_dvd_left (by simpa only [Int.natAbs_natCast] using dvd) co).symm
-
-theorem dyadic_target_in_primeBand {b ell : ℕ} (bp : 0<b) (mem : ell∈dyadicTargets (Fixed.beta b)) :
-    ell∈primeBand b := by
-  obtain ⟨pp,lower,upper⟩ := mem_dyadicTargets.mp mem
-  have βp : 0<Fixed.beta b := Nat.mul_pos (by decide) (Nat.mul_pos (Fixed.degree_pos bp) (Nat.succ_pos _))
-  have eq : Fixed.B b=2^(Fixed.beta b-1)*2 := by
-    rw [←pow_succ,Nat.sub_add_cancel βp]
-    rfl
-  refine mem_primeBand.mpr ⟨pp,upper,?_⟩
-  rw [eq,pow_two]
-  exact (Nat.mul_lt_mul_of_pos_right lower (by decide : 0<2)).trans_le (Nat.mul_le_mul_left ell pp.two_le)
 
 /-- The exceptional common-target class has small actual probability
 conditional on smoothness at the first mark. -/

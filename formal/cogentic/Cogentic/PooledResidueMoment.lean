@@ -5,10 +5,6 @@ open Finset Real
 noncomputable section
 open scoped Classical
 
-/-- Weights at repeated marks add before the second moment is taken. -/
-def pooledMarkWeight {ι : Type*} (S : Finset ι) (Y : ι→Finset ℕ) (f : ι→ℕ→ℝ) (a : ℕ) : ℝ :=
-  ∑ i∈S, if a∈Y i then f i a else 0
-
 private theorem pool_sum {ι : Type*} (S : Finset ι) (Y : ι→Finset ℕ) (f : ι→ℕ→ℝ) (g : ℕ→ℝ) :
     ∑ a∈S.biUnion Y, pooledMarkWeight S Y f a*g a = ∑ i∈S, ∑ a∈Y i, f i a*g a := by
   simp only [pooledMarkWeight,sum_mul]

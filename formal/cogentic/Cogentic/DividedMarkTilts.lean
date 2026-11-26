@@ -1,5 +1,6 @@
 import Cogentic.MarkTilts
-import Cogentic.CellAtomVariation
+import Cogentic.BandInsertion
+import Cogentic.ForcedRows
 import Cogentic.FixedPairCovariance
 import Cogentic.Rank
 
@@ -140,7 +141,8 @@ theorem grid_scale_insertions :
   let G (s : ℝ) := M s/M 0
   let r (k : ℕ) := (k:ℝ)^(-α)/(k:ℝ)^(-β)
   have hp : 0<H := log_pos (band_one_lt (Nat.succ_pos n.log2))
-  obtain ⟨lo,hi,_,_⟩ := ma
+  have lo := ma.1
+  have hi := ma.2.1
   have low : u₀≤u := (le_div_iff₀ hp).mpr (by simpa only [mul_comm] using lo)
   have high : u≤110*(Fixed.d b:ℝ) := (div_le_iff₀ hp).mpr (by simpa only [mul_comm] using hi)
   have eqm : saddleMean J α=H*u := by dsimp only [u]; field_simp
@@ -262,7 +264,7 @@ theorem common_scale_curvature_displacement :
   obtain ⟨floor,vp⟩ := grid_variance_floor (by linarith only [aa] : 0≤α) ma
   change H^2*u₀≤4*V at floor
   have single := insertions (max_le_iff.mp huge).1 α β aa bp ma mb
-  have nn (i : ι) : 0≤m i := rpow_nonneg (Nat.cast_nonneg _) _
+  have nn (i : ι) : 0≤ m i := rpow_nonneg (Nat.cast_nonneg _) _
   have d (i) : |z i-1|≤88/u₀ := (single (p i) (pm i) (p i) (pm i)).1
   have pt (i) : ((z i-1)*w i)^2 ≤ ((88/u₀)^2*H^2)*m i := by
     rw [mul_pow,show (w i)^2 = m i*(log (p i))^2 by rw [show w i=sqrt (m i)*log (p i) from rfl,mul_pow,sq_sqrt (nn i)]]

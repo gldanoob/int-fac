@@ -1,14 +1,10 @@
+import Cogentic.BandInsertion
 import Cogentic.ForcedMarginalRatios
 
 namespace Cogentic.Construction
 open Finset Real Cogentic.Window
 open scoped Classical
 noncomputable section
-
-/-- Full-band insertion at the saddle determined by a mark's unprescribed mean. -/
-def fullBandInsertion (b Q : ℕ) (α : ℝ) : ℝ :=
-  let M := shiftedMass (primeBand b) (primeProbability α) (fun p => log p) (log (Fixed.B b))
-  (Q:ℝ)^(1-α) * (M (log Q)/M 0)
 
 private theorem insertion_transfer {v r s A e : ℝ} (ap : 0 ≤ A) (ep : 0 ≤ e) (small : e ≤ 1/2)
     (hv : |v-1| ≤ A*e) (hr : |r-1| ≤ e) (hs : |s-1| ≤ e) :

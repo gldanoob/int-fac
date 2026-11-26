@@ -1,16 +1,9 @@
 import Cogentic.PolynomialProbability
+import Cogentic.CoefficientBox
 import Mathlib.Analysis.Normed.Ring.InfiniteSum
 namespace Cogentic.Construction
 open Real Cogentic.Window
 noncomputable section
-
-/-- The signed integer coefficient pair lies in the deterministic positive
-    enumeration rectangle. -/
-def inCoefficientBox (n : ℕ) (k : ℤ×ℤ) : Prop :=
-  let b := n.log2+1
-  0<k.1 ∧ k.1≤2*(b:ℤ)^2*Fixed.U b*Fixed.A b ∧ 0<k.2 ∧ k.2≤2*(b:ℤ)^2*Fixed.U b
-
-instance (n : ℕ) (k : ℤ×ℤ) : Decidable (inCoefficientBox n k) := by unfold inCoefficientBox; infer_instance
 
 private theorem gaussian_interval (b σ : ℕ) (sb : 2≤σ) :
     let μ := (b:ℝ)^2*σ

@@ -1,7 +1,19 @@
-import Cogentic.TargetResidue
+import Cogentic.CleanWindows
+import Cogentic.DyadicTargets
 
 namespace Cogentic.Construction
 open Finset
+
+theorem dyadic_target_in_primeBand {b ell : ℕ} (bp : 0<b) (mem : ell∈dyadicTargets (Fixed.beta b)) :
+    ell∈primeBand b := by
+  obtain ⟨pp,lower,upper⟩ := mem_dyadicTargets.mp mem
+  have βp : 0<Fixed.beta b := Nat.mul_pos (by decide) (Nat.mul_pos (Fixed.degree_pos bp) (Nat.succ_pos _))
+  have eq : Fixed.B b=2^(Fixed.beta b-1)*2 := by
+    rw [←pow_succ,Nat.sub_add_cancel βp]
+    rfl
+  refine mem_primeBand.mpr ⟨pp,upper,?_⟩
+  rw [eq,pow_two]
+  exact (Nat.mul_lt_mul_of_pos_right lower (by decide : 0<2)).trans_le (Nat.mul_le_mul_left ell pp.two_le)
 
 /-- There are enough ordinary primes left after the cofactor sieve to add a
 dummy prime to any one-row observable, avoiding its row prime and the target. -/
@@ -34,10 +46,11 @@ theorem auxiliary_ordinary_prime (line : DirichletLZerosOnLine) :
     have one : 3*β≤2^(12+d+z) := by
       rw [Nat.pow_add,Nat.pow_add]
       change 3*(1000*(d*z))≤2^12*2^d*2^z
-      exact (show 3*(1000*(d*z))≤4096*d*z by omega).trans
+      exact (show 3*(1000*(d*z))≤4096*d*z by rw [Nat.mul_assoc 4096]; omega).trans
         (Nat.mul_le_mul (Nat.mul_le_mul_left 4096 (Nat.lt_two_pow_self.le)) Nat.lt_two_pow_self.le)
     have bnd := Nat.pow_le_pow_left (Nat.lt_log2_self.le : b≤2^z) 3
     rw [←Nat.pow_mul] at bnd
+    change b^3≤2^(z*3) at bnd
     have powers : 1≤2^(z*3) := Nat.one_le_two_pow
     have two : b^3+3≤2^(z*3+2) := by rw [Nat.pow_add];omega
     apply (Nat.mul_le_mul one two).trans_lt
