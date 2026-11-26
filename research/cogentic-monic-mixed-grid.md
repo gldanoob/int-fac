@@ -4,6 +4,8 @@ A fixed three-field search split both of the first two semiprimes that the sched
 
 ## Fixed search
 
+Using several number fields in the number field sieve goes back to Coppersmith. Here the shared rows record the parity of individual primitive marks. This finite comparison also computes the rank for each two-field restriction and checks the mixed square roots exactly. [Coppersmith, *Modifications to the Number Field Sieve*](https://research.ibm.com/publications/modifications-to-the-number-field-sieve)
+
 The inputs were $310556537$ and $449508911$, in that order. Before collection, the plan fixed heights 128 and 256, prime cutoff $2H^2$, and three fields with the original scheduled root $m$. The fields are the raw quadratic $F$, raw cubic $G$, and $G+4(X-m)$. All are monic Eisenstein at two, evaluate to $N$ at $m$, and had unit derivatives on both inputs. No input factors enter the search.
 
 Collect each field's marks independently with the packed lattice collector, mark-local checks and the ramified row at two. Each column is a field and primitive point $(a,b)$ with $|a|\le H$, $1\le b\le H$, and $a-bm$ a modular unit. Stack its local ideal-parity rows with one row keyed by the primitive point and shared across the fields. This row requires an even total incidence for the point. Delete singleton rows and their forced-zero columns before binary elimination. Then apply the normalized degree-one Legendre probes through 257 to each field projection of the surviving basis.
