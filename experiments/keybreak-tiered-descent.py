@@ -28,7 +28,8 @@ gaussian_height = radix * (1 + 2 * v0)
 
 
 def check_margins():
-    assert gaussian_height < height and 2 * v0 < 1 and y0 < 1
+    assert F("1.057") < gaussian_height < height and 2 * v0 < 1 and y0 < 1
+    assert radix < F(".69")
     assert (low_ratio - slope_sum) * beta > height
     assert (low_ratio - 1) * slope_sum * beta > height
     assert low_ratio > top_ratio > high_ratio > F(3, 2)
@@ -48,7 +49,7 @@ def check_margins():
 
     bottom_geometry = (2 * slope_sum - 1) * beta
     bottom_mean = bottom_geometry - low_ratio / 3 - radix / (3 * beta)
-    period_margin = lower * (gaussian_height + slope_sum * beta) - upper * radix
+    period_margin = lower * (F("1.057") + slope_sum * beta) - upper * F(".69")
     assert bottom_mean > F(1, 50)
     assert period_margin > F(1, 25)
     print(f"height {float(gaussian_height):.9f}, bottom mean {float(bottom_mean):.9f}, "
@@ -78,7 +79,7 @@ def check_costs():
         "low algebraic": low,
         "probe setup": 2 * delta,
         "retained characters": b + 2 * delta / 3,
-        "elimination": F("2.53") * b,
+        "elimination": F("2.6") * b,
         "extraction": 2 * b,
     }
     assert max(costs.values()) < target
@@ -142,7 +143,7 @@ def check_integer_schedule(n):
         cutoffs.append(child)
     assert high_count > 0 and low_count > 0 and len(cutoffs) < n + 10
     assert cutoffs[1 + high_count] <= isqrt(d * t**2) < cutoffs[high_count]
-    assert 2 * top_box > 3 * global_child + 20 + 6 * (len(cutoffs) + 9).bit_length() + t.bit_length()
+    assert 2 * top_box > 3 * global_child + 20 * (len(cutoffs) + 10)**6 * t
 
     target_bits = (n - 1) // 2 - 2
     remaining = target_bits
