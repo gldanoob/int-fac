@@ -109,13 +109,40 @@ def signed_hits(conditions):
             yield (-1)**k, hits+extra
 
 
-def section_count(start, step, length, primes, primorial):
-    """Count a nonempty section using the shorter value or complementary window."""
-    if not step:
-        return length if start and primorial % abs(start) == 0 else 0
+@dataclass(frozen=True)
+class Section:
+    start: int
+    step: int
+    length: int
+    primes: tuple
+    limit: int
+    forced: int
+    windows: tuple
+    candidates: int
+
+    @property
+    def cost(self):
+        return min(self.length, self.candidates)
+
+    def values(self):
+        if self.candidates < self.length:
+            for sign, window in self.windows:
+                for d in window:
+                    value, remainder = divmod(self.limit, d)
+                    if not remainder:
+                        yield sign*self.forced*value
+        else:
+            for j in range(self.length):
+                value = self.start+self.step*j
+                if value and self.limit % abs(value) == 0:
+                    yield self.forced*value
+
+
+def section_plan(start, step, length, primes, primorial):
+    """Prepare the clipped and complementary scans of a nonconstant progression."""
     forced = gcd(start, step)
     if primorial % forced:
-        return 0
+        return None
     start, step = start//forced, step//forced
     if step < 0:
         start += step*(length-1)
@@ -125,7 +152,7 @@ def section_count(start, step, length, primes, primorial):
     first = max(0, -((limit+start)//step))
     last = min(length-1, (limit-start)//step)
     if first > last:
-        return 0
+        return None
     start += step*first
     end = start+step*(last-first)
     length = last-first+1
@@ -142,11 +169,21 @@ def section_count(start, step, length, primes, primorial):
         # Inversion enforces the original residue on this sign after taking P/d.
         lower += (sign*limit*inverse-lower) % step
         if lower <= upper:
-            windows.append(range(lower, upper+1, step))
+            windows.append((sign, range(lower, upper+1, step)))
             candidates += (upper-lower)//step+1
-    if candidates < length:
-        return sum(limit % d == 0 for window in windows for d in window)
-    return progression_sieve(start, step, length, primes)[0]
+    return Section(start, step, length, primes, limit, forced, tuple(windows), candidates)
+
+
+def section_count(start, step, length, primes, primorial):
+    """Count a nonempty section using the shorter value or complementary window."""
+    if not step:
+        return length if start and primorial % abs(start) == 0 else 0
+    plan = section_plan(start, step, length, primes, primorial)
+    if plan is None:
+        return 0
+    if plan.candidates < plan.length:
+        return sum(plan.limit % d == 0 for _, window in plan.windows for d in window)
+    return progression_sieve(plan.start, plan.step, plan.length, plan.primes)[0]
 
 
 def field_count(box, factor, band):
@@ -171,8 +208,7 @@ def field_count(box, factor, band):
     x_end, y_end = x+p-1, y+q-1
 
     def sections(hits):
-        # Each mark permits the change of variables u=x+a*y. Compare both
-        # projections before scanning: a congruence can fix only the larger mark.
+        # Compare the smooth candidate scans for both projections before scanning.
         choices = []
         for first in marks:
             a = first.mark
@@ -184,16 +220,20 @@ def field_count(box, factor, band):
             u0, _, P, _, _ = coset
             first_i = -((u0-x-a*y)//P)
             last_i = (x_end+a*y_end-u0)//P
-            choices.append((last_i-first_i+1, first, coset, first_i, last_i))
-        _, first, (u0, y0, P, R, Q), first_i, last_i = min(choices, key=lambda item: item[0])
+            start = first.offset+first.step*(u0+P*first_i)
+            delta = first.step*P
+            plan = section_plan(start, delta, last_i-first_i+1, eligible[first], products[first])
+            if plan is None or not plan.cost:
+                return 0
+            choices.append((plan.cost, first, coset, first_i, start, delta, plan))
+        _, first, (u0, y0, P, R, Q), first_i, projected_start, delta, plan = min(
+            choices, key=lambda item: item[0])
         a = first.mark
         second = next((test for test in marks if test != first), None)
         total = 0
-        for i in range(first_i, last_i+1):
+        for value in plan.values():
+            i = first_i+(value-projected_start)//delta
             u = u0+P*i
-            value = first.offset+first.step*u
-            if not value or products[first] % abs(value):
-                continue
             lo, hi = y, y_end
             if a:
                 lo = max(lo, -((x_end-u)//a))
@@ -402,6 +442,14 @@ def check_long_sections():
     factor = Factor((Smooth(0, 1, 1), Smooth(1, offset, step)), (fixed_x,))
     assert field_count(box, factor, band) == 1
 
+    flat_box = (0, 0, width, 1)
+    assert section_plan(2-width, 1, width, band, primorial).cost == width
+    for sign in (-1, 1):
+        factor = Factor((Smooth(0, 2-width, 1), Smooth(1, sign*offset, sign*step)))
+        assert section_plan(sign*offset, sign*step, width, band, primorial).cost == 1
+        assert field_count(flat_box, factor, band) == 1
+    assert section_plan(1, 1, width, band, primorial).cost == width
+
     forced = divisor
     offset, step = forced*band[-1], forced*step
     factor = Factor((Smooth(0, 1, 1), Smooth(1, offset, step)), (fixed_x,))
@@ -412,6 +460,23 @@ def check_long_sections():
     assert section_count(-7, 7, 3, (7,), 7) == 2
     assert section_count(-2, 7, 3, (2, 5, 7), 70) == 2
     print("five closed-form counts on sections of length at least 2^253")
+    print("two closed-form counts with 2^256 outer positions and one candidate")
+
+
+def check_projection_values():
+    rng = Random(20261129)
+    band = (5, 7, 11, 13)
+    for _ in range(1800):
+        primes = tuple(p for p in band if rng.getrandbits(1))
+        primorial = prod(primes)
+        start = rng.randrange(-100, 101)
+        step = rng.choice(tuple(range(-20, 0)) + tuple(range(1, 21)))
+        length = rng.randrange(1, 31)
+        expected = sorted(v for j in range(length)
+                          if (v := start+step*j) and primorial % abs(v) == 0)
+        plan = section_plan(start, step, length, primes, primorial)
+        assert (sorted(plan.values()) if plan is not None else []) == expected
+    print("1800 signed projection value lists match direct enumeration")
 
 
 if __name__ == "__main__":
@@ -419,3 +484,4 @@ if __name__ == "__main__":
     check_mixed()
     check_cases()
     check_long_sections()
+    check_projection_values()
