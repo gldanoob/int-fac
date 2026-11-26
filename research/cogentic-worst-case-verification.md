@@ -99,7 +99,20 @@ For a nonunit residue, an ineligible or repeated prime in $G$ gives zero mass. O
 
 Run `make check-two-thirds-lean` for the factoring proofs. The Lake project pins Lean 4.33.1, the matching Mathlib commit and the frozen Dirichlet GRH source. A fresh checkout needs network access to fetch the dependencies and their caches. Run `make check-two-thirds` with a Python interpreter that imports `sage.all` to also run the five finite replays. To reproduce in this workspace use `env DOT_SAGE=/tmp/rsa-sage-check make check-two-thirds`.
 
-The default Lake target checks the deductions from the precise critical-line statement in the frozen upstream source. Its public endpoints are audited at build time for dependence on additional axioms. The optional `lake build CogenticWithGRH` target imports the original all-character proof and applies it to the character bound, the small generating bases and the complete two-thirds factoring theorem. The default target and the application types were checked here. A local replay of the full combined import would require restoring the large original proof archive. The independent checks published for that exact upstream theorem are available separately. [Original theorem](https://github.com/homeowmorphism/riemann-hypothesis-original/blob/3091d9fb6eab9943787c5d19d0b7848bf364eac2/src/Main.lean) · [Independent verification](https://math.mit.edu/~drew/grh/) · [Application of the original proof](../formal/cogentic/CogenticWithGRH.lean)
+The default Lake target checks the factoring proof with the precise Dirichlet critical-line statement as an input. The optional module imports the archived proof of that statement and applies it to obtain `Cogentic.binary_factorization_two_thirds` with no theorem parameters. Its final command prints the axioms of the combined theorem. [Application of the original proof](../formal/cogentic/CogenticWithGRH.lean) · [Original theorem](https://github.com/homeowmorphism/riemann-hypothesis-original/blob/3091d9fb6eab9943787c5d19d0b7848bf364eac2/src/Main.lean)
+
+To compile that module from cached GRH artifacts, start in the repository root with elan on your path. Let Lake resolve the pinned dependencies, restore the GRH cache into its checkout, then build the factoring modules. Upstream specifies about 105 GB of free disk for the cache restore. If both the GRH cache and the ordinary factoring target are already installed, only the final command is needed. [Upstream cache instructions and provenance](https://github.com/homeowmorphism/riemann-hypothesis-original/blob/3091d9fb6eab9943787c5d19d0b7848bf364eac2/verification/CACHE.md)
+
+```sh
+(cd formal/cogentic && lake env true)
+(cd formal/cogentic/.lake/packages/tree && lake exe cache get)
+make check-two-thirds-lean
+make check-two-thirds-cached-grh
+```
+
+The final command compiles the wrapper directly with the pinned Lean compiler, imports its dependencies from installed `.olean` files, and fails if an import is missing. It writes `formal/cogentic/.lake/build/lib/lean/CogenticWithGRH.olean`. An ordinary source build remains available with `lake build CogenticWithGRH` from `formal/cogentic`.
+
+The cache client verifies each archive against its pinned manifest. We also compared the cache's `Main.olean` with Sutherland's independently published SHA-256 and obtained the same digest, `9146dfb4148e24d2252e04c50742f3e49dd126dfcc5006d10bf5f873ddf796ad`. This identifies that one module. The default factoring build and the wrapper's application types were checked here. The complete cached import still needs a host with room for its dependencies. [Independent kernel checks and artifact provenance](https://math.mit.edu/~drew/grh/)
 
 The reference PDF is the deterministic companion at commit `4a7bc8ab0bc770e71a259b7966c500496b99010a`, SHA-256 `0ccf115516dab3cbeee15167f2dea62fcb29d03a19224cb4a9ae69a5ce402993`. The original linked paper makes a separate private-coin, per-input expected-time claim. [Pinned manuscripts and their guarantees](cogentic-factoring-papers.md)
 

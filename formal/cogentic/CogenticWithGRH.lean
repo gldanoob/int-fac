@@ -48,3 +48,5 @@ theorem factor_of_eventual_coverage
   Concrete.factor_of_box_coverage LFunction_eq_zero_re covered
 
 end Cogentic
+
+#print axioms Cogentic.binary_factorization_two_thirds

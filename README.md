@@ -67,3 +67,5 @@ make check
 ~~~
 
 The standalone checks use the installed elan stable binary when available and otherwise use Lean on the search path. Run `make check-two-thirds-lean` for the pinned factoring project alone. To use a specific Lean executable, pass its path as the make variable `LEAN`. The [formal proofs](formal/) establish the finite tape-cover, raw clique-cost and order-query counting statements, together with existence and uniqueness of primitive-form certificates, the three conic secant identities, and the clipped three-square shell equivalence. The [PARI/GP experiments](experiments/) check the finite examples and sweeps. Each report includes commands for running its checks individually.
+
+With the pinned GRH artifacts installed, `make check-two-thirds-cached-grh` compiles the parameter-free factoring theorem and prints its axioms. [Cache setup](research/cogentic-worst-case-verification.md#reproduction-and-scope)
