@@ -20,3 +20,27 @@ The fixed holdout is 187, 299, 437, 11021, 11663 and 12317. The rank score split
 On holdout input 437, the unperturbed matrix had rank 132 and zero reachable targets. The exact score chose $(0,0,0,1)$ with lower rank 127 and 32 reachable targets, and verified divisor 19. The smooth-mark control also had zero reachable targets.
 
 This finite comparison pays for full relation collection across the coefficient box. It gives no bound for replacing that work with conditional expectations or for achieving deterministic $L_N[1/3]$ factoring.
+
+## Smaller norms on the fixed grid
+
+The old box has slopes of magnitude at least $(N-7)/2$. For every searched $(a,b)$, $|a/b|\le H$ and $b\ne0$. Completing the square gives
+
+$$
+a^2+sab+cb^2 = b^2\left((a/b+s/2)^2+|s^2-4c|/4\right)
+\ge b^2\left((N-7)/4-H\right)^2
+$$
+
+when $H\le(N-7)/4$. At $H=250$, every old norm on these six inputs exceeds five million. The grid stays far from the vertex of every old polynomial, including those with smaller discriminants inside the box.
+
+The separate replay uses the existing extractor's small-slope convention with the single fixed pair $(s_1,s_2)=(0,-1)$. Set $m=\lfloor\sqrt N\rfloor$, $r=N-m^2$ and $c_i=r-s_i m$, so both polynomials equal $N$ at $m$. For nonsquare $N$, $1\le r\le2m$ and $1\le c_i\le3m$. The discriminants are negative and the two norms at $(1,1)$ are at most $3m$. This choice uses only $N$ and runs once per input, with the same height, smoothness bound, and identical-mark extractor as the three prior controls. [Replay](../experiments/cogentic-selected-polynomial-recenter.py)
+
+| Input | Reachable targets | Rank | Columns | Verified divisor |
+| ---: | ---: | ---: | ---: | ---: |
+| 10001 | 27 | 108 | 470 | 137 |
+| 10203 | 25 | 116 | 792 | 19 |
+| 10403 | 33 | 133 | 442 | 103 |
+| 11021 | 30 | 127 | 502 | 107 |
+| 11663 | 29 | 125 | 339 | 109 |
+| 12317 | 29 | 128 | 465 | 109 |
+
+The smaller-norm pair split all six prespecified misses. The norm comparison explains the geometric difference between these parameter choices. It gives no uniform lower bound for smooth marks, rank, or certified splits.
