@@ -34,21 +34,21 @@ private theorem reciprocal_square_tangent (y a : ℝ) (hy : 0 < y) (ha : 0 < a) 
 
 /-- A rational separating inequality for the fixed two-cost schedule model.
 Here 2/(3v²) is κδ and v is the least elliptic recognition coefficient
-in private cutoff units. The conclusion excludes a ceiling of 2.1546. -/
+in private cutoff units. The conclusion excludes a ceiling of 2.15463. -/
 theorem sparse_schedule_floor (b δ v : ℝ) (hd : 0 < δ) (hv : 0 < v)
-    (hprivate : b + 4/(9*v^2) + 2*v/3 ≤ 10773/5000)
-    (hterminal : 3*v^2/2 + 4/δ + (10773/5000)*δ ≤ 6*b*(10773/5000-b)) :
+    (hprivate : b + 4/(9*v^2) + 2*v/3 ≤ 215463/100000)
+    (hterminal : 3*v^2/2 + 4/δ + (215463/100000)*δ ≤ 6*b*(215463/100000-b)) :
     False := by
-  let a : ℝ := 39243/50000
-  let k : ℝ := 837/625
-  let s : ℝ := 29357/20000
+  let a : ℝ := 7848521/10000000
+  let k : ℝ := 13394292/10000000
+  let s : ℝ := 146786579/100000000
   have ha : 0 < a := by norm_num [a]
   have hk : 0 < k := by norm_num [k]
-  have hδ : 4*s ≤ 4/δ + (10773/5000)*δ := by
-    have h : 4*s*δ ≤ 4 + (10773/5000)*δ^2 := by
+  have hδ : 4*s ≤ 4/δ + (215463/100000)*δ := by
+    have h : 4*s*δ ≤ 4 + (215463/100000)*δ^2 := by
       dsimp [s]
-      nlinarith only [sq_nonneg ((29357/20000 : ℝ)*δ-2), sq_nonneg δ]
-    have he : (4/δ + (10773/5000)*δ)*δ = 4 + (10773/5000)*δ^2 := by
+      nlinarith only [sq_nonneg ((146786579/100000000 : ℝ)*δ-2), sq_nonneg δ]
+    have he : (4/δ + (215463/100000)*δ)*δ = 4 + (215463/100000)*δ^2 := by
       field_simp
     exact le_of_mul_le_mul_right (a := δ) (by linarith only [h,he]) hd
   have hinv : (2*k/3)*(3/a^2 - 2*v/a^3) ≤ (2*k/3)*(1/v^2) :=
@@ -56,8 +56,8 @@ theorem sparse_schedule_floor (b δ v : ℝ) (hd : 0 < δ) (hv : 0 < v)
   have he : 4/(9*v^2) = (4/9)*(1/v^2) := by ring
   rw [he] at hprivate
   dsimp [a,k,s] at *
-  have hbq := sq_nonneg (b-9099/10000)
-  have hvq := sq_nonneg (v + ((837/625 : ℝ) - 4*(837/625)/(3*(39243/50000 : ℝ)^3))/3)
+  have hbq := sq_nonneg (b-90988635/100000000)
+  have hvq := sq_nonneg (v + ((13394292/10000000 : ℝ) - 4*(13394292/10000000)/(3*(7848521/10000000 : ℝ)^3))/3)
   generalize 1/v^2 = u at hinv hprivate
   generalize 4/δ = e at hδ hterminal
   norm_num at hinv hvq
@@ -71,16 +71,16 @@ theorem finite_grid_schedule_floor {n : ℕ} (z w : ℕ → ℝ)
     (b δ curve h ratio v height : ℝ) (hb : 0 < b) (hd : 0 < δ) (hc : 0 < curve)
     (hh : curve ≤ h) (hz0 : z 0 = 0) (hzn : z n = 1)
     (hstep : ∀ i < n, z i ≤ z (i+1))
-    (htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ 10773/5000 - b - h*z (i+1))
+    (htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ 215463/100000 - b - h*z (i+1))
     (hmoment : 4/(9*curve^2) ≤ ∑ i ∈ Finset.range n, z (i+1)^2*w i)
     (hslope : 0 ≤ 2*(b/δ) - 1/3)
     (hheight : (1 + δ/(2*(2/(3*curve^2))))/δ^3 ≤ height)
     (hbox : height + v ≤ ratio*(b/δ))
     (hmean : ratio/3 + 1/(3*δ^2*b) ≤ 2*v-b/δ)
-    (hraw : b + δ*ratio/3 + 1/(3*δ*b) ≤ 10773/5000) : False := by
+    (hraw : b + δ*ratio/3 + 1/(3*δ*b) ≤ 215463/100000) : False := by
   have hgrid := Cogentic.finite_stage_private_floor z w (hc.le.trans hh) hz0 hzn hstep htail
   have hterminal := terminal_tradeoff_of_search b δ (2/(3*curve^2)) ratio v height
-    (10773/5000) hb hd (by positivity) hslope hheight hbox hmean hraw
+    (215463/100000) hb hd (by positivity) hslope hheight hbox hmean hraw
   have hinv : 1/(2/(3*curve^2)) = 3*curve^2/2 := by field_simp
   rw [hinv] at hterminal
   exact sparse_schedule_floor b δ curve hd hc (by linarith only [hgrid,hmoment,hh]) hterminal

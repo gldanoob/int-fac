@@ -1,5 +1,6 @@
 import Cogentic.RandomizedBudgetLimit
 import Cogentic.RandomizedCostBounds
+import Cogentic.RandomizedEndpointFloor
 import Cogentic.RandomizedHiddenLabels
 import Cogentic.RandomizedPrivateFloor
 import Cogentic.RandomizedPrivateGates
