@@ -118,6 +118,10 @@ def run():
     odd_fives = [label for label in labels if label[:3] in column and label[:2] == [2, 5]]
     assert flags == [1, 1] and len(odd_fives) == 2 and all(label[3:] == [2, 1, 1] for label in odd_fives)
     check_split(895, m, (f, g), marks, basis, NEW_SQUARE, -1, 5)
+    search = run_path(str(HERE / "cogentic-monic-kernel-driver.py"))["search"]
+    result = search(895, 2, 20, 128, False, True, all_ideals=True)
+    assert (result["columns"], result["parity"], result["basis"]) == (151, 7, 5)
+    assert {min(case["divisor"], case["cofactor"]) for case in result["factors"]} == {5}
     for n, height in ((145, 16), (67, 20)):
         m, f, g = GRID["CHECK_PAIR"](n, 2)
         shift, fields = REPAIR(n, m, f, g)

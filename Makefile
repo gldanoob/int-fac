@@ -54,3 +54,14 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-square-probes.py
 	"$(PYTHON)" -B experiments/cogentic-planted-unit-signatures.py
 	"$(PYTHON)" -B experiments/cogentic-private-grid-density.py
+	"$(PYTHON)" -B experiments/cogentic-short-field-list.py
+	"$(PYTHON)" -B experiments/cogentic-weighted-smooth-count.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-all-ideal-reference.py
+	@printf '%s\n' 'iferr(read("experiments/cogentic-monic-singular-ideals.gp"), err, print(err); quit(1))' | "$(GP)" -fq
+	@printf '%s\n' 'iferr(read("experiments/cogentic-parametric-square-split.gp"), err, print(err); quit(1))' | "$(GP)" -fq
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-degree-certificate-check.py
+	"$(PYTHON)" -B experiments/cogentic-growing-pell-pair.py
+	"$(PYTHON)" -B experiments/cogentic-partial-sign-lattice.py
+	"$(PYTHON)" -B experiments/cogentic-planted-sparse-signs.py
+	"$(PYTHON)" -B experiments/cogentic-composite-private-parity.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-exact-grid.py

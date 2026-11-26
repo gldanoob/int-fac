@@ -78,29 +78,41 @@ def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
 
 def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
            query_cap=QUERY_CAP, time_cap=CASE_SECONDS, ramified_two=False,
-           mark_local=False, probe_cutoff=0, stop_at_factor=False):
-    left, right = map(list, fields)
-    try:
-        line = gp_value(f"poldisc(Polrev({left}))*poldisc(Polrev({right}))", time_cap)
-    except TimeoutExpired:
-        return dict(n=n, m=m, shift=shift, status="discriminant-time-cap", tests=0, factors=[])
-    except GPStackLimit:
-        return dict(n=n, m=m, shift=shift, status="discriminant-stack-cap", tests=0, factors=[])
-    discriminant = int(line)
-    if primes is None:
-        collect = run_path(str(HERE / "cogentic-monic-lattice-sieve.py"))["collect"]
-        marks = collect(n, m, fields, discriminant, cutoff, height=height,
-                        include_ramified_two=ramified_two, mark_local=mark_local)
+           mark_local=False, probe_cutoff=0, stop_at_factor=False, all_ideals=False):
+    discriminant = None
+    if all_ideals:
+        exact_collect = run_path(str(HERE / "cogentic-monic-exact-grid.py"))["collect"]
+        marks = list(exact_collect(n, m, fields, cutoff, height=height))
+        rows = [part for _, part in marks]
     else:
-        marks = GRID["relations"](n, m, fields, discriminant, primes, cutoff, complete_parity=True,
-                                  height=height, include_ramified_two=ramified_two, mark_local=mark_local)
-    columns = GRID["parity_words"]([small + large for _, small, large, _ in marks])
-    parity_basis = GRID["eliminate"](columns, (1 << j for j in range(len(marks))))
-    result = dict(n=n, m=m, shift=shift, columns=len(marks), parity=len(parity_basis))
+        left, right = map(list, fields)
+        try:
+            line = gp_value(f"poldisc(Polrev({left}))*poldisc(Polrev({right}))", time_cap)
+        except TimeoutExpired:
+            return dict(n=n, m=m, shift=shift, status="discriminant-time-cap", tests=0, factors=[])
+        except GPStackLimit:
+            return dict(n=n, m=m, shift=shift, status="discriminant-stack-cap", tests=0, factors=[])
+        discriminant = int(line)
+        if primes is None:
+            collect = run_path(str(HERE / "cogentic-monic-lattice-sieve.py"))["collect"]
+            marks = collect(n, m, fields, discriminant, cutoff, height=height,
+                            include_ramified_two=ramified_two, mark_local=mark_local)
+        else:
+            marks = GRID["relations"](n, m, fields, discriminant, primes, cutoff, complete_parity=True,
+                                      height=height, include_ramified_two=ramified_two, mark_local=mark_local)
+        rows = [small + large for _, small, large, _ in marks]
+    total_marks = len(marks)
+    if height >= 128:
+        core, parity_basis = GRID["parity_basis"](rows)
+        marks = [marks[j] for j in core]
+    else:
+        columns = GRID["parity_words"](rows)
+        parity_basis = GRID["eliminate"](columns, (1 << j for j in range(len(marks))))
+        assert all(GRID["combine"](word, columns) == 0 for word in parity_basis)
+    result = dict(n=n, m=m, shift=shift, columns=total_marks, parity=len(parity_basis))
     if not parity_basis:
         return dict(result, status="zero-parity", tests=0, basis=0, factors=[])
 
-    assert all(GRID["combine"](word, columns) == 0 for word in parity_basis)
     sign_bit, decode, query = exact_oracle(n, m, fields, marks, time_cap)
     signed = [sign_bit, *parity_basis]
     if probe_cutoff:
@@ -145,7 +157,7 @@ def fixtures():
             print(replay(n, m, shift, fields, primes, cutoff))
 
 
-def search(n, degree, height, query_cap, planted, relations_only):
+def search(n, degree, height, query_cap, planted, relations_only, all_ideals=False):
     if n < 2 or degree < 2 or height < 1 or query_cap < 0:
         raise ValueError("require N >= 2, degree >= 2, height >= 1, and a nonnegative query limit")
     def direct(stage, divisor):
@@ -175,12 +187,12 @@ def search(n, degree, height, query_cap, planted, relations_only):
                     divisor = gcd(a-b*m, n)
                     if 1 < divisor < n:
                         return direct("direct-mark-gcd", divisor)
-    cutoff = max(GRID["BASE"], 2*height**2)
+    cutoff = max(GRID["BASE"], 2*height**2, 2*(len(fields[1])-1) if all_ideals else 0)
     # The root lattice repays its setup on larger boxes or wide input coefficients.
-    primes = None if height >= 128 or n.bit_length() >= 255 else tuple(GRID["primes_through"](cutoff))
+    primes = None if all_ideals or height >= 128 or n.bit_length() >= 255 else tuple(GRID["primes_through"](cutoff))
     result = replay(n, m, shift, fields, primes, cutoff, height=height, query_cap=query_cap,
                     time_cap=None, ramified_two=True, mark_local=True, probe_cutoff=257,
-                    stop_at_factor=not relations_only)
+                    stop_at_factor=not relations_only, all_ideals=all_ideals)
     if planted:
         result["planted_cuts"] = cuts
     return result
@@ -197,15 +209,20 @@ if __name__ == "__main__":
     parser.add_argument("--queries", type=int, default=QUERY_CAP, help="maximum joint square tests")
     parser.add_argument("--planted", action="store_true", help="use the norm-two polynomial family")
     parser.add_argument("--relations-only", action="store_true", help="skip preliminary mark gcd splits")
+    parser.add_argument("--all-ideals", action="store_true", help="use SageMath to compute complete ideal parity, including singular prime ideals")
     args = parser.parse_args()
     if args.n is None:
-        if args.planted or args.relations_only or args.degree is not None or args.height != GRID["HEIGHT"] or args.queries != QUERY_CAP:
+        if args.planted or args.relations_only or args.all_ideals or args.degree is not None or args.height != GRID["HEIGHT"] or args.queries != QUERY_CAP:
             parser.error("provide N for a configurable search")
         fixtures()
     else:
         scheduled = run_path(str(HERE / "cogentic-monic-pair.py"))["scheduled_degree"]
         degree = scheduled(args.n) if args.degree is None and args.n >= 2 else args.degree
         try:
-            print(json.dumps(search(args.n, degree, args.height, args.queries, args.planted, args.relations_only)))
+            print(json.dumps(search(args.n, degree, args.height, args.queries, args.planted, args.relations_only, args.all_ideals)))
+        except ModuleNotFoundError as error:
+            if args.all_ideals and error.name in ("sage", "sage.all"):
+                parser.error("--all-ideals requires a Python environment with SageMath")
+            raise
         except ValueError as error:
             parser.error(str(error))
