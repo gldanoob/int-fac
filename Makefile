@@ -72,3 +72,4 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-monic-mixed-complete.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-quadratic-square-kernel.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-centered-quadratic-density.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-quadratic-supported-kernel.py

@@ -2,11 +2,13 @@
 
 import argparse
 import json
+import os
 from collections import Counter
 from fractions import Fraction
 from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
+from shutil import which
 from time import monotonic
 
 
@@ -55,12 +57,12 @@ def quadratic_space(n, m, fields, height):
     points = [(a, b) for a in range(-height, height+1) for b in range(1, height+1)
               if gcd(a, b) == gcd(a-b*m, n) == 1]
     blocks, incidence, local_masks = [], [], []
-    for i, (constant, linear, _) in enumerate(fields):
+    field_masks = run_path(str(HERE / "cogentic-quadratic-supported-kernel.py"))["grid_square_masks"]
+    packed_roots = height >= 16 and which(os.environ.get("GP", "gp")) is not None
+    for i, field in enumerate(fields):
         offset = i*(len(points)+1)
         blocks.append((offset, points))
-        d = linear**2-4*constant
-        elements = [(a+Fraction(b*linear, 2), Fraction(-b, 2)) for a, b in points]
-        for mask in QUADRATIC["square_masks"](d, [*elements, (-1, 0)]):
+        for mask in field_masks(field, points, height, packed_roots=packed_roots):
             incidence.append(mask)
             local_masks.append(mask << offset)
     return blocks, GRID["eliminate"](incidence, local_masks), [len(points)]*len(fields)

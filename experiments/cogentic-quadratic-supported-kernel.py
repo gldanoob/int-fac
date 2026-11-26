@@ -128,6 +128,23 @@ def marked_square_kernel(field, points, height, *, include_sign=True):
     return solve_descent(d, elements, basis, scalars)
 
 
+def grid_square_masks(field, points, height, *, packed_roots):
+    """Full field square space, including the sign coordinate, on a primitive grid."""
+    d, elements = marked_elements(field, points)
+    if QUADRATIC["rational_sqrt"](d) is not None:
+        raise ValueError("expected an irreducible quadratic")
+    if packed_roots:
+        basis, _, _ = away_basis(field, points, height)
+        scalars = supported_scalars(d, descent_scalars(d, elements, basis))
+    elif field[1] in (0, -1, -2):
+        norm_basis = run_path(str(HERE / "cogentic-quadratic-grid-norms.py"))["norm_basis"]
+        basis = norm_basis(field, points, height)
+        scalars = descent_scalars(d, elements, basis)
+    else:
+        return QUADRATIC["square_masks"](d, elements)
+    return descent_masks(d, basis, scalars)
+
+
 def replay():
     points = ((1, 1), (-1, 1))
     assert not marked_square_kernel((12, 0, 1), points, 1, include_sign=False)
