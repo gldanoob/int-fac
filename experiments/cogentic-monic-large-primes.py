@@ -55,8 +55,13 @@ def polynomial(values, x, mod):
     return result
 
 
+def homogeneous(values, a, b):
+    return sum(c * a**j * b**(len(values)-1-j) for j, c in enumerate(values))
+
+
 def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *,
-              height=HEIGHT, include_ramified_two=False):
+              height=HEIGHT, include_ramified_two=False, mark_local=False):
+    """Collect parity columns using the ordered primes through cutoff."""
     if include_ramified_two:
         if not excluded or any(
             len(coeffs) < 3 or coeffs[-1] != 1 or coeffs[0] % 4 != 2
@@ -66,14 +71,17 @@ def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *,
             raise ValueError("the ramified row requires a nonzero discriminant product and polynomials Eisenstein at two")
         while excluded % 2 == 0:
             excluded //= 2
+    if mark_local:
+        excluded = gcd(excluded, 2)
+    polynomials = [(coeffs, tuple(j*c for j, c in enumerate(coeffs) if j)) for coeffs in fields]
     retained = []
     for a in range(-height, height + 1):
         for b in range(1, height + 1):
             if gcd(a, b) != 1 or gcd(a - b*m, n) != 1:
                 continue
             small, large, smooth = [], [], True
-            for i, coeffs in enumerate(fields, 1):
-                value = sum(c * a**j * b**(len(coeffs)-1-j) for j, c in enumerate(coeffs))
+            for i, (coeffs, derivative) in enumerate(polynomials, 1):
+                value = homogeneous(coeffs, a, b)
                 if value == 0 or gcd(value, excluded) != 1:
                     break
                 if include_ramified_two and a % 2 == 0:
@@ -83,13 +91,20 @@ def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *,
                 factors = factor_bounded(value, primes, cutoff, complete_parity)
                 if factors is None:
                     break
-                if prod(p**e for p, e in factors) != abs(value):
+                tail = abs(value) // prod(p**e for p, e in factors)
+                if mark_local:
+                    local_derivative = homogeneous(derivative, a, b)
+                    if gcd(tail, local_derivative) != 1 or any(
+                        e > 1 and local_derivative % p == 0 for p, e in factors
+                    ):
+                        break
+                if tail != 1:
                     smooth = False
                 for p, e in factors:
                     root = a * pow(b, -1, p) % p
                     assert polynomial(coeffs, root, p) == 0
-                    derivative = tuple(j*c for j, c in enumerate(coeffs) if j)
-                    assert polynomial(derivative, root, p) != 0
+                    if not mark_local:
+                        assert polynomial(derivative, root, p) != 0
                     if p > BASE:
                         smooth = False
                     if e % 2:
