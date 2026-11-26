@@ -1,4 +1,4 @@
-"""Split a recognized Pell family using fixed smooth seeds on Gaussian charts."""
+"""Split recognized Pell and polynomial families using fixed smooth seeds on Gaussian charts."""
 
 import argparse
 import json
@@ -14,16 +14,43 @@ MATCHING, SQUARES = CHARTS["MATCHING"], CHARTS["SQUARES"]
 CRT_RANK = run_path(str(HERE / "cogentic-mixed-lifted-rank.py"))["crt_rank"]
 
 
+def polynomial_parameters(index):
+    k = 11300 + 118650 * index
+    d = (k*k - 15) // 5
+    s = (10*k*k - 76*k + 150) // 5
+    t = (38*k*k - 300*k + 570) // 5
+    return 4*s**4 + d**4, Fraction(s, d), Fraction(t, d)
+
+
 def split(n):
-    """Recognize the unit family and recover two exact modular square certificates."""
+    """Recover either family parameter from the public input alone."""
     if n < 40001:
         return None
     r = isqrt(n-1)
     s = isqrt(r//2)
     t = isqrt(15*s*s-56)
-    if r*r+1 != n or 2*s*s != r or s < 10 or t*t != 15*s*s-56 or gcd(t, n) != 1:
+    if r*r+1 == n and 2*s*s == r and t*t == 15*s*s-56 and gcd(t, n) == 1:
+        return certificates(n, r, s, t)
+    if n < polynomial_parameters(0)[0]:
         return None
+    low, high = 0, 1
+    while polynomial_parameters(high)[0] < n:
+        low, high = high + 1, 2 * high
+    while low < high:
+        middle = (low + high) // 2
+        if polynomial_parameters(middle)[0] < n:
+            low = middle + 1
+        else:
+            high = middle
+    candidate, s, t = polynomial_parameters(low)
+    if candidate == n:
+        return dict(certificates(n, 2*s*s, s, t), polynomial_index=low)
+    return None
 
+
+def certificates(n, r, s, t):
+    reduce_fraction = CHARTS["reduce_fraction"]
+    base = reduce_fraction(r, n)
     charts = [
         ((1, 0, 1), r, (1, 1), (1, 0, 0, 1)),
         ((2, -2, 1), r+1, (-30, 97), (0, -2, 1, -1)),
@@ -31,18 +58,18 @@ def split(n):
     ]
     elements, labels = [], []
     for (v, u, _), m, (a, b), (p, q, h, k) in charts:
-        discriminant, derivative = u*u-4*v, 2*m+u
-        assert m*m+u*m+v == n and gcd(derivative, n) == 1 and gcd(a, b) == 1
-        scale, factor = CHARTS["align"](n, (-4, 2*r), (discriminant, derivative))
+        discriminant, derivative = u*u-4*v, reduce_fraction(2*m+u, n)
+        assert (m*m+u*m+v).numerator == n and gcd(derivative, n) == gcd(a, b) == 1
+        scale, factor = CHARTS["align"](n, (-4, 2*base), (discriminant, derivative))
         assert factor is None and scale is not None
         generator = Fraction(-u, 2), scale/2
         assert SQUARES["multiply"](-4, generator, (k, Fraction(h, 2))) == (q, Fraction(p, 2))
-        assert gcd(p*k-q*h, n) == gcd(h*r+k, n) == 1
+        assert gcd(p*k-q*h, n) == gcd(h*base+k, n) == 1
         argument = Fraction(p*r+q, h*r+k)
         element = CHARTS["coordinates"](u, scale, a, b)
         label = a-b*argument
-        assert CHARTS["reduce_fraction"](label, n) == (a-b*m) % n
-        assert CHARTS["reduce_fraction"](element[0]+2*r*element[1], n) == (a-b*m) % n
+        assert CHARTS["reduce_fraction"](label, n) == reduce_fraction(a-b*m, n)
+        assert CHARTS["reduce_fraction"](element[0]+2*r*element[1], n) == reduce_fraction(a-b*m, n)
         elements.append(element)
         labels.append(label)
     assert [SQUARES["norm"](-4, element) for element in elements] == [2, 2*113**2, 2]
@@ -53,8 +80,8 @@ def split(n):
     for element, label, coefficient, scale in zip(elements[1:], labels[1:], (15, 1), (2*t, 2*s), strict=True):
         root = Fraction(1), Fraction(coefficient, 2)
         assert SQUARES["multiply"](-4, root, root) == SQUARES["multiply"](-4, elements[0], element)
-        value, residue = labels[0]*label, (1+coefficient*r) % n
-        assert value == scale**2 and residue*residue % n == scale**2 % n
+        value, residue = labels[0]*label, (1+coefficient*base) % n
+        assert value == scale**2 and residue*residue % n == reduce_fraction(scale**2, n)
         witnesses.append((value, residue))
     matches = MATCHING["matched_basis"](n, witnesses)
     assert [mask for mask, _ in matches] == [1, 2]
@@ -69,7 +96,10 @@ def split(n):
             refined.extend(factor for factor in (d, block//d) if factor > 1)
         blocks = refined
     assert len(blocks) >= 3 and prod(blocks) == n
-    return dict(n=n, r=r, t=t, s=s, smooth_norms=[2, 2*113**2, 2], crt_rank=rank,
+    def encode(value):
+        return value.numerator if value.denominator == 1 else [value.numerator, value.denominator]
+
+    return dict(n=n, r=encode(r), t=encode(t), s=encode(s), smooth_norms=[2, 2*113**2, 2], crt_rank=rank,
                 labels=[(label.numerator, label.denominator) for label in labels],
                 ratios=ratios, coprime_factors=sorted(blocks))
 
@@ -94,12 +124,17 @@ def replay():
                 assert (t % 113, s % 113) == (38, 10)
         t, s = 4*t+15*s, t+4*s
     assert gcd(*seen) == 1 and not split(40003)
-    print("Verified four constructed family cases, including the Pell return modulo 113")
+    for index in (0, 1, 2, 3, 17, 127):
+        n, _, _ = polynomial_parameters(index)
+        result = split(n)
+        assert result["polynomial_index"] == index and len(result["coprime_factors"]) == 4
+        assert split(n - 1) is None and split(n + 1) is None
+    print("Verified four Pell instances and six polynomial-family recognitions with four sign blocks")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("n", nargs="?", type=int, help="recognize and split a member of the Pell family")
+    parser.add_argument("n", nargs="?", type=int, help="recognize and split a member of either Gaussian family")
     args = parser.parse_args()
     if args.n is None:
         replay()

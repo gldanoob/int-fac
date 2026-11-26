@@ -49,7 +49,7 @@ All four blocks are integers greater than one since \(25\mid k\). The identities
 
 Each quadratic block is increasing for \(k\ge11300\). The resulting increasing polynomial in \(j\) has positive leading coefficient and degree eight. Binary search recovers \(j\) if the public input belongs to the family, with polynomial bit cost in \(\log N\). This is an explicit polynomial family of factored inputs. It gives no supply of these comparisons for arbitrary moduli.
 
-Run `gp -fq experiments/cogentic-rational-gaussian-seed-family.gp` to check the polynomial identities, two one-variable inputs and one primitive two-variable input.
+Run `python3 -B experiments/cogentic-gaussian-smooth-seed-charts.py N` to recognize the one-variable polynomial family from the public integer and recover its factors by sign comparisons. Run `gp -fq experiments/cogentic-rational-gaussian-seed-family.gp` to check the polynomial identities, two one-variable inputs and one primitive two-variable input.
 
 ## A denser family from primitive parameters
 

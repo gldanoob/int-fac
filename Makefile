@@ -84,13 +84,15 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-cubic-newton-parity.py
 	"$(PYTHON)" -B experiments/cogentic-cubic-order-kernel.py
 	"$(PYTHON)" -B experiments/cogentic-order-ideal-parity.py
+	"$(PYTHON)" -B experiments/cogentic-order-square-kernel.py
 	"$(PYTHON)" -B experiments/cogentic-radix-grid-density.py
 	"$(PYTHON)" -B experiments/cogentic-near-cube-density.py
 	"$(PYTHON)" -B experiments/cogentic-mixed-lifted-rank.py
 	"$(PYTHON)" -B experiments/cogentic-jacobi-exponent-prefilter.py
+	"$(PYTHON)" -B experiments/cogentic-pooled-order-certificates.py
 	"$(PYTHON)" -B experiments/cogentic-cofactor-dispersion.py
 	"$(PYTHON)" -B experiments/cogentic-planted-square-masks.py
-	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks cogentic-common-cofactors-sparse-steps; do \
+	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks cogentic-common-cofactors-sparse-steps cogentic-rational-gaussian-seed-family; do \
 		printf 'iferr(read("experiments/%s.gp"), err, print(err); quit(1))\n' "$$script" | "$(GP)" -fq || exit 1; \
 	done
 	@cd experiments && for script in cogentic-cubic-different-kernel cogentic-maximal-ideal-roots; do \
