@@ -5,6 +5,7 @@ import argparse
 import json
 import sys
 from fractions import Fraction
+from functools import cache
 from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
@@ -95,6 +96,33 @@ def multiplier_split(n, unit, exponent):
     return None
 
 
+@cache
+def norm_torus():
+    return run_path(str(HERE / "cogentic-varying-norm-torus.py"))
+
+
+def residual_split(n, unit, exponent, bound):
+    """Split if two local two-heights differ and an odd residual is bounded.
+
+    Raising to 2^h removes every local two-part. In the algebra X^2 = X,
+    evaluation at 0 and 1 sends the pair below to (value, inverse(value)),
+    so the split norm-one torus has exactly the residual order of value.
+    A shared annihilator supplies an odd multiplier at every prime, and
+    odd multipliers preserve the different heights used by multiplier_split.
+    """
+    value = pow(unit, exponent << n.bit_length(), n)
+    split_unit = (value, (pow(value, -1, n)-value) % n)
+    torus = norm_torus()
+    try:
+        relation = torus["bounded_multiple"](n, 0, split_unit, bound)
+    except torus["FactorFound"] as found:
+        return found.args[0]
+    if relation is None:
+        return None
+    odd_relation = relation // (relation & -relation)
+    return multiplier_split(n, unit, exponent * odd_relation)
+
+
 def rational_seeds(limit):
     for denominator in range(1, (limit-1)//14+1):
         for numerator in range(14*denominator+1, limit+1):
@@ -156,19 +184,26 @@ def charts(n, *, degree=None, minimum_bits=None, count=8, doublings=None,
             yield result
 
 
-def search(n, *, smooth_bound=None, **options):
+def search(n, *, smooth_bound=None, residual_order=None, **options):
     if smooth_bound is not None and smooth_bound < 1:
         raise ValueError("require a positive smoothness bound")
+    if residual_order is not None and residual_order < 1:
+        raise ValueError("require a positive residual order bound")
+    try_multipliers = smooth_bound is not None or residual_order is not None
     exponent = first_chart = None
     for result in charts(n, **options):
-        if result["status"] == "factor" or smooth_bound is None:
+        if result["status"] == "factor" or not try_multipliers:
             return result
         if first_chart is None:
             first_chart = result
-            exponent = smooth_exponent(n, smooth_bound)
+            exponent = smooth_exponent(n, smooth_bound or 1)
         divisor = multiplier_split(n, result["unit"], exponent)
         if divisor is not None:
             return dict(result, status="factor", factor=divisor, source="smooth multiplier")
+        if residual_order is not None:
+            divisor = residual_split(n, result["unit"], exponent, residual_order)
+            if divisor is not None:
+                return dict(result, status="factor", factor=divisor, source="residual order")
     return first_chart if first_chart is not None else {"status": "no-chart"}
 
 
@@ -280,6 +315,20 @@ def replay():
     print(f"The theorem menu checks {len(menu)} distinct paired charts at indices {first} through {8*first}.")
 
 
+def replay_stage_two():
+    options = dict(degree=7, minimum_bits=10, count=1, smooth_bound=3)
+    for n, collision_gcd, expected_factor in ((1537, 29, 29), (3683, 3683, 127)):
+        chart = search(n, **options)
+        assert chart["status"] == "chart" and chart["multiple"] == 2
+        exponent = smooth_exponent(n, options["smooth_bound"])
+        projected = pow(chart["unit"], exponent << n.bit_length(), n)
+        assert projected != 1 and gcd(pow(projected, 7, n)-1, n) == collision_gcd
+        split = search(n, residual_order=7, **options)
+        assert split["status"] == "factor" and split["source"] == "residual order"
+        assert split["unit"] == chart["unit"] and split["factor"] == expected_factor
+    print("Stage one misses 1537 and 3683. Stage two splits them by a local gcd and a shared odd multiple.")
+
+
 if __name__ == "__main__":
     if hasattr(sys, "set_int_max_str_digits"):
         sys.set_int_max_str_digits(0)
@@ -291,23 +340,35 @@ if __name__ == "__main__":
     parser.add_argument("--doublings", type=int, help="cap on doublings (default six in the fixed demo)")
     parser.add_argument("--trial-bound", type=int, default=13)
     parser.add_argument("--smooth-bound", type=int, help="try a smooth multiplier on each unit")
+    parser.add_argument("--residual-order", type=int, metavar="D", help="search for an odd residual order at most D (uses SageMath)")
+    parser.add_argument("--replay-stage-two", action="store_true", help="replay the residual-order examples")
     parser.add_argument("--seed-height", type=int, help="stream the public rational seed menu up to this height")
     parser.add_argument("--partner", action="store_true", help="also repair a chart of degree four higher")
     args = parser.parse_args()
-    if args.N is None:
+    if args.replay_stage_two:
+        if args.N is not None or args.residual_order is not None:
+            parser.error("--replay-stage-two does not take N or --residual-order")
+        try:
+            replay_stage_two()
+        except ValueError as error:
+            parser.error(str(error))
+    elif args.N is None:
+        if args.residual_order is not None:
+            parser.error("--residual-order requires N")
         replay()
     else:
         options = dict(degree=args.degree, minimum_bits=args.height_bits, count=args.count,
                        doublings=args.doublings, trial_bound=args.trial_bound,
                        seed_height=args.seed_height, partner=args.partner)
         try:
-            if args.seed_height is not None and args.smooth_bound is None:
+            if args.seed_height is not None and args.smooth_bound is None and args.residual_order is None:
                 results = charts(args.N, **options)
                 first = next(results, {"status": "no-chart"})
                 print(json.dumps(first))
                 for result in results:
                     print(json.dumps(result))
             else:
-                print(json.dumps(search(args.N, smooth_bound=args.smooth_bound, **options)))
+                print(json.dumps(search(args.N, smooth_bound=args.smooth_bound,
+                                        residual_order=args.residual_order, **options)))
         except ValueError as error:
             parser.error(str(error))
