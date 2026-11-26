@@ -2,43 +2,19 @@
 cogentic_as_library=1;
 read("cogentic-cubic-square-resolvent.gp");
 
-cubic_order_operator(operators,v) = sum(i=1,#operators,v[i]*operators[i]);
-
-cubic_order_quotient(operators,A,B) = {
-  my(inv=A^-1, constraints=matconcat(vector(3,j,(inv*cubic_order_operator(operators,B[,j]))~)));
-  my(h=denominator(constraints), dual=mathnf(h*constraints)/h, result=(dual^-1)~);
-  if(denominator(result)!=1,error("expected an integral ideal quotient"));
-  mathnf(result);
-};
-
-cubic_order_data(P,basis) = {
-  if(poldegree(P)!=3 || pollead(P)!=1 || #basis!=3,error("expected an integral cubic basis"));
-  my(change=matrix(3,3,i,j,polcoef(basis[j],i-1)), inv=change^-1);
-  my(operators=vector(3,j,
-    my(images=apply(z->lift(Mod(z*basis[j],P)),basis));
-    inv*matrix(3,3,i,k,polcoef(images[k],i-1))));
-  if(denominator(inv[,1])!=1 || !prod(i=1,3,denominator(operators[i])==1),
-    error("basis did not define a unital order"));
-  my(traces=matrix(3,3,i,j,trace(operators[i]*operators[j])));
-  my(different=cubic_order_quotient(operators,matid(3),traces^-1));
-  [inv,operators,different];
-};
-
-cubic_order_product(operators,A,B) = {
-  mathnf(matconcat(vector(3,j,cubic_order_operator(operators,A[,j])*B)));
-};
+read("cogentic-order-lattices.gp");
 
 cubic_different_ideal_even(data,A) = {
   my(operators=data[2], R=mathnf(matconcat([A,data[3]])));
   my(bound=logint(matdet(A),2)+1, exponent=1);
   while(exponent<bound,
-    my(next_R=mathnf(matconcat([A,cubic_order_product(operators,R,R)])));
+    my(next_R=mathnf(matconcat([A,order_product(operators,R,R)])));
     if(next_R==R,break);
     R=next_R;
     exponent*=2;
   );
   if(!issquare(matdet(R)),return(0));
-  my(U=cubic_order_quotient(operators,A,R), invariants=matsnf(U));
+  my(U=order_quotient(operators,A,R), invariants=matsnf(U));
   prod(i=1,#invariants,issquare(invariants[i]));
 };
 
@@ -47,7 +23,7 @@ cubic_different_first(data,elements) = {
   for(j=1,#elements,
     my(z=lift(elements[j]), coords=data[1]*vector(3,k,polcoef(z,k-1))~);
     my(h=denominator(coords));
-    ideals[j]=mathnf(cubic_order_operator(operators,h^2*coords));
+    ideals[j]=mathnf(order_operator(operators,h^2*coords));
     signs[j]=norm(elements[j])<0;
   );
   my(atoms=Set(select(A->A!=unit,ideals)));
@@ -57,7 +33,7 @@ cubic_different_first(data,elements) = {
       my(A=atoms[i],B=atoms[j],common=mathnf(matconcat([A,B])));
       if(common==unit,next);
       atoms=Set(select(lattice->lattice!=unit,concat(select(lattice->lattice!=A && lattice!=B,atoms),
-        [common,cubic_order_quotient(operators,A,common),cubic_order_quotient(operators,B,common)])));
+        [common,order_quotient(operators,A,common),order_quotient(operators,B,common)])));
       changed=1;
       break(2);
     ));
@@ -70,7 +46,7 @@ cubic_different_first(data,elements) = {
     for(i=1,#atoms,
       my(A=atoms[i], inv=A^-1, odd=0);
       while(denominator(inv*remaining)==1,
-        remaining=cubic_order_quotient(operators,remaining,A);
+        remaining=order_quotient(operators,remaining,A);
         odd=1-odd;
       );
       bits[i+1,j]=odd*bad[i];
@@ -86,7 +62,7 @@ cubic_different_squares(P,basis,polynomials,{cap=-1}) = {
   my(elements=apply(z->Mod(z,P),polynomials));
   if(!prod(i=1,#elements,elements[i]!=0),error("expected nonzero cubic entries"));
   if(!#elements,return([1,[],0,0,0]));
-  my(first=cubic_different_first(cubic_order_data(P,basis),elements));
+  my(first=cubic_different_first(order_data(P,basis),elements));
   my(pivots=List(), answers=List(), tests=0);
   for(i=1,#first,
     my(matched=0);
@@ -108,7 +84,7 @@ cubic_different_squares(P,basis,polynomials,{cap=-1}) = {
 };
 
 cubic_different_check(P,basis,primes,polynomials) = {
-  my(nf=nfinit(P), data=cubic_order_data(P,basis));
+  my(nf=nfinit(P), data=order_data(P,basis));
   my(C=matrix(3,3,i,j,polcoef(nf.zk[j],i-1)), map=data[1]*C, tested=0);
   if(denominator(map)!=1 || abs(matdet(map))!=1,error("fixture basis not maximal"));
   for(j=1,#primes,

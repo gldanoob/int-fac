@@ -78,6 +78,9 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-scaling.py --verify experiments/cogentic-sheared-scaling-results.jsonl
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-qs-witnesses.py --verify experiments/cogentic-sheared-qs-witness-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-rational-root-matching.py
+	"$(PYTHON)" -B experiments/cogentic-compatible-quadratic-charts.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-cubic-newton-parity.py
+	"$(PYTHON)" -B experiments/cogentic-cubic-order-kernel.py
 	"$(PYTHON)" -B experiments/cogentic-radix-grid-density.py
 	"$(PYTHON)" -B experiments/cogentic-near-cube-density.py
 	"$(PYTHON)" -B experiments/cogentic-mixed-lifted-rank.py
@@ -86,4 +89,7 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-planted-square-masks.py
 	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks; do \
 		printf 'iferr(read("experiments/%s.gp"), err, print(err); quit(1))\n' "$$script" | "$(GP)" -fq || exit 1; \
+	done
+	@cd experiments && for script in cogentic-cubic-different-kernel cogentic-maximal-ideal-roots; do \
+		printf 'iferr(read("%s.gp"), err, print(err); quit(1))\n' "$$script" | "$(GP)" -fq || exit 1; \
 	done
