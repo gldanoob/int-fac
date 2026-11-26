@@ -77,6 +77,26 @@ theorem observation_height {m d T C : ℕ} (cols : Vector (Vector ℚ d) m)
   rw [Int.abs_eq_natAbs] at zi
   exact_mod_cast zi
 
+theorem constructed_entry_bound {n ell u v w z : ℕ} (hn : 2≤n)
+    (big : 10004≤Fixed.d (n.log2+1)) (target : ell∈dyadicTargets (Fixed.beta (n.log2+1)))
+    (box : let b:=n.log2+1; u≤2*b^2*Fixed.U b*Fixed.A b ∧ v≤2*b^2*Fixed.U b ∧
+        w≤2*b^2*Fixed.U b*Fixed.A b ∧ z≤2*b^2*Fixed.U b) :
+    let s := TryPair.fixedInput n ell (Construction.construct n ell u v w z)
+    ∀ {rel}, Marking.stageOne s=some rel →
+    ∀ {cols}, markColumns s rel=some cols →
+    ∀ j k, |(cols.get j).get k| ≤ ((2*s.degree*(s.L₀+1)+1:ℕ):ℚ) := by
+  intro s rel stage cols computed
+  let P := TryPair.localBits s rel
+  obtain ⟨roots,cols',_,good,acc⟩ := Construction.constructed_column_accuracy hn big target box stage
+  cases Option.some.inj (good.symm.trans computed)
+  intro j k
+  obtain ⟨err,amp⟩ := acc j k
+  have perturb := (abs_sub_abs_le_abs_sub _ _).trans err
+  have power : (1/2:ℝ)^P≤1 := pow_le_one₀ (by norm_num) (by norm_num)
+  have realBound : |((cols.get j).get k:ℝ)|≤((2*s.degree*(s.L₀+1)+1:ℕ):ℝ) := by
+    push_cast; linarith
+  exact_mod_cast realBound
+
 /-- The full rounded matrix and right-hand side are bounded before a minor
 is selected, so this input bound also covers singular and inconsistent minors. -/
 theorem constructed_observation_height {n ell u v w z : ℕ} (hn : 2≤n)
@@ -92,15 +112,7 @@ theorem constructed_observation_height {n ell u v w z : ℕ} (hn : 2≤n)
     (∀ i,((observation cols lat.particular P).get i).natAbs≤H) ∧
     ∀ j i,(((lat.directions.map (fun direction=>observation cols direction P)).get j).get i).natAbs≤H := by
   intro s rel stage lat solved cols computed d P H
-  obtain ⟨roots,cols',_,good,acc⟩ := Construction.constructed_column_accuracy hn big target box stage
-  cases Option.some.inj (good.symm.trans computed)
-  have small (j k) : |(cols.get j).get k| ≤ ((2*s.degree*(s.L₀+1)+1:ℕ):ℚ) := by
-    obtain ⟨err,amp⟩ := acc j k
-    have perturb := (abs_sub_abs_le_abs_sub _ _).trans err
-    have power : (1/2:ℝ)^P≤1 := pow_le_one₀ (by norm_num) (by norm_num)
-    have realBound : |((cols.get j).get k:ℝ)|≤((2*s.degree*(s.L₀+1)+1:ℕ):ℝ) := by
-      push_cast; linarith
-    exact_mod_cast realBound
+  have small := constructed_entry_bound hn big target box stage computed
   have height := stageTwo_height solved
   constructor
   · exact observation_height _ _ P small height.1.2

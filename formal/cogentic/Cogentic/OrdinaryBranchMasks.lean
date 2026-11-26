@@ -224,6 +224,121 @@ theorem ordinary_target_branch_masks {n ell p q : ℕ} (hn : 2≤n) (hd : 10004�
     rw [ordinary_mask_sum,ordinary_mask_sum,target_mask_sum (by omega : 3≤Fixed.d (n.log2+1)) target a ht]
     split_ifs <;> simp_all
 
+/-- The independent residue mass of a hit or its complement. -/
+def residueBranchMass (density : ℝ) (hit : Bool) : ℝ :=
+  if hit then density else 1-density
+
+/-- Total variation of the signed class representation of a hit or miss. -/
+def residueBranchEnvelope (density : ℝ) (hit : Bool) : ℝ :=
+  if hit then density else 1+density
+
+def maskMass (absSign : Bool) (t : SignedResidueMask) : ℝ :=
+  (if absSign then |(t.sign:ℝ)| else (t.sign:ℝ)) / t.modulus
+
+private theorem join_mass (S T : List SignedResidueMask) (z : Bool) :
+    ((joinMasks S T).map (maskMass z)).sum = (S.map (maskMass z)).sum*(T.map (maskMass z)).sum := by
+  have prod (x y : SignedResidueMask) : maskMass z (joinMask x y)=maskMass z x*maskMass z y := by
+    cases z <;> simp only [joinMask,maskMass,Nat.cast_mul,Int.cast_mul,abs_mul,if_true,if_false,Bool.false_eq_true] <;> ring
+  induction S with
+  | nil => simp [joinMasks]
+  | cons x S ih =>
+    change (((T.map (joinMask x))++(joinMasks S T)).map (maskMass z)).sum=_
+    rw [List.map_append,List.sum_append,ih,List.map_cons,List.sum_cons,add_mul]
+    congr 1
+    rw [List.map_map,←List.sum_map_mul_left]
+    exact congrArg List.sum (List.map_congr_left (fun y _=>prod x y))
+
+theorem branch_class_mass (p q ell r s : ℕ) (roots : List ℕ) (hp hq ht z : Bool) :
+    let score := if z then residueBranchEnvelope else residueBranchMass
+    let S := ordinaryTargetBranchMasks p q ell r s roots hp hq ht
+    (S.map (maskMass z)).sum =
+      score (p:ℝ)⁻¹ hp * score (q:ℝ)⁻¹ hq * score (roots.length/(ell:ℝ)) ht := by
+  intro score S
+  have one (k a) (hit : Bool) : ((ordinaryResidueMasks k a hit).map (maskMass z)).sum=score (k:ℝ)⁻¹ hit := by
+    cases hit <;> cases z <;> simp [ordinaryResidueMasks,unitMask,maskMass,score,residueBranchEnvelope,residueBranchMass] <;> ring
+  have t : ((targetResidueMasks ell roots ht).map (maskMass z)).sum=score (roots.length/(ell:ℝ)) ht := by
+    cases ht <;> cases z <;>
+      simp [targetResidueMasks,unitMask,maskMass,score,residueBranchEnvelope,residueBranchMass,
+        List.map_map,Function.comp_def,List.map_const',List.sum_replicate] <;> ring
+  dsimp only [S,ordinaryTargetBranchMasks]
+  rw [join_mass,join_mass,one,one,t]
+
+/-- A branch-weighted smooth profile on one cell has the mean of its full
+integer mesh times the independent residue probabilities. A rare hit saves
+its full class density in the discrepancy, including for two ordinary hits. -/
+theorem ordinary_branch_mesh_mean (line : DirichletLZerosOnLine) (K : ℝ) (hk : 1≤K) :
+    ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    ∀ {p q : ℕ}, p∈sieveBand n ell 1 → q∈sieveBand n ell 1 → p≠q → p≠ell → q≠ell →
+    ∀ (r s : ℕ) (hp hq ht : Bool) (cell : Option (Bool×Fin (Fixed.d (n.log2+1)))) (f : ℕ→ℝ),
+    let b := n.log2+1; let L := firstCellMark b cell; let M := cellMarkCount b
+    let X := (constructorCellMarks n ell cell).filter (fun a=>
+      decide (a ≡ r [MOD p])=hp ∧ decide (a ≡ s [MOD q])=hq ∧ hitsTarget n ell a false=ht)
+    let ρ := ∏ t∈(markModulus n ell).primeFactors,(1-(t:ℝ)⁻¹)
+    let coeff := fun (g : ℝ→Bool→ℝ)=>g (p:ℝ)⁻¹ hp*g (q:ℝ)⁻¹ hq*g ((Fixed.d b:ℝ)/ell) ht
+    |(∑ a∈X,f a)-coeff residueBranchMass*(ρ*∑ j∈range M,f (L+j))|≤
+      coeff residueBranchEnvelope*(meshVariation L M f*(1+2*exp 6)*M*exp (-K*(Fixed.z b:ℝ)^2)) := by
+  classical
+  obtain ⟨n₁,counts⟩ := residue_class_contrast_drift line K hk
+  obtain ⟨b₀,degrees⟩ := Fixed.degree_grows 10004
+  refine ⟨max n₁ (max 2 (2^b₀)),?_⟩
+  intro n old ell target comp sieve p q pp qp pq pe qe r s hp hq ht cell f b L M X ρ coeff
+  obtain ⟨large,rest⟩ := max_le_iff.mp old
+  obtain ⟨hn,lim⟩ := max_le_iff.mp rest
+  have hd := degrees b (((Nat.le_log2 (by omega : n≠0)).mpr lim).trans (Nat.le_succ _))
+  let roots := wanted (Fixed.d b) ell (Fixed.rootBase n)
+  let S := ordinaryTargetBranchMasks p q ell r s roots hp hq ht
+  let Y := constructorCellMarks n ell cell
+  let G := ρ*∑ j∈range M,f (L+j)
+  let E := meshVariation L M f*(1+2*exp 6)*M*exp (-K*(Fixed.z b:ℝ)^2)
+  have prop := ordinary_target_branch_masks hn hd comp target sieve pp qp pq pe qe r s hp hq ht
+  have density (z : Bool) : (S.map (maskMass z)).sum=coeff (if z then residueBranchEnvelope else residueBranchMass) := by
+    have eq := branch_class_mass p q ell r s roots hp hq ht z
+    dsimp only at eq
+    have len : roots.length=Fixed.d b := (wanted_spec (target_gt_degree target) (Fixed.rootBase n)).1
+    rwa [len] at eq
+  have cls (t : SignedResidueMask) (tm : t∈S) :
+      |(∑ a∈Y,t.weight a*f a)-maskMass false t*G| ≤ maskMass true t*E := by
+    obtain ⟨tp,_,cap,clean,_⟩ := prop.2.1 t tm
+    have tr : (0:ℝ)<t.modulus := by exact_mod_cast tp
+    have law := counts n large ell target comp sieve cell 1 t.modulus 0 t.residue (by decide)
+      tp (Nat.coprime_one_left _) clean (by rw [one_mul];exact cap.trans (Nat.pow_le_pow_right (Nat.pow_pos (by decide)) (by decide : 3≤4)))
+      (fun v vm dvd=>(Nat.prime_of_mem_primeFactors vm).not_dvd_one dvd |>.elim) f (fun _=>0)
+    dsimp only at law
+    have no (v : ℕ) (hv : v∈(markModulus n ell).primeFactors) : ¬v∣1 := (Nat.prime_of_mem_primeFactors hv).not_dvd_one
+    simp only [Nat.modEq_one,filter_true,Nat.cast_one,div_one,sum_const_zero,sub_zero,abs_zero,sub_self,add_zero,
+      filter_true_of_mem no] at law
+    let A := ∑ a∈Y with a ≡ t.residue [MOD t.modulus], f a
+    change |(t.modulus:ℝ)*A-(∑ j∈range M,f (L+j))*ρ|≤E at law
+    have obs : (∑ a∈Y,t.weight a*f a)=(t.sign:ℝ)*A := by
+      dsimp only [A,SignedResidueMask.weight,residueEntry];rw [mul_sum,sum_filter]
+      apply sum_congr rfl;intro a _;split_ifs <;> ring
+    rw [obs]
+    have id : (t.sign:ℝ)*A-maskMass false t*G = ((t.sign:ℝ)/t.modulus)*((t.modulus:ℝ)*A-(∑ j∈range M,f (L+j))*ρ) := by
+      dsimp [maskMass,G];field_simp
+    rw [id,abs_mul,abs_div,abs_of_pos tr]
+    exact mul_le_mul_of_nonneg_left law (div_nonneg (abs_nonneg _) tr.le)
+  have all (T : List SignedResidueMask) (sub : ∀ t∈T,t∈S) :
+      |(∑ a∈Y, (T.map (fun t=>t.weight a)).sum*f a)-(T.map (maskMass false)).sum*G|≤
+        (T.map (maskMass true)).sum*E := by
+    induction T with
+    | nil => simp
+    | cons t T ih =>
+      have one := cls t (sub t (by simp))
+      have many := ih (fun t ht=>sub t (by simp [ht]))
+      simp only [List.map_cons,List.sum_cons,add_mul,sum_add_distrib]
+      rw [show _+_-(_+_)=((∑ a∈Y,t.weight a*f a)-maskMass false t*G)+
+        ((∑ a∈Y,(T.map (fun t=>t.weight a)).sum*f a)-(T.map (maskMass false)).sum*G) by ring]
+      exact (abs_add_le ..).trans (add_le_add one many)
+  have result := all S (fun _ h=>h)
+  rw [density false,density true] at result
+  have actual : (∑ a∈Y,(S.map (fun t=>t.weight a)).sum*f a)=∑ a∈X,f a := by
+    dsimp only [X,Y];rw [sum_filter]
+    apply sum_congr rfl;intro a _
+    rw [prop.2.2 a]
+    split_ifs <;> simp
+  rwa [actual] at result
+
 /-- On the prescribed branch, every field has a fixed hit product. Either
 or both of the two observed ordinary rows may belong to this field. -/
 theorem PrescribedRows.hitProduct_on_pair_branch {n ell p q : ℕ} (R : PrescribedRows n ell)
@@ -366,3 +481,5 @@ end Cogentic.Construction
 #print axioms Cogentic.Construction.target_part_residues
 
 #print axioms Cogentic.Construction.prescribed_pair_branch_partition
+
+#print axioms Cogentic.Construction.ordinary_branch_mesh_mean

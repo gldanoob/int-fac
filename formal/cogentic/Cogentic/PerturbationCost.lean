@@ -15,11 +15,11 @@ private theorem difference_length (x y : SignedWord) :
   unfold signedDifference; exact select_length ..
 
 /-- Canonical sign/magnitude encoding also clears the sign of zero. -/
-private def normal (x : SignedWord) : SignedWord × ℕ :=
+def normal (x : SignedWord) : SignedWord × ℕ :=
   let y := canonical x.digits
   (⟨x.negative && !y.1.isEmpty,y.1⟩,y.2+2)
 
-private theorem normal_spec (x : SignedWord) :
+theorem normal_spec (x : SignedWord) :
     (normal x).1=encode x.decode ∧ (normal x).1.digits.length≤x.digits.length ∧
     (normal x).2=3*x.digits.length+2 := by
   obtain ⟨sign,ds⟩ := x

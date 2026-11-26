@@ -282,8 +282,70 @@ theorem trialPrime_spec (n : List Bool) (fuel : List Unit) (two : 2 ≤ value n)
     rw [found]
     simp [hp]
 
+/-- Trial division on a bounded-size input, or on a failed search. The first
+proper gcd in ascending order equals the least prime factor. -/
+def trialFactor (n : List Bool) : Option (List Bool) × ℕ :=
+  let clock := BinarySaturation.tokens n
+  let trial := scan n (fun a => (a,0)) clock.1 [false,true]
+  match trial.1 with
+  | none => (none,clock.2+trial.2+1)
+  | some d =>
+    let out := BinarySaturation.canonical d
+    (some out.1,clock.2+trial.2+out.2+1)
+
+private theorem first_trial {n : ℕ} (hn : 2≤n) (comp : n.minFac<n)
+    (len a : ℕ) (start : 2≤a) (before : a≤n.minFac) (enough : n.minFac<a+len) :
+    (List.range' a len).findSome? (factor n) = some n.minFac := by
+  induction len generalizing a with
+  | zero => omega
+  | succ k ih =>
+    rw [List.range'_succ,List.findSome?_cons]
+    by_cases eq : a=n.minFac
+    · subst a
+      have nontrivial := (Nat.minFac_prime (by omega : n≠1)).one_lt
+      simp [factor,Nat.gcd_eq_right (Nat.minFac_dvd n),nontrivial,comp]
+    · have miss : factor n a = none := by
+        unfold factor
+        apply if_neg
+        intro h
+        have lower := Nat.minFac_le_of_dvd h.1 (Nat.gcd_dvd_left n a)
+        have upper := Nat.le_of_dvd (by omega : 0<a) (Nat.gcd_dvd_right n a)
+        omega
+      simpa only [miss,Option.orElse_none] using ih (a+1) (by omega) (by omega) (by omega)
+
+theorem trialFactor_spec {n : ℕ} (hn : 2≤n) :
+    (trialFactor n.bits).1 = if n.minFac<n then some n.minFac.bits else none := by
+  let fuel := (BinarySaturation.tokens n.bits).1
+  let scanWord := scan n.bits (fun a => (a,0)) fuel [false,true]
+  have length : fuel.length = n := (BinarySaturation.token_spec _).1.trans (value_bits n)
+  obtain ⟨out,_⟩ := scan_spec n.bits (by simpa using (show 0<n by omega)) (n.size+n+2)
+    (by rw [Nat.size_eq_bits_len]; omega) (fun a => (a,0)) id (fun a ha=>⟨rfl,ha,Nat.zero_le _⟩)
+    fuel [false,true] (by change 2+fuel.length≤_; omega)
+  change scanWord.1.map value = (List.range' 2 fuel.length).findSome? (fun j => factor (value n.bits) j) at out
+  rw [value_bits,length] at out
+  by_cases comp : n.minFac<n
+  · have low := (Nat.minFac_prime (by omega : n≠1)).two_le
+    rw [first_trial hn comp n 2 le_rfl low (by omega)] at out
+    cases eq : scanWord.1 with
+    | none => simp [eq] at out
+    | some d =>
+      have val : value d=n.minFac := by simpa [eq] using out
+      have can := (BinarySaturation.canonical_spec d).1
+      dsimp only [scanWord,fuel] at eq
+      simp only [trialFactor,eq,can,val,if_pos comp]
+  · have prime : n.Prime := by contrapose! comp; exact (Nat.not_prime_iff_minFac_lt hn).mp comp
+    have no (j : ℕ) : factor n j=none := by
+      rcases (Nat.dvd_prime prime).mp (Nat.gcd_dvd_left n j) with h|h <;> simp [factor,h]
+    have miss : scanWord.1=none := by
+      simpa only [List.findSome?_eq_none_iff.mpr (fun j (_ : j∈List.range' 2 n) => no j),
+        Option.map_eq_none_iff] using out
+    dsimp only [scanWord,fuel] at miss
+    simp only [trialFactor,miss,if_neg comp]
+
 end Cogentic.BinaryPresieve
 
 #print axioms Cogentic.BinaryPresieve.run_spec
 
 #print axioms Cogentic.BinaryPresieve.fixed_presieve
+
+#print axioms Cogentic.BinaryPresieve.trialFactor_spec

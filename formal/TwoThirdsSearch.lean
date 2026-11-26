@@ -202,6 +202,23 @@ theorem chargedBox_spec (n w₀ w₁ : Nat) (attempt : TryPair) (work) (g : Nat)
     iterate 4 (apply scan_sum; intro)
     exact Nat.le_refl _
 
+private theorem collect_cost_congr {n : Nat} (hn : 2 ≤ n)
+    (priced reference : (g : Nat) → Probe (Hit n g)) (cap : Nat → Nat) (gs : List Nat)
+    (localBound : ∀ g, (priced g).answer=(reference g).answer ∧ (priced g).calls≤cap g) :
+    (collect hn priced gs).1=(collect hn reference gs).1 ∧ (collect hn priced gs).2≤(gs.map cap).sum := by
+  induction gs with
+  | nil => exact ⟨rfl,Nat.le_refl _⟩
+  | cons g gs ih =>
+    obtain ⟨same,cost⟩ := localBound g
+    obtain ⟨value,tail⟩ := ih
+    simp only [collect,same,List.map_cons,List.sum_cons]
+    cases hit : (reference g).answer with
+    | none => exact ⟨value,Nat.add_le_add cost tail⟩
+    | some found =>
+      cases found with
+      | divisor => exact ⟨rfl,Nat.le_trans cost (Nat.le_add_right ..)⟩
+      | exponent => exact ⟨by simp only [value],Nat.add_le_add cost tail⟩
+
 /-- The collector returns the same certified output under these charges,
 including a divisor that stops the search before the remaining targets. -/
 theorem collect_chargedBox {n : Nat} (hn : 2 ≤ n) (w₀ w₁ : Nat) (attempt : TryPair)
@@ -210,18 +227,77 @@ theorem collect_chargedBox {n : Nat} (hn : 2 ≤ n) (w₀ w₁ : Nat) (attempt :
     run.1 = (collect hn (searchBox n w₀ w₁ attempt) gs).1 ∧
     run.2 ≤ (gs.map (fun g => rangeWork w₀ (fun a => rangeWork w₁ (fun b =>
       rangeWork w₀ (fun c => rangeWork w₁ (work g a b c)))))).sum := by
-  induction gs with
-  | nil => exact ⟨rfl,Nat.le_refl _⟩
-  | cons g gs ih =>
-    obtain ⟨same,cost⟩ := chargedBox_spec n w₀ w₁ attempt work g
-    obtain ⟨value,tail⟩ := ih
-    simp only [collect,same,List.map_cons,List.sum_cons]
-    cases hit : (searchBox n w₀ w₁ attempt g).answer with
-    | none => exact ⟨value,Nat.add_le_add cost tail⟩
-    | some found =>
-      cases found with
-      | divisor => exact ⟨rfl,Nat.le_trans cost (Nat.le_add_right ..)⟩
-      | exponent => exact ⟨by simp only [value],Nat.add_le_add cost tail⟩
+  exact collect_cost_congr hn _ _ _ gs (chargedBox_spec n w₀ w₁ attempt work)
+
+/-- Charge each visited loop cell and its terminating test. -/
+private def metered (f : Nat → Probe α) : List Nat → Probe α
+  | [] => ⟨none,1⟩
+  | a::xs =>
+    let p := f a
+    match p.answer with
+    | some h => ⟨some h,p.calls+1⟩
+    | none =>
+      let t := metered f xs
+      ⟨t.answer,p.calls+t.calls+1⟩
+
+private theorem metered_answer (xs : List Nat) {f g : Nat → Probe α}
+    (same : ∀ x, (f x).answer=(g x).answer) : (metered f xs).answer=(scan g xs).answer := by
+  induction xs with
+  | nil => rfl
+  | cons a xs ih => cases hit : (f a).answer <;> simp [metered,scan,←same,hit,ih]
+
+private theorem metered_range (w extra : Nat) (pos : 0<w) (f : Nat → Probe α) (cap : Nat → Nat)
+    (bound : ∀ x, (f x).calls+2+extra ≤ cap x) :
+    (metered f (List.range' 1 w)).calls+extra ≤ rangeWork w cap := by
+  have base (xs : List Nat) : (metered f xs).calls ≤ (xs.map fun x => (f x).calls+1).sum+1 := by
+    induction xs with
+    | nil => exact Nat.le_refl _
+    | cons a xs ih => cases hit : (f a).answer <;> simp only [metered,hit,List.map_cons,List.sum_cons] <;> omega
+  have room (xs : List Nat) : (xs.map fun x => (f x).calls+1).sum+xs.length*(extra+1) ≤ (xs.map cap).sum := by
+    induction xs with
+    | nil => simp
+    | cons a xs ih =>
+      have h := bound a
+      simp only [List.map_cons,List.sum_cons,List.length_cons,Nat.succ_mul]
+      omega
+  have r := room (List.range' 1 w)
+  rw [List.length_range'] at r
+  have one := Nat.le_mul_of_pos_left (extra+1) pos
+  unfold rangeWork
+  have h := base (List.range' 1 w)
+  omega
+
+/-- A metered four-coordinate search includes the dispatch of all four loops.
+The binary words representing each axis can be shared across every target. -/
+def meteredBox (n w₀ w₁ : Nat) (attempt : TryPair) (work : Nat → Nat → Nat → Nat → Nat → Nat)
+    (g : Nat) : Probe (Hit n g) :=
+  let slow := List.range' 1 w₀
+  let fast := List.range' 1 w₁
+  metered (fun a => metered (fun b => metered (fun c => metered (fun d =>
+    ⟨verify n g (attempt g a b c d),work g a b c d⟩) fast) slow) fast) slow
+
+theorem collect_meteredBox {n : Nat} (hn : 2≤n) {w₀ w₁ : Nat} (p₀ : 0<w₀) (p₁ : 0<w₁)
+    (attempt : TryPair) (work) (gs : List Nat) :
+    let run := collect hn (meteredBox n w₀ w₁ attempt work) gs
+    run.1 = (collect hn (searchBox n w₀ w₁ attempt) gs).1 ∧
+    run.2 ≤ (gs.map (fun g => rangeWork w₀ (fun a => rangeWork w₁ (fun b =>
+      rangeWork w₀ (fun c => rangeWork w₁ (fun d => work g a b c d+8)))))).sum := by
+  apply collect_cost_congr
+  intro g
+  constructor
+  · unfold meteredBox searchBox chargedBox
+    iterate 4 (apply metered_answer; intro)
+    rfl
+  · unfold meteredBox
+    apply metered_range w₀ 0 p₀
+    intro a
+    apply metered_range w₁ 2 p₁
+    intro b
+    apply metered_range w₀ 4 p₀
+    intro c
+    apply metered_range w₁ 6 p₁
+    intro d
+    exact Nat.le_refl _
 
 /-- The Cogentic box has coordinate bounds 2 L₀² U A and 2 L₀² U in each field. -/
 theorem gaussian_generator_search {n : Nat} (hn : 2 ≤ n) (L₀ U A : Nat)
@@ -323,3 +399,5 @@ end TwoThirdsSearch
 
 #print axioms TwoThirdsSearch.gaussian_generator_search
 #print axioms TwoThirdsSearch.collect_chargedBox
+
+#print axioms TwoThirdsSearch.collect_meteredBox

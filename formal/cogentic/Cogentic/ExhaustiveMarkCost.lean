@@ -9,7 +9,7 @@ import Cogentic.MinorVerificationWork
 import Cogentic.CollectorCost
 import Cogentic.TargetEnumerationCost
 import Cogentic.BinaryRootColumnsCost
-import Cogentic.ProjectionGates
+import Cogentic.ObservationGates
 import Cogentic.ConstructorBaseCost
 
 namespace Cogentic.Concrete
@@ -37,6 +37,28 @@ def boxWork (n : ℕ) (trial : ℕ → ℕ → ℕ → ℕ → ℕ → ℕ) : �
   ∑ g ∈ dyadicTargets (Fixed.beta b), ∑ u ∈ Icc 1 slow, ∑ v ∈ Icc 1 fast,
     ∑ w ∈ Icc 1 slow, ∑ z ∈ Icc 1 fast,
       trial g u v w z
+
+/-- The sum over the full box bounds the charges accumulated along the actual
+early-return search, including dispatch and termination of all four loops. -/
+theorem fixed_metered_boxWork (n : ℕ) (hn : 2 ≤ n)
+    (trial : ℕ → ℕ → ℕ → ℕ → ℕ → ℕ) :
+    let b := n.log2+1
+    let fast := 2*b^2*Fixed.U b
+    let scan := meteredBox n (fast*Fixed.A b) fast (candidate n) trial
+    let run := collect hn scan (dyadicTargets (Fixed.beta b)).sort
+    run.1 = (fixedCollection n hn).1 ∧ run.2 ≤ boxWork n (fun g u v w z => trial g u v w z+8) := by
+  intro b fast scan run
+  let gs : List ℕ := (dyadicTargets (Fixed.beta b)).sort
+  have bp : 0<b := Nat.succ_pos _
+  have fp : 0<fast := Nat.mul_pos (Nat.mul_pos (by decide) (Nat.pow_pos bp)) (Nat.two_pow_pos _)
+  have spec := collect_meteredBox hn (Nat.mul_pos fp (Nat.two_pow_pos _ : 0<Fixed.A b)) fp (candidate n) trial gs
+  refine ⟨spec.1,?_⟩
+  have bound := spec.2
+  have sumRange (w : ℕ) (f : ℕ → ℕ) : rangeWork w f = ∑ x ∈ Icc 1 w, f x := by
+    rw [rangeWork,←List.sum_toFinset f List.nodup_range',List.toFinset_range'_1_1]
+  have nd : gs.Nodup := Finset.sort_nodup _ _
+  rw [←List.sum_toFinset _ nd] at bound
+  simpa only [gs,Finset.sort_toFinset,sumRange,run,scan,boxWork,fast,b,Fixed.A] using bound
 
 theorem boxWork_le (n k : ℕ) (trial : ℕ → ℕ → ℕ → ℕ → ℕ → ℕ) :
     let b := n.log2+1
@@ -135,7 +157,7 @@ theorem exhaustive_mark_gates {n : ℕ} (hn : 2≤n) (large : 130000 ≤ Fixed.d
     _ = 2^(2+511041*s) := by rw [pow_add]; rfl
     _ ≤ _ := Nat.pow_le_pow_right (by decide) (by omega))
 
-private theorem natural_cost {n c work : ℕ} (hn : 64≤n)
+theorem natural_cost {n c work : ℕ} (hn : 64≤n)
     (bound : work ≤ 2^(c*TwoThirdsCost.scale (n.log2+1))) :
     (work:ℝ) ≤ Real.exp ((c:ℝ)*65*CompanionSplitCost.scale n) := by
   let k := c*TwoThirdsCost.scale (n.log2+1)
@@ -233,6 +255,40 @@ theorem exhaustive_arch_numerics_gates {n : ℕ} (large : 2≤Fixed.d (n.log2+1)
           _ ≤ 2^(20001*S) := Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
       next => exact Nat.zero_le _
 
+/-- Charge the integer observations only after the solver and the archimedean
+guards reach the rounded linear system. -/
+def observationTrialWork (n g u v w z : ℕ) : ℕ :=
+  let s := TryPair.fixedInput n g (Construction.construct n g u v w z)
+  match Marking.stageOne s with
+  | none => 0
+  | some rel => match Elimination.stageTwo rel with
+    | none => 0
+    | some lat =>
+      if lat.free < rel.marks.length ∧ 2*s.degree-2 ≤ lat.free then
+        match BinaryProjection.columnWords s rel with
+        | none => 0
+        | some cols => BinaryProjection.observationWork s rel lat cols
+      else 0
+
+theorem exhaustive_observation_gates {n : ℕ} (hn : 2≤n) (large : 10004≤Fixed.d (n.log2+1)) :
+    boxWork n (observationTrialWork n) ≤ 2^(571062*TwoThirdsCost.scale (n.log2+1)) := by
+  apply boxWork_le n 150050
+  intro g target u hu v hv w hw z hz
+  dsimp only [observationTrialWork]
+  split
+  next => exact Nat.zero_le _
+  next rel stage =>
+    split
+    next => exact Nat.zero_le _
+    next lat solved =>
+      split
+      next guard =>
+        obtain ⟨cols,words,_,_,cost⟩ := BinaryProjection.constructed_observations hn large target
+          ⟨(mem_Icc.mp hu).2,(mem_Icc.mp hv).2,(mem_Icc.mp hw).2,(mem_Icc.mp hz).2⟩ stage solved guard.1
+        rw [words]
+        exact cost
+      next => exact Nat.zero_le _
+
 /-- Pay for the two full local and target polynomials, both CRTs, nearest
 rounding and both digit corrections, even when recomputed on every tuple. -/
 def correctionTrialWork (n g _u _v _w _z : ℕ) : ℕ :=
@@ -251,7 +307,7 @@ theorem exhaustive_correction_gates {n : ℕ} (hn : 2≤n) (big : 3≤Fixed.d (n
 /-- Sum of the measured search stages used in the recursive factorization charge. -/
 def measuredSearchWork (n : ℕ) : ℕ :=
   exhaustiveMarkWork n + (BinaryTargets.run (Fixed.beta (n.log2+1)).bits).2 +
-    (BinaryCollector.fixed n).overhead + boxWork n (archNumericsTrialWork n) + boxWork n (correctionTrialWork n) +
+    (BinaryCollector.fixed n).overhead + boxWork n (archNumericsTrialWork n) + boxWork n (correctionTrialWork n) + boxWork n (observationTrialWork n) +
       boxWork n (verificationTrialWork n)
 
 theorem measured_search_L_two_thirds {n : ℕ} (hn : 64≤n) (large : 130000≤Fixed.d (n.log2+1))
@@ -270,10 +326,15 @@ theorem measured_search_L_two_thirds {n : ℕ} (hn : 64≤n) (large : 130000≤F
   have setup := (Nat.add_le_add mark arch).trans (calc
     _ = 2^(1+511043*s) := by rw [pow_add,pow_one,two_mul]
     _ ≤ 2^(1035056*s) := Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
-  have front := (Nat.add_le_add setup (exhaustive_correction_gates two (by omega) composite sieved)).trans (calc
+  have obs := (exhaustive_observation_gates two (by omega : 10004≤Fixed.d (n.log2+1))).trans
+    (Nat.pow_le_pow_right Nat.zero_lt_two (by omega : 571062*s≤1035057*s))
+  have front' := (Nat.add_le_add setup (exhaustive_correction_gates two (by omega) composite sieved)).trans (calc
     _ = 2^(1+1035056*s) := by rw [pow_add,pow_one,two_mul]
+    _ ≤ 2^(1035057*s) := Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
+  have measured := (Nat.add_le_add front' obs).trans (calc
+    _ = 2^(1+1035057*s) := by rw [pow_add,pow_one,two_mul]
     _ ≤ 2^(100441012*s) := Nat.pow_le_pow_right Nat.zero_lt_two (by omega))
-  have both := Nat.add_le_add front (exhaustive_verification_gates two (by omega : 10004≤Fixed.d (n.log2+1)))
+  have both := Nat.add_le_add measured (exhaustive_verification_gates two (by omega : 10004≤Fixed.d (n.log2+1)))
   have total : measuredSearchWork n≤2^(100441013*s) := both.trans (calc
     _ = 2^(1+100441012*s) := by rw [pow_add,pow_one,two_mul]
     _ ≤ _ := Nat.pow_le_pow_right Nat.zero_lt_two (by omega))

@@ -9,7 +9,7 @@ open Real Finset
 noncomputable def gridPlace {d : ℕ} (j : Fin (2*d)) : Bool × Fin d :=
   ((interleavePlaces d).symm j).elim (fun i => (false,i)) (fun i => (true,i))
 
-private theorem gridPlace_center {d : ℕ} (j : Fin (2*d)) :
+theorem gridPlace_center {d : ℕ} (j : Fin (2*d)) :
     nominalCenter d j = (center d (gridPlace j).1 (gridPlace j).2.val:ℝ) := by
   obtain ⟨i,rfl⟩ := (interleavePlaces d).surjective j
   cases i with

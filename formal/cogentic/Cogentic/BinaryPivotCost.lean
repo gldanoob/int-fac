@@ -241,7 +241,7 @@ def pivot {n : ℕ} (p r : Elimination.Row (n+1)) : Elimination.Row n × ℕ :=
   let out := normalize raw
   (out.1,out.2+rhs.2+∑ i, (vs.get i).2)
 
-private theorem pivot_spec {N n H : ℕ} (base : List (Elimination.Row N)) (hp : 1≤H)
+theorem pivot_spec {N n H : ℕ} (base : List (Elimination.Row N)) (hp : 1≤H)
     (input : ∀ r∈base, ∀ j, (r.aug j).natAbs≤H) {rows : List (Elimination.Row (n+1))}
     (reach : Elimination.SolveStep base rows) (p r : Elimination.Row (n+1)) (pm : p∈rows) (rm : r∈rows) :
     let W := ((base.length+1).size+H.size)*(base.length+1)+1
@@ -333,6 +333,22 @@ theorem solve_pivot_gates {N H : ℕ} (base : List (Elimination.Row N)) (hp : 1�
       change (rows.map (fun r => (pivot p r).2)).sum + _ ≤ _
       nlinarith only [cost,work,Nat.zero_le (rows.length*n*K),Nat.zero_le (rows.length*K)]
 
+theorem relation_height (s : Marking.Relations) (r : Elimination.Row s.marks.length) (hr : r∈Elimination.relationRows s) (j : Option (Fin s.marks.length)) :
+    (r.aug j).natAbs≤1 := by
+  obtain ⟨i,rfl⟩ := List.mem_ofFn.mp hr
+  cases j with
+  | none =>
+    change (-(s.rhs i)).natAbs≤1
+    induction i using Fin.cases with
+    | zero => change (0:ℕ)≤1; decide
+    | succ i => dsimp [Marking.Relations.rhs]; split <;> decide
+  | some k =>
+    change ((Vector.ofFn (s.matrix i)).get k).natAbs≤1
+    simp only [Vector.get_eq_getElem,Vector.getElem_ofFn]
+    induction i using Fin.cases with
+    | zero => change (1:ℕ)≤1; decide
+    | succ i => dsimp [Marking.Relations.matrix]; split <;> decide
+
 /-- Specialize the Boolean-circuit bound to the zero/one augmented system
 assembled from the exact stage-one output. -/
 theorem stageTwo_pivot_gates (s : Marking.Relations) :
@@ -344,22 +360,7 @@ theorem stageTwo_pivot_gates (s : Marking.Relations) :
     let out := solve n (Elimination.relationRows s)
     out.1.map Elimination.Family.integers = Elimination.stageTwo s ∧ out.2 ≤ m*n*(n+1)*K := by
   intro m n W B K out
-  have height (r : Elimination.Row n) (hr : r∈Elimination.relationRows s) (j : Option (Fin n)) :
-      (r.aug j).natAbs≤1 := by
-    obtain ⟨i,rfl⟩ := List.mem_ofFn.mp hr
-    cases j with
-    | none =>
-      change (-(s.rhs i)).natAbs≤1
-      induction i using Fin.cases with
-      | zero => change (0:ℕ)≤1; decide
-      | succ i => dsimp [Marking.Relations.rhs]; split <;> decide
-    | some k =>
-      change ((Vector.ofFn (s.matrix i)).get k).natAbs≤1
-      simp only [Vector.get_eq_getElem,Vector.getElem_ofFn]
-      induction i using Fin.cases with
-      | zero => change (1:ℕ)≤1; decide
-      | succ i => dsimp [Marking.Relations.matrix]; split <;> decide
-  have ⟨val,gates⟩ := solve_pivot_gates (Elimination.relationRows s) (H:=1) le_rfl height Elimination.SolveStep.start
+  have ⟨val,gates⟩ := solve_pivot_gates (Elimination.relationRows s) (H:=1) le_rfl (relation_height s) Elimination.SolveStep.start
   refine ⟨congrArg (Option.map Elimination.Family.integers) val,?_⟩
   simpa [out,K,B,W,m,n,Elimination.relationRows] using gates
 

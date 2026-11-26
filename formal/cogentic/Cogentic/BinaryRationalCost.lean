@@ -114,9 +114,9 @@ private theorem plusMinus_spec (sub : Bool) (x y : ℚ) (W : ℕ) (hx : width x�
     have ny : (y.den:ℚ)≠0 := by exact_mod_cast y.den_ne_zero
     rw [cv,decode_encode,dv]
     cases sub <;> simp only [Bool.false_eq_true,if_false,if_true,eqn,eqp,av,bv,sub_neg_eq_add]
-    · calc _ = (x.num:ℚ)/x.den+(y.num:ℚ)/y.den := by push_cast;field_simp;ring
+    · calc _ = (x.num:ℚ)/x.den+(y.num:ℚ)/y.den := by push_cast; field_simp
            _ = _ := by rw [Rat.num_div_den,Rat.num_div_den]
-    · calc _ = (x.num:ℚ)/x.den-(y.num:ℚ)/y.den := by push_cast;field_simp;ring
+    · calc _ = (x.num:ℚ)/x.den-(y.num:ℚ)/y.den := by push_cast; field_simp
            _ = _ := by rw [Rat.num_div_den,Rat.num_div_den]
   · rw [cc];unfold budget
     have m := max_le al bl
@@ -158,7 +158,7 @@ def inverse (x : Word) : Word :=
 
 private theorem inverse_pack (x : ℚ) : inverse (pack x)=pack x⁻¹ ∧ width x⁻¹≤width x := by
   by_cases xz : x=0
-  · subst x;exact ⟨by decide,by simp⟩
+  · subst x; exact ⟨by rw [inv_zero]; rfl,by simp⟩
   have nz := Rat.num_eq_zero.not.mpr xz
   have ne : x.num.natAbs.bits.isEmpty=false := List.isEmpty_eq_false_iff.mpr (by
     intro h; have := congrArg value h
@@ -166,7 +166,7 @@ private theorem inverse_pack (x : ℚ) : inverse (pack x)=pack x⁻¹ ∧ width 
   have den := Rat.den_inv_of_ne_zero xz
   have dp : 0<(x.den:ℤ) := by exact_mod_cast x.den_pos
   rcases lt_or_gt_of_ne nz with neg|pos
-  · simp [inverse,pack,encode,ne,Rat.num_inv,Int.sign_eq_neg_one_of_neg neg,den,neg,dp,width,max_comm]
+  · simp [inverse,pack,encode,ne,Rat.num_inv,Int.sign_eq_neg_one_of_neg neg,den,neg,x.den_pos,width,max_comm]
   · simp [inverse,pack,encode,ne,Rat.num_inv,Int.sign_eq_one_of_pos pos,den,pos.not_gt,dp.not_gt,width,max_comm]
 
 def wordAdd := plusMinus false

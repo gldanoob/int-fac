@@ -44,6 +44,43 @@ end Cogentic.Construction
 namespace Cogentic.Window
 open Real
 
+/-- Moving a saddle center by at most `D` band logarithms changes each
+prime weight by at most `8*D/u`. -/
+theorem prime_weight_of_saddle_gap (J : Finset ℕ) (α β H u D : ℝ)
+    (ha : 0 ≤ α) (hb : 0 ≤ β) (hH : 0 < H) (hu : 0 < u)
+    (small : 4*D ≤ u)
+    (hJ : ∀ p ∈ J, 1 ≤ p) (hband : ∀ p ∈ J, H/2 ≤ log p ∧ log p ≤ H)
+    (ma : H*u ≤ saddleMean J α) (mb : H*u ≤ saddleMean J β)
+    (near : |saddleMean J α-saddleMean J β| ≤ D*H) (q : ℕ) (hq : q ∈ J) :
+    |(q:ℝ)^(-α)/(q:ℝ)^(-β)-1| ≤ 8*D/u := by
+  have close (a b : ℝ) (s : 0≤a) (ab : a≤b) (lo : H*u ≤ saddleMean J b)
+      (hi : saddleMean J a-saddleMean J b ≤ D*H) : (b-a)*H ≤ 4*D/u := by
+    have z := (saddle_displacement J a b H s ab hH.le hJ hband).1
+    have y := mul_le_mul_of_nonneg_left lo (mul_nonneg (sub_nonneg.mpr ab) hH.le)
+    apply (le_div_iff₀ hu).mpr
+    apply (mul_le_mul_iff_right₀ hH).mp
+    nlinarith only [z,y,hi]
+  have h : |β-α| * H ≤ 4*D/u := by
+    rcases le_total α β with ab | ba
+    · rw [abs_of_nonneg (sub_nonneg.mpr ab)]
+      exact close α β ha ab mb (abs_le.mp near).2
+    · rw [abs_sub_comm,abs_of_nonneg (sub_nonneg.mpr ba)]
+      apply close β α hb ba ma
+      linarith [(abs_le.mp near).1]
+  have qp : (0:ℝ)<q := by exact_mod_cast (hJ q hq)
+  have ql : 0 ≤ log q := by exact log_nonneg (by exact_mod_cast hJ q hq)
+  have e : |(β-α)*log q| ≤ 4*D/u := by
+    rw [abs_mul,abs_of_nonneg ql]
+    exact (mul_le_mul_of_nonneg_left (hband q hq).2 (abs_nonneg _)).trans h
+  have f := Real.abs_exp_sub_one_le (e.trans ((div_le_one hu).mpr small))
+  have id : (q:ℝ)^(-α)/(q:ℝ)^(-β)=exp ((β-α)*log q) := by
+    rw [Real.rpow_def_of_pos qp,Real.rpow_def_of_pos qp,← exp_sub]
+    congr 1; ring
+  rw [id]
+  calc _ ≤ 2*|(β-α)*log q| := f
+       _ ≤ 2*(4*D/u) := by gcongr
+       _ = _ := by ring
+
 /-- At marks within one two-hundredth of the band logarithm of the
     reference center, every single-prime insertion weight changes by
     at most 1/(25u) in relative value. -/
@@ -53,35 +90,9 @@ theorem neighboring_prime_weight (J : Finset ℕ) (α β H u : ℝ)
     (ma : H*u ≤ saddleMean J α) (mb : H*u ≤ saddleMean J β)
     (near : |saddleMean J α-saddleMean J β| ≤ H/200) (q : ℕ) (hq : q ∈ J) :
     |(q:ℝ)^(-α)/(q:ℝ)^(-β)-1| ≤ 1/(25*u) := by
-  have up : 0 < u := by linarith
-  have close (a b : ℝ) (s : 0≤a) (ab : a≤b) (lo : H*u ≤ saddleMean J b)
-      (hi : saddleMean J a-saddleMean J b ≤ H/200) : (b-a)*H ≤ 1/(50*u) := by
-    have z := (saddle_displacement J a b H s ab hH.le hJ hband).1
-    have y := mul_le_mul_of_nonneg_left lo (mul_nonneg (sub_nonneg.mpr ab) hH.le)
-    apply (le_div_iff₀ (by positivity)).mpr
-    apply (mul_le_mul_iff_right₀ hH).mp
-    nlinarith only [z,y,hi]
-  have h : |β-α| * H ≤ 1/(50*u) := by
-    rcases le_total α β with ab | ba
-    · rw [abs_of_nonneg (sub_nonneg.mpr ab)]
-      exact close α β ha ab mb (abs_le.mp near).2
-    · rw [abs_sub_comm,abs_of_nonneg (sub_nonneg.mpr ba)]
-      apply close β α hb ba ma
-      linarith [(abs_le.mp near).1]
-  have qp : (0:ℝ)<q := by exact_mod_cast (hJ q hq)
-  have ql : 0 ≤ log q := by exact log_nonneg (by exact_mod_cast hJ q hq)
-  have e : |(β-α)*log q| ≤ 1/(50*u) := by
-    rw [abs_mul,abs_of_nonneg ql]
-    exact (mul_le_mul_of_nonneg_left (hband q hq).2 (abs_nonneg _)).trans h
-  have small : 1/(50*u) ≤ 1 := (div_le_one (by positivity)).mpr (by linarith)
-  have f := Real.abs_exp_sub_one_le (e.trans small)
-  have id : (q:ℝ)^(-α)/(q:ℝ)^(-β)=exp ((β-α)*log q) := by
-    rw [Real.rpow_def_of_pos qp,Real.rpow_def_of_pos qp,← exp_sub]
-    congr 1; ring
-  rw [id]
-  calc _ ≤ 2*|(β-α)*log q| := f
-       _ ≤ 2*(1/(50*u)) := by gcongr
-       _ = _ := by ring
+  have bound := prime_weight_of_saddle_gap J α β H u (1/200)
+    ha hb hH (by linarith) (by linarith) hJ hband ma mb (by linarith only [near]) q hq
+  convert bound using 1 <;> ring
 
 /-- Prime weights at the actual constructed mark are uniformly close to
     the amplitude-saddle weights, including for displaced conditional means. -/

@@ -76,11 +76,11 @@ private theorem class_abs {L M q h r s : ℕ} (qp : 0<q) (hp : 0<h) (cop : h.Cop
 /-- Joint second moment of signed congruence components across arbitrary
 constructor cells, with a single coefficient draw. Only the sum of the raw
 mesh means enters the shared small-divisor term. Cell components may overlap. -/
-theorem pooled_residue_score_second {ι : Type*} (line : DirichletLZerosOnLine) (K : ℝ) (hK : 1≤K) :
+theorem pooled_residue_score_second_uniform (line : DirichletLZerosOnLine) (K : ℝ) (hK : 1≤K) :
     ∃ C : ℝ, 0<C ∧ ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
     presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
     ∀ R T : PrescribedRows n ell, let b := n.log2+1
-    ∀ (S : Finset ι) (cell : ι→Option (Bool×Fin (Fixed.d b))) (q r : ι→ℕ) (f : ι→ℕ→ℝ) (D : ι→ℝ),
+    ∀ {ι : Type*} (S : Finset ι) (cell : ι→Option (Bool×Fin (Fixed.d b))) (q r : ι→ℕ) (f : ι→ℕ→ℝ) (D : ι→ℝ),
     (∀ i∈S, 0<q i ∧ Squarefree (q i) ∧ q i≤(Fixed.B b)^3 ∧ (q i).Coprime (markModulus n ell) ∧
       ∀ p∈pairCorrectionPrimes b,p.Coprime (q i)) →
     (∀ i∈S, 0≤D i ∧ ∀ a∈constructorCellMarks n ell (cell i), |f i a|≤D i) →
@@ -99,7 +99,7 @@ theorem pooled_residue_score_second {ι : Type*} (line : DirichletLZerosOnLine) 
   obtain ⟨C,cp,b₁,pair⟩ := cell_pair_covariance_approximation line K hK
   obtain ⟨b₂,floor⟩ := PrescribedRows.smooth_probability_margin line
   refine ⟨C,cp,max n₀ (max 2 (2^max b₀ (max b₁ b₂))),?_⟩
-  intro n large ell target comp absent R T b S cell q r f D props bounds M L Y X W δ V A z e B
+  intro n large ell target comp absent R T b ι S cell q r f D props bounds M L Y X W δ V A z e B
   obtain ⟨old,more⟩ := max_le_iff.mp large
   obtain ⟨hn,lim⟩ := max_le_iff.mp more
   obtain ⟨bw,bc⟩ := max_le_iff.mp (((Nat.le_log2 (by omega : n≠0)).mpr lim).trans (Nat.le_succ _))
@@ -236,6 +236,29 @@ theorem pooled_residue_score_second {ι : Type*} (line : DirichletLZerosOnLine) 
     field_simp [(pos a ha).ne',(pos y hy).ne'];ring
   rw [splitMoment]
   exact (add_le_add err model).trans_eq (by dsimp only [c];ring)
+
+/-- Joint second moment of signed congruence components across arbitrary
+constructor cells, with a single coefficient draw. Only the sum of the raw
+mesh means enters the shared small-divisor term. Cell components may overlap. -/
+theorem pooled_residue_score_second {ι : Type*} (line : DirichletLZerosOnLine) (K : ℝ) (hK : 1≤K) :
+    ∃ C : ℝ, 0<C ∧ ∃ n₀ : ℕ, ∀ n≥n₀, ∀ ell∈dyadicTargets (Fixed.beta (n.log2+1)), ¬n.Prime →
+    presieve n (n.log2+1) (Fixed.beta (n.log2+1)) (Fixed.A (n.log2+1)) (Fixed.rootBase n)=none →
+    ∀ R T : PrescribedRows n ell, let b := n.log2+1
+    ∀ (S : Finset ι) (cell : ι→Option (Bool×Fin (Fixed.d b))) (q r : ι→ℕ) (f : ι→ℕ→ℝ) (D : ι→ℝ),
+    (∀ i∈S, 0<q i ∧ Squarefree (q i) ∧ q i≤(Fixed.B b)^3 ∧ (q i).Coprime (markModulus n ell) ∧
+      ∀ p∈pairCorrectionPrimes b,p.Coprime (q i)) →
+    (∀ i∈S, 0≤D i ∧ ∀ a∈constructorCellMarks n ell (cell i), |f i a|≤D i) →
+    let M := cellMarkCount b; let L := fun i=>firstCellMark b (cell i)
+    let Y := fun i=>(constructorCellMarks n ell (cell i)).filter (fun a=>a ≡ r i [MOD q i])
+    let X := S.biUnion Y; let W := pooledMarkWeight S Y (fun i a=>(q i:ℝ)*f i a)
+    let δ := ∑ i∈S,∑ j∈range M,f i (L i+j)
+    let V := ∑ i∈S,meshVariation (L i) M (f i); let A := ∑ i∈S,D i
+    let z := (Fixed.z b:ℝ); let e := exp (-K*z^2); let B := (Fixed.B b:ℝ)
+    twoFieldSecond R T X (fun a=>W a/smoothMarkProbability R T a) (smoothMarkEvent R false) (smoothMarkEvent T true) ≤
+      A^2*C*e*(M:ℝ)^2 + (|δ|+V*(1+2*exp 6)*M*e)^2*exp (8/(Fixed.d b:ℝ)) +
+        4*A^2*(M:ℝ)^2/B*exp (48*z) := by
+  obtain ⟨C,cp,N,law⟩ := pooled_residue_score_second_uniform line K hK
+  exact ⟨C,cp,N,fun n large ell target comp sieve R T=>law n large ell target comp sieve R T (ι:=ι)⟩
 
 end
 end Cogentic.Construction

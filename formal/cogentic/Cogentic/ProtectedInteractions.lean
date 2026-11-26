@@ -20,7 +20,7 @@ def singleOrdinaryPrescription {n ell : ℕ} (i : BandRow (n.log2+1)) (side : Bo
       away := by intro q qm;obtain rfl := mem_singleton.mp qm;exact h.1.2.2 }
   else PrescribedRows.unrestricted n ell
 
-private theorem single_modulus {n ell : ℕ} (i : BandRow (n.log2+1)) (valid : OrdinaryAdmissible (n:=n) (ell:=ell) i) :
+theorem single_modulus {n ell : ℕ} (i : BandRow (n.log2+1)) (valid : OrdinaryAdmissible (n:=n) (ell:=ell) i) :
     prodPrimes (singleOrdinaryPrescription (n:=n) (ell:=ell) i false).primes *
     prodPrimes (singleOrdinaryPrescription (n:=n) (ell:=ell) i true).primes = bandRowPrime i := by
   cases color : i.1 <;> simp [singleOrdinaryPrescription,valid,color,prodPrimes,PrescribedRows.unrestricted]

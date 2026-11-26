@@ -14,7 +14,7 @@ def firstCellMark (b : ℕ) (cell : Option (Bool × Fin (Fixed.d b))) : ℕ :=
 
 def cellMarkCount (b : ℕ) := 2^(9997*Fixed.h b)
 
-private theorem cell_scale (b : ℕ) : cellMarkCount b*Fixed.invWidth b = Fixed.A b := by
+theorem cell_scale (b : ℕ) : cellMarkCount b*Fixed.invWidth b = Fixed.A b := by
   dsimp [cellMarkCount,Fixed.invWidth,Fixed.A]
   rw [←Nat.pow_add]; congr 1; ring
 
