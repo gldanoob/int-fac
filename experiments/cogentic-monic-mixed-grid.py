@@ -54,16 +54,17 @@ def restrict(basis, row):
             for word in basis if word != pivot]
 
 
-def probe(fields, discriminants, blocks, basis):
+def probe(fields, discriminants, blocks, basis, *, prime_cutoff=PROBE_CAP, after=2, deadline=None):
     for field, disc, (offset, points) in zip(fields, discriminants, blocks, strict=True):
         degree = len(field)-1
         derivative = [j*c for j, c in enumerate(field) if j]
         norms = [GRID["homogeneous"](field, *point) for point in points]
         mask = (1 << len(points))-1
-        for p in GRID["primes_through"](PROBE_CAP):
+        for p in GRID["primes_through"](prime_cutoff):
             if not basis or not points:
                 break
-            if p == 2 or disc % p == 0:
+            SQUARES["check_deadline"](deadline)
+            if p <= after or disc % p == 0:
                 continue
             squares = {r*r % p for r in range(1, p)}
             for root in range(p):
