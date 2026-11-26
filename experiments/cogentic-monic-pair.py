@@ -1,5 +1,6 @@
 """Construct two monic Eisenstein polynomials with an exact shared value."""
 
+import argparse
 import os
 import subprocess
 from pathlib import Path
@@ -58,21 +59,21 @@ def check_pair(n, degree):
     return m, f, g
 
 
-def check_relations():
+def run_gp(function, inputs, *files):
     cases = []
-    for n in (35, 77, 143):
+    for n in inputs:
         m, f, g = check_pair(n, 3)  # Fixed cubic/quartic fixtures.
-        cases.append(f"iferr(print(monic_relation_replay({n},{m},{[list(f), list(g)]})),"
+        cases.append(f"iferr(print({function}({n},{m},{[list(f), list(g)]})),"
                      "err,print(err);quit(1));")
     code = "\n".join(("cogentic_as_library=1;",
                       'read("cogentic-quadratic-order.gp");',
-                      'read("cogentic-monic-pair-relations.gp");', *cases, ""))
+                      'read("cogentic-monic-pair-relations.gp");',
+                      *(f'read("{file}");' for file in files), *cases, ""))
     result = subprocess.run([os.environ.get("GP", "gp"), "-fq"], input=code,
                             cwd=Path(__file__).resolve().parent,
                             capture_output=True, text=True, timeout=15, check=True)
     if result.stderr:
         raise RuntimeError(result.stderr)
-    print("Manual cubic/quartic relations [N, m, discriminants, count, first witness]:")
     print(result.stdout, end="")
 
 
@@ -105,5 +106,12 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
-    check_relations()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--squares", action="store_true", help="run the finite parity and square test")
+    if parser.parse_args().squares:
+        print("Square search [N, marks, nullity, dependencies tested, first witness, certificate]:")
+        run_gp("monic_square_replay", (35, 77, 143, 221, 323), "cogentic-monic-pair-squares.gp")
+    else:
+        run()
+        print("Manual cubic/quartic relations [N, m, discriminants, count, first witness]:")
+        run_gp("monic_relation_replay", (35, 77, 143))

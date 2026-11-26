@@ -52,3 +52,19 @@ The relation replay explicitly uses $d=3$ on $N=35,77,143$. These small cases us
 | 143 | 5 | 3 |
 
 For every retained norm, the replay multiplies the prime powers back to its absolute value and checks the exact rational valuations. For each prime $p$ it checks the simple root $a/b\bmod p$. PARI then factors the principal ideal of $a-b\alpha$ in the maximal order and checks the residue root, residue degree one, ramification index one and exponent of every returned prime ideal. For example, at $N=77$ and $(a,b)=(-7,2)$ the norms are $-47$ and $4365=3^2\cdot5\cdot97$. The cubic prime above 47 has residue root 20, and the quartic primes above 3, 5 and 97 have residue roots 1, 4 and 45. The exponent two above 3 is included in the direct ideal check. These finite relations establish neither span nor a splitting certificate.
+
+## Bounded parity and square check
+
+Run `python3 -B experiments/cogentic-monic-pair.py --squares` for the separate square search. The predeclared inputs are $35,77,143,221,323$, all with manual cubic/quartic degrees, $|a|\le64$, $1\le b\le64$ and smoothness bound 151. It uses the same primitive marks, unit test modulo $N$, discriminant exclusions and direct ideal verification. A binary matrix has one row per field, prime and degree-one root. Its columns contain the ideal exponents reduced modulo two. The replay tests at most 1,023 nonzero kernel combinations per input and exhausts the kernel on these inputs.
+
+| Input | Simultaneous marks | Parity nullity | Dependencies tested | Verified divisors |
+| ---: | ---: | ---: | ---: | ---: |
+| 35 | 4 | 0 | 0 | 0 |
+| 77 | 6 | 0 | 0 | 0 |
+| 143 | 4 | 0 | 0 | 0 |
+| 221 | 10 | 0 | 0 | 0 |
+| 323 | 22 | 1 | 1 | 0 |
+
+For each dependency, the replay tries the two signs shared by the products in the two fields. It requires an exact square in both fields and a denominator coprime to $N$ in each power-basis square root. It checks that the two residues square to the same signed mark product before taking their difference gcd with $N$. The square-root path also checks a known square in each input's cubic field.
+
+The sole dependency is the mark $(-1,2)$ for $N=323$. Its norms are $-1$ and $9$, and neither signed product is a square in either field according to PARI. The cubic obstruction also follows from its real embeddings. Here $F(X)=X^3+8X^2-2$. This polynomial is positive at $-1$ and $1$ and negative at $-1/2$. It has real roots on both sides of $-1/2$, so $-1-2\alpha$ has opposite signs at two embeddings. Neither it nor its negative can be a square. Thus even ideal parity alone fails on this concrete relation. The search tested only common signs and this fixed grid and smoothness bound. Other unit corrections, relation bounds, and extraction methods remain outside the check.
