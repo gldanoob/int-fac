@@ -78,3 +78,39 @@ order_one = intersection(()) - sum(intersection((p,)) for p in band)
 order_two = order_one + sum(intersection(pair) for pair in combinations(band, 2))
 assert order_one <= actual <= order_two
 print(f"{cycle} cofactor residues, three restricted pools, and {len(hits)} omission-test hits passed.")
+
+
+def check_high_directions(a, b, limit, power):
+    delta = b-a
+    na, nb = m-a, m-b
+    ra, rb = (sum(digit * mark**i for i, digit in enumerate(digits)) for mark in (a, b))
+    assert gcd(na*nb, N) == 1 and (rb-ra) % delta == 0
+    inverse = pow(ra + na*((rb-ra)//delta), -1, na*nb)
+    ha, hb = na*(limit+a)**power, nb*(limit+b)**power
+    # Subtracting (limit+a) times the first high column gives (0, hb*delta).
+    # This triangular basis gives one representative for each of ha*hb cosets.
+    for za in range(ha):
+        for j in range(hb):
+            zb = za % delta + j*delta
+            k = ((na*zb-nb*za)//delta)*inverse % (na*nb)
+            a0, b0 = za-k*ra, zb-k*rb
+            assert a0 % na == 0 and b0 % nb == 0
+            # Floor the coordinates of the remainder in the two high directions.
+            det = ha*hb*delta
+            u = (hb*(limit+b)*a0-ha*(limit+a)*b0)//det
+            v = (ha*b0-hb*a0)//det
+            ya = (a0-ha*(u+(limit+a)*v))//na
+            yb = (b0-hb*(u+(limit+b)*v))//nb
+            assert (yb-ya) % delta == 0
+            y = (yb-ya)//delta
+            x = ya-a*y
+            assert abs(y) <= 4*(2*limit)**(power+1)//delta
+            assert abs(x) <= 6*(2*limit)**(power+2)//delta
+            for z, r, n, h, mark in ((za, ra, na, ha, a), (zb, rb, nb, hb, b)):
+                assert z == k*r+n*(x+mark*y)+h*(u+(limit+mark)*v)
+    return ha*hb
+
+
+classes = sum(check_high_directions(a, b, 3, power)
+              for a, b in combinations(range(1, 4), 2) for power in (1, 2))
+print(f"Recovered bounded correcting coefficients for all {classes} two-mark quotient classes.")
