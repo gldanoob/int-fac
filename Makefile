@@ -43,3 +43,7 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-real-gaps.py
 	"$(PYTHON)" -B experiments/cogentic-monic-local-laws.py
 	"$(PYTHON)" -B experiments/cogentic-intermediate-count.py
+	"$(PYTHON)" -B experiments/cogentic-planted-norm-two.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-large-primes.py
+	"$(PYTHON)" -B experiments/cogentic-monic-productive-signs.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-scheduled-split.py
