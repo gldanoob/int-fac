@@ -1,5 +1,6 @@
 """Measure the frozen degree-three boundary cohort using only public integers."""
 
+import argparse
 import json
 from math import gcd, isqrt, prod
 from pathlib import Path
@@ -82,17 +83,30 @@ def planted(n):
                 field_row=[0, p, 0], norms=[side[0] for side in norms], factors=fs, rank_at_least=1)
 
 
-def run():
+def records():
     assert PAIR["scheduled_degree"]((1 << 215)-1) == 2
     assert PAIR["scheduled_degree"](1 << 215) == 3
     for height in HEIGHTS:
         for n in INPUTS:
             start = monotonic()
             result = raw(n, height)
-            print(json.dumps(dict(result, seconds=round(monotonic()-start,4))), flush=True)
+            yield dict(result, seconds=round(monotonic()-start, 4))
     for n in INPUTS:
-        print(json.dumps(planted(n)), flush=True)
+        yield planted(n)
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--verify", type=Path, help="recompute every saved row except elapsed time")
+    args = parser.parse_args()
+    if args.verify:
+        saved = [json.loads(line) for line in args.verify.read_text().splitlines()]
+        for expected, observed in zip(saved, records(), strict=True):
+            expected.pop("seconds", None)
+            observed.pop("seconds", None)
+            if expected != json.loads(json.dumps(observed)):
+                raise ValueError(f"frozen result differs for {observed['n']} in {observed['mode']} mode")
+        print(f"Verified {len(saved)} frozen 216-bit grid and planting records")
+    else:
+        for row in records():
+            print(json.dumps(row), flush=True)
