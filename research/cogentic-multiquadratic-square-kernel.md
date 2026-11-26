@@ -1,0 +1,40 @@
+# Exact square kernels in explicit multiquadratic fields
+
+In a supplied multiquadratic field of degree polynomial in \(\log N\) whose defining rational radicands have \(\exp(O(W))\)-bit presentations, all the square relations among \(\exp(O(W))\) explicit marks with \(\exp(O(W))\)-bit coefficients can be found deterministically in \(\exp(O(W))\) bit time, where \(W=(\log N)^{1/3}(\log\log N)^{2/3}\). The bounds hold for unrestricted ideal support. The relative norm tests come before the construction of basis products, which controls their heights even when the field degree grows. [Earlier quadratic tower descent](https://github.com/gldanoob/int-fac/blob/132367e/research/cogentic-quadratic-tower-square-kernel.md)
+
+## Testing whether a squareclass descends to the rationals
+
+Let \(K=\mathbb Q(\sqrt{D_1},\ldots,\sqrt{D_k})\), with rationally independent squareclasses \([D_i]\), and let \(\sigma_1,\ldots,\sigma_k\) be a binary basis of \(G=\operatorname{Gal}(K/\mathbb Q)\). For \(\alpha\in K^\times\), its squareclass comes from \(\mathbb Q\) exactly when
+\[
+  \alpha\sigma(\alpha)\in (K^{\langle\sigma\rangle})^{\times 2}
+\]
+for each \(\sigma_i\) and each \(\sigma_i\sigma_j\) with \(i<j\).
+
+A rational class satisfies every test by taking a relative norm of a rational representative times a square. For the converse, a square \(\alpha\) already represents the rational class of one. Otherwise the generator tests imply \([\sigma_i(\alpha)]=[\alpha]\) in \(K^\times/K^{\times 2}\). Thus \(E=K(\sqrt\alpha)\) is Galois over \(\mathbb Q\), with a central kernel of order two in the map \(\operatorname{Gal}(E/\mathbb Q)\to G\). The test for \(\sigma\) says precisely that a lift of \(\sigma\) has order two. In one direction, if \(t\) is a norm root in the fixed field, the lift sends \(\sqrt\alpha\) to \(t/\sqrt\alpha\), so its square is the identity. In the other direction, for an order-two lift \(s\), the element \(t=\sqrt\alpha\,s(\sqrt\alpha)\) is fixed by the central kernel and by \(s\). It therefore lies in \(K^{\langle\sigma\rangle}\) and is a norm root. Both lifts have the same square because the kernel is central of order two.
+
+Choose order-two lifts for the basis. The pair tests say that their pairwise products also have order two, so the lifts commute. They generate a subgroup mapping isomorphically to \(G\). Its fixed field is quadratic over \(\mathbb Q\), say \(\mathbb Q(\sqrt r)\), and \(E=K(\sqrt r)\). Equality of these quadratic extensions gives \([\alpha]=[r]\) in \(K^\times/K^{\times2}\).
+
+## Constructing the kernel without nested basis products
+
+For \(n\) columns in \(K\), build the relative norms of each column for every test in the criterion. Recursively compute the square kernel for each list in its degree-half fixed field, and intersect the kernels in the original \(n\) mask coordinates. The intersection consists exactly of the masks whose products have rational squareclasses. At degree one, compute the rational square kernel by gcd refinement into pairwise coprime factors, removing factors that are exact squares and keeping a sign row.
+
+For each basis mask of the intersection, multiply its selected columns once. Its product \(\beta\) is a rational class in \(K\). To obtain a rational representative, descend along any quadratic flag specified by the rational radicands. At a step \(M=F(\sqrt D)\), the relative norm of the current element \(\beta\) is square in \(F\). With \(t^2=N_{M/F}(\beta)\), choose the sign so \(\delta=\operatorname{Tr}_{M/F}(\beta)+2t\ne0\). Then \((\beta+t)^2=\delta\beta\), so \(\delta\) gives the same squareclass in \(M\). Moreover, if \(\beta\) was a rational class in \(M\), then \(\delta\) is a rational class in \(F\). Indeed, the kernel of the squareclass map from \(F\) to \(M\) is spanned by \([D]\) and \(D\) is rational. The same argument justifies the norm-square condition at the next step. The resulting rational representatives give the squareclass map on the intersection.
+
+The rational classes killed by extension to \(K\) are exactly the span of the \([D_i]\). Each quadratic subfield corresponds to a nontrivial character of \(G\), and the character's radical monomial generates that subfield. To compute the final kernel, append the \(D_i\) to the rational representative columns, compute their rational square kernel, then project away the appended coordinates. The projection is injective by independence of the radicands. Lift the masks back through the intersection basis. Exact roots can be recovered by forming the products for the final basis and taking their field square roots.
+
+## Bit cost
+
+A subcall lists at most \(k(k+1)/2\) child tests and passes only columnwise norms to its children. A norm step at most doubles absolute logarithmic height. Thus at depth \(j\) the column heights are bounded by \(2^j H\), where \(H\ge1\) bounds the original heights. The products used after a subcall's intersection have height at most \(n2^jH\). Each trace descent step replaces height \(h\) by at most \(3h+3\log 2\), using \(h(t)=h(N\beta)/2\le h(\beta)\). All rational representatives therefore have height at most \(O(3^k nH)\). The number of subcalls is at most \((k+1)^{2k+1}\).
+
+One can use tensor bases of radical monomials. Label each radical by its subset of the original \(D_i\). A fixed field uses the monomials fixed by the chosen sign automorphism. Products of basis monomials multiply their symmetric-difference monomial by the product of the radicands at the repeated indices. Hence multiplication tables, embeddings and basis changes have sizes polynomial in the degree and the original presentation. Coefficient heights of a field element are polynomial in its absolute height and this presentation size, by taking traces against the dual monomial basis.
+
+An elementary square test with root recovery suffices in these bases. For an element \(A+B\sqrt D\) with \(B=0\), test \(A\) and \(A/D\) in the lower field. For \(B\ne0\), first take a lower-field square root \(t\) of \(A^2-DB^2\) and try both signs in \(a^2=(A+t)/2\). If one succeeds, the other coefficient is \(B/(2a)\). This follows by comparing coefficients in \((a+b\sqrt D)^2\), and the resulting root can be verified by squaring. With rational square tests at the bottom, at most three recursive calls occur at each step. Heights in each call are bounded by a constant times the parent height plus the radicand height and a constant. With \(d=2^k\), this is polynomial bit work in \(d\) and the explicit input size.
+
+The bound is \((k+1)^{2k+1}\) times a polynomial in \(n,d\) and input coefficient bit lengths. When \(d\) is polynomial in \(\log N\), the subcall factor is \(\exp(o(W))\). This gives the stated one-third scale for the kernel calculation. Applying it to a fan requires supplied multiquadratic models and evaluation maps. The estimate leaves the field construction, mark supply and probability of a productive modular sign outside the kernel calculation.
+
+## Biquadratic check
+
+In \(K=\mathbb Q(\sqrt2,i)\), take \(\alpha=\sqrt2\). The automorphism flipping only \(i\) has relative norm \(2\), square in \(\mathbb Q(\sqrt2)\). The automorphism flipping both radicals has relative norm \(-2\), square in \(\mathbb Q(\sqrt{-2})\). Their product has relative norm \(-2\) in \(\mathbb Q(i)\), where it is nonsquare. These generator tests alone would admit this class.
+
+An exact Sage check on the 624 nonzero elements of \(\sum_{j=0}^3 c_j b_j\) for \(c_j\in[-2,2]\) and \((b_0,b_1,b_2,b_3)=(1,\sqrt2,i,i\sqrt2)\) compared the three norm tests with an explicit trace descent along \(K/\mathbb Q(\sqrt2)/\mathbb Q\). The 32 passing elements all descended, and the final rational tests against \(1,2,-1,-2\) agreed with direct square testing in \(K\).
+Multiplying the same grid by 7 preserved the 32 descending classes and yielded zero field squares, also in agreement with direct tests. For any passing element, the rational representative produced by descent was checked by an exact square test on its quotient with the original element.
