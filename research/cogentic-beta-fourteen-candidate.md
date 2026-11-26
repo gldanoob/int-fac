@@ -1,0 +1,47 @@
+# Candidate cutoff 14 for the randomized Cogentic descent
+
+**Status: candidate parameter replay.** The target is expected bit time $L_N[1/3,28]$ for the randomized Cogentic construction with the local one-sided smoothness screens and sparse kernel. The factor-base change is from $\beta=18$ to $\beta=14$. The original descent lemmas cannot be invoked verbatim. This checkpoint records the replacement estimates that appear sufficient and the source arguments that still need a full replay. [Pinned manuscript, Definitions 2.7, 4.5 and 6.1](https://github.com/google-research/google-research/blob/4a7bc8ab0bc770e71a259b7966c500496b99010a/cogentic_research_papers/integer_factorization/paper.pdf) · [Local coefficient 36](cogentic-smoothness-screen.md)
+
+## Factor counts and the density that sets the trial clocks
+
+Write $L=\ln N$, $H=L^{1/3}(\ln L)^{2/3}$, $V=L^{2/3}(\ln L)^{1/3}$ and $U=(L/\ln L)^{1/3}$. In Definition 2.7 keep $\delta=1/2$, $g=3$, $\tau=1/3$, $\mu=8$, $\eta_0=2$, and $\rho=3/4$. Only $\beta$ changes among these constants. In particular $\ln Q_0\sim V/3$, $d\sim U/2$, $\ln M\sim8V$ and $\ln B\sim14H$. Use the old grid definition and $u_{\rm cap}=\lceil4\widehat U\rceil$. Its tuned $y$ differs from the cap $Y$ by $\ln Y-\ln y=O(\ln Y/U)+O(1)$, since $u_0\gg U$ on the intended scales and the grid rounds the target logarithm within $O(1/u_0)$. The logarithmic ratio is $1+o(1)$ uniformly, including at terminal caps.
+
+For an algebraic node, the uniform upper bound is
+\[
+ \ln X_*\le (9+o(1))V+(U/4+O(1))\ln q,
+ \qquad
+ \frac{\ln q}{\ln Y}\le\frac{16}{9}+o(1).
+\]
+The constant $9$ includes $\delta\eta_0=1$ in addition to $\mu=8$. The top of a penultimate bucket capped at $B$ is the critical range. It gives the upper coefficient $9/14+4/9=137/126=1.087301\ldots$ for $4u_0/U$. Replace the general bound $4u_0\le0.96U$ in Lemmas 2.8(4) and 3.5 with $4u_0\le1.10U$. At the rational root, $\ln X_*=(17/6+o(1))V$, so $4u_0/U=17/84+o(1)=0.202380\ldots+o(1)$. Replace the rational subcase bound $0.16U$ by $0.21U$. The root algebraic subcase has cap $Y_2$ and count coefficient $4/9+o(1)$, so its $0.46U$ bound stays valid. The unchanged lower guard $u_0\ge U/30$ has room in all three cases.
+
+The wider count guard does not require weaker smoothness-density estimates. For tuned queries with $\ln Y\le100H$, the moment factor satisfies
+\[
+ \ln((8u_0\ln y)^{u_0})\le(11/60+o(1))H,
+\]
+since $u_0\le1.10U/4$ and $\ln(u_0\ln y)\le(2/3+o(1))\ln L$. For $\ln Y>100H$ the algebraic count coefficient satisfies $4u_0/U\le9/100+4/9+o(1)<0.535$ and $\ln(u_0\ln y)\le(1+o(1))\ln L$, giving a moment exponent below $0.134$. The root cases lie within these bounds. Therefore the actual tuned pairs satisfy a stronger moment guard than the original $0.25H$. Use $0.24H$ in both Lemma 2.8(4) and the admissibility definition in Lemma 3.5. This keeps the density lower bound $\nu\ge L_N(1/3,-0.97)$ for **all** formally admissible pairs, since the source proves $\nu\ge\frac12(5u_0\ln y)^{-4u_0}$ and the new moment guard bounds the last exponent by $0.96H$. The source's exceptional-set sizes and short-width nonprincipal bound can keep their old upper constants. The latter has exponent at most $0.20-0.60+0.24+0.01=-0.15$ before subleading factors.
+
+At the rational root the same density inequality gives a sharper exponent $(2/3)(17/84)=17/126=0.134920\ldots$. Thus the original rational density bound $L_N(1/3,-0.17)$, rational good-box lower bound $L_N(1/3,3.80)$ and the $L_N(1/3,-0.19)$ short-fiber cutoff can all stay. Retain the root algebraic density bound $L_N(1/3,-0.47)$. With $E_q^2/q=\exp((4+o(1))H)$ and the two general density bounds, $\mu_{\rm node}\ge L_N(1/3,2.04)$ still has slack. The printed root and algebraic trial denominators at exponents $2.75$ and $2.00$ can therefore stay. Merely widening the factor-count cap and continuing to bound $\ln(u_0\ln y)$ by $\ln L$ would lose this margin.
+
+## Small moduli, excluded conductors and pair losses
+
+The following numerical replacements concern the source proof. They leave the associated tests in Definition 4.5 unchanged.
+
+| Location | Replacement or retained margin at cutoff 14 |
+| --- | --- |
+| Lemma 2.8(3), special-$q$ box | $E_q/q\le L_N(1/3,-4.9)$ replaces $-6.9$. Its limiting exponent is $2-14/2=-5$. The geometric bucket ratio and depth bounds stay. |
+| Lemma 3.5(2), large sieve | From $y\ge B^{0.99}$, $y^{4/5}$ and $y^{1/8}$ have respective lower leading coefficients $11.088$ and $1.7325$, both above the Mellin truncation coefficient $1$. Replace the old printed lower coefficients. The $0.24$ moment guard only decreases the bad-conductor count. |
+| Lemma 3.5(4)(a), principal term | For $g_{\rm AP}\le y^{0.30}$ and relative width at least $L_N(1/3,-0.20)$, $g_{\rm AP}/(y\delta_1)\le y^{-0.68}$ still holds. Here $0.20/(0.99\cdot14)<0.02$. |
+| Lemma 3.6(3)–(4), bad conductors | The bad-prime fraction still has room below the $S_{\rm skew}^{-2}$ loss. An exceptional conductor with its factor $\gcd(f,3)$ removed has lower leading coefficient $0.60\cdot0.99\cdot14=8.316$. Use $8.30$ in place of $10.6$ in the pruning comparison against $8.25$. The margin survives only after checking this comparison. |
+| Lemma 4.3, rational root | Replace the display $D\le\bar y^{0.23}$ by $D\le\bar y^{0.29}<\bar y^{0.30}$, since $\ln D\le4.01H$ and $0.29\cdot0.99\cdot14=4.0194$. Replace the displayed small-gcd tail exponent $-0.44$ by $-0.34$ from $B^{-1/40}$. It still beats the rational density. The bad-$a$ conductor floor can use $8.30$ in place of $10.68$, giving a bound $L_N(1/3,-6.7)E_{q_0}^2$. The resulting bad-bin bounds $-6.6$ before normalization and $-6.2$ after normalization suffice in place of $-9.0$ and $-8.5$. |
+| Lemma 4.4, algebraic nodes | The common-factor bound $4.02$ stays below $0.30\cdot0.99\cdot14=4.158$. Replace the auxiliary count bound $u'\le0.031U$ by $u'\le0.038U$, using $0.52/(0.99\cdot14)=0.037518\ldots$. The two progression losses still have combined coefficient below $0.08$ even with the crude logarithmic factor. The test $(y/2)^3\ge qB$ still follows from the $16/9+o(1)$ cap ratio. |
+
+The main progression modulus scales are unchanged. In $\log Q_{\rm AP}$ the term $\frac12u_0\ln y$ is asymptotic to $\frac18\ln X_*$ up to lower-order terms. The old absolute lower scales for $Q_{\rm AP}$ and the bounds on ancestor determinants therefore need to be replayed with the tuned quantities, rather than treating the new hybrid factor count as an additional loss in the modulus.
+
+## Remaining proof obligations and the cost ledger
+
+1. **Parameter and interval replay.** Prove eventual `ParamsValid`, the tuned-grid side conditions and the bounds in the first two sections uniformly over the last two buckets and all grid queries. Replace the explicit thresholds in Lemma 2.8 and in the admissibility condition. Check that no finite-precision guard silently uses the old $0.96U$ comparison. The ladder depth, decay of box sizes along chains, coefficient cutoff and the mod-3 pin retain their leading scales.
+2. **Local moments and descent readiness.** Replay Lemmas 3.5–3.6 and 4.3–4.6 using the displayed changes. In particular, recheck the continuity and comparability of tuned weights, the exceptional-conductor split in the second moment, and the upper bound for the bad-child and shared-prime events. Show that the original trial caps and the path-telescoping failure probabilities still apply to the actual deterministic filters and conditioned Laplace law. The table checks the numerical margins used in these arguments and does not by itself prove the full probability bounds.
+3. **Coupling and exact acceptance.** Reuse the local one-sided screens for the $Q_0$-smooth operands and the capped full factorer for $\Delta'_t$. The $Q_0$ and determinant height exponents, and hence the screen clocks, are unchanged. Verify the omitted unused root factor list and the conditional union bound as in the coefficient-36 analysis. Retain the verified modular product identities, independent private coins for any nullspace proposals, and the sealed-root rule. Check that the run flips no success decision using the unsealed $z_m$ values. Then the original CRT fruitfulness proof applies.
+4. **Root reconstruction and bit cost.** The factor base and relation dimension are $\exp((14+o(1))H)$. The number of recorded factors per relation is $\exp(O((\ln L)^2))$ times a bit polynomial, so the 3-adic square-root precision is also $\exp((14+o(1))H)$. Retain its mod-3 initialization and exact certificate, and charge at most fourteen root calls. Factor-base enumeration, sparse kernel computation and the schoolbook root bound then each cost $\exp((28+o(1))H)$. The outer cap, unchanged node trial exponents and screen costs give the smaller charge $\exp((14+3.10+2.00+2+o(1))H)$. Character setup also stays below 28. The sealed array has leading workspace exponent $17.1$, and even a dense store of the retained parity vectors has exponent 28. These fit within the existing deterministic space bound of 40, with the capped subroutines and termination fallback charged as before.
+
+If these obligations close, the constant success probability per phase and the polynomial-size factorization tree preserve the expected-time coefficient 28. The rational parameter comparisons in this checkpoint were checked by exact arithmetic. They leave the analytic and algorithmic replay above open.
