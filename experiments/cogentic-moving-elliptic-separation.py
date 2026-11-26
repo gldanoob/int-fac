@@ -4,7 +4,6 @@
 import argparse
 import sys
 from fractions import Fraction
-from functools import cache
 from itertools import combinations, permutations, product
 from math import gcd, isqrt, prod
 from pathlib import Path
@@ -145,17 +144,6 @@ def split_curve(roots, marked, exponent, modulus):
         point = doubled
 
 
-@cache
-def batch_tools():
-    try:
-        batch = run_path(str(HERE / "cogentic-elliptic-batch-search.py"))
-    except ModuleNotFoundError as error:
-        if error.name == "sage":
-            raise ValueError("residual-order search requires SageMath Python") from error
-        raise
-    return tuple(batch[name] for name in ("PolynomialRing", "Zmod", "value_tree", "evaluate_many"))
-
-
 def signed_multiple(first, second, i, j, modulus):
     assert first[0] == second[0] and i != j
     if first[1] == second[1]:
@@ -171,16 +159,13 @@ def bounded_multiple(point, modulus, a2, a4, bound):
         return 1
     width = isqrt(bound - 1) + 1
     # A local order r <= bound has r = j*width-i with 0 <= i < width.
-    babies = {}
+    babies = []
     baby = None
     for i in range(1, width):
         baby = add(baby, point, modulus, a2, a4)
         if baby is None:
             return i
-        if baby[0] in babies:
-            j, previous = babies[baby[0]]
-            return signed_multiple(baby, previous, i, j, modulus)
-        babies[baby[0]] = i, baby
+        babies.append(baby)
 
     step = add(baby, point, modulus, a2, a4)
     if step is None:
@@ -195,23 +180,11 @@ def bounded_multiple(point, modulus, a2, a4, bound):
             return j*width
         giants.append(giant)
 
-    polynomial_ring, residue_ring, value_tree, evaluate_many = batch_tools()
-    ring = polynomial_ring(residue_ring(modulus), "x")
-    baby_tree = value_tree(ring, babies)
-    giant_tree = value_tree(ring, [giant[0] for giant in giants])
-    values = evaluate_many(baby_tree[-1][0], giant_tree)
-    for j, (giant, value) in enumerate(zip(giants, values, strict=True), 1):
-        if checked_gcd(int(value), modulus) == 1:
-            continue
-        node = 0
-        for row in reversed(baby_tree[:-1]):
-            node *= 2
-            if checked_gcd(int(row[node](giant[0])), modulus) == 1:
-                node += 1
-        assert baby_tree[0][node](giant[0]) == 0
-        i, baby = babies[giant[0]]
-        return signed_multiple(giant, baby, j*width, i, modulus)
-    return None
+    hit = TORUS["batch_match"](modulus, (x for x, _ in giants), (x for x, _ in babies))
+    if hit is None:
+        return None
+    j, i = hit
+    return signed_multiple(giants[j], babies[i], (j+1)*width, i+1, modulus)
 
 
 def residual_multiple(roots, marked, exponent, modulus, bound):

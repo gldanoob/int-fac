@@ -83,14 +83,23 @@ def height_split(n, k, value):
 
 
 @cache
-def batch_tools():
+def collision_checker():
     try:
-        batch = run_path(str(HERE / "cogentic-elliptic-batch-search.py"))
+        return run_path(str(HERE / "cogentic-unit-collision-search.py"))["tuple_collision"]
     except ModuleNotFoundError as error:
         if error.name == "sage":
             raise ValueError("residual-order search requires SageMath Python") from error
         raise
-    return tuple(batch[name] for name in ("PolynomialRing", "Zmod", "value_tree", "evaluate_many"))
+
+
+def batch_match(modulus, giant_labels, baby_labels):
+    """Expose a proper gcd or return the indices of a global scalar match."""
+    hit = collision_checker()(modulus, ((x,) for x in giant_labels), ((x,) for x in baby_labels))
+    if hit is None:
+        return None
+    if hit["status"] == "local-split":
+        raise FactorFound(hit["factor"])
+    return hit["left_index"], hit["right_index"]
 
 
 def trace(value, n):
@@ -114,14 +123,10 @@ def bounded_multiple(n, k, value, bound):
     """Return a global multiple or None, or raise FactorFound for a proper gcd."""
     # A local order r <= bound can be written j*width - i inside these lists.
     width = isqrt(bound - 1) + 1
-    babies = {}
+    babies = []
     baby = IDENTITY
-    for i in range(width):
-        t = trace(baby, n)
-        if t in babies:
-            j, previous = babies[t]
-            return signed_multiple(baby, previous, i, j, n)
-        babies[t] = i, baby
+    for _ in range(width):
+        babies.append(baby)
         baby = multiply(baby, value, k, n)
 
     giants = []
@@ -134,24 +139,11 @@ def bounded_multiple(n, k, value, bound):
 
     if width == 1:
         return None
-    polynomial_ring, residue_ring, value_tree, evaluate_many = batch_tools()
-    ring = polynomial_ring(residue_ring(n), "X", implementation="NTL")
-    baby_tree = value_tree(ring, babies)
-    giant_traces = [trace(giant, n) for giant in giants]
-    values = evaluate_many(baby_tree[-1][0], value_tree(ring, giant_traces))
-    for j, (giant, t, evaluated) in enumerate(zip(giants, giant_traces, values, strict=True), 1):
-        if checked_gcd(int(evaluated), n) == 1:
-            continue
-        # Full products can collect different primes from different factors.
-        node = 0
-        for row in reversed(baby_tree[:-1]):
-            node *= 2
-            if checked_gcd(int(row[node](t)), n) == 1:
-                node += 1
-        assert baby_tree[0][node](t) == 0
-        i, baby = babies[t]
-        return signed_multiple(giant, baby, j*width, i, n)
-    return None
+    hit = batch_match(n, (trace(x, n) for x in giants), (trace(x, n) for x in babies))
+    if hit is None:
+        return None
+    j, i = hit
+    return signed_multiple(giants[j], babies[i], (j+1)*width, i, n)
 
 
 def split_from_generator(n, k, z, odd_power, residual_order=None):
