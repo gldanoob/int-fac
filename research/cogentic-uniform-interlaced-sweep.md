@@ -41,6 +41,8 @@ For example $N=272483$ has 671 root matches and 343 feasible charts in the wide 
 \]
 The first-cohort input $221$ already splits in the short window using an eleven-chart certificate for $96\,e_2$.
 
+Using only centered integer labels at the same wide window for $272483$ admits all 343 charts and gives row rank 343. It yields none of the eight single-prime target directions. This comparison keeps the chart search fixed and changes only the rational-label height cap to the mark cap.
+
 The full root index can contain different signed center classes for the same discriminant. Comparing two such roots is a separate possible factorization route. A control at $272483$ kept only the first admissible class $\{z,-z\}\bmod N$ for each $\Delta\bmod N$ in the relation pool. It dropped 81 extra charts and kept 256. The resulting 89-chart certificate gives exponent $1142603024707663005240$ for the direction $e_2$, and the same order-exponent procedure splits off 523. Neither run compares pairs of centers by gcd.
 
 The wide search scans order $\sqrt N$ center candidates. On this fixed quadratic chart with positive marks at most $A$, the real roots also lie in $[1,A]$, so $0<F(0)\le3A^2$. When $N>3A^2$ no such chart specializes. The finite sweep establishes that these small local relations can combine beyond a constructed modulus. The origin and label bounds do not supply a subexponential worst-case search.
