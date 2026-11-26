@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check one fixed small-discriminant pair on the six previous misses."""
+"""Check one fixed small-discriminant pair on two finite batches."""
 
 from math import isqrt
 from pathlib import Path
@@ -11,18 +11,33 @@ gp_certificate = split["gp_certificate"]
 check_certificate = split["check_certificate"]
 
 # The larger half of each original batch, fixed before the replay.
-INPUTS = split["INPUTS"][3:] + split["HOLDOUT"][3:]
+MISSES = split["INPUTS"][3:] + split["HOLDOUT"][3:]
+# Three close-factor fixtures and three with wider separation.
+FRESH = (16637, 24511, 19043, 34387, 23707, 49981)
 SLOPES = (0, -1)
 
 
-def run():
+def centered_pair(n):
+    m = isqrt(n)
+    constants = tuple(n-m*m-slope*m for slope in SLOPES)
+    discs = tuple(slope*slope-4*constant for slope, constant in zip(SLOPES, constants))
+    if not all(disc < 0 for disc in discs):
+        return None
+    product = discs[0]*discs[1]
+    if isqrt(product)**2 == product:
+        return None
+    assert all(m*m+slope*m+constant == n for slope, constant in zip(SLOPES, constants))
+    return constants, discs
+
+
+def run(label, inputs):
     hits = 0
-    for n in INPUTS:
-        m = isqrt(n)
-        constants = tuple(n-m*m-slope*m for slope in SLOPES)
-        discs = tuple(slope*slope-4*constant for slope, constant in zip(SLOPES, constants))
-        assert all(disc < 0 for disc in discs)
-        assert all(m*m+slope*m+constant == n for slope, constant in zip(SLOPES, constants))
+    for n in inputs:
+        pair = centered_pair(n)
+        if pair is None:
+            print({"batch": label, "n": n, "admissible": False}, flush=True)
+            continue
+        constants, discs = pair
         slopes, offsets = list(SLOPES), list(constants)
         height, bound = split["RELATION_HEIGHT"], split["RELATION_BOUND"]
         scores = gp_call(f"rank_box_scores({n},{slopes},{offsets},[[[0,0]],[[0,0]]],{height},{bound})",
@@ -34,10 +49,13 @@ def run():
         if certificate is not None:
             assert targets > 0 and certificate[3:] == (columns, rank)
             hits += 1
-        print({"n": n, "discriminants": discs, "targets": targets, "rank": rank,
+        print({"batch": label, "n": n, "discriminants": discs, "targets": targets, "rank": rank,
                "columns": columns, "certificate": certificate}, flush=True)
-    print(f"Verified splits with near-square polynomials: {hits}/{len(INPUTS)}")
+    print(f"Verified splits on {label}: {hits}/{len(inputs)}", flush=True)
 
 
 if __name__ == "__main__":
-    run()
+    assert centered_pair(9) is None  # square input
+    assert centered_pair(88) is None  # equal quadratic fields
+    run("previous misses", MISSES)
+    run("fresh batch", FRESH)

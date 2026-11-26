@@ -35,3 +35,4 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-stratified-coefficients.py
 	"$(PYTHON)" -B experiments/cogentic-coefficient-selection.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-split.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-recenter.py

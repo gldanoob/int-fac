@@ -44,3 +44,18 @@ The separate replay uses the existing extractor's small-slope convention with th
 | 12317 | 29 | 128 | 465 | 109 |
 
 The smaller-norm pair split all six prespecified misses. The norm comparison explains the geometric difference between these parameter choices. It gives no uniform lower bound for smooth marks, rank, or certified splits.
+
+The pair is used only when both discriminants are negative and their product is not a perfect square. The first test excludes square inputs such as 9. The second excludes coincident quadratic fields, as for 88 with discriminants $-28$ and $-63$. The exact tests and both fixtures are in the replay. For each returned certificate Python checks the annihilating exponent, recomputes the modular squaring chain and verifies the proper divisor.
+
+A separate fixed fresh batch used products of primes $(127,131)$, $(127,193)$, $(137,139)$, $(137,251)$, $(151,157)$ and $(151,331)$. These products supplied the input fixtures. Coefficient selection received just the six integers.
+
+| Fresh input | Reachable targets | Rank | Columns | Verified divisor |
+| ---: | ---: | ---: | ---: | ---: |
+| 16637 | 0 | 62 | 62 | — |
+| 24511 | 0 | 77 | 77 | — |
+| 19043 | 31 | 123 | 415 | 139 |
+| 34387 | 0 | 81 | 81 | — |
+| 23707 | 22 | 100 | 137 | 151 |
+| 49981 | 25 | 118 | 122 | 151 |
+
+The fresh batch split 3/6 with the same limits. The three misses had full column rank and no eligible target in the column span. `make check-one-third` runs both batches.
