@@ -40,7 +40,7 @@ The [arithmetic replay](../experiments/keybreak-private-elliptic-schedule.py) ch
 
 ## A 2.157 retune with public elliptic recognition
 
-If the [public elliptic recognition transfer](keybreak-public-elliptic-recognition.md) supplies the required successful public trees after exceptional primes are excluded, use the coefficient 1.4143 in both the private and public tests. The following rational parameters keep the same integer rules, grid, private floor, factor cap, probe accounting and exact matrix implementation.
+The [public elliptic recognition argument](keybreak-public-elliptic-recognition.md) bounds the loss of successful public trees when candidates containing exceptional primes are excluded. With that argument and the same Dirichlet GRH and KeyBreak inputs, the manuscript bound becomes $L_N[1/3,2.157]$ using coefficient 1.4143 for both private and public recognition. The following rational parameters keep the same integer rules, grid, private floor, factor cap, probe accounting and exact matrix implementation.
 
 | $\delta$ | $\kappa$ | $\beta$ | $\alpha$ | $\gamma$ | $h_T$ | $\lambda_H$ | $\lambda_L$ |
 |---:|---:|---:|---:|---:|---:|---:|---:|
