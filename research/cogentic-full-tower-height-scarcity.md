@@ -1,6 +1,6 @@
 # Small-height quadratic towers cover few digit inputs
 
-Let $X\le N<2X$, $L=\log X$, $D=(L/\log L)^{1/3}$ and $V=D^2\log L$. Consider a primitive irreducible $P\in\mathbb Z[T]$ of degree $d=O(D)$ whose field admits a complete tower of quadratic extensions from $\mathbb Q$. The polynomial can be nonmonic and need have no composition structure. Allow an input-dependent reduced rational radix $m=u/v$, with $0<v$ and $|u|,v\le \exp(O(V))$. If $P$ has coefficient height $\exp(O(V))$, at most $X^{o(1)}$ integers in the dyad divide a nonzero value $v^dP(u/v)$ from this model. In particular, the model cannot supply small-height fields for all inputs, even when the evaluated multiples and the towers vary. [Earlier obstructions for compositions](cogentic-quadratic-tower-construction-limits.md) · [Square kernels for supplied towers](cogentic-quadratic-tower-square-kernel.md)
+Let $X\le N<2X$, $L=\log X$, $D=(L/\log L)^{1/3}$ and $V=D^2\log L$. Consider a primitive irreducible $P\in\mathbb Z[T]$ of degree $d=O(D)$ whose field admits a complete tower of quadratic extensions from $\mathbb Q$. The polynomial can be nonmonic and need have no composition structure. Allow an input-dependent reduced rational radix $m=u/v$, with $0<v$ and $|u|,v\le \exp(O(V))$. If $P$ has coefficient height $\exp(O(V))$, at most $X^{o(1)}$ integers in the dyad divide a nonzero value $v^dP(u/v)$ from this model. The same conclusion holds for towers of varying relative degrees with maximum relative degree $o(D)$. These models cannot supply small-height fields for all inputs, even when the evaluated multiples and the towers vary. [Earlier obstructions for compositions](cogentic-quadratic-tower-construction-limits.md) · [Square kernels for supplied towers](cogentic-quadratic-tower-square-kernel.md)
 
 ## Denominators and height at one quadratic step
 
@@ -54,6 +54,19 @@ $$
 $$
 For $d=O(D)$ and $U=O(V)$, the same evaluated-value argument bounds the log count of represented inputs by $(e_0+1)U+o(L)$. Thus $e_0=o(D)$ still gives only $X^{o(1)}$ inputs. If $r$ is fixed and $e_0=\Theta(D)$, a digit-height bound $U\le(\kappa+o(1))L/d$ gives at most $X^{\kappa/2^r+o(1)}$ inputs. This implies scarcity when $\kappa<2^r$. A generic $O(V)$ budget in this fixed-step regime can make the bound vacuous.
 
+## Towers with varying relative degrees
+
+Suppose instead the top step has degree $q\ge2$ over $E$ of degree $e$, and $G=T^q+\sum_{j=0}^{q-1}a_jT^j$ is the relative minimal polynomial. The same Gauss norm calculation gives $\operatorname{Nm}\mathfrak d=l$ for $\mathfrak d^{-1}=\mathcal O_E+\sum_j\mathcal O_Ea_j$, where $l$ is the positive leading coefficient of $P$. The $a_j$ jointly generate $E$ since a polynomial of degree $q$ over any proper subfield could not have a root of degree $eq$ over $\mathbb Q$. Choose $\beta=\sum_j a_jt^j$ with $0\le t\le(q-1)\binom e2$. Each pair of distinct embeddings forbids at most $q-1$ values of $t$ by a nonzero polynomial identity, so a choice gives a generator of $E$. Its denominator ideal divides $\mathfrak d$. The bounds $|\sigma a_j|\le2^qM(\sigma G)$ and $t\le d^3$ give a log Mahler budget increase of $O(eq\log(2+d))$ at this step.
+
+For a fixed $E$, the same dyadic measure envelopes now give $\prod_\sigma A_\sigma\le 2^{e(q+1)}\exp(U)/l$. Packing in $\mathfrak d^{-1}$ gives $\exp(U+O(eq))$ choices for each coefficient. Counting the $q$ coefficients, the denominator ideal and the $e$ dyadic exponents gives a fixed-field log count of $(q+1)U+O(eq^2+e\log(2+U+e))$. For a full pattern $q_1,\ldots,q_r$ with product $d$, the intermediate degrees decrease by at least a factor two in the downward recursion. Hence their squared sum is $O(d^2)$, and the budget grows in total by $O(d\log(2+d))$. Since $\sum_i(q_i+1)=O(d)$, the full log count for this pattern is bounded by
+$$
+ \left(2+\sum_i(q_i+1)\right)U+
+ O\!\left(d^2\log(2+d)+d\log(2+U+d\log(2+d))\right).
+$$
+There are at most $\exp(O(\log^2(2+d)))$ patterns, by bounding their length by $\log_2 d$ and each entry by $d$.
+
+Let $Q$ bound every relative degree uniformly. If $Q\le\sqrt D$, then $\sum_iq_i=O(\sqrt D\log D)$. If $\sqrt D<Q=o(D)$, then $q_i/\log q_i=O(Q/\log D)$ and $\sum_i\log q_i=\log d=O(\log D)$, giving $\sum_iq_i=O(Q)$. In both cases $\sum_i(q_i+1)=o(D)$. At $U=O(V)$ and $d=O(D)$ the log count is $o(L)$, so the same evaluated-value argument gives only $X^{o(1)}$ inputs. The argument requires no normality at any step. It also applies to an abelian extension of bounded exponent, since a composition series of its Galois group gives relative degrees bounded by that exponent.
+
 The count applies when the primitive irreducible polynomial defines the stated field tower. A norm formula is covered when its factors arise from the relative minimal polynomial in that tower. Reducible norm forms or word alignments that only give a divisibility condition on a product of factors fall outside this scope. A separate argument would have to track which factors carry the prime divisors of $N$.
 
-An exact arithmetic check compared the denominator-ideal norms, defined by lattice index, with both primitive leading coefficients on 320 real and imaginary quadratic fixtures. Of these, 319 gave irreducible quartic norm polynomials.
+An exact arithmetic check compared the denominator-ideal norms, defined by lattice index, with both primitive leading coefficients on 320 real and imaginary quadratic fixtures. Of these, 319 gave irreducible quartic norm polynomials. A further 320 fixtures with relative degrees three and four checked the same norm-content identities and the generator choice. All their norm polynomials were irreducible.
