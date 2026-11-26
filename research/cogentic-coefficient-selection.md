@@ -38,3 +38,5 @@ The finite replay takes $m=\lfloor\sqrt N\rfloor$ and two monic imaginary quadra
 | 10403 | 0 | — | — |
 
 For 77 the chosen quadratics are $X^2-39X+787$ and $X^2+41X+763$. The extractor finds $31^{267480}\equiv1\pmod{77}$ and $\gcd(31^{33435}-1,77)=11$. The unperturbed pairs split three inputs, and the selected pairs split one. Counting jointly smooth marks alone can favor a pair whose relations fail to give a split under these limits. The one-third proof still needs control of the full rank score and a uniform fast smoothness count.
+
+A separate finite test scores all coefficient tuples by the number of rational-prime targets reached by their valuation columns. It uses the same extraction limits and adds a six-input holdout. [Rank comparison and certificates](cogentic-selected-polynomial-rank.md)

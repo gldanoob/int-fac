@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Finite four-coefficient selection followed by an independent GP certificate."""
+"""Compare finite rank scoring, smooth-mark selection and unperturbed controls."""
 
 import json
 import os
 import runpy
 import subprocess
+from itertools import product
 from math import gcd, isqrt
 from pathlib import Path
 
@@ -15,6 +16,7 @@ Factor, Smooth, select = (selection[name] for name in ("Factor", "Smooth", "sele
 # Fixed before running selection: small public composites, one box, mark range,
 # smoothness bound, and relation-search limits. No factorization enters selection.
 INPUTS = (77, 143, 221, 10001, 10203, 10403)
+HOLDOUT = (187, 299, 437, 11021, 11663, 12317)
 BAND_BOUND = 300
 MARKS = range(1, 101)
 BOX = ((0, 0, 4, 2), (0, 0, 4, 2))  # both u and v vary in each field
@@ -49,17 +51,23 @@ def selected_terms(n, m, slopes, constants):
     return tuple(terms)
 
 
+def gp_call(call, *, rank=False):
+    code = ('cogentic_as_library=1;\n'
+            'iferr(read("cogentic-quadratic-order.gp"),err,print(err);quit(1));\n')
+    if rank:
+        code += 'iferr(read("cogentic-selected-polynomial-rank.gp"),err,print(err);quit(1));\n'
+    code += f'iferr(print({call}),err,print(err);quit(1));\n'
+    result = subprocess.run([os.environ.get("GP", "gp"), "-fq", "-s", "64M"], input=code, cwd=ROOT,
+                            capture_output=True, text=True, timeout=120)
+    if result.returncode or result.stderr:
+        raise RuntimeError(f"PARI failed: {result.stdout}{result.stderr}")
+    return json.loads(result.stdout)
+
+
 def gp_certificate(n, slopes, constants):
     call = (f"quadratic_certificate_coeffs({n},{list(slopes)},{list(constants)},"
             f"{RELATION_HEIGHT},{RELATION_BOUND})")
-    code = ('cogentic_as_library=1;\n'
-            'iferr(read("cogentic-quadratic-order.gp"),err,print(err);quit(1));\n'
-            f'iferr(print({call}),err,print(err);quit(1));\n')
-    result = subprocess.run([os.environ.get("GP", "gp"), "-fq", "-s", "64M"], input=code, cwd=ROOT,
-                            capture_output=True, text=True, timeout=120)
-    if result.returncode:
-        raise RuntimeError(f"PARI failed: {result.stdout}{result.stderr}")
-    certificate = json.loads(result.stdout)
+    certificate = gp_call(call)
     if certificate == []:
         return None
     if (not isinstance(certificate, list) or len(certificate) != 5
@@ -95,47 +103,68 @@ def check_certificate(n, certificate):
         assert divisor in split_chain(n, base, exponent)
 
 
-def run():
-    records = []
+def rank_scores(n, slopes, constants):
+    fields = [list(product(range(u, u+width), range(v, v+height)))
+              for u, v, width, height in BOX]
+    call = (f"rank_box_scores({n},{list(slopes)},{list(constants)},{json.dumps(fields)},"
+            f"{RELATION_HEIGHT},{RELATION_BOUND})")
+    scores = gp_call(call, rank=True)
+    return {left+right: tuple(score) for left, row in zip(fields[0], scores, strict=True)
+            for right, score in zip(fields[1], row, strict=True)}
+
+
+def run(label, inputs):
+    totals = [0, 0, 0]
     band_primes = [p for p in selection["primes_through"](BAND_BOUND) if p > isqrt(BAND_BOUND)]
     assert all(width > 1 for field in BOX for width in field[2:])
-    for n in INPUTS:
+    for n in inputs:
         m, base_slopes, base_constants = base_polynomials(n)
         terms = selected_terms(n, m, base_slopes, base_constants)
-        point, score, trace = select(BAND_BOUND, BOX, terms)
-        u1, v1, u2, v2 = point
-        perturbations = ((u1, v1), (u2, v2))
-        slopes = tuple(base_slopes[i] + n*perturbations[i][1] for i in range(2))
-        constants = tuple(base_constants[i] + n*perturbations[i][0] for i in range(2))
-        discs = tuple(slopes[i]**2 - 4*constants[i] for i in range(2))
-        assert all(disc < 0 for disc in discs)
-        assert all((m*m + slopes[i]*m + constants[i]) % n == 0 for i in range(2))
+        smooth_point, score, trace = select(BAND_BOUND, BOX, terms)
+        scores = rank_scores(n, base_slopes, base_constants)
+        # Maximize reachable rational-prime targets, then nullity, then rank.
+        # The score is exact on this finite grid. Ties keep the first tuple.
+        rank_point = max(scores, key=scores.__getitem__)
+        variants = (("rank", rank_point), ("smooth", smooth_point), ("unperturbed", (0, 0, 0, 0)))
+        certificates = {}
+        for i, (method, point) in enumerate(variants):
+            u1, v1, u2, v2 = point
+            slopes = (base_slopes[0]+n*v1, base_slopes[1]+n*v2)
+            constants = (base_constants[0]+n*u1, base_constants[1]+n*u2)
+            discs = tuple(s*s-4*c for s, c in zip(slopes, constants))
+            assert all(disc < 0 for disc in discs)
+            assert all((m*m+s*m+c) % n == 0 for s, c in zip(slopes, constants))
 
-        retained = -score
-        direct_marks = []
-        for a in MARKS:
-            if gcd(a-m, n) != 1:
-                continue
-            values = tuple(a*a + slopes[i]*a + constants[i] for i in range(2))
-            if all(band_squarefree(value, band_primes) for value in values):
-                direct_marks.append((a, values))
-        assert len(direct_marks) == retained
+            marks = []
+            for a in MARKS:
+                if gcd(a-m, n) != 1:
+                    continue
+                values = tuple(a*a+s*a+c for s, c in zip(slopes, constants))
+                if all(band_squarefree(value, band_primes) for value in values):
+                    marks.append((a, values))
+            if method == "smooth":
+                assert len(marks) == -score
 
-        certificate = gp_certificate(n, slopes, constants)
-        baseline = gp_certificate(n, base_slopes, base_constants) if any(point) else certificate
-        check_certificate(n, certificate)
-        check_certificate(n, baseline)
-        records.append((n, point, retained, tuple(direct_marks), certificate, baseline, len(trace), discs))
-
-    for n, point, retained, marks, certificate, baseline, decisions, discs in records:
-        print({"n": n, "selected_(u1,v1,u2,v2)": point, "joint_marks": retained,
-               "marks": marks, "discriminants": discs, "selector_decisions": decisions,
-               "certificate": certificate, "unperturbed_certificate": baseline})
-    successes = sum(record[4] is not None for record in records)
-    unperturbed = sum(record[5] is not None for record in records)
-    assert any(record[4] is not None and any(record[1]) for record in records)
-    print(f"Verified splits on {len(records)} inputs: selected {successes}, unperturbed {unperturbed}")
+            if point not in certificates:
+                certificate = gp_certificate(n, slopes, constants)
+                check_certificate(n, certificate)
+                if certificate is not None:
+                    assert certificate[3:] == (scores[point][3], scores[point][2])
+                    assert scores[point][0] > 0
+                certificates[point] = certificate
+            certificate = certificates[point]
+            totals[i] += certificate is not None
+            print({"batch": label, "n": n, "method": method, "(u1,v1,u2,v2)": point,
+                   "joint_marks": len(marks), "marks": marks, "discriminants": discs,
+                   "selector_decisions": len(trace) if method == "smooth" else None,
+                   "targets": scores[point][0], "nullity": scores[point][1],
+                   "rank": scores[point][2], "columns": scores[point][3],
+                   "certificate": certificate}, flush=True)
+    print(f"Verified splits on {label} batch of {len(inputs)}: "
+          f"rank {totals[0]}, smooth {totals[1]}, unperturbed {totals[2]}", flush=True)
 
 
 if __name__ == "__main__":
-    run()
+    assert gp_call("check_rank_score()", rank=True) == 1
+    run("original", INPUTS)
+    run("holdout", HOLDOUT)
