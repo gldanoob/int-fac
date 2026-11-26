@@ -1,6 +1,6 @@
-# A 2.159 schedule conditional on private elliptic recognition
+# A 2.159 single-input randomized factoring schedule
 
-For a single integer from scratch, the tiered KeyBreak schedule has expected bit-time coefficient below 2.159 if the private-coordinate elliptic recognition bound applies to the counted private shapes. The public algebraic tests still use the genus-two coefficient from H.3. The bound uses the analytic assumptions of the [tiered schedule](keybreak-tiered-descent.md) and the [private elliptic recognition argument](keybreak-private-elliptic-recognition.md). The arithmetic replay verifies the strict cost and finite parameter inequalities. The applicability of the private recognition argument is a separate analytic input.
+For one integer from scratch, this schedule gives a manuscript-level expected bit-time bound $L_N[1/3,2.159]$ under Dirichlet GRH and the pinned KeyBreak analytic results. The [private elliptic recognition proof](keybreak-private-elliptic-recognition.md) derives its private prime supply from RH, then applies Lenstra and Pomerance’s elliptic-curve splitting theorem to the counted shapes. All public algebraic tests retain the genus-two guarantee used by the [tiered schedule](keybreak-tiered-descent.md). The [arithmetic replay](../experiments/keybreak-private-elliptic-schedule.py) checks the parameters and costs. Neither the analytic argument nor the complete factoring algorithm has been verified in Lean.
 
 ## Exact parameters
 
