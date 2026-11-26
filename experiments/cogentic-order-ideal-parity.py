@@ -1,0 +1,151 @@
+"""Recover arbitrary-degree ideal parity without a maximal-order input."""
+
+from pathlib import Path
+from runpy import run_path
+
+from sage.all import NumberField, PolynomialRing, QQ, ZZ, block_matrix, matrix, prime_range, vector
+
+HERE = Path(__file__).resolve().parent
+CUBIC = run_path(str(HERE / "cogentic-cubic-order-kernel.py"))
+PowerBasis, NamedPrime = CUBIC["PowerBasis"], CUBIC["NamedPrime"]
+atomize, index, named_even = CUBIC["atomize"], CUBIC["index"], CUBIC["named_even"]
+coprime_part, coprime_basis = CUBIC["coprime_part"], CUBIC["coprime_basis"]
+tame_profiles, weight_sum, square_depth = (
+    CUBIC["tame_profiles"], CUBIC["weight_sum"], CUBIC["square_depth"]
+)
+eliminate, combine, span = CUBIC["eliminate"], CUBIC["combine"], CUBIC["span"]
+
+
+def cover_polynomial(polynomial, algebra, gamma):
+    degree = polynomial.degree()
+    zero = matrix(QQ, degree, degree)
+    alpha = algebra.multiplications[1] if degree > 1 else -polynomial[0] * algebra.identity
+    x = block_matrix([[alpha, zero], [zero, alpha]])
+    y = block_matrix([[zero, algebra.identity], [algebra.multiplication(gamma), zero]])
+    for j in range(degree * (2 * degree - 1) + 1):
+        candidate = polynomial.parent()((y + j * x).charpoly().list())
+        if candidate.gcd(candidate.derivative()).degree() == 0:
+            return candidate.change_ring(ZZ).change_ring(QQ)
+    raise AssertionError("primitive element scan exhausted")
+
+
+def generator_even(polynomial, algebra, gamma, modulus):
+    extension = cover_polynomial(polynomial, algebra, gamma)
+    if not extension.is_irreducible():
+        return True
+    _, base = tame_profiles(polynomial, modulus)
+    _, cover = tame_profiles(extension, modulus)
+    for number in coprime_basis([modulus, *base, *cover]):
+        depth = square_depth(number)
+        if weight_sum(cover, number, depth) != 2 * weight_sum(base, number, depth):
+            return False
+    return True
+
+
+def atom_even(polynomial, algebra, order, atom, local_orders):
+    degree = polynomial.degree()
+    norm = index(order, atom)
+    remaining = norm
+    cutoff = max(2 * degree, degree * (degree - 1))
+    for p in prime_range(cutoff + 1):
+        exponent = norm.valuation(p)
+        if not exponent:
+            continue
+        if p not in local_orders:
+            local_orders[p] = NamedPrime(polynomial, p)
+        if not named_even(local_orders[p], atom, exponent):
+            return False
+        remaining //= p**exponent
+
+    for t in range(degree * (degree - 1) + 1):
+        if remaining == 1:
+            return True
+        gamma = vector(QQ, [t**i for i in range(degree)]) * atom
+        principal_norm = ZZ(abs(algebra.multiplication(gamma).det()))
+        assert principal_norm % norm == 0
+        covered = coprime_part(remaining, principal_norm // norm)
+        if covered > 1 and not generator_even(polynomial, algebra, gamma, covered):
+            return False
+        remaining //= covered
+    assert remaining == 1
+    return True
+
+
+def ideal_kernel(polynomial, elements, *, norm_sign=False):
+    """Return a basis of original-coordinate masks for the ideal-parity kernel."""
+    polynomial = polynomial.change_ring(ZZ).change_ring(QQ)
+    if not polynomial.is_monic() or polynomial.degree() < 1 or not polynomial.is_irreducible():
+        raise ValueError("expected a monic irreducible polynomial")
+    degree = polynomial.degree()
+    columns = [vector(QQ, (polynomial.parent()(z) % polynomial).padded_list(degree)) for z in elements]
+    if any(z.is_zero() for z in columns):
+        raise ValueError("expected nonzero elements")
+    algebra = PowerBasis(polynomial)
+    scaled = [z.denominator()**2 * z for z in columns]
+    order, (atoms, principals) = atomize(algebra, scaled)
+    local_orders = {}
+    data = [(atom, atom.inverse(), not atom_even(polynomial, algebra, order, atom, local_orders))
+            for atom in atoms]
+    encoded = []
+    for z, remaining in zip(columns, principals, strict=True):
+        bits = int(norm_sign and algebra.multiplication(z).det() < 0)
+        for j, (atom, inverse, bad) in enumerate(data, 1):
+            exponent = 0
+            while (remaining * inverse).denominator() == 1:
+                remaining = algebra.colon(remaining, atom)
+                exponent += 1
+            if bad and exponent % 2:
+                bits |= 1 << j
+        assert remaining == order
+        encoded.append(bits)
+    return eliminate(encoded, (1 << j for j in range(len(columns))))
+
+
+def replay():
+    t = PolynomialRing(QQ, "t").gen()
+    fixtures = [
+        (t - 3, [-1, 2, 19, 38, 7**2, 2/QQ(19)]),
+        (t**2 - 2, [-1, 2, 17, t, t/17, 19*(t+1), (t+1)**2]),
+        (t**4 - 2, [-1, t, t*t, 17, 19, 17*(1+t*t), 19*t/17, (1+t*t)**2]),
+        (t**6 - 2, [-1, t, t*t, t**3, 31, 37, 31*(1+t**3), 37*t/31, (1+t*t)**2]),
+    ]
+    masks = 0
+    for polynomial, values in fixtures:
+        field = NumberField(polynomial, "alpha")
+        elements = [polynomial.parent()(z)(field.gen()) for z in values]
+        primes = set()
+        for z in elements:
+            norm = z.norm()
+            primes.update(norm.numerator().prime_divisors())
+            primes.update(norm.denominator().prime_divisors())
+        places = [place for p in sorted(primes) for place in field.primes_above(p)]
+        for norm_sign in (False, True):
+            rows = [
+                int(norm_sign and z.norm() < 0)
+                | sum((z.valuation(place) % 2) << j for j, place in enumerate(places, 1))
+                for z in elements
+            ]
+            basis = ideal_kernel(polynomial, values, norm_sign=norm_sign)
+            assert span(basis) == {word for word in range(1 << len(values)) if not combine(word, rows)}
+            masks += 1 << len(values)
+
+    quartic = t**4 - 2
+    algebra = PowerBasis(quartic)
+    q = ZZ(2**61 - 1) * ZZ(2**89 - 1)
+    a = vector(QQ, [q, 0, q, 0])
+    assert not generator_even(quartic, algebra, a, q)
+    assert generator_even(quartic, algebra, a * algebra.multiplication(a), q*q)
+    assert cover_polynomial(quartic, algebra, a).degree() == 8
+    scaled = t**4 - 2*q**4
+    algebra = PowerBasis(scaled)
+    order, _ = atomize(algebra, [q * algebra.identity[0], algebra.identity[1]])
+    assert index(order, algebra.identity) == q**6
+    elems = [q, t, q*q, t*t, (q+t)**2, t/q, q*t*t]
+    rescaled = [t.parent()(value)(q*t) for value in elems]
+    assert span(ideal_kernel(scaled, elems)) == span(ideal_kernel(quartic, rescaled))
+    print(f"{masks} masks matched the known-prime oracle across degrees 1, 2, 4 and 6")
+    print(f"{q.nbits()}-bit composite exercised proper-subfield parity and scaled-order enlargement")
+
+
+if __name__ == "__main__":
+    replay()
