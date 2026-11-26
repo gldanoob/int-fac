@@ -4,7 +4,7 @@ Fix an integer $n\ge3$ with $n\equiv2\pmod3$. The [quartic tower construction](c
 $$
  F_n(X)=X^4+2nX^3-(5n+4)X^2+2nX+1.
 $$
-In $K=\mathbf Q(\theta)$ for a root of $F_n$, take the units $u=-\theta$, $v=2-\theta$, $w=1-2\theta$. A nonempty product of distinct units from this list is a square **if and only if** $n+2$ is an integer square. Whenever $n+2=a^2$, the product of all three units has square root $(\theta-1)^2/a$.
+In $K=\mathbf Q(\theta)$ for a root of $F_n$, take the units $u=-\theta$, $v=2-\theta$, $w=1-2\theta$. There exists a nonempty subset of these units whose product is a square **if and only if** $n+2$ is an integer square. Whenever $n+2=a^2$, the product of all three units has square root $(\theta-1)^2/a$.
 
 ## Proof
 
