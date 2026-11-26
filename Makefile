@@ -95,9 +95,10 @@ check-one-third:
 	"$(PYTHON)" -B experiments/cogentic-jacobi-exponent-prefilter.py
 	"$(PYTHON)" -B experiments/cogentic-pooled-order-certificates.py
 	"$(PYTHON)" -B experiments/cogentic-boxed-order-relations.py
+	"$(PYTHON)" -B experiments/cogentic-sparse-support-partition.py
 	"$(PYTHON)" -B experiments/cogentic-cofactor-dispersion.py
 	"$(PYTHON)" -B experiments/cogentic-planted-square-masks.py
-	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks cogentic-common-cofactors-sparse-steps cogentic-rational-gaussian-seed-family cogentic-unit-corrected-family; do \
+	@for script in cogentic-cubic-square-resolvent cogentic-bounded-degree-multiples cogentic-prescribed-unit-marks cogentic-common-cofactors-sparse-steps cogentic-rational-gaussian-seed-family cogentic-unit-corrected-family cogentic-joint-gaussian-orders; do \
 		printf 'iferr(read("experiments/%s.gp"), err, print(err); quit(1))\n' "$$script" | "$(GP)" -fq || exit 1; \
 	done
 	@cd experiments && for script in cogentic-cubic-different-kernel cogentic-maximal-ideal-roots cogentic-half-ideal-relations; do \
