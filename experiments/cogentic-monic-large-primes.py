@@ -3,7 +3,7 @@
 import os
 import subprocess
 from ast import literal_eval
-from collections import defaultdict
+from collections import defaultdict, deque
 from math import gcd, isqrt, prod
 from pathlib import Path
 from runpy import run_path
@@ -132,6 +132,35 @@ def eliminate(columns, combinations):
         else:
             kernel.append(mask)
     return kernel
+
+
+def core_indices(columns):
+    """Keep the indices of columns left after eliminating singleton rows."""
+    rows = defaultdict(set)
+    for j, column in enumerate(columns):
+        for key in column:
+            rows[key].add(j)
+    pending = deque(key for key, hits in rows.items() if len(hits) == 1)
+    alive = bytearray(b"\1") * len(columns)
+    while pending:
+        hits = rows[pending.popleft()]
+        if len(hits) == 1:
+            j, = hits
+            alive[j] = 0
+            for key in columns[j]:
+                rows[key].remove(j)
+                if len(rows[key]) == 1:
+                    pending.append(key)
+    return [j for j, keep in enumerate(alive) if keep]
+
+
+def parity_basis(columns):
+    """Return surviving indices and their compact kernel basis for distinct row keys."""
+    core = core_indices(columns)
+    words = parity_words([columns[j] for j in core])
+    basis = eliminate(words, (1 << j for j in range(len(core))))
+    assert all(combine(word, words) == 0 for word in basis)
+    return core, basis
 
 
 def support(word):
