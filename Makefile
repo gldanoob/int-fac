@@ -81,6 +81,8 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-integer-lifts.py --verify experiments/cogentic-sheared-integer-lift-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-compatible-quadratic-charts.py
 	"$(PYTHON)" -B experiments/cogentic-gaussian-smooth-seed-charts.py
+	"$(PYTHON)" -B experiments/cogentic-unit-collision-search.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-unit-collision-verify.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-cubic-newton-parity.py
 	"$(PYTHON)" -B experiments/cogentic-cubic-order-kernel.py
 	"$(PYTHON)" -B experiments/cogentic-order-ideal-parity.py
