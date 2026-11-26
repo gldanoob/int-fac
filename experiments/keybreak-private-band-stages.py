@@ -57,3 +57,18 @@ def replay():
 
 if __name__ == "__main__":
     replay()
+
+beta = F(1253, 1000)
+revised_b = F(3, 4)*beta
+revised_rational_loss = s_r*F(19, 15)/beta
+ceiling = F(2504, 1000)
+assert F(929, 250) > F(1504, 405)
+assert F(89, 30)*beta > F(929, 250)
+assert F(5, 3)*beta-s_a*F(4, 3)-F(64, 27)/(3*beta) > F(1, 50)
+assert F(237, 320)-F(400, 640)*beta < -F(1, 25)
+assert max(costs)-b+revised_b < ceiling
+revised_raw = revised_b+s_a+revised_rational_loss+2*slack
+assert revised_raw < ceiling
+assert (ceiling-revised_b-s_a-2*slack)**2 > h1_squared
+assert max(F(2), revised_b+F(3, 2), F(26, 10)*revised_b, 2*revised_b) < ceiling
+print(f"retuned raw lattice and rational-test coefficient {float(revised_raw):.10f}")
