@@ -103,4 +103,12 @@ To divide by $\varphi(Q)$ without factoring $Q$, use $Q^{-1}\prod_{p\mid Q,\ p\l
 
 The [finite replay](../experiments/cogentic-scalar-divisor-count.py) also checks the gcd reduction and its omitted-prime case by exact enumeration. A contour check computes the short principal integral, both high-frequency tails up to a finite height and the two horizontal segments. Their sum reproduces the original finite-height Perron integral. This checks the cutoff and contour orientation independently of the asymptotic character bound.
 
+**Schedule check.** Take $w$ proportional to $V$ as a common bit-length envelope for the affine queries and $s=O(H)$. Then $\log Q,\log(2+Y)=O(w)$, throughout the contour, although $Y$ itself can be exponential in $w$. The uniform character estimate depends on $\log(2+|t|)$ in its range condition. The only explicit decay in $|t|$ used above comes from integration by parts in the principal integral over the primes. With $\log h=O(V)$ and $\log B\asymp H$, the logarithm of the right side of (3) is
+\[
+ \tfrac12\log h+O\!\left(s+\log w+
+       \frac{\log h}{\log B}\log(2w)\right)
+ = \tfrac12\log h+O(H),
+\]
+because $(V/H)\log L=H$. Equivalently, the estimate must absorb $\sqrt h/T$ as well as the one-third correction. On the displayed fixed schedule $\log X_{\rm sc}=(100001+o(1))V$ and the grid evaluations inside the admissible boxes are bounded by $X_{\rm sc}\exp(O(H))$. Thus a sufficient length has logarithm at most $(50000.5+o(1))V$, well below the original coefficient width $\log U=(100000+o(1))V$. This is a bound on the required length. An actual scalar call has its own $T$ after the panel and residue restrictions. Subsequent bisections decrease those lengths down to one, and no lower bound from the schedule keeps every call above (3). [Fixed parameter and grid bounds](cogentic-deterministic-two-thirds.md#fixed-parameters)
+
 The scalar counter is still missing for intermediate lengths above direct enumeration and below (3) when the bin table is too large. The asymptotic reduction and counters have no independent Lean verification.
