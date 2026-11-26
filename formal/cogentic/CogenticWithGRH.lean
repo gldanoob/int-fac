@@ -1,8 +1,8 @@
 import Main
 import Cogentic
 
-/-! Applications of the frozen Dirichlet GRH proof. This target also imports
-    the original proof of the critical-line theorem for every character. -/
+/-! Applications of the Dirichlet critical-line theorem supplied by the pinned
+    GRH package's `Main` module. -/
 namespace Cogentic
 
 theorem uniform_character_psi :
@@ -48,5 +48,11 @@ theorem factor_of_eventual_coverage
   Concrete.factor_of_box_coverage LFunction_eq_zero_re covered
 
 end Cogentic
+
+open Lean Elab Command in
+run_cmd
+  for ax in ← collectAxioms ``Cogentic.binary_factorization_two_thirds do
+    unless #[``propext, ``Classical.choice, ``Quot.sound].contains ax do
+      throwError "The combined factoring theorem depends on unexpected axiom {ax}"
 
 #print axioms Cogentic.binary_factorization_two_thirds

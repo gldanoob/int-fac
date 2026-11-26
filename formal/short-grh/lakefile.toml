@@ -1,0 +1,27 @@
+name = "shortGRHFactoring"
+version = "0.1.0"
+srcDir = ".lake/port"
+defaultTargets = ["CogenticWithGRH"]
+
+[[require]]
+name = "GRH"
+git = "https://github.com/leanprover-community/riemann-hypothesis"
+rev = "2d39be8e0f21c2e58b067f6e70e6d21dc63a4c99"
+
+[[lean_lib]]
+name = "Development"
+leanOptions = { maxHeartbeats = 4000000, autoImplicit = false, relaxedAutoImplicit = false }
+
+[[lean_lib]]
+name = "Formalism"
+leanOptions = { maxHeartbeats = 4000000, autoImplicit = false, relaxedAutoImplicit = false }
+
+[[lean_lib]]
+name = "TwoThirds"
+roots = ["ModularPower", "OrderQueries", "TwoThirdsCost", "TwoThirdsFactor", "TwoThirdsFinish", "TwoThirdsRank", "TwoThirdsSearch", "TwoThirdsWindow"]
+
+[[lean_lib]]
+name = "Cogentic"
+
+[[lean_lib]]
+name = "CogenticWithGRH"

@@ -22,6 +22,12 @@ check-two-thirds-lean:
 check-two-thirds-cached-grh:
 	cd formal/cogentic && "$(LAKE)" env lean -o .lake/build/lib/lean/CogenticWithGRH.olean CogenticWithGRH.lean
 
+.PHONY: check-two-thirds-short-grh
+check-two-thirds-short-grh:
+	"$(PYTHON)" formal/short-grh/prepare.py
+	cd formal/short-grh && "$(PYTHON)" cache.py "$(LAKE)"
+	cd formal/short-grh && "$(LAKE)" build CogenticWithGRH
+
 check-two-thirds: check-two-thirds-lean
 	"$(PYTHON)" -B experiments/cogentic-fixed-window-audit.py
 	"$(PYTHON)" -B experiments/cogentic-fixed-rank-audit.py

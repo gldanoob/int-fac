@@ -1,0 +1,259 @@
+[
+  {
+    "module": "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+    "sha256": "996ea76bcf67da5ded8d8bf2558d500e3dfdd6b3fc8dca8a94a4366688839723",
+    "imports": [],
+    "lines": [[4, 22], [48, 48]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AnalyticAtDslope",
+    "sha256": "e17451e6dd59ad6d8306cdd35afff09ca403105320f443e1193ac8bed5016368",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.BdIntEqZeroOfPrimitive",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompletedLFunctionNeZeroOfReNonpos"
+    ],
+    "lines": [[5, 298]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.BdIntEqZeroOfPrimitive",
+    "sha256": "22fb944ca816b88ace38e686f3c61c957960308de5af2ef2bee3495f6dac5749",
+    "imports": [],
+    "lines": [[2, 217]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompletedLFunctionNeZeroOfReNonpos",
+    "sha256": "956816181d6ff0698bb3ff13359e209b311a8e7876338d77315709da71754d4b",
+    "imports": [],
+    "lines": [[3, 148]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsBoundRight",
+    "sha256": "ce1668f274750606ec65152fe8050467582cccbddc2c35b0925775fc054d65c0",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip"
+    ],
+    "lines": [[4, 359]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsFactorOrder",
+    "sha256": "c03e695e0224ebcc9c93c71de04a41aabe24b900f0c4aed13b748269605282da",
+    "imports": [],
+    "lines": [[3, 41]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExplicitFormulaClosed",
+    "sha256": "cdf5450e450d2c7f37611c21926aef2e9e3b9bf4d516232d27ebf04371c06d93",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FiniteBox",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedExplicitFormula",
+      "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder",
+      "Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion"
+    ],
+    "lines": [[11, 92]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExplicitFormulaClosedStatement",
+    "sha256": "4308930de367282c8e31cd11b875ec0dff19397bbee5f1df84d7ece4ab1d7af5",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExplicitFormulaClosed",
+      "Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion"
+    ],
+    "lines": [[9, 13]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FiniteBox",
+    "sha256": "82976c4abf85d334896ed9df6a7a100ee7924a87e122ed8a58b28924eaa2860c",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FinsumMemLeOfSubset"
+    ],
+    "lines": [[4, 125]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FinsumMemLeOfSubset",
+    "sha256": "b0650be0d2b9197c017e2434f6827a6a3117b61a5015cb0d86af3ae41e74a567",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip"
+    ],
+    "lines": [[4, 7], [25, 40], [43, 108]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore",
+    "sha256": "2717beff30d4c2d746b092408dd82f6f00bdb8a61b2864e20ac42f17f8f65905",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormOneSubConjMul",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormSubOneMulRiemannZetaLe",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TsumOneDivRpowLe"
+    ],
+    "lines": [[5, 177]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivEqOrderDivAddAnalytic",
+    "sha256": "9afe1a8c86e387444382c91fdba4fca90396a510e5c0854fa688a2ff6e004661",
+    "imports": [],
+    "lines": [[2, 41]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionNearZero",
+    "sha256": "b48cd287376268f0fc1deef2eb892af148a408921b1c1f2249fe6926b5d90d38",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompletedLFunctionNeZeroOfReNonpos",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivEqOrderDivAddAnalytic",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip"
+    ],
+    "lines": [[6, 177]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip",
+    "sha256": "66f69a9ba74810bbd114e08dca4085af15d58feea81e437fe3767d1983030145",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormOneSubConjMul",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SummableNinePowMulInvSqSucc",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TsumOneDivRpowLe"
+    ],
+    "lines": [[5, 134]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormOneSubConjMul",
+    "sha256": "41024947de1bae8c0a9ae00715ada3d2cb441ad82485c7ee0f01cfe430b631c5",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsFactorOrder"
+    ],
+    "lines": [[3, 243]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.NormSubOneMulRiemannZetaLe",
+    "sha256": "2446397e5837d37d31733275711083b907bf4d72ec0c2cfb77fdd1ac66d69fec",
+    "imports": [],
+    "lines": [[2, 217]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PerronIntegralShiftPrimitiveLFunction",
+    "sha256": "da19e549784e415a7e910473ee68fcf1a7a3a00499d43dbda248af6f63e8d474",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.AnalyticAtDslope",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.CompletedLFunctionNeZeroOfReNonpos",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExistsBoundRight",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ImportsMore",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionNearZero",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.LogDerivLFunctionStrip"
+    ],
+    "lines": [[5, 223], [227, 337]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PerronIntegralShiftPrimitiveLFunctionStatement",
+    "sha256": "2f3684a7800cb0d947aff95091ff17054a9a1b663913cebc110d420c90cc38d1",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PerronIntegralShiftPrimitiveLFunction"
+    ],
+    "lines": [[4, 7]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.SummableNinePowMulInvSqSucc",
+    "sha256": "cde81e1ac84771a269a000788bef267152ad277290d81be3d0fa1a2118b64a75",
+    "imports": [],
+    "lines": [[2, 266], [269, 322]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedExplicitFormula",
+    "sha256": "5c7af6c341e46d2d338f95ef26d9b5966f70a80d4dab035d030fc9ab41c5791a",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FiniteBox",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.PerronIntegralShiftPrimitiveLFunctionStatement",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronPsi",
+      "Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion"
+    ],
+    "lines": [[7, 73]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronKernel",
+    "sha256": "cf54efb1f92798b693c214c95a1eca839e8446f94fb91bb528d1199c4a286dcc",
+    "imports": [],
+    "lines": [[2, 404]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronPsi",
+    "sha256": "f8b6a9b506f27c549e5a0db6dfd6ac43f31af95fc58704973e63e8f108e4bd44",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronKernel"
+    ],
+    "lines": [[3, 608]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TsumOneDivRpowLe",
+    "sha256": "412131bbda87260618a8ea0fd59b7126e6b98dbe86a87c84a52c77b01d0c8038",
+    "imports": [],
+    "lines": [[2, 92]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ZeroCountHolds",
+    "sha256": "0c1f4cbf38dd11b513495cc0135d437f37daee68411ef83d088a88b2fc0b2c10",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.FinsumMemLeOfSubset",
+      "Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ZeroCount"
+    ],
+    "lines": [[5, 13]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder",
+    "sha256": "4028eaab3a439e24bda37d35e17f737aaff3cf503d3045ee0646f1985df17077",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes"
+    ],
+    "lines": [[7, 82]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrderStatement",
+    "sha256": "9495452041c5138d5783f3f68b22ef30654945f2eb8fc38e671890f47312fb6e",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder"
+    ],
+    "lines": [[7, 11]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.LogDerivSeriesOfExplicit",
+    "sha256": "27513e0fda72b38a8703d5608feb5f4f15b048ad297d93b845ba730ce23e0afe",
+    "imports": [],
+    "lines": [[12, 17], [261, 351], [464, 464]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.PsiChiSqrtLogBound",
+    "sha256": "55fd9d496e782767a1a922823e87ad7c4f02769694bc4ef0748d75ab830b97cb",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder",
+      "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SumIndicatorLeZsumR"
+    ],
+    "lines": [[14, 18], [72, 81], [236, 236]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SumIndicatorLeZsumR",
+    "sha256": "51257c0c7d825d40e7f9fc9477fc00d00d59ee9f44c13eb0e009fda37ee2d651",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes",
+      "Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrderStatement",
+      "Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ZeroCount"
+    ],
+    "lines": [[8, 18], [21, 33], [36, 180]]
+  },
+  {
+    "module": "Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ZeroCount",
+    "sha256": "d96d6005935ce076e9e31214369a941691f2c487b86d60246e5e5b9d71d685e6",
+    "imports": [
+      "Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes"
+    ],
+    "lines": [[5, 16]]
+  },
+  {
+    "module": "Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion",
+    "sha256": "f547104b02cfa5b508b5d9fd489d7839de0d90c97d9634893644631224b72c67",
+    "imports": [],
+    "lines": [[4, 11], [29, 31], [104, 106]]
+  }
+]

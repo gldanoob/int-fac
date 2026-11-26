@@ -1,0 +1,110 @@
+--- a/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/ExplicitFormulaClosed.lean
++++ b/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/ExplicitFormulaClosed.lean
+@@ -5,7 +5,7 @@
+ import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder
+ import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion
+
+-open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab
++open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An  Formalism.MainNotions
+ open scoped nonZeroDivisors
+
+ namespace GlobalTheory.ExplicitFormulaClosed
+--- a/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/ExplicitFormulaClosedStatement.lean
++++ b/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/ExplicitFormulaClosedStatement.lean
+@@ -3,7 +3,7 @@
+ import Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.ExplicitFormulaClosed
+ import Formalism.SharpRestriction.GlobalSchurBounds.GeneralLinearActions.FiltrationCocycleLiftCriterion
+
+-open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab
++open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An  Formalism.MainNotions
+ open scoped nonZeroDivisors
+ set_option maxHeartbeats 1000000 in
+ theorem _root_.GlobalTheory.T.norm_psi0_add_zsum_le : ∃ C : ℝ, ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), χ.IsPrimitive → ∀ u T : ℝ, 2 ≤ T → T ≤ u → ‖GlobalTheoryTheory.psi0 χ u + zsum χ 0 T (fun ρ => (u : ℂ) ^ ρ / ρ)‖ ≤ C * (u * Real.log (q * u * T) ^ 2 / T + Real.log (q * u) + zsumR χ 0 1 (fun ρ => 1 / ‖ρ‖)) := by
+--- a/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/NormOneSubConjMul.lean
++++ b/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/NormOneSubConjMul.lean
+@@ -221,10 +221,15 @@
+       have e : f = fun z => (∏ w ∈ S, (z - w) ^ m w) * g z := funext hfg
+       rw [← logDeriv_apply, ← logDeriv_apply]
+       conv_lhs => rw [e]
+-      rw [logDeriv_mul (f := fun z => ∏ w ∈ S, (z - w) ^ m w) z
++      rw [logDeriv_fun_mul (f := fun z => ∏ w ∈ S, (z - w) ^ m w) z
+         (Finset.prod_ne_zero_iff.2 fun w hw => pow_ne_zero _ (hzw w hw)) (hgne z hzb)
+         (by fun_prop) (hg z (hsub hzb)).differentiableAt]
+       congr 1
++      have ep : (∏ w ∈ S, fun z : ℂ => (z - w) ^ m w) =
++          fun z => ∏ w ∈ S, (z - w) ^ m w := by
++        ext z
++        simp
++      rw [← ep]
+       rw [logDeriv_prod (f := fun w z => (z - w) ^ m w) (fun w hw => pow_ne_zero _ (hzw w hw))
+         (fun w hw => by fun_prop)]
+       refine Finset.sum_congr rfl fun w hw => ?_
+--- a/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/SummableNinePowMulInvSqSucc.lean
++++ b/Development/AbelianVarietyTheory/Proofs/GlobalInterpolation/SummableNinePowMulInvSqSucc.lean
+@@ -264,6 +264,7 @@
+   rfl
+
+ end LLeft
++open LLeft
+
+ theorem norm_LFunction_le_poly_left :
+     ∃ C : ℝ, 0 < C ∧ ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), χ ≠ 1 → ∀ s : ℂ,
+--- a/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/DirichletLZerosInWindowFiniteAndPosOrderStatement.lean
++++ b/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/DirichletLZerosInWindowFiniteAndPosOrderStatement.lean
+@@ -2,7 +2,7 @@
+ import Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes
+ import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder
+
+-open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab
++open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An
+ open scoped nonZeroDivisors
+ set_option maxHeartbeats 1000000 in
+ theorem _root_.GlobalTheory.T.dirichletLZerosInWindow_finite_and_pos_order : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (t T : ℝ), (zerosIn χ t T).Finite ∧ ∀ ρ ∈ zerosIn χ t T, 1 ≤ zmult χ ρ := by
+--- a/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/PsiChiSqrtLogBound.lean
++++ b/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/PsiChiSqrtLogBound.lean
+@@ -3,7 +3,7 @@
+ import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrder
+ import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.SumIndicatorLeZsumR
+
+-open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab
++open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An
+ open scoped nonZeroDivisors
+
+ namespace GlobalTheory.Mem.An.GoodLarge
+--- a/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/SumIndicatorLeZsumR.lean
++++ b/Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/SumIndicatorLeZsumR.lean
+@@ -2,8 +2,9 @@
+ import Development.AbelianVarietyTheory.Definitions.Foundations.RayPrimes
+ import Development.AbelianVarietyTheory.Proofs.IwasawaDecomposition.DirichletLZerosInWindowFiniteAndPosOrderStatement
+ import Development.AbelianVarietyTheory.PublishedTheorems.AutomorphicForms₂.ZeroCount
++open Classical
+
+-open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An Formalism.BasicNotions Formalism.MainNotions Formalism.MainNotions.Inhab
++open Finset ArithmeticFunction NumberField IsDedekindDomain Filter Topology GlobalTheory.Mem.An
+ open scoped nonZeroDivisors
+
+ namespace GlobalTheory.Mem.An
+--- a/Formalism/SharpRestriction/GlobalSchurBounds/GeneralLinearActions/FiltrationCocycleLiftCriterion.lean
++++ b/Formalism/SharpRestriction/GlobalSchurBounds/GeneralLinearActions/FiltrationCocycleLiftCriterion.lean
+@@ -1,9 +1,8 @@
+ import Mathlib
++open Classical
+
+ noncomputable section
+
+ namespace Formalism.MainNotions.GlobalTheoryTheory
+-
+-open Formalism.BasicNotions
+
+ abbrev abelian₂ (n : ℕ) : ℝ := (ArithmeticFunction.vonMangoldt n : ℝ)
+--- a/Cogentic/BinaryMaskCost.lean
++++ b/Cogentic/BinaryMaskCost.lean
+@@ -184,7 +184,7 @@
+   exact ⟨b,Nat.add_le_add_right cost 1⟩
+
+ private theorem search_mono {d D p P : ℕ} (degree : d ≤ D) (work : p ≤ P) :
+-    searchBudget d p ≤ searchBudget D P := by unfold searchBudget; gcongr; decide
++    searchBudget d p ≤ searchBudget D P := by unfold searchBudget; gcongr <;> decide
+
+ private def monicPair (d : ℕ) (m a b : List Bool) : Bool × ℕ :=
+   let out := product m (a++[true]) (b++[true]) d
