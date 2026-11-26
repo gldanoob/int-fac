@@ -55,7 +55,17 @@ def polynomial(values, x, mod):
     return result
 
 
-def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *, height=HEIGHT):
+def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *,
+              height=HEIGHT, include_ramified_two=False):
+    if include_ramified_two:
+        if not excluded or any(
+            len(coeffs) < 3 or coeffs[-1] != 1 or coeffs[0] % 4 != 2
+            or any(c % 2 for c in coeffs[:-1])
+            for coeffs in fields
+        ):
+            raise ValueError("the ramified row requires a nonzero discriminant product and polynomials Eisenstein at two")
+        while excluded % 2 == 0:
+            excluded //= 2
     retained = []
     for a in range(-height, height + 1):
         for b in range(1, height + 1):
@@ -66,6 +76,10 @@ def relations(n, m, fields, excluded, primes, cutoff, complete_parity=False, *, 
                 value = sum(c * a**j * b**(len(coeffs)-1-j) for j, c in enumerate(coeffs))
                 if value == 0 or gcd(value, excluded) != 1:
                     break
+                if include_ramified_two and a % 2 == 0:
+                    assert b % 2 == 1 and value % 4 == 2
+                    small.append((i, 2, 0))
+                    value //= 2
                 factors = factor_bounded(value, primes, cutoff, complete_parity)
                 if factors is None:
                     break
