@@ -14,7 +14,7 @@ def product : List (List Bool) → List Bool × ℕ
     let out := natProduct a tail.1
     (out.1,tail.2+out.2+1)
 
-private theorem product_spec (xs : List ℕ) (W : ℕ) (pos : ∀ a∈xs,0<a) (bound : xs.prod ≤ W) :
+theorem product_spec (xs : List ℕ) (W : ℕ) (pos : ∀ a∈xs,0<a) (bound : xs.prod ≤ W) :
     (product (xs.map Nat.bits)).1=xs.prod.bits ∧
       (product (xs.map Nat.bits)).2 ≤ 1+xs.length*(30*(W+1)^2+1) := by
   induction xs with
@@ -51,7 +51,9 @@ private theorem threshold {T base : ℕ} (tp : 0<T) (bp : 0<base) (j : ℕ) (jp 
   rw [Nat.mul_comm (3^j) base] at h
   omega
 
-set_option maxHeartbeats 1200000 in
+attribute [local irreducible] natProduct leq
+
+set_option maxHeartbeats 500000 in
 private theorem firstPower_spec {T base W : ℕ} (tp : 0<T) (bp : 0<base)
     (tb : T.size ≤ W) (bs : base.size ≤ W) (room : 3*(T+1) ≤ W)
     (fuel : List Bool) {j : ℕ} (jp : 1 ≤ j) (small : j ≤ max 1 (Nat.clog 3 ((T-1)/base+1)))
@@ -59,6 +61,7 @@ private theorem firstPower_spec {T base W : ℕ} (tp : 0<T) (bp : 0<base)
     let G := max 1 (Nat.clog 3 ((T-1)/base+1))
     let out := firstPower T.bits base.bits fuel (3^j).bits
     out.1=(3^G).bits ∧ out.2 ≤ 1+fuel.length*(100*(W+1)^2) := by
+  dsimp only
   induction fuel generalizing j with
   | nil =>
     simp only [List.length_nil,Nat.add_zero] at space
@@ -91,9 +94,7 @@ private theorem firstPower_spec {T base W : ℕ} (tp : 0<T) (bp : 0<base)
     have call : firstPower T.bits base.bits (head::rest) (3^j).bits =
         if ok.1 then ((3^j).bits,probe.2+ok.2+1) else
           (tail.1,probe.2+ok.2+next.2+tail.2+2) := rfl
-    change (firstPower T.bits base.bits (head::rest) (3^j).bits).1=(3^G).bits ∧
-      (firstPower T.bits base.bits (head::rest) (3^j).bits).2 ≤ _
-    rw [call,List.length_cons,Nat.succ_mul rest.length]
+    simp only [call,List.length_cons,Nat.succ_mul]
     cases hit : ok.1 with
     | true =>
       have eq := le_antisymm small (s.mp hit)
@@ -133,6 +134,9 @@ def run (b d K₁ B U A m P : List Bool) : List Bool × ℕ :=
   (out.1,threshold.2+fuel.2+power.2+normalized.2+base.2+ternary.2+out.2+7)
 
 
+attribute [local irreducible] product ternaryBound BinaryPowerScan.exactPower canonical tokens
+
+set_option maxHeartbeats 800000 in
 /-- The constructor's leading coefficient from its other shared binary
 parameters. No numerical search over n or enumeration of possible leading
 coefficients is needed. -/
@@ -164,8 +168,8 @@ theorem fixed_leading {n : ℕ} (hn : 2 ≤ n) (big : 2 ≤ Fixed.d (n.log2+1)) 
   have sp : 0<S := zp.trans_le zs
   have within {i j : ℕ} (h : i ≤ j) : 2^(i*S) ≤ 2^(j*S) := Nat.pow_le_pow_right Nat.zero_lt_two (Nat.mul_le_mul_right S h)
   have sizeSelf (a : ℕ) : a.size ≤ a := Nat.size_le.mpr Nat.lt_two_pow_self
-  have pi := primorial_pos d
-  have mp : 0<m := by simp [m,Fixed.rootBase]
+  have pi : 0 < P := primorial_pos d
+  have mp : 0 < m := by simp [m,Fixed.rootBase]
   have ap : 0<A := Nat.two_pow_pos _
   have kp : 0<K := Nat.two_pow_pos _
   have up : 0<U := Nat.two_pow_pos _
