@@ -1,6 +1,6 @@
 # Cost of weighted windows for a public ratio interval
 
-Let $N=pQ$ with $p$ prime. Suppose the public ratio interval $I\subset[1,4]$ of length $\lambda>0$ contains $Q/p$. A list of weighted gap windows covering every real ratio in $I$ has cost at least $\Omega(N^{1/5}\lambda^{3/5})$ when $\lambda\ge N^{-1/8}$. An explicit list attains this bound up to logarithmic factors. At $\lambda\asymp 1$ this gives the fifth-root scale. A shorter public interval saves a factor of $\lambda^{3/5}$ in this range. These estimates concern the geometric coverage promise. The actual divisor ratios for a fixed $N$ can admit a much smaller list. [Batched weighted gap search](cogentic-hasse-window-factor-gap.md)
+Let $N=pQ$ with $p$ prime. Suppose the public ratio interval $I\subset[1,4]$ of length $\lambda>0$ contains $Q/p$. A list of weighted gap windows covering every real ratio in $I$ has cost at least $\Omega(N^{1/5}\lambda^{3/5})$ when $\lambda\ge N^{-1/8}$. An explicit list attains this bound up to logarithmic factors. At $\lambda\asymp 1$ this gives the fifth-root scale. A shorter public interval saves a factor of $\lambda^{3/5}$ in this range. These estimates concern the geometric coverage promise. Given an actual factorization $N=pQ$, the triple $(p,Q,0)$ already covers its ratio with a single integer in its sum window, namely $2N$. [Batched weighted gap search](cogentic-hasse-window-factor-gap.md)
 
 ## Lower bound with integer windows
 
