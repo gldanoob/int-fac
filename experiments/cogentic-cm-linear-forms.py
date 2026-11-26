@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Search rational markings of quadratic twists of the fixed j=1728 curve."""
+"""Search rational markings of twists of a cubic with three public integral roots."""
 
 import argparse
 from itertools import product
@@ -17,22 +17,35 @@ FactorFound, checked_gcd, curve, separation_rank, smooth_exponent, split_curve, 
 )
 
 
-def find_split(modulus, smooth_bound, height, residual_bound=None):
+def find_split(modulus, smooth_bound, height, residual_bound=None, base_roots=(0, 1, -1)):
     """Return a divisor and its public parameter or a bounded miss."""
     if modulus < 3 or modulus % 2 == 0 or min(smooth_bound, height) < 1:
         raise ValueError("require odd N >= 3 and positive search bounds")
     if residual_bound is not None and residual_bound < 1:
         raise ValueError("residual bound must be positive")
+    if len(base_roots) != 3 or len(set(base_roots)) != 3:
+        raise ValueError("require three distinct base roots")
+    for prime in MOVING["primes_through"](min(2*height, modulus)):
+        if modulus % prime == 0:
+            return (prime, None, "trial division") if prime < modulus else None
+    first, second, third = base_roots
+    try:
+        if max(checked_gcd(d, modulus) for d in (first-second, first-third, second-third)) == modulus:
+            return None
+    except FactorFound as found:
+        return found.args[0], None, "bad reduction"
     exponent = smooth_exponent(modulus, smooth_bound)
     for v in range(1, height + 1):
+        scaled_roots = tuple(v*root for root in base_roots)
         for u in range(-height, height + 1):
-            if u in (0, v, -v) or gcd(u, v) != 1:
+            if u in scaled_roots or gcd(u, v) != 1:
                 continue
             stage = "parameter gcd"
             try:
-                if max(checked_gcd(value, modulus) for value in (v, u, u-v, u+v)) == modulus:
+                differences = (v, *(u-root for root in scaled_roots))
+                if max(checked_gcd(value, modulus) for value in differences) == modulus:
                     continue
-                roots, marked = curve((0, v, -v, u), 3)
+                roots, marked = curve((*scaled_roots, u), 3)
                 stage = "smooth multiplier"
                 split_curve(roots, marked, exponent, modulus)
                 if residual_bound is not None:
@@ -132,8 +145,19 @@ def replay():
     assert EllipticCurve(GF(p), [-(7*48)**2, 0]).cardinality() == 180
     assert find_split(1247, 3, 2) is None
     assert find_split(1247, 3, 2, 5) == (29, (-2, 1), "residual collision")
+    roots = (0, 1, 3)
+    assert find_split(29213, 5, 5, base_roots=roots) == (131, (-5, 1), "smooth multiplier")
+    for prime, base_order in ((131, 136), (223, 220)):
+        field = GF(prime)
+        base = EllipticCurve(field, [0, -4, 0, 3, 0])
+        assert base.cardinality() == base_order
+        assert int(base.quadratic_twist().cardinality()) == 2*(prime+1)-base_order
+        assert EllipticCurve(field, [-1, 0]).cardinality() == prime+1
+    assert find_split(143, 5, 2, base_roots=(0, 11, 3)) == (11, None, "bad reduction")
+    assert find_split(143, 5, 6) == (11, None, "trial division")
     print(f"Checked 1,024 sign patterns and {comparisons} prescribed twist pairs.")
     print("Split 6751 outside the untwisted and torus promises, and 1247 by residual search.")
+    print("On the non-CM base with roots 0, 1, 3 a twist of order 128 splits 29213.")
 
 
 def main():
@@ -142,19 +166,22 @@ def main():
     parser.add_argument("--smooth-bound", type=int, default=5)
     parser.add_argument("--height", type=int, default=7)
     parser.add_argument("--residual-bound", type=int)
+    parser.add_argument("--roots", type=int, nargs=3, default=(0, 1, -1), metavar=("A", "B", "C"),
+                        help="three distinct integral roots of the base cubic (default 0 1 -1)")
     args = parser.parse_args()
     if args.N is None:
         replay()
         return
     try:
-        result = find_split(args.N, args.smooth_bound, args.height, args.residual_bound)
+        result = find_split(args.N, args.smooth_bound, args.height, args.residual_bound, args.roots)
     except ValueError as error:
         parser.error(str(error))
     if result is None:
         print("No split found within the public bounds.")
         raise SystemExit(1)
-    divisor, (u, v), stage = result
-    print(f"{args.N} = {divisor} * {args.N // divisor} (c={u}/{v}, {stage})")
+    divisor, parameter, stage = result
+    detail = f"c={parameter[0]}/{parameter[1]}, {stage}" if parameter else stage
+    print(f"{args.N} = {divisor} * {args.N // divisor} ({detail})")
 
 
 if __name__ == "__main__":
