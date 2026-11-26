@@ -23,15 +23,15 @@ For a free column with finite pivot-row vector \(v\) and real entry \(u_j\), its
 The proposed capped cost has coefficient \(\max(r,3b+2\eta)\) and workspace at most \(B^2e^{o(H)}+e^{(b+2\eta+o(1))H}\) bits. Take \(c\) down to \(2b\), \(x\) to \(1/\sqrt c\), and \(\eta\) down to zero through fixed strict schedules. The limiting cost is \(\max\{b+4\sqrt{2b}/(3b),3b\}\). At \(b=(8/9)^{1/3}\) the two bounds agree. If the success proof transfers, the original random generator has separating sign with probability \(1/2-o(1)\), the capped trial succeeds with probability bounded away from zero, and the verified gcd and recursive factorization give the per-input expected bound. [Single-generator splitting](cogentic-dense-exponents.md#a-single-successful-prime-can-give-the-divisor-directly)
 
 - Audit the full high-trace argument, including the diagonal and peeling steps, for every fixed smaller menu. In particular check that all uses of denominator averaging and exact coincidences are accounted for, including small-prime tails and identical denominators. The leading substitutions above do not by themselves prove this uniform transfer.
-- Give a complete precision and tape ledger for the lifted transposed rows, the incremental real rank test, and the final reconstruction with individually cleared denominators. The proposal needs the same guarantee on every full-rank modular pivot outcome, including poorly conditioned real projected columns.
-- Replay the segmented projective sieve and the transpose projection on exact fixtures. Neither the thinner-domain asymptotic nor the new extraction path has been tested here.
+- The [precision analysis](cogentic-transposed-log-precision.md) gives a rank threshold uniform in the full-rank pivot and accounts for transposed lifting and final coefficient recovery.
+- The [segmented sieve](../experiments/cogentic-thin-denominator-sieve.py) agrees with exhaustive enumeration on 2,100 finite comparisons. The transpose replay below checks the lifting and extraction on a single engineered input.
 
 ## Exact transpose replay and the lifting cost
 
-For a square integer system (Mlambda=w) of dimension (s), put (H_M=max(1,max_{i,j}|M_{ij}|)). The residuals in base (P_*) satisfy
-[
- |w_k|_inftyle P_*^{-k}|w|_infty+sH_M.
-]
-This follows from (w_{k+1}=(w_k-Md_k)/P_*) with every component of (d_k) between zero and (P_*-1). Cramer's rule bounds every reduced numerator and denominator by (K=(sH_M)^smax(1,|w|_infty)). Lift until the modulus exceeds (2K^2), reconstruct each coordinate, and check the integer equations. With (sle B,operatorname{poly}(L)) and (log Kle B,operatorname{poly}(L)), the modular products, integer residual updates, accumulation of residues and classical rational reconstruction together cost (B^{3+o(1)}) bit operations for polynomially many right-hand sides. Each denominator divides the pivot determinant. Their least common multiple (D_0) therefore has (B,operatorname{poly}(L)) bits, and all projected columns can be streamed as integer numerators on the one scale (D_0 2^P), where (P) is the dyadic precision.
+For an integer system $M\lambda=w$ of dimension $s$, write $H_M=\max(1,\max_{i,j}|M_{ij}|)$. In base $P_*$ the residual satisfies
+$$
+  \|w_k\|_\infty\le P_*^{-k}\|w\|_\infty+s H_M.
+$$
+Indeed $w_{k+1}=(w_k-Md_k)/P_*$ and every digit is between zero and $P_*-1$. Cramer's rule bounds the reduced numerators and denominators by $K=(sH_M)^s\max(1,\|w\|_\infty)$. Lift past modulus $2K^2$, reconstruct the coordinates, and check the integer equations. The common denominator divides the absolute pivot determinant, so all projected columns can be stored on one scale $D_0 2^P$. Here $D_0$ is the least common multiple of the reconstructed denominators and $P$ is the dyadic precision. Both $s$ and $\log K$ are at most $B\operatorname{poly}(L)$. The precision proof accounts for the projected rank decisions, the inhomogeneous target, and tape access. [Bounds and stopping rule](cogentic-transposed-log-precision.md)
 
 On the engineered quadratic fixture, the replay compares 38 transpose projections at precisions 64 and 192 against a direct rational solve. It selects two independent projected directions, lifts just those two primal right-hand sides and the target, and verifies the resulting modular order multiple and proper gcd. [Exact projection replay](../experiments/cogentic-transposed-extraction.py)
