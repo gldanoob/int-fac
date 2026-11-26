@@ -72,3 +72,21 @@ For a fixed \(N\), the number of ordered representations \(N=(2S^2)^2+(D^2)^2\) 
 \]
 
 is uniquely determined since \(S-10D=(300\ell^2-76k\ell)/5\ne0\) in the sector. A positive primitive pair is recovered uniquely from its slope. Hence the multiplicity is \(N^{o(1)}\), and there are at least \(X^{1/4-o(1)}\) distinct inputs at most \(X\) with four certified sign blocks. This count uses supplied parameters. The one-variable recognizer above does not recover an arbitrary primitive pair from \(N\) in polynomial bit time.
+
+## Many values with no small prime divisor
+
+There is a fixed \(\eta>0\) such that for all sufficiently large \(X\), at least
+\[
+ \gg \frac{X^{1/4}}{(\log X)^8}
+\]
+distinct inputs \(N\le X\) from the primitive sector have every prime divisor greater than \(N^\eta\). Each of the four coprime sign blocks is comparable to \(N^{1/4}\), with fixed constants.
+
+Begin with all parameter pairs in the sector with \(K\le\ell\le2K\) and the two fixed residue conditions. Primitivity will follow after removing the pairs with a large common divisor. Put \(F=625N\), the product of the four integral homogeneous quadratics obtained by replacing \(C,E\) by \(25C,25E\). For primes dividing \(M=118650\), the fixed residue conditions already give \(N\not\equiv0\pmod p\). For each other prime \(p\), each of the four quadratics is nonzero modulo \(p\), by the coprimality of its coefficients. Their product has at most eight projective zeros over \(\mathbb F_p\). If \(\rho(p)\) counts the affine residue pairs where \(F\) vanishes, the origin and these projective lines give \(\rho(p)\le8p\). All such primes are at least 11, so their local excluded density \(g(p)=\rho(p)/p^2\) is strictly less than one.
+
+For squarefree \(q\) coprime to \(M\), CRT gives \(\rho(q)\le8^{\omega(q)}q\). In each of these residue classes, imposing the progression defines one coset modulo \(Mq\). The lattice count is the sector area divided by \((Mq)^2\), with error \(O(K/q+1)\). Thus the divisibility count by \(q\) has density \(g(q)=\rho(q)/q^2\) and error
+\[
+ O\bigl(8^{\omega(q)}(K+q)\bigr).
+\]
+The total error up to \(K^{1/4}\) is \(K^{5/4+o(1)}\). The bound \(g(p)\le8/p\) and Mertens' estimate give the dimension-eight interval product bound for the fundamental lemma. Indeed \((1-g(p))^{-1}\le(1-1/p)^{-8}(1+O(p^{-2}))\), so the extra product over primes at least \(z\) is \(1+O(1/z)\). The full density product through \(y\) is at least a constant times \((\log y)^{-8}\). The lemma applies to the multiset of octic values indexed by parameter pairs. With fixed sufficiently large \(u\) and \(y=K^{1/(4u)}\), it leaves \(\gg K^2/(\log K)^8\) pairs with no prime divisor of \(N\) at most \(y\). [Lagarias, Fundamental Lemma of the Combinatorial Sieve](https://websites.umich.edu/~lagarias/675notes/Estimate5-2015.pdf)
+
+A pair that remains and is not primitive has a common prime \(p>y\), since every common prime divides the homogeneous octic and no prime dividing \(M\) can divide \(\ell\). Also \(p\le2K\). Summing the elementary count \(O((K/p+1)^2)\) for both parameters divisible by \(p\) gives \(O(K^2/y+K\log(2K))\). This is negligible compared with the sieve count. For the remaining primitive pairs, \(N\asymp K^8\), so \(y>N^\eta\) for any fixed \(0<\eta<1/(32u)\) and all sufficiently large \(K\). Roughness gives \(\Omega(N)=O(1)\) and hence \(\tau(N)\le2^{\Omega(N)}=O(1)\). The representation argument above now bounds the multiplicity by a constant. Taking \(K\) a sufficiently small fixed multiple of \(X^{1/8}\) proves the asserted count of distinct values.
