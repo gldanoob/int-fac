@@ -1,0 +1,187 @@
+"""Decide the full signed primitive-grid split question for shared-root fields."""
+
+import argparse
+import json
+from collections import Counter
+from math import gcd, prod
+from pathlib import Path
+from runpy import run_path
+from time import monotonic
+
+
+HERE = Path(__file__).resolve().parent
+MIXED = run_path(str(HERE / "cogentic-monic-mixed-grid.py"))
+GRID, PROBES, SQUARES = (MIXED[name] for name in ("GRID", "PROBES", "SQUARES"))
+COMPLETE = MIXED["DRIVER"]["complete_basis"]
+
+
+def scheduled_fields(n):
+    m, f, g = GRID["CHECK_PAIR"](n, MIXED["SCHEDULED_DEGREE"](n))
+    return m, (f, g, (g[0]-4*m, g[1]+4, *g[2:]))
+
+
+def parity_space(n, m, fields, height):
+    collect = run_path(str(HERE / "cogentic-monic-exact-grid.py"))["collect"]
+    cutoff = max(2*height**2, 2*max(len(field)-1 for field in fields))
+    columns, variables, sizes = [], [], []
+    for i, field in enumerate(fields):
+        marks = list(collect(n, m, (field,), cutoff, height=height))
+        sizes.append(len(marks))
+        for point, rows in marks:
+            variables.append((i, point))
+            columns.append([(0, *point), *((i+1, p, root) for _, p, root in rows)])
+        variables.append((i, None))
+        columns.append([(0, 0, 0)])  # Every primitive mark has b > 0.
+    core, basis = GRID["parity_basis"](columns)
+    variables = [variables[j] for j in core]
+    blocks, offset = [], 0
+    for i in range(len(fields)):
+        points = [point for index, point in variables if index == i and point is not None]
+        assert variables[offset+len(points)] == (i, None)
+        blocks.append((offset, points))
+        offset += len(points)+1
+    return blocks, basis, sizes
+
+
+def probe_rounds(fields, blocks):
+    cursor, last_prime = 1, 0
+    data = [
+        (field, [j*c for j, c in enumerate(field) if j],
+         offset, points, [GRID["homogeneous"](field, *point) for point in points])
+        for field, (offset, points) in zip(fields, blocks, strict=True)
+    ]
+
+    def restrict(basis, cutoff):
+        nonlocal cursor, last_prime
+        for p in GRID["primes_through"](cutoff):
+            if not basis:
+                break
+            if p <= max(2, cursor):
+                continue
+            last_prime = p
+            squares = {r*r % p for r in range(1, p)}
+            for field, derivative, offset, points, norms in data:
+                for root in range(p):
+                    if GRID["polynomial"](field, root, p):
+                        continue
+                    slope = GRID["polynomial"](derivative, root, p)
+                    if slope:
+                        row, _ = PROBES["leading_unit_row"](len(field)-1, points, norms,
+                                                            p, root, slope, squares)
+                        basis = MIXED["restrict"](basis, row << offset)
+        cursor = cutoff
+        return basis, dict(last_prime=last_prime)
+
+    return restrict
+
+
+def exact_query(n, m, fields, derivatives, blocks, word):
+    counts, signs, supports, residues = Counter(), [], [], []
+    for field, derivative, (offset, points) in zip(fields, derivatives, blocks, strict=True):
+        mask = word >> offset
+        selected = [points[j] for j in GRID["support"](mask & ((1 << len(points))-1))]
+        negative = (mask >> len(points)) & 1
+        sign = 1-2*negative
+        signs.append(sign)
+        supports.append(selected)
+        counts.update(selected)
+        value = [sign]+[0]*(len(field)-2)
+        for a, b in selected:
+            value = SQUARES["multiply_mark"](field, value, a, b)
+        root = SQUARES["square_numerator"](field, value)
+        if root is None:
+            return None
+        residue = SQUARES["evaluate"](root, m)*pow(derivative, -1, n) % n
+        assert residue**2 % n == sign*prod((a-b*m) % n for a, b in selected) % n
+        residues.append(residue)
+    negatives = signs.count(-1)
+    assert negatives % 2 == 0 and all(count % 2 == 0 for count in counts.values())
+    normalization = (-1)**(negatives//2)
+    for (a, b), count in counts.items():
+        normalization = normalization*pow(a-b*m, count//2, n) % n
+    normalization %= n
+    product = prod(residues) % n
+    ratio = product*pow(normalization, -1, n) % n
+    assert ratio*ratio % n == 1
+    return product, normalization, ratio, signs, supports, residues
+
+
+def search(n, m, fields, height, *, query_cap=None, stop_at_split=True):
+    """Decide one connected grid over at least two monic Eisenstein fields."""
+    start = monotonic()
+    fields = tuple(tuple(field) for field in fields)
+    if n <= 1 or n % 2 == 0 or height < 1 or len(fields) < 2:
+        raise ValueError("require odd N > 1, positive height and at least two fields")
+    for field in fields:
+        if (len(field) < 3 or field[-1] != 1 or field[0] % 4 != 2
+                or any(c % 2 for c in field[:-1]) or SQUARES["evaluate"](field, m) % n):
+            raise ValueError("require monic Eisenstein polynomials vanishing at the shared root")
+    derivatives = [SQUARES["evaluate"]([j*c for j, c in enumerate(field) if j], m)
+                   for field in fields]
+    gcds = [gcd(derivative, n) for derivative in derivatives]
+    if any(value != 1 for value in gcds):
+        return dict(n=n, m=m, height=height, status="nonunit-derivative",
+                    derivative_gcds=gcds, certificate=None)
+    if query_cap is not None and query_cap < 0:
+        raise ValueError("the exact query cap must be nonnegative")
+    blocks, ideal, sizes = parity_space(n, m, fields, height)
+    certificate = None
+
+    def query(word):
+        nonlocal certificate
+        witness = exact_query(n, m, fields, derivatives, blocks, word)
+        if witness is None:
+            return None
+        product, normalization, ratio, signs, supports, residues = witness
+        divisor = gcd(product-normalization, n)
+        if certificate is None and 1 < divisor < n:
+            certificate = dict(n=n, m=m, fields=fields, height=height, signs=signs,
+                               points=supports, residues=residues, normalization=normalization,
+                               ratio=ratio, divisor=divisor, cofactor=n//divisor)
+        return product, normalization
+
+    status, queries, basis, survivors, last_prime = COMPLETE(
+        ideal, probe_rounds(fields, blocks), query, query_cap, n if stop_at_split else None)
+    if status == "complete":
+        status = "complete-split" if certificate else "complete-no-split"
+    return dict(n=n, m=m, height=height, status=status, columns=sizes, ideal=len(ideal),
+                surviving=len(survivors), square_basis=len(basis), tests=queries,
+                last_prime=last_prime, certificate=certificate, seconds=round(monotonic()-start, 4))
+
+
+def fixtures():
+    for n, height, split in ((895, 20, True), (247, 2, False)):
+        m, fields = scheduled_fields(n)
+        result = search(n, m, fields, height, stop_at_split=False)
+        assert result["status"] == ("complete-split" if split else "complete-no-split")
+        assert result["surviving"] == result["square_basis"]
+        print(json.dumps(result))
+    signed = search(65, 9, ((2, -2, 1), (82, 18, 1), (-70, 6, 1)), 1, stop_at_split=False)
+    certificate = signed["certificate"]
+    assert signed["status"] == "complete-split" and signed["square_basis"] == 1
+    assert certificate["signs"] == [-1, -1, 1] and certificate["normalization"] == 64
+    assert not any(certificate["points"]) and certificate["divisor"] in (5, 13)
+    print(json.dumps(signed))
+    blocks = [(2*i, [(3, 2)]) for i in range(4)]
+    word = sum(1 << offset for offset, _ in blocks)
+    _, normalization, ratio, _, _, _ = exact_query(79, 9, ((-2, 0, 1),)*4, (18,)*4, blocks, word)
+    assert normalization == (3-2*9)**2 % 79 and ratio in (1, 78)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("n", type=int, nargs="?")
+    parser.add_argument("--height", type=int, default=20)
+    parser.add_argument("--queries", type=int)
+    parser.add_argument("--basis", action="store_true", help="certify a full basis even after a split")
+    args = parser.parse_args()
+    if args.n is None:
+        fixtures()
+        return
+    m, fields = scheduled_fields(args.n)
+    print(json.dumps(search(args.n, m, fields, args.height, query_cap=args.queries,
+                            stop_at_split=not args.basis)))
+
+
+if __name__ == "__main__":
+    main()
