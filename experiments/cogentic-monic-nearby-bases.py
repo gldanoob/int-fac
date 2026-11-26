@@ -103,6 +103,7 @@ def confirm_certificates(results):
         for certificate in result["factors"]:
             f, g = result["fields"]
             points, sign = certificate["points"], certificate["sign"]
+            assert sign in (-1, 1) and len({tuple(point) for point in points}) == len(points)
             assert all(abs(a) <= HEIGHT and 1 <= b <= HEIGHT and gcd(a, b) == gcd(a-b*m, n) == 1
                        for a, b in points)
             code = (check + f"points={points};\n"
@@ -110,6 +111,11 @@ def confirm_certificates(results):
                     + f"check_square(Polrev({g}),points,{sign},{m},{n})]);\n")
             roots = json.loads(GRID["gp"](code, timeout=30)[0])
             assert all(a in (b, -b % n) for a, b in zip(certificate["residues"], roots, strict=True))
+            left, right = certificate["residues"]
+            square = sign*prod(a-b*m for a, b in points) % n
+            assert left**2 % n == right**2 % n == square == certificate["square"]
+            divisor = gcd(left-right, n)
+            assert 1 < divisor < n and divisor == certificate["divisor"]
             verified += 1
     return verified
 
