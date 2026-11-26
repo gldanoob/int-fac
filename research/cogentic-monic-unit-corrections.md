@@ -44,17 +44,7 @@ An explicitly supplied modular square root $t$ of a correction ratio can also re
 
 ## Bounded replay
 
-Run from the repository root.
-
-```sh
-python3 -B - <<'PY'
-import runpy
-
-run_gp = runpy.run_path("experiments/cogentic-monic-pair.py")["run_gp"]
-run_gp("monic_unit_fixture", (35, 77, 143, 221, 323),
-       "cogentic-monic-pair-squares.gp", "cogentic-monic-unit-corrections.gp")
-PY
-```
+Run `python3 -B experiments/cogentic-monic-pair.py --units` from the repository root to replay the certificate and the fixed seven-input holdout.
 
 The [replay](../experiments/cogentic-monic-unit-corrections.gp) uses the existing relation grid $|a|\le64$, $1\le b\le64$, and smoothness bound $151$. The four smaller fixtures have nullity zero. For the one singleton dependency at $323$, it searches for base roots among $1$ and $X+c$ for $-8\le c\le8$, using exact division and an integral norm-unit test. It keeps the power-order units among $a-bX$ and $-a-bX$ on both sides. It searches products of those units with total absolute exponent at most eight, in order of increasing total, until their corrected residues have the same square and their ratio differs from $\pm1$. The first success uses the cubic exponents $(-2,1)$ and no quartic multiplier. The expected factors are checked only after the result is returned by the search.
 
@@ -80,16 +70,6 @@ The finite certificate establishes that the mixed-sign obstruction for this depe
 ## Fixed holdout
 
 The holdout inputs, in order, are $187,209,247,299,391,437,10403$. The fixed parameters are manual cubic and quartic degrees, the existing grid $|a|\le64$, $1\le b\le64$, smoothness bound $151$ and cap of $1023$ nonzero signed parity dependencies. The unit search advances only if the nullity is one, the dependency is a singleton and the sign check yields no certificate. It uses base roots $1$ and $X+c$ for $-8\le c\le8$, the same mirrored-mark unit candidates and total absolute exponent at most eight. All seven cases share the Python harness's 15-second GP timeout. These inputs and limits were set before execution.
-
-```sh
-python3 -B - <<'PY'
-import runpy
-
-run_gp = runpy.run_path("experiments/cogentic-monic-pair.py")["run_gp"]
-run_gp("monic_unit_holdout", (187, 209, 247, 299, 391, 437, 10403),
-       "cogentic-monic-pair-squares.gp", "cogentic-monic-unit-corrections.gp")
-PY
-```
 
 | $N$ | Retained marks | Parity nullity | Dependencies tested | Unit search started | Splits |
 | ---: | ---: | ---: | ---: | ---: | ---: |

@@ -107,8 +107,15 @@ def run():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--squares", action="store_true", help="run the finite parity and square test")
-    if parser.parse_args().squares:
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--squares", action="store_true", help="run the finite parity and square test")
+    mode.add_argument("--units", action="store_true", help="check the unit correction and its fixed holdout")
+    args = parser.parse_args()
+    if args.units:
+        files = ("cogentic-monic-pair-squares.gp", "cogentic-monic-unit-corrections.gp")
+        run_gp("monic_unit_fixture", (35, 77, 143, 221, 323), *files)
+        run_gp("monic_unit_holdout", (187, 209, 247, 299, 391, 437, 10403), *files)
+    elif args.squares:
         print("Square search [N, marks, nullity, dependencies tested, first witness, certificate]:")
         run_gp("monic_square_replay", (35, 77, 143, 221, 323), "cogentic-monic-pair-squares.gp")
     else:

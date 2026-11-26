@@ -38,3 +38,8 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-selected-polynomial-recenter.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-pair.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-pair.py --squares
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-pair.py --units
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-index.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-real-gaps.py
+	"$(PYTHON)" -B experiments/cogentic-monic-local-laws.py
+	"$(PYTHON)" -B experiments/cogentic-intermediate-count.py
