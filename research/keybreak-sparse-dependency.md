@@ -1,0 +1,33 @@
+# Sparse dependency extraction and a 2.155 schedule
+
+For a single integer from scratch the joint private/public elliptic schedule admits a manuscript-level expected bit bound $L_N[1/3,2.155]$ under the same Dirichlet GRH and pinned KeyBreak inputs. The final matrix needs one verified nonzero binary dependency. Storing only its nonzero entries and using a sparse Krylov procedure reduces the linear-algebra coefficient from $2.4b$ to $2b$. The new limiting terms are the raw trials at the bottom of the descent and the private screening stages. [Public elliptic descent](keybreak-public-elliptic-recognition.md) · [Previous one-input schedule](keybreak-private-elliptic-schedule.md)
+
+## The sparse matrix and its kernel
+
+Write $C$ for the public bound on the number of parity and character columns, and collect $C+1$ rows without a rank test. Transpose these records, add zero padding for unused columns, then append one zero row to get a singular square binary matrix $M$ of size $s=C+1$. Repeated indices within a row are canceled by parity. The number of field elements and prime incidences in each completed tree is $\exp(o(H))$ where $H=(\log N)^{1/3}(\log\log N)^{2/3}$. In particular the depth is $O(\log\log N)$, each point has only polynomially many factors in the input bit length, and the **compressed** character output has polynomial length even for the cumulative sampler. Consequently $s=\exp((b+o(1))H)$ and the total stored support is at most $\exp((b+o(1))H)$. One need never store a dense square array. [KeyBreak (H.22) and (H.30)](https://crypto.sjtu.edu.cn/factoring.pdf#page=140) · [Compressed characters](keybreak-cumulative-character-probes.md)
+
+Use $K=\mathbf F_{2^h}$ with $4s<2^h\le8s$. The bit length of each field element is $O(\log s)$. Enumerating at most $2^h$ candidate moduli and testing irreducibility by modular Frobenius and polynomial gcd costs $s\operatorname{poly}(\log s)$ bits up to constant factors. Draw uniform independent $u,v\in K^s$. Generate the first $2s$ values of $u^TM^iv$ and recover the scalar minimal recurrence using Berlekamp–Massey. If its polynomial $P$ is divisible by $t$, evaluate $z=(P/t)(M)v$ using Horner's rule. Verify $z\ne0$ and $Mz=0$, expand the coordinates in the binary basis and verify a nonzero binary component against the original rows. Repeat a fixed bounded number of times and fail the epoch on exhaustion. A sparse linear dependency procedure of this type is due to Wiedemann. [Wiedemann, *Solving sparse linear equations over finite fields*](https://www.enseignement.polytechnique.fr/informatique/profs/Francois.Morain/Master1/Crypto/projects/Wiedemann86.pdf)
+
+For the success probability, $v$ misses the nilpotent summand in the Fitting decomposition with probability at most $1/|K|$, since $M$ is singular. Otherwise its vector minimal polynomial $m_v$ is divisible by $t$. For each distinct irreducible $f\mid m_v$ the vector $(m_v/f)(M)v$ is nonzero by minimality. If the scalar recurrence loses a copy of $f$, its polynomial divides $m_v/f$ and therefore $u$ annihilates that nonzero vector. The union bound over at most $s$ irreducibles loses at most $s/|K|$; the $2s$ terms suffice by the linear complexity bound. On the remaining event $P=m_v$, so $z$ is nonzero and lies in the kernel. At least one binary coordinate is nonzero and every binary component is killed by $M$, whose entries are binary. This works for arbitrary nullity and arbitrary Jordan blocks at zero. A fixed number of fresh attempts makes the total failure probability less than $1/128$. The random probes and verified dependency are public before the hidden roots are used.
+
+For each matrix-vector multiply, sort/merge support records by column with the vector and accumulate the contributions by row, using sequential external merge sorts. A pass costs $\exp((b+o(1))H)$ bit operations even on multitape machines. At most $O(s)$ passes are needed. The recurrence discrepancies and coefficient updates in Berlekamp–Massey admit direct sequential scans of the saved prefix and polynomials (including a reverse-order sequence tape); $O(s^2)$ field operations and sequential index moves suffice. A final sparse pass verifies the dependency. Thus the full bound is $\exp((2b+o(1))H)$ including field construction, vector copies, randomness and failure checks. The [Python implementation](../experiments/keybreak-sparse-dependency.py) exercises these exact finite-field operations on small matrices. Its default PRNG is for reproducible experimentation when seeded; the proof uses independent uniform bits.
+
+## Integer schedule and leading terms
+
+Keep the finite rules of the [elliptic schedule](keybreak-private-elliptic-schedule.md). Set
+$$
+ \delta=1.36245,\quad\kappa=.79414,\quad\beta=.667731,\quad
+ \alpha=.500005,\quad\gamma=.684287,\quad h_T=.644358.
+$$
+Use $\lambda_T(a)=1+.78a$, $\lambda_H=1.97$, $\lambda_L=2.149294$, and $1024$ private groups with $z_j=.026+.974j/1023$ and $a_j=z_j^2$. The first private floor is $.00067e_0$, rounded up as before. The curve coefficient allowance for both private and public tests is $.785005>1.4143/\sqrt{3\kappa\delta}$. Use cap slack $.000005$ and require a bottom absolute mean of $\exp(.00002\Lambda_d)$. All are fixed positive margins. In G.10 the previous diagonal estimate applies for every fixed positive mean exponent. The actual height coefficient is $.644353434\ldots$, the low fixed-point margin is $.000003750\ldots$, the bottom mean coefficient is $.000029020\ldots$, and the private factor-count ratio is below $1.698$ against the cap of two. The proof of the band estimates needs only finitely many fixed separated groups; increasing their count to 1024 changes no asymptotic union step.
+
+| Work on this input | Coefficient, rounded up |
+|---|---:|
+| Private elliptic screening | 2.154788 |
+| Low raw descent trials | 2.154790 |
+| Top algebraic testing | 2.134201 |
+| High raw descent trials | 2.097146 |
+| Character setup and retained evaluations | 0.908300 and 1.818051 |
+| Sparse dependency and exact extraction | 1.819501 each |
+
+The [arithmetic replay](../experiments/keybreak-sparse-schedule.py) checks the upper bound and rounded guards at two symbolic input sizes, including every group and all high/low transitions. The square-congruence extraction and both elliptic recognition arguments retain the analytic assumptions stated in the previous schedule. The exact finite computations do not test asymptotic runtime.

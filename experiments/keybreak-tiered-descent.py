@@ -110,7 +110,7 @@ def check_integer_schedule(
     n, *, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=gamma,
     top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,
     h=h, target=target, scales=scales, fractions=fractions, top_ratio_slope=F(0),
-    factor_cap=2, first_scale=F(0),
+    factor_cap=2, first_scale=F(0), cap_slack=slack,
 ):
     mb = n.bit_length()
     d = first_degree(n, mb, delta)
@@ -128,7 +128,7 @@ def check_integer_schedule(
         child = max(base, ceil((raw_box + F(th, d)) / ratio))
         assert child < parent and box >= child + 6 and box > base + 1 and 2 * box >= parent
         assert ratio * d * child >= th + d * raw_box
-        curve_budget = target - delta * beta - delta * ratio / 3 - 2 * slack
+        curve_budget = target - delta * beta - delta * ratio / 3 - 2 * cap_slack
         assert curve_budget > 0 and h**2 * child / e0 < curve_budget**2
         return box, child
 
