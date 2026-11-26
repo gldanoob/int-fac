@@ -1,8 +1,9 @@
 """Test the frozen integer-lift rule on the three 40-bit scaling inputs."""
 
+import argparse
 from collections import Counter
 import json
-from math import gcd, isqrt, prod
+from math import gcd, isfinite, isqrt, prod
 from os import killpg
 from pathlib import Path
 from runpy import run_path
@@ -187,11 +188,81 @@ def run():
         print(json.dumps(dict(record, seconds=round(monotonic()-start, 3))), flush=True)
 
 
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
+def verification_record(n):
+    local, generators = prepare(n)
+    exact, identical = SHEARED["evaluation_rows"](local, HEIGHT, 2)
+    rational_words = SHEARED["SUPPORTED"]["QUADRATIC"]["rational_words"]
+    primorial = prod(PRIMES)
+
+    def smooth(value):
+        remainder = abs(value)
+        while remainder > 1 and (common := gcd(remainder, primorial)) > 1:
+            remainder //= common
+        return remainder == 1
+
+    labels, retained = [], []
+    for j, (i, word) in enumerate(generators):
+        residue = prod(local[i]["values"][k] for k in GRID["support"](word)) % n
+        centered = (residue+n//2) % n-n//2
+        for offset in OFFSETS:
+            label = centered+offset*n
+            if smooth(label):
+                labels.append(label)
+                retained.append(j)
+                break
+    public_start = isqrt(n-1)+1
+    public = []
+    for u in range(public_start, public_start+64):
+        if gcd(u, n) != 1:
+            raise ValueError(f"{n}: unexpected nonunit public witness")
+        if smooth(u*u-n):
+            public.append(u*u-n)
+    lift_nullity = len(basis(rational_words(labels)))
+    extended_nullity = len(basis(rational_words(labels+public)))
+    if lift_nullity or extended_nullity:
+        raise ValueError(f"{n}: frozen exhaustion now has candidate dependencies")
+    return dict(n=n, dimensions=[len(field["basis"]) for field in local],
+                original_nullity=len(basis(exact)), identical_nullity=len(basis(identical)),
+                retained=len(retained), original_retained_nullity=len(basis([exact[j] for j in retained])),
+                lift_nullity=lift_nullity, attempts=0, public=len(public), extended_nullity=extended_nullity,
+                status="exhausted")
+
+
+def verify(path):
+    def unique_keys(pairs):
+        record = dict(pairs)
+        if len(record) != len(pairs):
+            raise ValueError("duplicate key in result record")
+        return record
+
+    records = [json.loads(line, object_pairs_hook=unique_keys) for line in path.read_text().splitlines()]
+    if len(records) != len(INPUTS) or any(not isinstance(record, dict) for record in records):
+        raise ValueError("expected three JSON objects in frozen order")
+    for n, record in zip(INPUTS, records, strict=True):
+        seconds = record.pop("seconds", None)
+        if type(seconds) not in (int, float) or not isfinite(seconds) or seconds < 0:
+            raise ValueError(f"{n}: invalid recorded wall time")
+        if record.get("n") != n or record.get("status") != "exhausted":
+            raise ValueError(f"{n}: unexpected input or status")
+        expected = verification_record(n)
+        if json.dumps(record, sort_keys=True) != json.dumps(expected, sort_keys=True):
+            raise ValueError(f"{n}: saved counts disagree with the independent replay")
+    print(f"Verified all {len(records)} frozen integer-lift records (wall times excluded).")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("n", nargs="?", type=int, choices=INPUTS)
+    mode.add_argument("--verify", type=Path, help="recompute the three frozen records")
+    args = parser.parse_args()
+    if args.verify is not None:
+        try:
+            verify(args.verify)
+        except (ValueError, OSError) as error:
+            parser.error(str(error))
+    elif args.n is None:
         check_normalization()
         run()
     else:
-        n = int(sys.argv[1])
-        assert n in INPUTS
-        print(json.dumps(measure(n)), flush=True)
+        print(json.dumps(measure(args.n)), flush=True)
