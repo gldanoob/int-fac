@@ -28,3 +28,35 @@ unit_family_split(n) = {
   if(unit_family_split(a*b)!=[u,a,b],error("large input"));
   print("250 odd parameters, 250 neighboring integers, and one ", logint(a*b,2)+1, "-bit input verified")
 }
+
+\\ Build the two quadratic power orders at an arbitrary eligible input and parameter.
+unit_parameter_chart(n,t) = {
+  if(n<3 || n%2==0,error("expected odd N >= 3"));
+  my(pieces=[t,t-1,t+1,t^2+1],d);
+  for(i=1,#pieces,d=gcd(pieces[i],n);if(d>1 && d<n,return([d,n/d])));
+  if(gcd(prod(i=1,#pieces,pieces[i]),n)!=1,return([]));
+  my(v=Mod(t,n), a=v*(v-1)/(v+1), b=a/v^2);
+  my(m=lift(-(v^2+1)^2/(4*v*(v^2-1))), d1=(a+1)/2, d2=(b-1)/2);
+  my(l=2*n+lift(m+d2), k=l+1+lift(Mod(m,n)+d1-l-1));
+  my(f=x^2+x-k^2,g=x^2-x-l^2,alpha=Mod(x,f),beta=Mod(x,g));
+  my(uf=2*k-1-2*alpha,vg=2*l+1-2*beta);
+  if(!(l<k && k<2*l) || subst(f,x,m)%n || subst(g,x,m)%n,error("parametric orders"));
+  if(norm(uf)!=-1 || norm(vg)!=-1 || (k-alpha)^2!=-alpha*uf || (l-beta)^2!=-beta*vg,error("units"));
+  if(Mod(k-m,n)/Mod(l-m,n)!=-v || Mod(2*k-1-2*m,n)!=a || Mod(2*l+1-2*m,n)!=b,error("chart residues"));
+  [m,k,l,lift(a),lift(b)]
+};
+unit_parameter_match(n,t,i,j) = {
+  my(chart=unit_parameter_chart(n,t));
+  if(#chart<5,return(chart));
+  my(a=Mod(chart[4],n),b=Mod(chart[5],n),r=(a+1)/2*a^i,s=(b-1)/2*b^j);
+  if(r^2!=s^2,return([]));
+  my(d=gcd(lift(r-s),n));
+  if(d==1 || d==n,[],[d,n/d]);
+};
+{
+  my(count=0);
+  forstep(n=3,255,2,for(t=2,9,if(#unit_parameter_chart(n,t)==5,count++)));
+  if(unit_parameter_match(341,2,2,2)!=[11,31],error("parameter split"));
+  if(unit_parameter_match(341,2,0,0)!=[] || unit_parameter_match(35,2,2,2)!=[5,7],error("controls"));
+  print(count," eligible charts checked; the fixed t=2 unit comparison splits 341")
+}
