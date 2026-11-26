@@ -4,7 +4,7 @@
 from collections import Counter
 from fractions import Fraction
 from itertools import combinations, product
-from math import isqrt
+from math import comb, gcd, isqrt, prod
 
 
 def primes_through(limit):
@@ -128,6 +128,53 @@ def check_common_intercept():
     return len(origins)
 
 
+def check_affine_line_obstruction(lines):
+    band, mark_limit, width = 127, 64, 1 << 15
+    modulus = prod(prime for _, _, prime in lines)
+    mark = next(a for a in range(1, modulus + 1)
+                if all((a + slope) % prime == 0 for _, slope, prime in lines))
+    assert mark <= mark_limit
+    step = 2 * 113 * (257 - mark)
+    eligible = [prime for prime in primes_through(band)
+                if prime > band // 2 and step % prime != 0]
+
+    degree = 0
+    while 4 * band ** (degree + 1) <= step * width:
+        degree += 1
+    buckets = {}
+    for primes in combinations(eligible, degree):
+        value = prod(primes)
+        key = (1 << (value.bit_length() - 1), value % step)
+        buckets.setdefault(key, []).append(value)
+    (bottom, residue), values = max(buckets.items(), key=lambda entry: len(entry[1]))
+    assert len(values) * (degree + 2) * step >= comb(len(eligible), degree)
+    constant = next(residue + step * j for j in range(modulus)
+                    if all((residue + step * (j + intercept)) % prime == 0
+                           for intercept, _, prime in lines))
+    assert constant * 4 < bottom and gcd(constant, step) == 1
+
+    slope_count = width // mark_limit
+    primorial = prod(prime for prime in primes_through(band) if prime ** 2 > band)
+    for intercept, slope, _ in lines:
+        for y in range(slope_count):
+            x = intercept + slope * y
+            assert 0 <= x < width
+            assert primorial % (constant + step * (x + mark * y)) != 0
+
+    witnesses = set()
+    for value in values:
+        for y in range(1 + bottom // (4 * mark_limit * step)):
+            quotient, rem = divmod(value - constant, step)
+            x = quotient - mark * y
+            assert rem == 0 and 0 <= x < width and 0 <= y < slope_count
+            assert primorial % (constant + step * (x + mark * y)) == 0
+            witnesses.add((x, y))
+    mass = Fraction(len(witnesses), width * slope_count)
+    assert mass >= Fraction(comb(len(eligible), degree),
+                            128 * (degree + 2) * band ** (degree + 2) * 2 ** degree)
+    return len(lines) * slope_count, len(witnesses)
+
+
 def main():
     frequencies = 0
     for exponent in range(3, 11):
@@ -138,6 +185,11 @@ def main():
     rectangle_cases = sum(check_rectangle_bound(modulus) for modulus in (4, 16))
     print(f'{frequencies} Fourier residue budgets and {rectangle_cases} rectangle bounds passed')
     print(f'Common intercept bounds passed for {check_common_intercept()} targets')
+    crossing = check_affine_line_obstruction([(1, 0, 3), (2, 1, 5)])
+    parallel = check_affine_line_obstruction([(1024, -1, 3), (2048, -1, 5)])
+    line_points, witnesses = (sum(counts) for counts in zip(crossing, parallel))
+    print(f'Affine-line obstruction passed for {line_points} rejected line points'
+          f' and {witnesses} accepted box points')
 
 
 if __name__ == '__main__':

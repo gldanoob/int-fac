@@ -89,3 +89,33 @@ For any prefix of $S$ intercepts, its expected failed fraction under a uniform d
 The average miss bound alone cannot guarantee that a deterministic list of at most $\lfloor\rho R\rfloor$ intercepts hits any successful target. Abstract failure sets can put every listed intercept in the failure set of every target while keeping the average miss fraction at most $\rho$. For an adaptive list, take the intercepts on its all-failure transcript and use that same failure set. A shorter guarantee needs information about the arithmetic distribution of the failures.
 
 The [integer replay](../experiments/cogentic-intercept-sampling.py) checks the weighted intercept marginal and both prefix estimates for 64 targets with differing box origins. It uses toy scores with exactly known failure sets.
+
+## An arithmetic obstruction for a few affine lines
+
+Replacing the full intercept by one affine function of its field's slope, or by a short list of such functions, can erase an entire squarefree band-smoothness test. The obstruction below uses synthetic values of the affine constant $C$. The step has the Cogentic form and the test has its height and bit bounds. The statement concerns the arithmetic test family and ordinary integer lines in coefficient coordinates. It gives no assertion about the allowable constants in a single fixed Cogentic instance or the value of that instance's full score.
+
+Suppose $\log A\asymp\log B\asymp H$, $A$ is a power of two, $\log m=\Theta(V)$, $P_0=\prod_{p\le d}p$ with $d=O(H)$, and $\ell\in(B/2,B]$ is prime. Let $\mathscr L$ be $k$ integer lines $x=u_i+v_i y$ with $O(V)$-bit coefficients and $v_i\ne-m$, where
+\[
+                         1\le k\le\frac{\log A}{3\log V}.
+\]
+Fix any power of two $X$ with $\log X=\Theta(V)$. For all sufficiently large inputs there are an integer $1\le a\le A$, a nonnegative $O(V)$-bit constant $C$, and a positive step $D=P_0\ell(m-a)$ such that the test
+\[
+                  1_{\{C+D(x+ay)\text{ is a squarefree product of primes in }(\sqrt B,B]\}}
+\]
+has uniform mean at least $\exp(-cH)$ on $[0,X)\times[0,X/A)$ for a fixed $c>0$, and vanishes at every point of $\mathscr L$ in this box. The line list may depend on the prescribed box. The choice of sign of $D$ fixes a representative for the absolute norm test.
+
+**Congruences on the lines.** Choose distinct primes $p_i\in(V^2,2V^2]$, avoiding the prime divisors of $m+v_i$. There are $\gg V^2/\log V$ primes to choose from by the prime number theorem, while a nonzero $O(V)$-bit integer forbids $O(V/\log V)$ primes in this range. These primes exceed $d$, lie below $\sqrt B$ and differ from $\ell$. Their product $Q$ satisfies $\log Q\le3k\log V\le\log A$. Pick $a$ by $a\equiv-v_i\pmod{p_i}$ in $[1,Q]$. The same choice works inside any prescribed interval of at least $Q$ consecutive possible marks. Then $p_i\nmid D$ because $m-a\equiv m+v_i\not\equiv0\pmod{p_i}$. Impose $C\equiv-Du_i\pmod{p_i}$. On line $i$ the norm is divisible by $p_i$, a forbidden prime, for every integer $y$.
+
+**Positive mass on the prescribed box.** Let $t$ be the largest integer with $4B^t\le DX$. Products of $t$ distinct primes from $(B/2,B]$ coprime to $D$ are at least $(B/2)^t$ and at most $B^t$. Their dyadic size intervals number at most $t+2$. Write $J$ for the number of these eligible primes. The coprimality condition deletes at most $O(V/\log B)$ primes. By uniqueness of the products, some interval $[Z,2Z)$ with $Z$ a power of two and some unit residue $r$ modulo $D$ contain at least $\binom Jt/((t+2)D)$ products. Because $DX<4B^{t+1}$ and $Z\ge (B/2)^t/2$, one has $Z>DX/(8B2^t)$. Take $C$ in $[0,DQ)$ satisfying $C\equiv r\pmod D$ and the prescribed congruences modulo all $p_i$. This is possible because $\gcd(D,Q)=1$, and $C<Z/4$ for large inputs since $X=\exp(\Theta(V))$ and $BQ2^t=\exp(O(H))$. For every selected product $n$ and every integer $0\le y\le Z/(4AD)$, the integer $x=(n-C)/D-ay$ lies in $[0,X)$ and gives that product. Indeed $x\ge Z/(2D)$ and $x\le B^t/D\le X/4$. These slopes constitute at least $Z/(4DX)>1/(32B2^t)$ of all slopes in the box. The uniform mean is at least
+\[
+       \frac{\binom Jt}{32X(t+2)DB2^t}
+       \ \ge\ \frac{\binom Jt}{128(t+2)B^{t+2}2^t}
+       \ \ge\ e^{-cH}.
+\]
+The last bound follows from $J\gg B/\log B$, $\binom Jt\ge(J/t)^t$, $t=O(V/H)$ and $(V/H)\log L=H$. A further $O(V/\log B)$ band-prime omissions leave the same bound. All the marked norms in the prescribed box have $O(V)$ bits since $C<DQ$, $a\le A$ and $\log(DX)=O(V)$.
+
+For a prescribed mark $a$, a larger obstruction applies to a list of fibers $x+ay=u_i$. Any list of $k\le\log X/(6\log V)$ such fibers can be made entirely nonsmooth by the same construction. Choose $p_i$ avoiding $m-a$ and impose the congruences on $C$ with $a$ already fixed. The line step no longer requires $Q\le A$. Instead $Q\le\sqrt X$ follows from the bound on $k$, so $C<DQ\le D\sqrt X<Z/4$ for sufficiently large inputs. The counting argument gives the same lower bound on the full-box test mean. This applies to selectors that choose a short, test-independent list of values of $x+ay$ and keep any number of slopes at those values.
+
+This rules out a comparison with error $\exp(-C_1H)$ for sufficiently large $C_1$ if it must work uniformly for these box-and-test instances and all support confined to the proposed lines. The list can contain arbitrarily many points per line. The result applies to line lists fixed before this constructed instance. It does not preclude a rule that chooses its lines from the test, that wraps them modulo a torus and uses many resulting ordinary lines, or that handles the given score without preserving individual test means.
+
+The [integer replay](../experiments/cogentic-intercept-sampling.py) checks both crossing lines and parallel fibers, enumerates all slope positions on the tested lines, and finds accepted points in the same prescribed boxes by multiplying actual band primes.
