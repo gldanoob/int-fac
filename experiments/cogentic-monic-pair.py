@@ -1,5 +1,9 @@
 """Construct two monic Eisenstein polynomials with an exact shared value."""
 
+import os
+import subprocess
+from pathlib import Path
+
 
 def integer_root(n, degree):
     """Floor of the positive integer root, by binary search."""
@@ -54,6 +58,24 @@ def check_pair(n, degree):
     return m, f, g
 
 
+def check_relations():
+    cases = []
+    for n in (35, 77, 143):
+        m, f, g = check_pair(n, 3)  # Fixed cubic/quartic fixtures.
+        cases.append(f"iferr(print(monic_relation_replay({n},{m},{[list(f), list(g)]})),"
+                     "err,print(err);quit(1));")
+    code = "\n".join(("cogentic_as_library=1;",
+                      'read("cogentic-quadratic-order.gp");',
+                      'read("cogentic-monic-pair-relations.gp");', *cases, ""))
+    result = subprocess.run([os.environ.get("GP", "gp"), "-fq"], input=code,
+                            cwd=Path(__file__).resolve().parent,
+                            capture_output=True, text=True, timeout=15, check=True)
+    if result.stderr:
+        raise RuntimeError(result.stderr)
+    print("Manual cubic/quartic relations [N, m, discriminants, count, first witness]:")
+    print(result.stdout, end="")
+
+
 def run():
     assert check_pair(9, 2) == (3, (-6, 2, 1), (-6, 2, -2, 1))
     assert check_pair(11, 2)[1] == (2, 0, 1)
@@ -84,3 +106,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+    check_relations()

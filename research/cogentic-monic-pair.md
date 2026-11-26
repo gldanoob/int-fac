@@ -40,3 +40,15 @@ $$
 interpreted as the binary form also when $b=0$. For $A\le\exp(cW)$ with fixed $c>0$, this is at most $\exp((1+c+o(1))V)$. The construction thus supplies fields and norm sizes compatible with one-third parameter scales. The power-order maps above require separate work to use with maximal orders, and the construction gives no smoothness or rank bounds. In particular, the two binary forms obey $G_{\rm hom}(a,b)=bF_{\rm hom}(a,b)+(a-mb)a^d$ even though their fields are distinct. The existing [variable-multiple field construction](cogentic-variable-multiple-lattice.md) has different local distribution requirements and uses coefficient sampling to address them.
 
 Evaluating $G$ on the roots of monic $F$ gives $|\operatorname{Res}(F,G)|=N|F(0)|^d$. If $\gcd(F(0),N)=1$, any common root $x$ modulo $N$ is a unit, since $F(x)\equiv F(0)\pmod p$ whenever $p$ divides both $x$ and $N$. Then $(x-m)x^d\equiv0\pmod N$ implies $x\equiv m\pmod N$. These identities describe the raw pair.
+
+## Finite cubic and quartic relations
+
+The relation replay explicitly uses $d=3$ on $N=35,77,143$. These small cases use the manual degree rather than the automatic schedule. It scans primitive marks $-12\le a\le12$, $1\le b\le12$, with $a-mb$ a unit modulo $N$. It computes both homogeneous norms as signed integers and keeps simultaneous 97-smooth marks coprime to the product of the two polynomial discriminants. PARI checks each polynomial discriminant against its field discriminant times the square of its power-order index, so the exclusion covers all index primes as well. [Relation replay](../experiments/cogentic-monic-pair-relations.gp)
+
+| Input | Common argument | Simultaneous marks |
+| ---: | ---: | ---: |
+| 35 | 3 | 2 |
+| 77 | 3 | 4 |
+| 143 | 5 | 3 |
+
+For every retained norm, the replay multiplies the prime powers back to its absolute value and checks the exact rational valuations. For each prime $p$ it checks the simple root $a/b\bmod p$. PARI then factors the principal ideal of $a-b\alpha$ in the maximal order and checks the residue root, residue degree one, ramification index one and exponent of every returned prime ideal. For example, at $N=77$ and $(a,b)=(-7,2)$ the norms are $-47$ and $4365=3^2\cdot5\cdot97$. The cubic prime above 47 has residue root 20, and the quartic primes above 3, 5 and 97 have residue roots 1, 4 and 45. The exponent two above 3 is included in the direct ideal check. These finite relations establish neither span nor a splitting certificate.
