@@ -12,6 +12,8 @@ The parameters are in binary, with $T\ge1$. Suppose a uniform deterministic algo
 \]
 bit operations, where $w$ bounds the total bit length of $B,c,d,T$. **Then the two-field construction gives a uniform deterministic $L_N[1/3,O(1)]$ complete factoring algorithm**, under the scalar-moment and extractor results used by the fixed-schedule manuscript. The proof only needs (1) on its generated progressions. The uniform large-modulus case of (1) remains open. [Fixed-schedule moment argument](cogentic-deterministic-two-thirds.md) · [Sufficient score](cogentic-conditional-score.md) · [Sum of absolute score coefficients](cogentic-universal-score-sampler.md)
 
+The [four-coordinate selector](cogentic-coefficient-selection.md) implements the prefix decisions with exact finite scalar counts. For modular-only terms it counts lattice points in a binary box by Euclidean floor sums. The [stratified sampler](cogentic-stratified-coefficients.md) gives a common short list for affine inequalities and congruences and a slope reduction on a fixed smooth-mark fiber.
+
 ## Rectangles for a pair of marked values
 
 The geometric reduction is independent of the factoring estimates. Let $X,Y$ be independent and uniform on the integer intervals $[x,x+p-1]$ and $[y,y+q-1]$. Fix distinct integer marks $0\le a<b\le A$. Each test is the product of two unary indicators, one at $u=X+aY$ and one at $v=X+bY$, and an arbitrary acceptance predicate on $(X,Y)\bmod M$. In the factorization application $M=B^{O(1)}$. The translations and the constants of the unary tests may have either sign.

@@ -1,0 +1,43 @@
+# Stratified coefficient samples for inequalities and congruences
+
+A deterministic list of at most $(KS)^d$ weighted points approximates every conjunction of affine inequalities and affine congruences on a uniform integer box in dimension $d$. The absolute probability error is at most $d(2/S+4/K)$. Taking $K=S=\lceil6d/\eta\rceil$ gives error at most $\eta$. The bound is independent of the lengths of the box sides, the magnitudes of the coefficients, and the number of conjuncts. For $d\le4$ and error $\exp(-CH)$, this gives a list of size $\exp(O(H))$ even when each coefficient has $\Theta(V)$ bits. Here $H=(\log N)^{1/3}(\log\log N)^{2/3}$ and $V=(\log N)^{2/3}(\log\log N)^{1/3}$. This applies to the affine root and derivative congruences in the [coefficient score](cogentic-conditional-score.md), and to tests that also impose affine ranges on the coefficients.
+
+## An interval and one residue class
+
+Take a uniform integer interval $I=[u,u+L)$ with $L\ge1$. For positive integers $K,S$, put $k=\min(K,L)$ and split $I$ at the positions $u+\lfloor jL/k\rfloor$ for $0\le j\le k$. Each stratum $I_j$ has length $L_j\in\{\lfloor L/k\rfloor,\lceil L/k\rceil\}$. Give its first $S_j=\min(S,L_j)$ points equal weight $L_j/(L S_j)$. The weights sum to one and there are at most $KS$ points.
+
+For the test $x\in J\cap(r\bmod q)$, where $J$ is any integer interval and $q\ge1$, a stratum wholly inside $J$ compares two consecutive intervals of lengths $L_j$ and $S_j$. In any length $m$ interval, a residue probability differs from $1/q$ by at most $1/m$. Thus the difference within a full stratum is at most $2/S$ if $L_j>S$, and it is zero if the stratum is sampled in full. The total contribution there is at most $2/S$. At most two partially intersected strata contribute at most their combined mass, at most $2\lceil L/K\rceil/L\le4/K$ when $K\le L$. If $K>L$, every point is sampled at its original mass. The bound therefore holds for all $L,K,S$, including empty tests and the unconstrained residue modulus $q=1$.
+
+There is also a sharper estimate for isolated points. For a truncated stratum, $L_j>S$ implies $L>KS$. Any point omitted by the sampler there loses mass $1/L<1/(KS)$. A sampled point gains
+\[
+ \frac{L_j}{LS}-\frac1L
+ \le \frac1{KS}+\frac{1/S-1}{L}
+ \le \frac1{KS}.
+\]
+Full strata have zero error. Hence a test supported on at most $R$ points has error at most $R/(KS)$, regardless of where they lie.
+
+## Products of strata in a coefficient box
+
+Use independent copies of the construction in all $d$ coordinates. Replace the uniform coordinate laws one at a time and freeze all the other coordinates at each replacement. A conjunction of affine inequalities in one remaining variable cuts out an interval. Each affine congruence $a x\equiv b\pmod q$ cuts out either the empty set or a single residue modulo $q/\gcd(a,q)$. This includes $a=0$ and moduli that do not share a unit coefficient. By the generalized Chinese remainder theorem, intersecting residue classes gives either the empty set or a single residue modulo the least common multiple of their moduli. The conditional difference is at most $2/S+4/K$ at every frozen tuple. Averaging and summing the $d$ coordinate replacements proves the claimed estimate.
+
+More generally, at a given replacement suppose each slice is a disjoint union of at most $T$ interval-residue sets, or comes with such upper and lower covers whose uniform slice masses differ by at most $\rho$. In the first case add the $T$ errors. In the cover case apply the upper and lower bounds separately to obtain error at most $T(2/S+4/K)+\rho$. A slice supported on at most $R$ isolated points instead uses $R/(KS)$. These bounds only require the representations to exist. Generating the sample requires the box endpoints alone. The test itself can still be evaluated directly on a supported point.
+
+The rational weight of one coordinate has $O(\log L+\log S)$ bits. If every box endpoint has at most $W$ bits, integer division and multiplication stream the list in time at most $(KS)^d\operatorname{poly}(W+\log(2KS))$ in fixed dimension. If exactly fair random bits are wanted, round each weight down to a multiple of $2^{-r}$ and give the remaining mass to one point. For a support of size $M_0$ this changes every acceptance probability by at most $M_0 2^{-r}$. Thus $r=\lceil\log_2(M_0/\eta)\rceil$ gives an additional error at most $\eta$. In particular the required seed length is $O(H)$ at accuracy $\eta=\exp(-CH)$, and deterministic search can simply enumerate the support.
+
+For any nonnegative score that expands wholly into tests controlled by this result, the mean changes by at most the test error times the sum of the absolute score coefficients. If that sum is $\exp(C_0H)$, choosing a larger fixed exponential precision makes the score error $o(1)$. This is a simultaneous statement about the tests and does not require computing the real weights to enumerate the support. The earlier [parity comparison](cogentic-parity-compression.md) preserves the modular factors while saving one bit. Stratification also handles inequalities and produces a much smaller list for this class.
+
+## Mixed tests with squarefree smoothness
+
+Three restricted forms of mixed tests admit the same comparison.
+
+* **Unaffected smoothness.** If a smoothness predicate does not depend on any replaced coordinate, it is constant in every frozen slice. The comparison then holds for its product with any affine conjunction. The coordinates on which smoothness depends still keep their original law.
+* **A fixed mark per field.** A squarefree smoothness test at an integer mark $a>0$ depends on the intercept $u$ and slope $v$ of the field only through $t=u+av$. For a uniform box with inclusive bounds $u_-\le u\le u_+$ and $v_-\le v\le v_+$, the fiber at $t$ consists of the consecutive slopes
+  \[
+    [v_-,v_+]\cap[\lceil(t-u_+)/a\rceil,\lfloor(t-u_-)/a\rfloor].
+  \]
+  Keep the exact marginal on $t$, with mass equal to the fiber size divided by the box size. Stratify only the slopes on each nonempty fiber and recover $u=t-av$. On a fiber, any collection of predicates at the same mark is constant, while the root and derivative congruences remain affine. The replacement error is at most $2/S+4/K$ per field. The support per field is at most $(L_u+a(L_v-1))KS$, compared with $L_uL_v$ original coefficient pairs. For $L_u\asymp aL_v$ of exponential width this removes the independent slope sweep. With independent fields the construction tensorizes for a prescribed mark in each field. The lists depend on the marks, and a distinct mark in the same field generally varies along the fiber.
+* **A bounded number of prime factors in the varying norm.** In a frozen slice suppose one required test is that a nonconstant affine integer norm is nonzero and, up to sign, a squarefree product of at most $h$ eligible primes. If the eligible set has size at most $P$, the accepted slice has at most $R=2\sum_{j=0}^h\binom Pj$ points, including the products of size zero. A nonconstant affine form takes each signed value at most once. Any further predicate can only narrow the accepted set, even if it is another smoothness predicate with no known decomposition. The error is at most $R/(KS)$ in that slice. The same argument works after dividing by a known common factor of the constant and slope, provided the required residual norm satisfies the factor-count bound. For instance, with eligible primes in $(\sqrt B,B]$, a restriction $1\le|\text{residual norm}|\le B^c$ implies at most $\lfloor2c\rfloor$ such factors. For fixed $h$, $P=\exp(O(H))$ and target error $\exp(-CH)$, taking $KS$ sufficiently large of order $\exp(O(H))$ preserves these slices. Each replaced coordinate needs this sparsity condition or a separate slice estimate.
+
+The full two-mark smoothness tests need more. Their varying norms may be as large as $\exp(O(V))$, for which the magnitude bound alone permits $O(V/H)$ prime factors and the sparse count above can be $\exp(O(V))$. Also, conditioning on one mark does not make the second mark constant. The construction therefore gives no worst-case one-third claim for the complete score. Even exact preservation of a single smoothness mean fails in general. On $0\le x<16$ with $K=4,S=2$, the test that $x+1$ is a squarefree product of primes in $\{3,5,7\}$ has uniform mass $5/16$ and sampled mass $1/4$.
+
+The [exact replay](../experiments/cogentic-stratified-coefficients.py) checks short and truncated strata, incompatible congruences and nonunit coefficients, product-box replacements, sparse mixed slices, and a fixed mark with actual squarefree smoothness.
