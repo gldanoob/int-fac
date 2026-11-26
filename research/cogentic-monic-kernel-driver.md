@@ -1,5 +1,21 @@
 # Full-grid parity through basis-only splitting
 
+## Search an integer
+
+From the repository root, run the driver with Python 3 and PARI/GP installed.
+
+```sh
+python3 -B experiments/cogentic-monic-kernel-driver.py 247
+python3 -B experiments/cogentic-monic-kernel-driver.py 247 --degree 3 --relations-only
+python3 -B experiments/cogentic-monic-kernel-driver.py 85 --degree 4 --planted --height 8 --relations-only
+```
+
+The first command uses the scheduled degree and returns the direct factor 13. The second skips the preliminary mark gcds and searches for square relations. At height 64, it retains 945 marks, finds joint parity dimension 14, and verifies a signed square basis of dimension 14. Its certificates give both 13 and 19. The third command searches the planted norm-two family. Its two signed parity candidates are removed by local probes, giving a trivial square kernel on the included marks.
+
+The JSON result identifies construction and mark gcds separately from square certificates. Each square certificate lists the marks, common sign, two residues, their common square and a proper divisor. The search checks the congruence and divisibility. A single-input run uses the [mark-local test and square-tail rule](cogentic-monic-local-roots.md), includes the [known dyadic ideals](cogentic-monic-ramified-two.md), and applies the [leading-unit probes](cogentic-monic-square-probes.md) through 257 before exact arithmetic. The default box height is 64 and the exact query cap is 128, adjustable with `--height` and `--queries`. A cap reports incomplete search. A completely exhausted basis only covers the admitted marks in that box. The single-input command has no wall-clock cutoff.
+
+## Original fixed comparison
+
 Run `python3 -B experiments/cogentic-monic-kernel-driver.py` from the repository root. The bounded cubic and quartic replay uses the original five fixtures followed by the seven fixed holdouts. It repairs the common root before collecting relations. A proper derivative gcd returns a direct factor. The grid discards nonunit mark residues and extracts no direct factors from them. [Derivative repair](cogentic-monic-index.md)
 
 For accepted pairs the driver reuses the full parity collector at $|a|\le64$, $1\le b\le64$, base bound $151$, and private-prime cutoff $8192$. Residuals above the cutoff are handled by exact integer square tests. The arithmetic control checks that $17\cdot8209^2$ contributes the same bounded parity as $17$ and $17\cdot8209^3$ is rejected. This residual rule also applies in the grid since a large odd ideal row is private. The successful marks at $247$ involve an even valuation at $433$, above the base bound and below the private-prime cutoff. [Full grid parity](cogentic-monic-large-primes.md)

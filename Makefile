@@ -47,3 +47,9 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-large-primes.py
 	"$(PYTHON)" -B experiments/cogentic-monic-productive-signs.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-scheduled-split.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-kernel-driver.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-blind-grid.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-local-roots.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-ramified-two.py
+	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-monic-square-probes.py
+	"$(PYTHON)" -B experiments/cogentic-planted-unit-signatures.py

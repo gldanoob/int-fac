@@ -1,10 +1,13 @@
 """Compose full grid parity, adaptive exact squares, and basis gcd extraction."""
 
+import argparse
 from ast import literal_eval
+import json
 from math import gcd, prod
 from pathlib import Path
 from runpy import run_path
 from subprocess import TimeoutExpired
+import sys
 from time import monotonic
 
 
@@ -16,17 +19,32 @@ QUERY_CAP = 128
 CASE_SECONDS = 5
 
 
-def adaptive(parity_basis, oracle):
+class GPStackLimit(Exception):
+    """PARI exhausted its arithmetic stack in this query."""
+
+
+def gp_value(expression, timeout, setup=""):
+    code = (setup + f'iferr(print({expression}),err,if(errname(err)=="e_STACK",'
+            'print("stack-cap"),print(err);quit(1)));\n')
+    line, = GRID["gp"](code, timeout=timeout)
+    if line == "stack-cap":
+        raise GPStackLimit
+    return line
+
+
+def adaptive(parity_basis, oracle, query_cap=QUERY_CAP):
     pivots, square_basis, tests = [], [], 0
     for word in parity_basis:
         for selection in range(1 << len(pivots)):
-            if tests == QUERY_CAP:
+            if tests == query_cap:
                 return "query-cap", tests, len(pivots), square_basis
             candidate = word ^ GRID["combine"](selection, pivots)
             try:
                 roots = oracle(candidate)
             except TimeoutExpired:
                 return "time-cap", tests, len(pivots), square_basis
+            except GPStackLimit:
+                return "stack-cap", tests, len(pivots), square_basis
             tests += 1
             if roots:
                 square_basis.append((candidate, roots))
@@ -36,8 +54,8 @@ def adaptive(parity_basis, oracle):
     return "complete", tests, len(pivots), square_basis
 
 
-def exact_oracle(n, m, fields, marks):
-    deadline = monotonic() + CASE_SECONDS
+def exact_oracle(n, m, fields, marks, time_cap=CASE_SECONDS):
+    deadline = monotonic() + time_cap if time_cap is not None else None
     sign_bit = 1 << len(marks)
     coefficients = [list(p) for p in fields]
 
@@ -47,26 +65,28 @@ def exact_oracle(n, m, fields, marks):
 
     def query(word):
         sign, points = decode(word)
-        seconds = deadline - monotonic()
-        if seconds <= 0:
-            raise TimeoutExpired("GP exact square oracle", CASE_SECONDS)
-        code = ('read("cogentic-monic-kernel-driver.gp");\n'
-                f'iferr(print(kernel_roots({n},{m},apply(Polrev,{coefficients}),'
-                f'{points},{sign})),err,print(err);quit(1));\n')
-        line, = GRID["gp"](code, timeout=seconds)
-        return literal_eval(line)
+        seconds = deadline - monotonic() if deadline is not None else None
+        if seconds is not None and seconds <= 0:
+            raise TimeoutExpired("GP exact square oracle", time_cap)
+        expr = f'kernel_roots({n},{m},apply(Polrev,{coefficients}),{points},{sign})'
+        return literal_eval(gp_value(expr, seconds, 'read("cogentic-monic-kernel-driver.gp");\n'))
 
     return sign_bit, decode, query
 
 
-def replay(n, m, shift, fields, primes, cutoff):
+def replay(n, m, shift, fields, primes, cutoff, *, height=GRID["HEIGHT"],
+           query_cap=QUERY_CAP, time_cap=CASE_SECONDS, ramified_two=False,
+           mark_local=False, probe_cutoff=0):
     left, right = map(list, fields)
     try:
-        line, = GRID["gp"](f"print(poldisc(Polrev({left}))*poldisc(Polrev({right})));\n",
-                           timeout=CASE_SECONDS)
+        line = gp_value(f"poldisc(Polrev({left}))*poldisc(Polrev({right}))", time_cap)
     except TimeoutExpired:
         return dict(n=n, m=m, shift=shift, status="discriminant-time-cap", tests=0, factors=[])
-    marks = GRID["relations"](n, m, fields, int(line), primes, cutoff, complete_parity=True)
+    except GPStackLimit:
+        return dict(n=n, m=m, shift=shift, status="discriminant-stack-cap", tests=0, factors=[])
+    discriminant = int(line)
+    marks = GRID["relations"](n, m, fields, discriminant, primes, cutoff, complete_parity=True,
+                              height=height, include_ramified_two=ramified_two, mark_local=mark_local)
     columns = GRID["parity_words"]([small + large for _, small, large, _ in marks])
     parity_basis = GRID["eliminate"](columns, (1 << j for j in range(len(marks))))
     result = dict(n=n, m=m, shift=shift, columns=len(marks), parity=len(parity_basis))
@@ -74,10 +94,16 @@ def replay(n, m, shift, fields, primes, cutoff):
         return dict(result, status="zero-parity", tests=0, basis=0, factors=[])
 
     assert all(GRID["combine"](word, columns) == 0 for word in parity_basis)
-    sign_bit, decode, query = exact_oracle(n, m, fields, marks)
-    status, tests, rank, square_basis = adaptive([sign_bit, *parity_basis], query)
+    sign_bit, decode, query = exact_oracle(n, m, fields, marks, time_cap)
+    signed = [sign_bit, *parity_basis]
+    if probe_cutoff:
+        prefilter = run_path(str(HERE / "cogentic-monic-square-probes.py"))["prefilter"]
+        signed, stats = prefilter(fields, [entry[0] for entry in marks], signed, discriminant,
+                                  prime_cutoff=probe_cutoff)
+        result.update(probe_rank=stats["rank"], survivors=len(signed))
+    status, tests, rank, square_basis = adaptive(signed, query, query_cap)
     if status == "complete":
-        assert len(square_basis) + rank == len(parity_basis) + 1
+        assert len(square_basis) + rank == len(signed)
         status = "kernel-trivial" if not square_basis else "basis-exhausted"
     factors = []
     for word, (a, b) in square_basis:
@@ -94,7 +120,7 @@ def replay(n, m, shift, fields, primes, cutoff):
     return dict(result, status=status, tests=tests, rank=rank, basis=len(square_basis), factors=factors)
 
 
-def main():
+def fixtures():
     cutoff = max(GRID["BASE"], 2 * GRID["HEIGHT"]**2)
     primes = tuple(GRID["primes_through"](cutoff))
     outside = 8209
@@ -112,5 +138,65 @@ def main():
             print(replay(n, m, shift, fields, primes, cutoff))
 
 
+def search(n, degree, height, query_cap, planted, relations_only):
+    if n < 2 or degree < 2 or height < 1 or query_cap < 0:
+        raise ValueError("require N >= 2, degree >= 2, height >= 1, and a nonnegative query limit")
+    def direct(stage, divisor):
+        assert 1 < divisor < n and n % divisor == 0
+        return dict(n=n, status=stage, divisor=divisor, cofactor=n // divisor)
+    if n in (2, 3, 5, 7):
+        return dict(n=n, status="prime")
+    if n % 2 == 0:
+        return direct("even", 2)
+    if planted:
+        build = run_path(str(HERE / "cogentic-planted-norm-two.py"))["monic_plants"]
+        fixed = build(n, degree)
+        if isinstance(fixed, int):
+            return direct("construction-gcd", fixed)
+        m, cuts, f, g = fixed
+        shift, fields = None, (f, g)
+    else:
+        m, f, g = GRID["CHECK_PAIR"](n, degree)
+        fixed = REPAIR(n, m, f, g)
+        if isinstance(fixed, int):
+            return direct("direct-derivative-gcd", fixed)
+        shift, fields = fixed
+    if not relations_only:
+        for a in range(-height, height+1):
+            for b in range(1, height+1):
+                if gcd(a, b) == 1:
+                    divisor = gcd(a-b*m, n)
+                    if 1 < divisor < n:
+                        return direct("direct-mark-gcd", divisor)
+    cutoff = max(GRID["BASE"], 2*height**2)
+    primes = tuple(GRID["primes_through"](cutoff))
+    result = replay(n, m, shift, fields, primes, cutoff, height=height, query_cap=query_cap,
+                    time_cap=None, ramified_two=True, mark_local=True, probe_cutoff=257)
+    if planted:
+        result["planted_cuts"] = cuts
+    return result
+
+
 if __name__ == "__main__":
-    main()
+    # This local arithmetic CLI passes exact coefficients and discriminants to GP.
+    if hasattr(sys, "set_int_max_str_digits"):
+        sys.set_int_max_str_digits(0)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("n", nargs="?", type=int, help="integer to split (omit for fixed replays)")
+    parser.add_argument("--height", type=int, default=GRID["HEIGHT"], help="primitive box height")
+    parser.add_argument("--degree", type=int, help="override the scheduled degree parameter")
+    parser.add_argument("--queries", type=int, default=QUERY_CAP, help="maximum joint square tests")
+    parser.add_argument("--planted", action="store_true", help="use the norm-two polynomial family")
+    parser.add_argument("--relations-only", action="store_true", help="skip preliminary mark gcd splits")
+    args = parser.parse_args()
+    if args.n is None:
+        if args.planted or args.relations_only or args.degree is not None or args.height != GRID["HEIGHT"] or args.queries != QUERY_CAP:
+            parser.error("provide N for a configurable search")
+        fixtures()
+    else:
+        scheduled = run_path(str(HERE / "cogentic-monic-pair.py"))["scheduled_degree"]
+        degree = scheduled(args.n) if args.degree is None and args.n >= 2 else args.degree
+        try:
+            print(json.dumps(search(args.n, degree, args.height, args.queries, args.planted, args.relations_only)))
+        except ValueError as error:
+            parser.error(str(error))
