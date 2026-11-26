@@ -26,6 +26,16 @@ In the linear construction \(\left|\operatorname{Nm}_{K/\mathbb Q}(\alpha-i)\rig
 
 If a prime \(p\) larger than every mark difference occurs to odd exponent in \(S\), each \(\alpha-i\) has an odd valuation at some prime above \(p\). This follows from the norm valuation, which is the sum of these valuations weighted by the residue degrees. For exponent one, there is exactly one prime of positive valuation, its valuation is one and its residue degree is one. The positive supports are disjoint for distinct marks, since a common prime would divide \(i-j\). The ratios against one fixed mark therefore have independent ideal parity at these rows. In particular the squarefree band version has full square-class rank on the planted ratios.
 
+### A collision that gives a factor on a particular input
+
+When two marks coincide modulo a prime of $S$, they can yield an actual square. Take $Q=X(X-12)$ and $P=Q^2+27$. With $\gamma=Q(\alpha)$, one has $\gamma^2=-27$. Over $E=\mathbf Q(\gamma)$ the discriminant of $X^2-12X-\gamma$ is
+$$
+ 144+4\gamma=\gamma(4-2\gamma/3)^2 .
+$$
+The norm of $\gamma$ is $27$, so $\gamma$ is nonsquare in $E$, the quadratic is irreducible over $E$, and $P$ is irreducible over $\mathbf Q$. Thus $(2\alpha-12)/(4-2\gamma/3)$ squares to the product $\alpha(\alpha-12)$ in the quartic field. The two marks coincide modulo three.
+
+For $N=P(16)=4123$ the evaluation at $16$ gives $Q(16)=64$, with rational square root $8$. The quartic square root evaluates to $-15/29\equiv426\pmod{4123}$. The gcds with $426-8$ and $426+8$ are $19$ and $217$. All the displayed denominators are units modulo this input. This gives a productive dependency on a single integer with an exact, checkable certificate. The choice $N=P(16)$ is essential to the example. Constructing such a modular evaluation with a known rational-side square for arbitrary $N$ remains open.
+
 ## Cyclotomic marks in a full tower
 
 Take \(d=2^r\) with \(2^d-1<N\), set \(m=2\), and take an odd smooth unit \(R\) modulo \(N\). A nonunit \(2^d-1\) gives a proper gcd. When its gcd is one, choose \(C\) with \(C\equiv-R/(2^d-1)\pmod N\), \(C\equiv2\pmod4\) and \(C\equiv1\pmod{\operatorname{rad}(R)}\), as above. The primitive polynomial
