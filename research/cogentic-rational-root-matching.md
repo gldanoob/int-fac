@@ -51,3 +51,21 @@ Alternatively, assign each local generator **one fixed lift** $E'_j\equiv E_j\pm
 Trying a prescribed list of full lift assignments costs one decision per assignment. Admitting all lifts as independent generators defines a larger valid domain, including products that use two different lifts of the same generator. An at-most-one-lift constraint per generator is a different decision problem. With replaced labels the exact criterion concerns the chosen basis generators, since changes of local basis can alter the lifted labels.
 
 The [exact replay](../experiments/cogentic-rational-root-matching.py) checks the examples, rational-unit normalizations and then compares the basis decision and its normalized signs to all 5,888 subsets of eight small modular witness lists. The field identities in both examples were also checked directly in PARI.
+
+## The complete sign image for a single quadratic fan
+
+Given a binary basis of certified rational matches, let $z_i$ be the evaluated unit roots of unity. Compute the finest prime-power partition visible to these relations without factoring the input first. Start with the single block $N$. For each $z_i$ and each current block $C$, split $C$ by $\gcd(z_i-1,C)$ and omit unit pieces. Every prime power dividing odd $N$ is retained intact because it has exactly two square roots of one. Two prime powers finish in the same block exactly when their signs agree for every basis root. Every combination of the basis is constant in sign on each final block, so this refinement exhausts the divisors distinguishable by these dependencies.
+
+For each $z_i$, take its sign vector on the final blocks, subtract its sign at a fixed reference block over $\mathbb F_2$, and omit the reference coordinate. The rank $r$ of these vectors is the rank of the full sign image modulo global sign. Thus a uniform dependency among the $2^h$ certified choices splits with exact probability $1-2^{-r}$, where $h$ is the matched basis dimension. The partition takes at most $h\log_2 N$ gcds. The remaining rank computation is polynomial in the explicit basis size. Distinct block signatures can be linearly dependent, so counting the blocks alone does not determine $r$.
+
+The [single-input replay](../experiments/cogentic-single-fan-image.py) constructs quadratic fields from each input's shifted base polynomial, tests bounded smoothness from scratch, computes each complete local square basis by quadratic norm descent, and joins those bases by signed rational squareclass. Rational and algebraic norms sharing a factor with $N$ are excluded from the reported relations. The source charges all field and relation construction to the individual input. Each row below gives one run. Parameters are maximum numerator, denominator, shift and smoothness bound, in that order.
+
+| Input | Parameters | Marks | Certified dimension $h$ | Sign rank $r$ | Final blocks |
+|---:|---|---:|---:|---:|---|
+| 119 | 13, 3, 3, 13 | 16 | 4 | 0 | 119 |
+| 341 | 13, 3, 3, 13 | 23 | 6 | 1 | 11, 31 |
+| 119 | 23, 5, 5, 23 | 57 | 28 | 1 | 7, 17 |
+| 341 | 23, 5, 5, 23 | 91 | 48 | 1 | 11, 31 |
+| 4199 | 33, 7, 7, 43 | 62 | 17 | 2 | 13, 17, 19 |
+
+The exhaustive Sage replay on the first two rows gave the same counts. On the fourth row the basis computation determines the outcome on all $2^{48}$ dependencies without enumerating them. On the fifth it finds all three factors from one input and gives exact split probability $3/4$. The selected windows are finite checks. A uniform bound on how far to search for a positive sign rank remains open. [Original exhaustive replay](https://github.com/gldanoob/int-fac/blob/ec1c86e/experiments/cogentic-single-input-fan.py)

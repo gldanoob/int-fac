@@ -78,6 +78,7 @@ check-one-third:
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-scaling.py --verify experiments/cogentic-sheared-scaling-results.jsonl
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-qs-witnesses.py --verify experiments/cogentic-sheared-qs-witness-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-rational-root-matching.py
+	"$(PYTHON)" -B experiments/cogentic-single-fan-image.py
 	GP="$(GP)" "$(PYTHON)" -B experiments/cogentic-sheared-integer-lifts.py --verify experiments/cogentic-sheared-integer-lift-results.jsonl
 	"$(PYTHON)" -B experiments/cogentic-compatible-quadratic-charts.py
 	"$(PYTHON)" -B experiments/cogentic-gaussian-smooth-seed-charts.py
