@@ -18,10 +18,10 @@ private theorem node_trace_le (split : Splitter) (k n : ℕ) :
     dsimp only [commonWork]; omega
   simp only [nodeTrace,guardedLocalWork,driverWork]
   by_cases h : ReachesSearch k n
-  · simp only [h,if_true,dif_pos]
+  · simp only [dif_pos h,if_pos h]
     have bound := (search_trace_spec n h.1).2
     omega
-  · simp only [h,if_false,dif_neg]; omega
+  · simp only [dif_neg h,if_neg h]; omega
 
 private theorem tree_trace_le (split : Splitter) (k : ℕ) {n : ℕ} (t : Run n) :
     t.work (nodeTrace split k) + t.work BinaryRecursion.nodeBudget ≤
@@ -63,7 +63,7 @@ theorem factor_words_of_dense_hits (line : DirichletLZerosOnLine)
     simp only [List.append_nil] at words
     change let primes := (BinaryRecursion.emit t []).1.map BinaryDivision.value
            primes.prod=n ∧ (∀ p∈primes, p.Prime) ∧ (∀ p, p.Prime → ∀ j, p^j∣n ↔ j≤primes.count p)
-    simp only [words,List.map_map,Function.comp_def,BinaryDivision.value_bits,List.map_id_fun]
+    simp only [words,List.map_map,Function.comp_def,BinaryDivision.value_bits,List.map_id']
     exact ⟨t.correct.1,fun p hp => Nat.prime_def.mpr (t.correct.2 p hp),
       fun p hp => t.multiplicity (Nat.prime_def.mp hp)⟩
   · intro hits ε pos
