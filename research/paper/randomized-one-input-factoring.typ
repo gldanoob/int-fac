@@ -19,11 +19,11 @@
 
 = Statement and model
 
-For each integer $N >= 2$, one classical randomized algorithm returns its prime factorization with multiplicities and terminates on every random tape. Its expected bit complexity satisfies
-$ EE T(N) = exp(O(H(N))), quad H(N) = (log N)^(1/3) (log log N)^(2/3), $
-with natural logarithms and expectation over independent fair bits for that input. More precisely, for every $epsilon > 0$ and all sufficiently large $N$, the manuscript gives
-$ EE T(N) <= exp((C_* + epsilon) H(N)), quad C_* = 1.9839824118071388229 dots . $
-In $L$-notation this is $L_N[1/3,C_*]$. The bound includes all setup, failed searches, verification and recursion. A fixed rational schedule with 4,096 stages gives a coefficient below $1.984578735$ [3, 6].
+For each integer $N >= 2$, one classical randomized algorithm returns its prime factorization with multiplicities and terminates on every random tape. Its expected bit complexity on that input satisfies
+$ EE T(N) <= L_N thin [1/3,C_*], quad C_* = 1.9839824118071388229 dots . $
+Here $L_N thin [alpha,c] = exp((c+o(1))(log N)^alpha (log log N)^(1-alpha))$, with natural logarithms. Writing $H(N) = (log N)^(1/3) (log log N)^(2/3)$ gives the coarser bound $EE T(N) = exp(O(H(N)))$. The displayed upper bound means that for every $epsilon > 0$, all sufficiently large $N$ satisfy $EE T(N) <= exp((C_*+epsilon)H(N))$.
+
+The expectation is over independent fair bits. The bit count includes all setup, failed searches, verification and recursion. A fixed rational schedule with 4,096 stages gives a coefficient below $1.984578735$ [3, 6].
 
 The algorithm constructs two square roots of the same residue modulo $N$. When their signs agree at some prime factors and differ at others, a greatest common divisor splits $N$. Narrower public polynomial coefficients reduce the descent cost. Estimates for products of primes in short intervals show that enough usable relations remain.
 
