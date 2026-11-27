@@ -103,16 +103,13 @@ theorem eventually_work_le_exp {E T : ℕ → ℝ} {c ε : ℝ} (hε : 0 < ε)
       mul_le_mul_of_nonneg_right hpoly (exp_pos _).le
     _ = _ := by rw [← exp_add, add_mul, add_comm (c * scale n)]
 
-/-- Lift eventual local charges through a proper-split recurrence. A monotone
-majorant covers the finitely many sizes below the asymptotic threshold. -/
-theorem eventually_work_le_exp_of_recurrence {E T : ℕ → ℝ}
-    (split : ∀ n, 2 ≤ n → ¬n.Prime → RandomizedSplitWork.SplitLaw n)
-    (hE : ∀ n, 0 ≤ E n) (hprime : ∀ n, n.Prime → E n ≤ T n)
-    (hrec : ∀ n (hn : 2 ≤ n) (hp : ¬n.Prime),
-      E n ≤ T n + (split n hn hp).expectedChildCharge E)
-    {c ε : ℝ} (hc : 0 ≤ c) (hε : 0 < ε)
+/-- Extend a finite real per-size budget to a monotone majorant. This covers
+the small recursive factors preceding any asymptotic cutoff. -/
+theorem exists_monotone_majorant {T : ℕ → ℝ} {c ε : ℝ}
+    (hc : 0 ≤ c) (hε : 0 < ε)
     (hlocal : ∀ᶠ n : ℕ in atTop, T n ≤ exp (c * scale n)) :
-    ∀ᶠ n : ℕ in atTop, E n ≤ exp ((c + ε) * scale n) := by
+    ∃ major : ℕ → ℝ, Monotone major ∧ (∀ n, T n ≤ major n) ∧
+      ∀ᶠ n : ℕ in atTop, major n ≤ exp ((c + ε) * scale n) := by
   classical
   have tail := hlocal.and ((log_grows.eventually_ge_atTop 1).and
     (eventually_ge_atTop (2 : ℕ)))
@@ -142,15 +139,28 @@ theorem eventually_work_le_exp_of_recurrence {E T : ℕ → ℝ}
     · have h := Finset.single_le_sum (f := fun n => |T n|) (fun _ _ => abs_nonneg _)
         (Finset.mem_range.mpr (lt_of_not_ge hn))
       exact (le_abs_self _).trans (h.trans (le_max_left ..))
-  have hδ : 0 < ε/2 := by positivity
-  have hmajor_exp : ∀ᶠ n : ℕ in atTop, major n ≤ exp ((c + ε/2) * scale n) := by
+  have hmajor_exp : ∀ᶠ n : ℕ in atTop, major n ≤ exp ((c + ε) * scale n) := by
     filter_upwards [eventually_ge_atTop N, scale_grows.eventually_ge_atTop 0,
-      eventually_bitPoly_le_exp (A := K) hδ 0] with n hn hs hk
+      eventually_bitPoly_le_exp (A := K) hε 0] with n hn hs hk
     simp only [pow_zero, mul_one] at hk
     apply max_le
     · exact hk.trans (exp_le_exp.mpr (mul_le_mul_of_nonneg_right (by linarith) hs))
     · rw [max_eq_left hn]
       exact exp_le_exp.mpr (mul_le_mul_of_nonneg_right (by linarith) hs)
+  exact ⟨major, hmono, hmajor, hmajor_exp⟩
+
+/-- Lift eventual local charges through a proper-split recurrence. A monotone
+majorant covers the finitely many sizes below the asymptotic threshold. -/
+theorem eventually_work_le_exp_of_recurrence {E T : ℕ → ℝ}
+    (split : ∀ n, 2 ≤ n → ¬n.Prime → RandomizedSplitWork.SplitLaw n)
+    (hE : ∀ n, 0 ≤ E n) (hprime : ∀ n, n.Prime → E n ≤ T n)
+    (hrec : ∀ n (hn : 2 ≤ n) (hp : ¬n.Prime),
+      E n ≤ T n + (split n hn hp).expectedChildCharge E)
+    {c ε : ℝ} (hc : 0 ≤ c) (hε : 0 < ε)
+    (hlocal : ∀ᶠ n : ℕ in atTop, T n ≤ exp (c * scale n)) :
+    ∀ᶠ n : ℕ in atTop, E n ≤ exp ((c + ε) * scale n) := by
+  have hδ : 0 < ε/2 := by positivity
+  obtain ⟨major, hmono, hmajor, hmajor_exp⟩ := exists_monotone_majorant hc hδ hlocal
   rw [show c + ε = (c + ε/2) + ε/2 by ring]
   exact eventually_work_le_exp hδ hmajor_exp
     (RandomizedSplitWork.expected_work_le_log2 E major split hE hmono
