@@ -49,3 +49,22 @@ Consequently one fixed power ensures \(|\theta|\le s<1\), keeps the anchor in th
 For the centered sampler use the original radix \(M=\lfloor N^{1/d_0}\rfloor\), multipliers of order \(M^{C_k}\), and physical degree \(d=d_0+L_0\) with fixed even \(L_0>C_k+1\). The centered-digit height contribution \(kN/Q^d\) is at most \(M^{C_k-L_0+o(1)}\) since \(d\log\log V=o(\log M)\), even at the smallest allowed denominator. The remaining centered-digit and parity coefficients are \(O(d2^d M(\log V)^{O(1)})\). The one-mark kernel has monomial basis of length \(V(\log V)^{O(1)}\), so the fixed power margin in \(\sigma\) still gives its relative Gaussian approximation. The modulus \(H=pn\) is coprime to \(N\) by construction. The multiplier range exponent can be taken sufficiently large uniformly in this band. [Height and parity construction](keybreak-multiplier-residue-phases.md#height-parity-content-and-derivative)
 
 For the particular mark set \(T=a^d\sigma|Q\theta-r|\). The columns corresponding to \(1,\theta\) give smallest standard deviation at least a constant times \(\eta T\). Summing the squared lengths of all the columns gives largest standard deviation \(O_s(T)\). The imaginary component before multiplication by the anchor factor has standard deviation \(O_s(\eta)\) in units of the coefficient width since \(|\Im(\theta^j)|\le j s^{j-1}\eta\). Thus the Gaussian area is \(O_s(\eta T^2)\). The centered term is \(o(\eta T)\). All coprime image points in a disk of radius \(c\eta T\), for a sufficiently small constant \(c>0\), therefore have multiplier-averaged probability \(\gg a^d\sqrt{|D|}/(\eta T^2)\) each. Apply the class count at norm cutoff \(c^2\eta^2T^2/a^d\). This costs a factor of order \(\eta\) in the prefactor. The cutoff differs from \(a^d M^2\sigma^2\) by powers of \(\log V\), and \(\log a=\log V+O(\log\log V)\). Hence the algebraic density lower bound holds uniformly with leading exponent \(-(1+o(1))u_A\log u_A\). Summing that conditional probability over the counted rational pairs proves the claim by linearity of expectation. The proof allows arbitrary dependence among different passing marks.
+
+## A shorter representation of the same cofactor ratio
+
+Suppose two distinct primitive positive definite marks \(h=[a,b,c]\), \(g=[A,B,C]\) give \(h(R)=pn_1\), \(g(R)=pn_2\) at the same primitive anchor \(R=(r,Q)\). Set
+\[
+ u=aB-bA,\qquad v=aC-cA,\qquad w=bC-cB,\qquad
+ J=\begin{pmatrix}-v&-w\\u&v\end{pmatrix},\qquad S=v^2-uw.
+\]
+The Sylvester determinant gives \(S=\operatorname{Res}(h,g)\). It is positive because the forms are positive definite with distinct pairs of conjugate roots. One has \(J^2=S\,\mathrm{id}\), \(h(JR)=Sh(R)\), and \(g(JR)=Sg(R)\). The pencil through the observed values factors integrally as
+\[
+ g(R)h(X,Y)-h(R)g(X,Y)
+ =(QX-rY)\big((ur+vQ)X+(vr+wQ)Y\big).
+\]
+Modulo \(p\), the left side vanishes and the first linear factor is nonzero. Consequently both coordinates of \(JR\) are divisible by \(p\). In particular \(p\mid S\), either by the resultant or by applying \(J\) twice and using primitivity. For \(H_0=V(\log V)^{C}\) bounding both mark heights, \(S\ll H_0^4=o(p^2)\). The integer \(t=S/p\) is thus positive and less than \(p\). Define the second integral vector \(R'=JR/p\). Then
+\[
+ h(R')=tn_1,\qquad g(R')=tn_2,\qquad JR'=tR,
+ \qquad \|R'\|_\infty\ll \frac{H_0^2}{p}\|R\|_\infty .
+\]
+The second vector can have content, and its coordinates can have either sign. The last identity recovers the original anchored pair once \(h,g,p\) are fixed. Since \(\alpha<1/2\), the complementary vector is shorter by a power of \(P\). Its scale and congruence modulus shrink together. For example, when \(S\asymp H_0^4\), the squared new coordinate bound divided by \(t\) is of order \(M^2/p\) up to powers of \(\log V\), just as in the original region. The square discriminant of \(n_2 h-n_1 g\) also follows from its primitive rational root. These identities give simultaneous arithmetic constraints on a pair of cofactor values. [Lean identities for the two forms](../formal/cogentic/Cogentic/RandomizedQuadraticInvolution.lean) · [Primitive linear factor and square discriminant](../formal/cogentic/Cogentic/RandomizedPrimitiveQuadraticRoot.lean)
