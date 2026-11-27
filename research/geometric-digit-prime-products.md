@@ -78,15 +78,15 @@ Fixing all digits except the first makes its images equally spaced by \(X/B\). A
 
 ## Sharp true-value intervals across several periods
 
-Split each real prime interval into a fixed number (M) of equal real subintervals, assigning integer endpoints consistently. In a full subbox the sum of the logarithmic relative widths is (O(1/M)). The upper product scale is (O(X)), so choosing a sufficiently large fixed (M) makes every real product interval in a subbox have diameter less than (X/2). All subbins retain relative widths (asymp1/d) and the same fixed power bounds, with constants allowed to depend on (M). They have positive prime populations for large (B) by the principal estimate in the ordinary comparison.
+Split each real prime interval into a fixed number \(M\) of equal real subintervals, assigning integer endpoints consistently. Within a subbox, the sum of the logarithms of the upper-to-lower endpoint ratios is \(O(1/M)\). The upper product scale is \(O(X)\), so a sufficiently large fixed \(M\) makes the product range in every subbox shorter than \(X/2\). All subbins have relative widths \(\asymp 1/d\), with constants that can depend on \(M\), and the same fixed power bounds apply. The principal prime estimate gives positive subbin populations for large \(B\).
 
-For any sharp true-value interval (J), the intersection of (J) with a subbox product interval projects injectively onto a residue arc, possibly wrapping at zero. Apply (1) on that subbox with the projected arc. Its normalized error is uniform over all subboxes and endpoints. Average over the subboxes with the exact prime-count probabilities, which are products of the individual bin probabilities. There is no cost proportional to the number (M^k) of subboxes.
+For each true-value interval \(J\), its intersection with a subbox product range projects injectively onto a residue arc, possibly wrapping at zero. Apply (1) to that arc within the subbox. The normalized error is uniform over subboxes and endpoints. Average over the subboxes using their exact prime-count probabilities. These are products of the individual bin probabilities and sum to one.
 
-Replace those mixing probabilities by the corresponding real probabilities from (dx/log x). At each prime bin their total variation difference is (B^{-c_-/2+o(1)}) by the GRH prime estimate at the subbin endpoints and the lower bound on the full prime population. The sum of these differences over the (k) slots is still (B^{-c_-/2+o(1)}). Each subbox's scaled folded density has supremum (O(Md)) by the one-variable log-density bound, so the normalized reference changes by only (B^{-c_-/2+o(1)}). With the real weights, the subbox references sum to the unnormalized real product law restricted to (J) and folded modulo (X). Thus
-[
-   rac{#{ninmathcal P:nin J, nmod Xinmathcal D_a}}{|mathcal P|}
-   =rac{|mathcal D_a|}{X}
-     left(rac1{|mathcal D_a|}sum_{xinmathcal D_a} f_J(x)+O(B^{-kappa'})
-ight),
-]
-where (f_J) is (X) times this folded restricted density and (kappa'>0) is fixed. Endpoint conventions can be taken half-open on the line and the circle. The estimate is absolute on the same digit-density scale, including intervals whose continuous reference is small.
+Now weight the subboxes by the continuous bin probabilities from \(dx/\log x\). In each prime bin, the discrete and continuous distributions over its \(M\) subbins have total variation distance \(B^{-c_-/2+o(1)}\) by the endpoint estimates and the lower bound for the full bin. Summing the distances over \(k\) independent slots preserves that bound. Each subbox's scaled folded density is \(O(Md)\) by the one-variable log-density bound. Thus the change in the normalized reference is \(B^{-c_-/2+o(1)}\). With the continuous weights, the subbox references sum to the real product density restricted to \(J\) and then folded modulo \(X\). Writing \(f_J\) for \(X\) times this unnormalized folded density gives
+\[
+ \frac{\#\{n\in\mathcal P:n\in J,\ n\bmod X\in\mathcal D_a\}}{|\mathcal P|}
+ =\frac{|\mathcal D_a|}{X}
+   \left(\frac{1}{|\mathcal D_a|}\sum_{x\in\mathcal D_a}f_J(x)
+         +O(B^{-\kappa'})\right)
+\]
+for fixed \(\kappa'>0\). A half-open endpoint convention works on both the line and the circle. The error is absolute on the original digit-density scale, including for intervals whose continuous reference is small.
