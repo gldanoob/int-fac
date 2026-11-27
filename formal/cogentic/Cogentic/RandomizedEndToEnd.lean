@@ -11,6 +11,7 @@ import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4Thin
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL19SecondMoment
+import Cogentic.RandomizedL19Muq
 import Cogentic.RandomizedPaperL18_4
 import Cogentic.RandomizedPaperLeafStatements
 import Cogentic.RandomizedEpochAnalyticInputs
@@ -139,6 +140,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL18_4.ThinPairInputs.thin_pair_fraction
 #print axioms Cogentic.RandomizedL19SecondMoment.L19Inputs.leaves
 #print axioms Cogentic.RandomizedL19SecondMoment.L19Inputs.slots_bounds
+#print axioms Cogentic.RandomizedL19Muq.DividedStripRatioInputs.muq_le
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceThinPairFraction
 #print axioms Cogentic.RandomizedL18_4.zmod_parseval
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieve
