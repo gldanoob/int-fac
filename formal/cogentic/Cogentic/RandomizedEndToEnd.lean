@@ -20,10 +20,12 @@ import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL34
+import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL30
+import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedConcreteTV
@@ -192,6 +194,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27_1.L27_1Inputs.slot_le
 #print axioms Cogentic.RandomizedL30.L30Inputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL30.L30Inputs.slot_le
+#print axioms Cogentic.RandomizedL30Sub.FailureData.subexpLoss
+#print axioms Cogentic.RandomizedL30Sub.PaperInputs.modelCount_lower
 #print axioms Cogentic.RandomizedP1.P1Inputs.toP1Leaf
 #print axioms Cogentic.RandomizedP1.trialDivisionGap
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.toRatedLeaf
@@ -206,6 +210,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL19Full.L19FullCertificate.slots_bounds
 #print axioms Cogentic.RandomizedC5Full.C5FullInputs.toHitMassInputs
 #print axioms Cogentic.RandomizedC5Full.C5FullInputs.hitMass_of_inputs
+#print axioms Cogentic.RandomizedL34Sub.probeMiss_le_exp_of_estimates
+#print axioms Cogentic.RandomizedL30Sub.FailureData.subexpLoss
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
