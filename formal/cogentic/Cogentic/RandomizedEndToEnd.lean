@@ -4,7 +4,10 @@ import Cogentic.RandomizedConcreteEpochCost
 import Cogentic.RandomizedConcreteStageCost
 import Cogentic.RandomizedConcreteStageCostS1S2
 import Cogentic.RandomizedConcreteStageCostS3
+import Cogentic.RandomizedConcreteStageCostS469
 import Cogentic.RandomizedConcreteStageCostS8
+import Cogentic.RandomizedC5Algebra
+import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
@@ -142,6 +145,13 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCostS1S2.s1Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS1S2.s2Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS1S2.ConcreteC4Hypotheses.withS1S2
+#print axioms Cogentic.RandomizedConcreteStageCostS469.s4Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS469.s6Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS469.s9Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS469.ConcreteC4Hypotheses.withS4S6S9
+#print axioms Cogentic.RandomizedC5Algebra.C5AlgebraInputs.stageBudget
+#print axioms Cogentic.RandomizedL19Poisson.CoupledNumeratorData.numerator_energy
+#print axioms Cogentic.RandomizedL19Poisson.PoissonDenominatorData.A_bound
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
