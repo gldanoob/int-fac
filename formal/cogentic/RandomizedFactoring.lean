@@ -91,7 +91,7 @@ import Cogentic.RandomizedProbeCount
 import Cogentic.RandomizedPublicSpan
 import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
-import Cogentic.RandomizedPrimeBinBias
+import Cogentic.RandomizedPrimeBinProgression
 import Cogentic.RandomizedPrimeBinSupply
 import Cogentic.RandomizedScheduleFloor
 import Cogentic.RandomizedSemisimpleZero
