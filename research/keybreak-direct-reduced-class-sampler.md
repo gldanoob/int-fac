@@ -2,6 +2,8 @@
 
 For odd \(N>1\), the proposal below samples the primitive proper form classes of discriminant \(\Delta=-4N\) whose canonical reduced representative has leading coefficient coprime to \(N\). Conditional on returning a form, its class is exactly uniform on that set and its leading coefficient is already factored. Under Dirichlet GRH, on the rough-input branch the omitted classes have fraction \(e^{-\omega(H)}\), and the proposal takes polynomial expected work in \(\log N\). [Reduced forms and the form-class group, Lenstra–Pomerance §2](https://cr.yp.to/bib/1992/lenstra.pdf#page=5) · [Rough-input prepass](keybreak-private-shape-work.md#ensuring-the-count-suffices-on-every-input)
 
+The executable Sage replay draws the factored integers by Kalai’s procedure, samples one local orientation per prime power, combines the root by CRT, and applies the canonical tests. On small fixtures it also computes the exact proposal weight of each valid form independently. [Direct class sampler](../experiments/keybreak-direct-class-sampler.py)
+
 ## The equal-weight proposal
 
 Write a form as \([A,2b,C]\). We use the convention \(-A<2b\le A\le C\), with \(2b\ge0\) if \(A=C\). There is one such primitive positive definite reduced form per proper class. The discriminant gives \(AC-b^2=N\), so the reduction inequalities imply \(3A^2\le4N\). Put \(U=\lfloor 2\sqrt{N/3}\rfloor\), let \(T=2^J\) be the least power of two at least \(U\), and use the following attempt. [Lenstra–Pomerance, reduced representatives in §2](https://cr.yp.to/bib/1992/lenstra.pdf#page=5)

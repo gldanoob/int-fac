@@ -25,6 +25,12 @@ import Cogentic.RandomizedCutoffCrossing
 import Cogentic.RandomizedTwoMarkResidue
 import Cogentic.RandomizedUnitaryDivisorSign
 import Cogentic.RandomizedClassSchedule
+import Cogentic.RandomizedClassSignFibers
+import Cogentic.RandomizedReducedFormMinimum
+import Cogentic.RandomizedReducedFormRoot
+import Cogentic.RandomizedFormDivisor
+import Cogentic.RandomizedQuadraticRamification
+import Cogentic.RandomizedGenusMixing
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
 import Cogentic.RandomizedKrylovProbe
@@ -80,3 +86,9 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedSamplerTransfer.deficient_weights_totalVariation_le
 #print axioms Cogentic.Randomized.cutoff_crossing_cost_floor
 #print axioms Cogentic.Randomized.sharp_classSchedule_infimum
+#print axioms Cogentic.RandomizedReducedFormRoot.normalized_root
+#print axioms Cogentic.RandomizedReducedFormMinimum.leading_square_bound
+#print axioms Cogentic.RandomizedClassSignFibers.square_global_sign_uniform
+#print axioms Cogentic.RandomizedFormDivisor.normalize_private_root
+#print axioms Cogentic.Randomized.zmod_quadratic_normalized_not_global_sign
+#print axioms Cogentic.RandomizedGenusMixing.identity_mass_bias
