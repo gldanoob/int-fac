@@ -24,6 +24,10 @@ import Cogentic.RandomizedQuadraticShear
 import Cogentic.RandomizedCutoffCrossing
 import Cogentic.RandomizedTwoMarkResidue
 import Cogentic.RandomizedUnitaryDivisorSign
+import Cogentic.RandomizedUnitCircleMoment
+import Cogentic.RandomizedTwoFactorFourier
+import Cogentic.RandomizedQuadraticNormBound
+import Cogentic.RandomizedSectorNormBound
 import Cogentic.RandomizedClassSchedule
 import Cogentic.RandomizedClassKnotThreshold
 import Cogentic.RandomizedClassSignFibers
