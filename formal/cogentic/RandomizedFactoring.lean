@@ -3,6 +3,7 @@ import Cogentic.RandomizedBudgetLimit
 import Cogentic.RandomizedCRTSigns
 import Cogentic.RandomizedCostBounds
 import Cogentic.RandomizedEndpointFloor
+import Cogentic.RandomizedEvaluationNorm
 import Cogentic.RandomizedEvaluationMaps
 import Cogentic.RandomizedFiniteObstruction
 import Cogentic.RandomizedFullTableFloor
@@ -14,6 +15,8 @@ import Cogentic.RandomizedKrylovProbe
 import Cogentic.RandomizedOddSplit
 import Cogentic.RandomizedOptimalCost
 import Cogentic.RandomizedPadeEuclid
+import Cogentic.RandomizedPadeCost
+import Cogentic.RandomizedPadeKrylov
 import Cogentic.RandomizedPadeMinimal
 import Cogentic.RandomizedPadeNormalize
 import Cogentic.RandomizedPadeRecurrence
