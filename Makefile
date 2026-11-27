@@ -22,9 +22,14 @@ check-two-thirds-lean:
 check-randomized-lean:
 	cd formal/cogentic && "$(LAKE)" build RandomizedFactoring
 
+# Wave-2 W13 (Cogentic.RandomizedConcreteEpochCost) is intentionally not listed:
+# it does not compile against the current `ConcreteEpochData` because
+# `DirectFormSpec` requires `DecidableEq` on the sample type and the concrete
+# epoch only supplies `DecidableEq Label`.  See
+# research/randomized-end-to-end-status.md for the exact diagnostics.
 .PHONY: check-randomized-end-to-end
 check-randomized-end-to-end:
-	cd formal/cogentic && "$(LAKE)" build Cogentic.RandomizedEndToEnd Cogentic.RandomizedEpochVacuity Cogentic.RandomizedCostedEpoch
+	cd formal/cogentic && "$(LAKE)" build Cogentic.RandomizedEndToEnd Cogentic.RandomizedEpochVacuity Cogentic.RandomizedCostedEpoch Cogentic.RandomizedConcreteEpoch Cogentic.RandomizedConcreteEpochChecks Cogentic.RandomizedPaperLeafStatements Cogentic.RandomizedPaperEndpoint
 
 .PHONY: check-two-thirds-cached-grh
 check-two-thirds-cached-grh:
