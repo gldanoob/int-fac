@@ -2,6 +2,8 @@ import Cogentic.RandomizedEpochOutput
 import Cogentic.RandomizedEpochSuccess
 import Cogentic.RandomizedFieldExtraction
 import Cogentic.RandomizedUniversalSchedule
+import Mathlib.Data.Fintype.Option
+import Mathlib.Data.Fintype.Sigma
 
 /-!
 # Concrete End-to-End Hard-Input Epoch Assembly and Cost-Budget Combiner
@@ -532,34 +534,45 @@ end HardEpochData
 
 /-! ## Section 4: End-to-End Epoch Assembly and Serialized Factoring Theorems -/
 
-/-- Sample space lifted to all `n : ℕ` (trivial below `3`, equal to `(E n h).Sample`
-for `3 ≤ n`). -/
+/-- Sample space lifted to all `n : ℕ`: `none` below `3`, and a tagged sample of
+`E n h` for `3 ≤ n`. The proof tag lives in `PLift`, so no type-level `if` (and hence
+no cast) is needed to define the lifted law and attempt. -/
 def epochSpace (E : ∀ n, 3 ≤ n → HardEpochData n) (n : ℕ) : Type :=
-  if h : 3 ≤ n then (E n h).Sample else Unit
+  Option (Σ h : PLift (3 ≤ n), (E n h.down).Sample)
 
 noncomputable instance epochSpaceFintype (E : ∀ n, 3 ≤ n → HardEpochData n) (n : ℕ) :
     Fintype (epochSpace E n) := by
-  unfold epochSpace
-  split_ifs with h
-  · haveI : NeZero n := ⟨by omega⟩
+  haveI : Fintype (PLift (3 ≤ n)) := Fintype.ofFinite _
+  have hf : ∀ h : PLift (3 ≤ n), Fintype (E n h.down).Sample := fun h => by
+    haveI : NeZero n := ⟨by have := h.down; omega⟩
     infer_instance
-  · infer_instance
+  haveI : Fintype (Σ h : PLift (3 ≤ n), (E n h.down).Sample) := @Sigma.instFintype _ _ hf _
+  unfold epochSpace
+  infer_instance
+
+/-- Tag a sample of `E n hN` as a point of `epochSpace E n`. -/
+def epochEmbed (E : ∀ n, 3 ≤ n → HardEpochData n) {n : ℕ} (hN : 3 ≤ n)
+    (x : (E n hN).Sample) : epochSpace E n :=
+  some ⟨⟨hN⟩, x⟩
 
 /-- Actual epoch law lifted to all `n : ℕ`. -/
 noncomputable def epochLaw (E : ∀ n, 3 ≤ n → HardEpochData n) (n : ℕ) :
-    PMF (epochSpace E n) := by
-  unfold epochSpace
-  split_ifs with h
-  · exact (E n h).actual
-  · exact PMF.pure ()
+    PMF (epochSpace E n) :=
+  if h : 3 ≤ n then (E n h).actual.map (epochEmbed E h) else PMF.pure none
 
 /-- Assembled epoch attempt lifted to all `n : ℕ`. -/
 noncomputable def epochAttempt (E : ∀ n, 3 ≤ n → HardEpochData n) (n : ℕ) :
-    epochSpace E n → Option (Factors n) × ℕ := by
-  unfold epochSpace
-  split_ifs with h
-  · exact (E n h).assembledAttempt h
-  · exact fun _ => (none, 0)
+    epochSpace E n → Option (Factors n) × ℕ
+  | none => (none, 0)
+  | some ⟨h, x⟩ => (E n h.down).assembledAttempt h.down x
+
+theorem epochLaw_of_le (E : ∀ n, 3 ≤ n → HardEpochData n) {n : ℕ} (hN : 3 ≤ n) :
+    epochLaw E n = (E n hN).actual.map (epochEmbed E hN) :=
+  dif_pos hN
+
+theorem epochAttempt_embed (E : ∀ n, 3 ≤ n → HardEpochData n) {n : ℕ} (hN : 3 ≤ n) :
+    epochAttempt E n ∘ epochEmbed E hN = (E n hN).assembledAttempt hN :=
+  rfl
 
 /-- The asymptotic hard-input epoch premises at target exponent `C`:
 for every `δ > 0`, eventually on every hard input `n`, `E n hN` satisfies the
@@ -629,12 +642,12 @@ theorem assembled_epoch_ratio_eventually
   have hSpos : 0 < S := (exp_pos _).trans_le hSexp
   have hwork :
       mean (epochLaw E n) (fun a => ((epochAttempt E n a).2 + 1 : ℕ)) + 1 ≤ ENNReal.ofReal W := by
-    simpa only [epochLaw, epochAttempt, epochSpace, dif_pos hN] using
-      (E n hN).assembledAttempt_mean_work_le hN hpub
+    rw [epochLaw_of_le E hN, mean_map]
+    exact (E n hN).assembledAttempt_mean_work_le hN hpub
   have hhit :
       S ≤ (((epochLaw E n).map (epochAttempt E n)).toOuterMeasure {o | o.1 ≠ none}).toReal := by
-    simpa only [epochLaw, epochAttempt, epochSpace, dif_pos hN] using
-      (E n hN).assembledAttempt_hit_prob_ge hN ho hpow hcheck huniform hγ₀ hγ hTV
+    rw [epochLaw_of_le E hN, PMF.map_comp, epochAttempt_embed]
+    exact (E n hN).assembledAttempt_hit_prob_ge hN ho hpow hcheck huniform hγ₀ hγ hTV
   have hWle : W ≤ exp ((C + 3 * δ / 4) * scale n) := by
     have hmax : max 0 W_pub ≤ exp ((C + δ / 2) * scale n) :=
       max_le (exp_pos _).le hWpub

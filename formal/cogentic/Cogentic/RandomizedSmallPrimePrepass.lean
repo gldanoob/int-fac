@@ -780,13 +780,21 @@ def checkDivisor (n d : ℕ) (hn : 0 < n) (hdn : d ≤ n) : Option (Factors n) �
   | some qword =>
     have hprop : TwoThirdsSearch.ProperDivisor n d := by
       have hspec := (verify_spec hn (Nat.size_le_size hdn)).1
-      have hsome : some (value qword) = _ := by simpa [res, hres] using hspec
+      have hsome : some (value qword) =
+          (open scoped Classical in
+            if TwoThirdsSearch.ProperDivisor n d then some (n / d) else none) := by
+        rw [show (verify n d).1 = some qword from hres] at hspec
+        exact hspec
       by_contra hnot
       rw [if_neg hnot] at hsome
       simp at hsome
     have hq : value qword = n / d := by
       have hspec := (verify_spec hn (Nat.size_le_size hdn)).1
-      have hsome : some (value qword) = _ := by simpa [res, hres] using hspec
+      have hsome : some (value qword) =
+          (open scoped Classical in
+            if TwoThirdsSearch.ProperDivisor n d then some (n / d) else none) := by
+        rw [show (verify n d).1 = some qword from hres] at hspec
+        exact hspec
       rw [if_pos hprop] at hsome
       exact Option.some.inj hsome
     have hprod : d * value qword = n := by
@@ -806,16 +814,18 @@ theorem checkDivisor_spec {n d : ℕ} (hn : 0 < n) (hdn : d ≤ n) :
   obtain ⟨hval, hcost⟩ := verify_spec hn (Nat.size_le_size hdn)
   unfold checkDivisor
   dsimp only
-  cases hres : (verify n d).1 with
-  | none =>
-    simp only [hres, Option.map_none] at hval
+  split
+  next hres =>
+    rw [hres] at hval
+    simp only [Option.map_none] at hval
     refine ⟨?_, Nat.add_le_add_right hcost 1⟩
     simp only [ne_eq, not_true_eq_false, false_iff]
     intro hprop
     rw [if_pos hprop] at hval
     simp at hval
-  | some qword =>
-    simp only [hres, Option.map_some] at hval
+  next qword hres =>
+    rw [hres] at hval
+    simp only [Option.map_some] at hval
     refine ⟨?_, Nat.add_le_add_right hcost 1⟩
     simp only [ne_eq, reduceCtorEq, not_false_eq_true, true_iff]
     by_contra hnot
