@@ -45,6 +45,7 @@ import Cogentic.RandomizedSurvivorMoment
 import Cogentic.RandomizedPoolCoverage
 import Cogentic.RandomizedMarginalModes
 import Cogentic.RandomizedWidthOneGate
+import Cogentic.RandomizedTopCoefficientDet
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -127,3 +128,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.Randomized.balanced_envelope_endpoint_lower
 #print axioms Cogentic.Randomized.balanced_envelope_endpoint_upper
 #print axioms Cogentic.RandomizedWidthOneGate.fixed_stage_gate_lt
+#print axioms Cogentic.RandomizedTopCoefficientDet.det_quadratic_topProjection_mul
