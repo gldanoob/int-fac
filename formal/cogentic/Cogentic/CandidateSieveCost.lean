@@ -342,6 +342,117 @@ theorem trialFactor_spec {n : ℕ} (hn : 2≤n) :
     dsimp only [scanWord,fuel] at miss
     simp only [trialFactor,miss,if_neg comp]
 
+
+private theorem trial_scan_length {n a d : List Bool} {fuel : List Unit}
+    (found : (scan n (fun a => (a, 0)) fuel a).1 = some d) :
+    d.length ≤ n.length + a.length + fuel.length := by
+  induction fuel generalizing a with
+  | nil => simp [scan] at found
+  | cons _ fuel ih =>
+    cases h : (probe n a).1 with
+    | none =>
+      have hg : (scan n (fun a => (a, 0)) fuel (addDigits a.length a [] true).1).1 =
+          some d := by simpa only [scan, h] using found
+      have hw := ih hg
+      have hl := (addDigits_spec a.length a [] true le_rfl (by simp)).1
+      rw [hl] at hw
+      simpa only [List.length_cons, Nat.add_assoc, Nat.add_left_comm, Nat.add_comm] using hw
+    | some out =>
+      have he : out = d := Option.some.inj (by simpa only [scan, h] using found)
+      subst out
+      have hg := (gcdBits_spec n a (n.length + a.length) (Nat.le_add_right ..)
+        (Nat.le_add_left ..)).2.1
+      change (if (BinarySplitter.proper (n ++ List.replicate a.length false)
+        (gcdBits n a).1).1 then some (gcdBits n a).1 else none) = some d at h
+      split at h
+      · have he := Option.some.inj h
+        rw [he] at hg
+        exact hg.trans (Nat.le_add_right ..)
+      · contradiction
+
+/-- A fixed polynomial allowance for the executable trial division gates. -/
+def trialFactorCap (n : ℕ) : ℕ := 4096 * (n + 2) ^ 4
+
+/-- The cap includes token expansion, every visited probe, canonicalization
+of the first proper divisor, and the final dispatch. -/
+theorem trialFactor_work_le {n : ℕ} (hn : 2 ≤ n) :
+    (trialFactor n.bits).2 ≤ trialFactorCap n := by
+  let x := n + 2
+  let w := 2 * x
+  let clock := BinarySaturation.tokens n.bits
+  let trial := scan n.bits (fun a => (a, 0)) clock.1 [false, true]
+  have hs : n.size ≤ n := Nat.size_le.mpr Nat.lt_two_pow_self
+  obtain ⟨hlen, htokens⟩ := BinarySaturation.token_spec n.bits
+  change clock.1.length = _ at hlen
+  change clock.2 ≤ _ at htokens
+  rw [value_bits] at hlen
+  rw [value_bits, Nat.size_eq_bits_len] at htokens
+  have hword : n.bits.length ≤ w := by rw [Nat.size_eq_bits_len]; dsimp [w, x]; omega
+  have hfuel : [false, true].length + clock.1.length ≤ w := by
+    rw [hlen]
+    change 2 + n ≤ w
+    dsimp [w, x]
+    omega
+  have hwork : trial.2 ≤ n * visitBudget w := by
+    have ht := (scan_spec n.bits (by simpa only [value_bits] using (show 0 < n by omega))
+      w hword (fun a => (a, 0)) id (fun a ha => ⟨rfl, ha, Nat.zero_le _⟩)
+      clock.1 [false, true] hfuel).2
+    rw [hlen] at ht
+    exact ht
+  have hcanon (d : List Bool) (hd : trial.1 = some d) :
+      (BinarySaturation.canonical d).2 ≤ 3 * w := by
+    rw [(BinarySaturation.canonical_spec d).2]
+    apply Nat.mul_le_mul_left
+    have hh := trial_scan_length hd
+    rw [Nat.size_eq_bits_len, hlen] at hh
+    change d.length ≤ n.size + 2 + n at hh
+    dsimp [w, x]
+    omega
+  have hcost : (trialFactor n.bits).2 ≤ n + 2 * n.size + n * visitBudget w + 3 * w + 1 := by
+    change (match trial.1 with
+      | none => (none, clock.2 + trial.2 + 1)
+      | some d => (some (BinarySaturation.canonical d).1,
+          clock.2 + trial.2 + (BinarySaturation.canonical d).2 + 1)).2 ≤ _
+    cases h : trial.1 with
+    | none => simp only; omega
+    | some d =>
+      have hd := hcanon d h
+      simp only
+      omega
+  calc
+    _ ≤ 9 * x + x * visitBudget (2 * x) + 1 := by
+      have hx : n ≤ x := by dsimp [x]; omega
+      have hterm := Nat.mul_le_mul_right (visitBudget w) hx
+      dsimp [w] at hcost hterm
+      omega
+    _ ≤ trialFactorCap n := by
+      change 9 * x + x * visitBudget (2 * x) + 1 ≤ 4096 * x ^ 4
+      have hx : 1 ≤ x := by dsimp [x]; omega
+      have hpos : 0 < x := by omega
+      have h1 : x ≤ x ^ 4 := Nat.le_self_pow (by decide) _
+      have h2 : x ^ 2 ≤ x ^ 4 := Nat.pow_le_pow_right hpos (by decide)
+      have h3 : x ^ 3 ≤ x ^ 4 := Nat.pow_le_pow_right hpos (by decide)
+      have h4 : 1 ≤ x ^ 4 := Nat.one_le_pow _ _ hpos
+      unfold visitBudget probeBudget gcdBudget
+      nlinarith only [h1, h2, h3, h4]
+
+/-- Writing the cap requires only linearly many bits in the input width. -/
+theorem trialFactorCap_size_le (n : ℕ) : (trialFactorCap n).size ≤ 4 * n.size + 21 := by
+  have hbase : n + 2 ≤ 2 ^ (n.size + 2) := by
+    rw [pow_add]
+    have h := Nat.lt_size_self n
+    have hp := Nat.two_pow_pos n.size
+    omega
+  apply Nat.size_le.mpr
+  calc
+    _ ≤ 4096 * (2 ^ (n.size + 2)) ^ 4 := by
+      unfold trialFactorCap
+      gcongr
+    _ = 2 ^ (12 + (n.size + 2) * 4) := by
+      rw [pow_add (2 : ℕ) 12, pow_mul]
+      rfl
+    _ < _ := Nat.pow_lt_pow_right (by decide) (by omega)
+
 end Cogentic.BinaryPresieve
 
 #print axioms Cogentic.BinaryPresieve.run_spec
@@ -349,3 +460,5 @@ end Cogentic.BinaryPresieve
 #print axioms Cogentic.BinaryPresieve.fixed_presieve
 
 #print axioms Cogentic.BinaryPresieve.trialFactor_spec
+
+#print axioms Cogentic.BinaryPresieve.trialFactor_work_le
