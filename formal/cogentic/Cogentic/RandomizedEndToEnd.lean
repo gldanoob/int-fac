@@ -6,6 +6,8 @@ import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
 import Cogentic.RandomizedL18_4
+import Cogentic.RandomizedL18_4CellCount
+import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedPaperL18_4
 import Cogentic.RandomizedPaperLeafStatements
@@ -124,9 +126,14 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteEpochCost.hardEpochAsymptoticBound_of_concreteCost
 #print axioms Cogentic.RandomizedConcreteTV.toy_tv_eq_zero
 #print axioms Cogentic.RandomizedConcreteTV.toyC3Inputs
+#print axioms Cogentic.RandomizedConcreteTV.bigConcreteC3
+#print axioms Cogentic.RandomizedConcreteTV.bigC3Inputs
 #print axioms Cogentic.RandomizedConcreteStageCost.s0Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.s7Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.ConcreteC4Hypotheses.ofS0S7
+#print axioms Cogentic.RandomizedL18_4.cell_prime_count_of_cellData
+#print axioms Cogentic.RandomizedL18_4.cell_prime_count_from_critical_line
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceCellNumeratorCount
 #print axioms Cogentic.RandomizedL18_4.zmod_parseval
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieve
 #print axioms Cogentic.RandomizedPaperL18_4.paperAssumptions_of_L18_4Inputs

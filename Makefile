@@ -24,7 +24,7 @@ check-randomized-lean:
 
 .PHONY: check-randomized-end-to-end
 check-randomized-end-to-end:
-	cd formal/cogentic && "$(LAKE)" build Cogentic.RandomizedEndToEnd Cogentic.RandomizedEpochVacuity Cogentic.RandomizedCostedEpoch Cogentic.RandomizedConcreteEpoch Cogentic.RandomizedConcreteEpochChecks Cogentic.RandomizedConcreteEpochCost Cogentic.RandomizedConcreteStageCost Cogentic.RandomizedConcreteTV Cogentic.RandomizedL18_4 Cogentic.RandomizedL18_4LargeSieve Cogentic.RandomizedConcreteHitMass Cogentic.RandomizedConcreteHitMassCount Cogentic.RandomizedPaperL18_4 Cogentic.RandomizedPaperLeafStatements Cogentic.RandomizedPaperEndpoint
+	cd formal/cogentic && "$(LAKE)" build Cogentic.RandomizedEndToEnd Cogentic.RandomizedEpochVacuity Cogentic.RandomizedCostedEpoch Cogentic.RandomizedConcreteEpoch Cogentic.RandomizedConcreteEpochChecks Cogentic.RandomizedConcreteEpochCost Cogentic.RandomizedConcreteStageCost Cogentic.RandomizedConcreteTV Cogentic.RandomizedL18_4 Cogentic.RandomizedL18_4CellCount Cogentic.RandomizedL18_4Numerator Cogentic.RandomizedL18_4LargeSieve Cogentic.RandomizedConcreteHitMass Cogentic.RandomizedConcreteHitMassCount Cogentic.RandomizedPaperL18_4 Cogentic.RandomizedPaperLeafStatements Cogentic.RandomizedPaperEndpoint
 
 .PHONY: check-two-thirds-cached-grh
 check-two-thirds-cached-grh:
