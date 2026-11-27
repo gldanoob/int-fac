@@ -69,9 +69,49 @@ theorem mixedCoeff_modEq_of_det_sign {a b c r q u v x y : ℤ}
   · exact Or.inl (by simpa only [h, one_mul] using hm)
   · exact Or.inr (by simpa only [h, neg_one_mul] using hm)
 
+/-- The form value and mixed coefficient recover the first partial
+derivative multiplied by the determinant of the two columns. -/
+theorem formValue_completion_identity (a b c r q u v : ℤ) :
+    2 * formValue a b c r q * v - q * mixedCoeff a b c r q u v =
+      (r * v - q * u) * (2 * a * r + b * q) := by
+  unfold formValue mixedCoeff
+  ring
+
+theorem formValue_completion_identity_of_det_one {a b c r q u v : ℤ}
+    (hS : r * v - q * u = 1) :
+    2 * formValue a b c r q * v - q * mixedCoeff a b c r q u v = 2 * a * r + b * q := by
+  simpa only [hS, one_mul] using formValue_completion_identity a b c r q u v
+
+/-- The two cross-multiplied mixed coefficients eliminate the common
+completion coordinate v. -/
+theorem cross_mixedCoeff_identity (a b c A B C r q u v : ℤ) :
+    q * (formValue a b c r q * mixedCoeff A B C r q u v -
+      formValue A B C r q * mixedCoeff a b c r q u v) =
+      (r * v - q * u) *
+        (formValue A B C r q * (2 * a * r + b * q) -
+          formValue a b c r q * (2 * A * r + B * q)) := by
+  calc
+    _ = formValue A B C r q *
+          (2 * formValue a b c r q * v - q * mixedCoeff a b c r q u v) -
+        formValue a b c r q *
+          (2 * formValue A B C r q * v - q * mixedCoeff A B C r q u v) := by ring
+    _ = _ := by
+      rw [formValue_completion_identity, formValue_completion_identity]
+      ring
+
+theorem cross_mixedCoeff_identity_of_det_one {a b c A B C r q u v : ℤ}
+    (hS : r * v - q * u = 1) :
+    q * (formValue a b c r q * mixedCoeff A B C r q u v -
+      formValue A B C r q * mixedCoeff a b c r q u v) =
+      formValue A B C r q * (2 * a * r + b * q) -
+        formValue a b c r q * (2 * A * r + B * q) := by
+  simpa only [hS, one_mul] using cross_mixedCoeff_identity a b c A B C r q u v
+
 #print axioms second_columns_of_completions
 #print axioms formValue_after_completion
 #print axioms mixedCoeff_completion
 #print axioms mixedCoeff_modEq_of_det_sign
+#print axioms formValue_completion_identity_of_det_one
+#print axioms cross_mixedCoeff_identity_of_det_one
 
 end Cogentic.RandomizedQuadraticCompletion
