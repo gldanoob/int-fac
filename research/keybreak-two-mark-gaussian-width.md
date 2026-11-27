@@ -124,3 +124,36 @@ If \(\theta_j\) are the rotated phases of the dual basis characters under the id
  2t\sum_{j=1}^m\cos\theta_j-2t^2\sum_{j=1}^m\cos^2\theta_j+o(1)
 \]
 with a uniform remainder. At each fixed moment order every noncanceling character has kernel component of norm \(O(1/B)\) and nonzero integer lift, so its projected frequency lies at distance at least \(1-O(B^{-2})\) from \(L^*\). Its expectation is \(O(\exp(-c_0\sigma^2))\), uniformly even after the rotations. The error summed over any fixed number of moment indices tends to zero. The normalized cosine sum therefore has the independent uniform-circle limit by the method of moments, and the mean cosine square tends in probability to \(1/2\). The logarithm converges in distribution to \(N(-\lambda^2,2\lambda^2)\). The original density has the same lognormal limit by the \(L^2\) comparison and the ambient normalization. Integrating the bounded positive part \((1-dP/dQ)_+\) gives the stated profile.
+
+## How many narrow Gaussian shifts approximate the full image?
+
+Let \(K,L,\pi\) be the stable fixed-degree lattices above, \(m=n-r\). All input centers now have the same projection onto \(L_{\mathbb R}\). Allow at most \(M\) such centers with arbitrary probability weights, and compare the resulting image mixture with the ideal Gaussian \(Q\) of width \(\sigma\) at the common projected center. Suppose
+\[
+ \sigma/\sqrt{\log n}\to\infty,\qquad B/(\sigma\sqrt{\log n})\to\infty.
+\]
+Write \(D_m=\log\det K-m\log\sigma-m/2\), using natural logarithms and Gaussian weight \(\exp(-\pi\|x\|^2/\sigma^2)\). For fixed real \(a\), if
+\[
+                    \log M=D_m+a\sqrt{m/2}+o(\sqrt m),
+\]
+the infimum total variation over the centers and weights tends to \(\Phi(-a)\). Independent uniform shifts on \(K_{\mathbb R}/K\), with equal weights, attain this limit in expectation. This quantifies the number of shifts for approximation of the full image.
+
+For the lower bound, choose \(b_n\to\infty\) with \(b_n=o(\sqrt n)\) dominating the absolute remainder in \(\log M\). For each component retain the atoms of the ambient integer Gaussian with log mass at least
+\[
+            l_n=-n\log\sigma-n/2+a\sqrt{n/2}+b_n .
+\]
+This set has at most \(e^{-l_n}\) elements and asymptotic probability \(\Phi(-a)\) uniformly in its center. Indeed the coordinates are independent. One-dimensional Poisson summation and its first three scale derivatives give the continuous-Gaussian mean \(1/2\) and variance \(1/2\) for \(\pi(X_j-c_j)^2/\sigma^2\) up to \(O(e^{-c\sigma^2})\), and a bounded absolute third centered moment. The Berry–Esseen bound is uniform, and \(ne^{-c\sigma^2}=o(1)\). The exact ambient log normalizer is \(n\log\sigma+o(1)\). Meanwhile every \(Q\)-atom is at most \((1+o(1))/(\sigma^r\det K)\), by Poisson summation in fixed rank, since \(L^*\) is integral and \(\det L=1/\det K\). The union of the projected retained sets has \(Q\)-probability at most \(M e^{-l_n}(1+o(1))/(\sigma^r\det K)=o(1)\), and mixture probability at least \(\Phi(-a)-o(1)\). [Finite mixture bound for arbitrary weights in Lean](../formal/cogentic/Cogentic/RandomizedFiniteSupportTV.lean)
+
+For the matching construction take independent shifts \(C_i\) uniform on the kernel torus with Haar probability. For an image point \(y\), the relative fiber mass before ambient normalization is
+\[
+ A_i(y)=\det K\,\sigma^{-m}\sum_{v\in K}
+            \exp(-\pi\|\xi_y+v-C_i\|^2/\sigma^2),
+\]
+where \(\xi_y\) is the kernel offset of any lift relative to the fixed center. Tiling shows \(\mathbb E A_i(y)=1\) and the law in the random shift is independent of \(y\). The actual image density relative to \(Q\) differs from \(A_i\) by a factor \(1+o(1)\) uniformly in the shift, by the ambient and projected normalizers. Truncate each weight at the event \(A_i\le M e^{-b_n}\), setting it to zero otherwise. The variance of their truncated average is at most \(e^{-b_n}\), since the truncated second moment is at most \(M e^{-b_n}\mathbb E A_i\). The expected deficit of the averaged density below one is bounded by \(e^{-b_n/2}+\mathbb E[A_i\mathbf 1_{A_i>M e^{-b_n}}]+o(1)\), also after integration against \(Q\).
+
+Size-biasing the uniform offset by \(A_i\) gives the continuous Gaussian \(Z\) on \(K_{\mathbb R}\) reduced modulo \(K\). At that offset the log weight equals
+\[
+        \log\det K-m\log\sigma-\pi\|Z\|^2/\sigma^2+o_{\mathbb P}(1).
+\]
+Indeed the expectation of the sum of the square roots of the other translates' density ratios to that of \(Z\) equals \(\sum_{v\ne0}\exp(-\pi\|v\|^2/(4\sigma^2))\). The least singular value of the kernel basis is \(\gg B\), so a product theta sum bounds this by \(o(1)\). The normalized squared length \(2\pi\|Z\|^2/\sigma^2\) is chi-squared with \(m\) degrees of freedom. Its central limit theorem gives missing mass \(\Phi(-a)+o(1)\), as required.
+
+One may replace \(\log\det K\) here by \(m\log B+O_{r,s}(1)\) if all normalized roots have modulus at most a fixed \(s<1\). Divide the multiplication matrix by its signed leading coefficient and use the last \(m\) rows as a square triangular block \(T\) with unit diagonal. Its inverse is a truncated convolution by the coefficients of \(\prod_{j=1}^r(1-z_j t)^{-1}\), whose absolute sum is bounded by \((1-s)^{-r}\). The remaining \(r\) rows \(R\) have bounded operator norm. The determinant correction is \(\det(I_r+R(T^*T)^{-1}R^*)^{1/2}\), between one and a constant depending only on \(r,s\).
