@@ -2,12 +2,14 @@ import Cogentic.RandomizedConcreteEpoch
 import Cogentic.RandomizedConcreteEpochChecks
 import Cogentic.RandomizedConcreteEpochCost
 import Cogentic.RandomizedConcreteStageCost
+import Cogentic.RandomizedConcreteStageCostS3
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
 import Cogentic.RandomizedL18_4
 import Cogentic.RandomizedL18_4CellCount
 import Cogentic.RandomizedL18_4Numerator
+import Cogentic.RandomizedL18_4Mass
 import Cogentic.RandomizedL18_4Thin
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL19SecondMoment
@@ -134,9 +136,14 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCost.s0Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.s7Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.ConcreteC4Hypotheses.ofS0S7
+#print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_of_cellData
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_from_critical_line
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceCellNumeratorCount
+#print axioms Cogentic.RandomizedL18_4.MassErrorInputs.mass_lower
+#print axioms Cogentic.RandomizedL18_4.MassErrorInputs.error_le
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceCellNumeratorCountOfMass
 #print axioms Cogentic.RandomizedL18_4.ThinPairInputs.thin_pair_fraction
 #print axioms Cogentic.RandomizedL19SecondMoment.L19Inputs.leaves
 #print axioms Cogentic.RandomizedL19SecondMoment.L19Inputs.slots_bounds
