@@ -1,4 +1,5 @@
 import Cogentic.CharacterEstimate
+import Mathlib.Algebra.BigOperators.Associated
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
 namespace Cogentic.Randomized
@@ -76,5 +77,79 @@ theorem primeBin_average_from_critical_line (line : DirichletLZerosOnLine) :
   intro q _ χ hχ ι _ _ A B hA hAB
   rw [Fintype.card_piFinset, Nat.cast_prod, Finset.prod_div_distrib]
   exact div_le_div_of_nonneg_right (bound q χ hχ A B hA hAB) (by positivity)
+
+/-- The distinct integer products obtained by choosing one prime from every bin. -/
+def primeBinProducts {ι : Type} [Fintype ι] [DecidableEq ι] (A B : ι → ℕ) : Finset ℕ :=
+  (Fintype.piFinset (fun i ↦ primeBin (A i) (B i))).image (fun p ↦ ∏ i, p i)
+
+/-- Disjoint bins identify the slot of each prime divisor of a tuple product. -/
+theorem primeBin_product_injOn {ι : Type} [Fintype ι] [DecidableEq ι] (A B : ι → ℕ)
+    (hdisj : Pairwise fun i j ↦ Disjoint (primeBin (A i) (B i)) (primeBin (A j) (B j))) :
+    Set.InjOn (fun p : ι → ℕ ↦ ∏ i, p i)
+      ↑(Fintype.piFinset (fun i ↦ primeBin (A i) (B i))) := by
+  intro p hp p' hp' heq
+  change (∏ i, p i) = (∏ i, p' i) at heq
+  funext i
+  have hi := Fintype.mem_piFinset.mp hp i
+  have hprime := (mem_filter.mp hi).2
+  have hdvd : p i ∣ ∏ j, p' j := by
+    rw [← heq]
+    exact dvd_prod_of_mem p (mem_univ i)
+  obtain ⟨j, _, hj⟩ := ((Nat.prime_iff.mp hprime).dvd_finsetProd_iff p').mp hdvd
+  have hj' := Fintype.mem_piFinset.mp hp' j
+  have hpp := (Nat.prime_dvd_prime_iff_eq hprime (mem_filter.mp hj').2).mp hj
+  have hij : i = j := by
+    by_contra hne
+    exact (Finset.disjoint_left.mp (hdisj hne)) hi (hpp.symm ▸ hj')
+  exact hij ▸ hpp
+
+theorem primeBinProducts_card {ι : Type} [Fintype ι] [DecidableEq ι] (A B : ι → ℕ)
+    (hdisj : Pairwise fun i j ↦ Disjoint (primeBin (A i) (B i)) (primeBin (A j) (B j))) :
+    (primeBinProducts A B).card = ∏ i, (primeBin (A i) (B i)).card := by
+  rw [primeBinProducts, Finset.card_image_of_injOn (primeBin_product_injOn A B hdisj),
+    Fintype.card_piFinset]
+
+theorem primeBinProducts_character_sum {q : ℕ} (χ : DirichletCharacter ℂ q)
+    {ι : Type} [Fintype ι] [DecidableEq ι] (A B : ι → ℕ)
+    (hdisj : Pairwise fun i j ↦ Disjoint (primeBin (A i) (B i)) (primeBin (A j) (B j))) :
+    (∑ m ∈ primeBinProducts A B, χ m) =
+      ∑ p ∈ Fintype.piFinset (fun i ↦ primeBin (A i) (B i)), χ (∏ i, (p i : ZMod q)) := by
+  rw [primeBinProducts, Finset.sum_image (primeBin_product_injOn A B hdisj)]
+  simp only [Nat.cast_prod]
+
+private theorem primeBin_pattern_subset {ι : Type} [DecidableEq ι] (A B : ι → ℕ)
+    (hdisj : Pairwise fun i j ↦ Disjoint (primeBin (A i) (B i)) (primeBin (A j) (B j)))
+    {s t : Finset ι} {n : ℕ}
+    (hs : n ∈ primeBinProducts (fun i : s ↦ A i) (fun i : s ↦ B i))
+    (ht : n ∈ primeBinProducts (fun i : t ↦ A i) (fun i : t ↦ B i)) :
+    s ⊆ t := by
+  obtain ⟨p, hp, hprod⟩ := mem_image.mp hs
+  obtain ⟨p', hp', hprod'⟩ := mem_image.mp ht
+  change (∏ i, p i) = n at hprod
+  change (∏ j, p' j) = n at hprod'
+  intro i hi
+  let is : s := ⟨i, hi⟩
+  have hpi := Fintype.mem_piFinset.mp hp is
+  have hprime := (mem_filter.mp hpi).2
+  have hdvd : p is ∣ ∏ j, p' j := by
+    rw [hprod', ← hprod]
+    exact dvd_prod_of_mem p (mem_univ is)
+  obtain ⟨j, _, hj⟩ := ((Nat.prime_iff.mp hprime).dvd_finsetProd_iff p').mp hdvd
+  have hpj := Fintype.mem_piFinset.mp hp' j
+  have hpp := (Nat.prime_dvd_prime_iff_eq hprime (mem_filter.mp hpj).2).mp hj
+  have hij : i = (j : ι) := by
+    by_contra hne
+    exact (Finset.disjoint_left.mp (hdisj hne)) hpi (hpp.symm ▸ hpj)
+  exact hij.symm ▸ j.property
+
+/-- Two different subsets of the same disjoint bins give disjoint integer products. -/
+theorem primeBinProducts_disjoint_patterns {ι : Type} [DecidableEq ι] (A B : ι → ℕ)
+    (hdisj : Pairwise fun i j ↦ Disjoint (primeBin (A i) (B i)) (primeBin (A j) (B j)))
+    {s t : Finset ι} (hst : s ≠ t) :
+    Disjoint (primeBinProducts (fun i : s ↦ A i) (fun i : s ↦ B i))
+      (primeBinProducts (fun i : t ↦ A i) (fun i : t ↦ B i)) :=
+  Finset.disjoint_left.mpr fun _ hs ht ↦
+    hst (Finset.Subset.antisymm (primeBin_pattern_subset A B hdisj hs ht)
+      (primeBin_pattern_subset A B hdisj ht hs))
 
 end Cogentic.Randomized
