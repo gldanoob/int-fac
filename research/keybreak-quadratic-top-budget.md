@@ -72,3 +72,5 @@ Reducible quadratics have only \(V^{2+o(1)}\) possibilities at height \(V\). By 
 For one uniform parent root, the raw primitive population in a smooth three-dimensional box is now proved when its side exceeds the cube-root threshold by a fixed power. The rational smoothness condition and the algebraic distribution are still needed. [Quadratic mark count and discriminant-family bound](keybreak-quadratic-mark-geometry.md)
 
 When the accepted top resultants are squarefree, every good resultant prime gives a unique degree-one child. In a mixed row the leading-coefficient parity is weighted by the degree of each mark. [Local child and row identities](keybreak-squarefree-resultant-children.md)
+
+An ordinary one-mark lower bound is now available under Dirichlet GRH for negative fundamental marks with split parity. It permits a bounded number of additional factors of size at most \(V\exp(O((\log\log V)^2))\). The strict cost table above uses a smaller pure-smoothness cutoff; the new one-mark conclusion cannot be substituted directly for that hypothesis. [Algebraic one-mark estimate and its remaining conditions](keybreak-quadratic-one-mark.md)
