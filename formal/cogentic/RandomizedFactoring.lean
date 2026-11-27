@@ -52,9 +52,11 @@ import Cogentic.RandomizedSubsetFiber
 import Cogentic.RandomizedFixedMoebius
 import Cogentic.RandomizedPrimitiveQuadraticRoot
 import Cogentic.RandomizedQuadraticInvolution
+import Cogentic.RandomizedQuadraticCompletion
 import Cogentic.RandomizedClassMajority
 import Cogentic.RandomizedWeightedIncidence
 import Cogentic.RandomizedCenteredBoxRatio
+import Cogentic.RandomizedWitnessSizeBias
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
