@@ -2,6 +2,7 @@ import Cogentic.RandomizedConcreteEpoch
 import Cogentic.RandomizedConcreteEpochChecks
 import Cogentic.RandomizedConcreteEpochCost
 import Cogentic.RandomizedConcreteStageCost
+import Cogentic.RandomizedConcreteStageCostS1S2
 import Cogentic.RandomizedConcreteStageCostS3
 import Cogentic.RandomizedConcreteStageCostS8
 import Cogentic.RandomizedConcreteTV
@@ -138,6 +139,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCost.s0Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.s7Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.ConcreteC4Hypotheses.ofS0S7
+#print axioms Cogentic.RandomizedConcreteStageCostS1S2.s1Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS1S2.s2Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS1S2.ConcreteC4Hypotheses.withS1S2
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
