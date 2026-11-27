@@ -65,7 +65,7 @@ Write \(g=(q,A)\) and \(\mu_g\) for the uniform root law of \(N\) modulo \(g\). 
 \]
 This includes \(q=1\), which gives the unconditional interval mass. For \(q\) coprime to \(A\) the main term is uniform modulo \(q\).
 
-For odd \(d\) coprime to \(N\), take \(q=d\gcd(d,A)\). Since \(A\) is squarefree, \(d\mid u\) is equivalent to \(h^2\equiv N\pmod q\), in addition to the planted root condition. Write \(\rho_N(s)\) for the number of roots modulo \(s\). Hensel lifting gives \(\rho_N(q)=\rho_N(d)\), so whenever \(q\le Q\),
+For \(d\) coprime to \(N\), take \(q=d\gcd(d,A)\). Since \(A\) is squarefree, \(d\mid u\) is equivalent to \(h^2\equiv N\pmod q\), in addition to the planted root condition. Write \(\rho_N(s)\) for the number of roots modulo \(s\). Hensel lifting at the odd planted primes gives \(\rho_N(q)=\rho_N(d)\), so whenever \(q\le Q\),
 \[
 \Pr(h\in I,\ d\mid u)
 =\frac{|I|}{A}\frac{\rho_N(d)}{d\rho_N(\gcd(d,A))}+O(\rho_N(d)\tau).
@@ -78,4 +78,17 @@ For an arbitrary bounded test of \(u\bmod d\), sum the residue formula at modulu
 
 Take the lift window centered near \(\sqrt N\). Then \(h+\sqrt N\asymp\sqrt N\) and \(A\asymp\sqrt N\), so \(|u|\asymp |h-\sqrt N|\). The interval estimate gives \(\Pr(|u|\le Z)\ll Z/\sqrt N+\tau\) for \(Z\le \sqrt N\). In particular, forcing \(|u|\le e^{O(DH)}\) by independent sign samples is exponentially rare on the \(DH\) scale in this construction. The ordinary quotient scale remains \(N^{1/2+o(1)}\).
 
-The local estimates establish divisibility and character moments up to their modulus limit. A lower bound for fully smooth values requires a separate global input. At the ordinary quotient scale and terminal cutoff \(e^{bH}\), the usual Dickman comparison for unrestricted integers would already have loss \(e^{-\Theta(DH)}\). A private cutoff \(e^{bDH}\) changes that comparison to an \(H\)-scale loss, but the method above does not transfer the unrestricted smooth-number count to the CRT-root sample. Turning this distribution result into a cheaper single-input schedule therefore requires a smoothness theorem at the relevant scale, or a different construction that supplies smaller cofactors or useful partial relations.
+The local law also gives a smoothness upper bound at the terminal cutoff. Fix \(b>0\), take \(y=e^{bH}\) and \(T=e^{BDH}\), and use the simultaneous estimate through \(Q=T^2\), with \(\tau=e^{-3BDH}\). Restrict to quotients coprime to \(N\). In the centered window, any nonunit quotient instead gives a proper gcd with \(N\), since \(0<|u|<N\) eventually. If \(|u|\ge T/y\) is \(y\)-smooth, multiply its prime factors one at a time until the product first reaches \(T/y\). This supplies a smooth divisor \(d\in[T/y,T]\), so its query modulus \(d\gcd(d,A)\) lies in range.
+
+For \((d,N)=1\), every odd prime power has at most two roots and powers of 2 have at most four. Thus \(\rho_N(d)\le4\cdot 2^{\omega(d)}\). The summed incidence error is \(O(T^2\tau)\), even using just \(\rho_N(d)\le d\). The main term of the union bound is controlled by Rankin's inequality with \(\sigma=(\log D)/(2\log y)\):
+\[
+\begin{aligned}
+\sum_{\substack{T/y\le d\le T\\P^+(d)\le y}}\frac{2^{\omega(d)}}{d}
+&\le (T/y)^{-\sigma}\prod_{p\le y}\left(1+2\sum_{j\ge1}p^{-j(1-\sigma)}\right)\\
+&\le \exp\left(-\sigma\log(T/y)+O(\sqrt D\log\log y)\right)\\
+&=\exp\left(-\left(\frac{B}{6b}+o(1)\right)H\right).
+\end{aligned}
+\]
+The product bound uses \(p^\sigma\le y^\sigma=\sqrt D\) and the prime harmonic sum. The constant \(1/6\) uses \(\log D/\log n\to1/3\). Smaller quotients have probability \(O(T/\sqrt N+\tau)\) by the interval bound. The probability that the sampled coefficient fails the simultaneous estimate fits the same error allowance. This proves arbitrarily large fixed exponential saving on the \(H\) scale by increasing \(B\) in the sampler. In one growing-parameter sampler, take \(B=\sqrt D\). Then \(\log Q+\log(1/\tau)=5D^{3/2}H=o(n/\log n)\) and the upper bound becomes \(\exp(-\Omega(\sqrt D H))\).
+
+The private cutoff \(e^{bDH}\) is a different regime. The ordinary Dickman comparison there gives an \(H\)-scale loss for unrestricted integers of size \(N^{1/2+o(1)}\), while the Rankin argument above at that larger cutoff has only \(\log T/\log y=B/b\) in its loss parameter. A lower bound for fully smooth values at the private cutoff still requires a global smoothness input for the CRT-root sample. A cheaper single-input schedule would also need a way to use those values, reduce the quotient height, or exploit useful partial relations.
