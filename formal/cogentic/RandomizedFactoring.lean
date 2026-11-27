@@ -3,9 +3,11 @@ import Cogentic.RandomizedCRTSigns
 import Cogentic.RandomizedCostBounds
 import Cogentic.RandomizedEndpointFloor
 import Cogentic.RandomizedKrylovProbe
+import Cogentic.RandomizedHasseIncidence
 import Cogentic.RandomizedHiddenLabels
 import Cogentic.RandomizedOptimalCost
 import Cogentic.RandomizedOddSplit
+import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
 import Cogentic.RandomizedPrivateFloor
 import Cogentic.RandomizedPrivateGates
@@ -26,3 +28,7 @@ import Cogentic.RandomizedSparseDependency
 #print axioms Cogentic.Randomized.exact_finite_grid_floor
 #print axioms Cogentic.Randomized.algebraicCost_bounds
 #print axioms Cogentic.RandomizedOddSplit.hidden_split_fraction
+#print axioms Cogentic.Randomized.radix_only_search_floor
+#print axioms Cogentic.Randomized.free_rational_search_floor
+#print axioms Cogentic.Randomized.terminal_search_gnfs_floor
+#print axioms Cogentic.Randomized.terminal_gnfs_equality

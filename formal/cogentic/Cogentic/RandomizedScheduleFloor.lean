@@ -7,8 +7,29 @@ import Mathlib.Tactic.Ring
 
 namespace Cogentic.Randomized
 
-/-- The height, terminal mean, and raw search constraints imply a necessary
-two-variable tradeoff, even if the height and box dimensions can be retuned. -/
+/-- Separate the contribution of the field height from the cost of drawing a
+rationally eligible point in the two-coordinate terminal box. -/
+theorem terminal_tradeoff_of_height (b δ ratio v height charge C : ℝ)
+    (hb : 0 < b) (hd : 0 < δ) (hh : 0 ≤ height) (hratio : 0 ≤ ratio)
+    (hbox : height + v ≤ ratio*(b/δ))
+    (hmean : ratio/3 + 1/(3*δ^2*b) ≤ 2*v-b/δ)
+    (hraw : b+δ*ratio/3+charge ≤ C) :
+    2*height*δ^2 + 1/(3*b) + C*δ + (6*b-δ)*charge ≤ 6*b*(C-b) := by
+  have hlo : b/δ + 2*height + 1/(3*δ^2*b) ≤ (2*(b/δ)-1/3)*ratio := by linarith
+  have hslope : 0 ≤ 2*(b/δ)-1/3 := by
+    by_contra! hneg
+    have hpos : 0 < b/δ + 2*height + 1/(3*δ^2*b) := by positivity
+    linarith only [hpos,hlo,mul_nonpos_of_nonpos_of_nonneg hneg.le hratio]
+  have hupper : ratio ≤ 3*(C-b-charge)/δ := by
+    apply (le_div_iff₀ hd).mpr
+    linarith
+  have h := mul_le_mul_of_nonneg_left hupper hslope
+  have h' := mul_le_mul_of_nonneg_right (hlo.trans h) (sq_nonneg δ)
+  apply sub_nonneg.mp
+  convert sub_nonneg.mpr h' using 1 <;> first | rfl | (field_simp; ring)
+
+/-- The ordinary field height and rational trial charge give the current
+private/terminal schedule tradeoff. -/
 theorem terminal_tradeoff_of_search (b δ x ratio v height C : ℝ)
     (hb : 0 < b) (hd : 0 < δ) (hx : 0 < x)
     (hratio : 0 ≤ ratio)
@@ -17,19 +38,11 @@ theorem terminal_tradeoff_of_search (b δ x ratio v height C : ℝ)
     (hmean : ratio / 3 + 1 / (3*δ^2*b) ≤ 2*v - b/δ)
     (hraw : b + δ*ratio/3 + 1/(3*δ*b) ≤ C) :
     1 / x + 4 / δ + C * δ ≤ 6 * b * (C - b) := by
-  have hlo : b/δ + 2*((1 + δ/(2*x))/δ^3) + 1/(3*δ^2*b) ≤
-      (2*(b/δ) - 1/3)*ratio := by linarith
-  have hslope : 0 ≤ 2*(b/δ) - 1/3 := by
-    by_contra! hneg
-    have hpos : 0 < b/δ + 2*((1 + δ/(2*x))/δ^3) + 1/(3*δ^2*b) := by positivity
-    linarith only [hpos, hlo, mul_nonpos_of_nonpos_of_nonneg hneg.le hratio]
-  have hupper : ratio ≤ 3*(C-b)/δ - 1/(δ^2*b) := by
-    field_simp at hraw ⊢
-    nlinarith
-  have h := mul_le_mul_of_nonneg_left hupper hslope
-  have h' := mul_le_mul_of_nonneg_right (hlo.trans h) (sq_nonneg δ)
-  apply sub_nonneg.mp
-  convert sub_nonneg.mpr h' using 1 <;> first | rfl | (field_simp; ring)
+  have h := terminal_tradeoff_of_height b δ ratio v ((1+δ/(2*x))/δ^3) (1/(3*δ*b))
+    C hb hd (by positivity) hratio (by linarith) hmean hraw
+  convert h using 1
+  field_simp
+  ring
 
 private theorem reciprocal_square_tangent (y a : ℝ) (hy : 0 < y) (ha : 0 < a) :
     3/a^2 - 2*y/a^3 ≤ 1/y^2 := by
