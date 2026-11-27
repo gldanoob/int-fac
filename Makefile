@@ -22,6 +22,10 @@ check-two-thirds-lean:
 check-randomized-lean:
 	cd formal/cogentic && "$(LAKE)" build RandomizedFactoring
 
+.PHONY: check-randomized-end-to-end
+check-randomized-end-to-end:
+	cd formal/cogentic && "$(LAKE)" build Cogentic.RandomizedEndToEnd Cogentic.RandomizedEpochVacuity Cogentic.RandomizedCostedEpoch
+
 .PHONY: check-two-thirds-cached-grh
 check-two-thirds-cached-grh:
 	cd formal/cogentic && "$(LAKE)" env lean -o .lake/build/lib/lean/CogenticWithGRH.olean CogenticWithGRH.lean

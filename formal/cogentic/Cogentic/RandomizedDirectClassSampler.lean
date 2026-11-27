@@ -2923,8 +2923,8 @@ theorem gcdExitProb_toReal_le_scaled {Form : Type*} [DecidableEq Form]
               (2 * (2 : ℝ) ^ J * ((J : ℝ) + 1)) :=
             div_le_div_of_nonneg_right hbound (by positivity)
         _ = ((spec.U : ℝ) * (1 + Real.log (spec.U : ℝ)) / ((2 : ℝ) ^ J * ((J : ℝ) + 1))) *
-              ((1 : ℝ) / (p : ℝ)) := by ring
-    · have hUp0 : spec.U / p = 0 := by omega
+              ((1 : ℝ) / (p : ℝ)) := by field_simp
+    · have hUp0 : spec.U / p = 0 := Nat.lt_one_iff.mp (Nat.lt_of_not_le hUp)
       have hzero : (∑ A ∈ (Finset.Icc 1 spec.U).filter (fun A => p ∣ A),
           (2 : ℝ) ^ A.primeFactors.card) ≤ 0 := by
         simpa [hUp0] using hsum_pm
