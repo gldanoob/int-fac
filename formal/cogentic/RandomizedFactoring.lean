@@ -47,6 +47,7 @@ import Cogentic.RandomizedMarginalModes
 import Cogentic.RandomizedWidthOneGate
 import Cogentic.RandomizedTopCoefficientDet
 import Cogentic.RandomizedPrimeDetNullity
+import Cogentic.RandomizedCubicBoxChart
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -131,3 +132,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedWidthOneGate.fixed_stage_gate_lt
 #print axioms Cogentic.RandomizedTopCoefficientDet.det_quadratic_topProjection_mul
 #print axioms Cogentic.RandomizedPrimeDetNullity.finrank_ker_eq_one_of_dvd_not_sq
+#print axioms Cogentic.RandomizedCubicBoxChart.card_box
