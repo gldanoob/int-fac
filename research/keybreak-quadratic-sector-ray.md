@@ -250,3 +250,44 @@ To improve the collision main term from subpower to polylogarithmic accuracy, re
 Expand as an upper sum over a common divisor \(d\) coprime to \(q\). For \(d>V^\xi\), drop smoothness; the number after division is \(O((W/d)^2/q+W/d)\), and the divisor weights give a power saving for small fixed \(\xi>0\). For \(d\le V^\xi\), put \(x=W/d\), so \(x\ge q^2 V^{1-2\xi}\). Dirichlet GRH gives an \(O(\Psi(x,Y)/\varphi(q))\) upper bound for smooth numbers in any unit residue in a fixed relative dyad at this scale. In detail take a fixed positive smooth Mellin majorant of the dyad and expand in characters modulo \(q\). The principal count is \(O(\Psi(x,Y))\). For a nonprincipal character move the integral to \(1/2+\eta\). There its \(Y\)-truncated Euler product is \(V^{o(1)}\) at polynomial height: the full primitive \(L\)-function obeys the GRH subpower bound on this fixed line, imprimitive Euler factors cost \(V^{o(1)}\), and partial summation of the GRH twisted prime sum bounds the discarded prime logarithm by \(O_\eta(Y^{-\eta}(\log V)^{O(1)})\). The prime-power tail also converges. Truncate initially at large polynomial height on the line of absolute convergence and use the rapid Mellin decay on the horizontal segments. The resulting \(x^{1/2+\eta}V^{o(1)}\) is negligible compared with \(\Psi(x,Y)/\varphi(q)\). For the congruent pair on the original dyads one residual norm can now be counted freely and the other in its unit residue. Alternatively split norms below a fixed smaller power of \(W\) off by the trivial bound and sum dyads where the same shift applies. Summing the squared smooth counts over \(d\) uses the saddle-point divisor estimate as before. The displayed prefix bound follows as well: for residual pairs with maximum entry below \(q^2V^{1/4}\), the unrestricted integer-pair bound already gives a power saving; in the remaining pairs sum the second entry in the dyad of the maximum and the first freely.
 
 In the zero-frequency main term sum \(v=qj\) using \(O(2^{\omega(j)})\) local roots, fixing either allowed global sign; this removes any dependence on \(2^{\omega(q)}\) from the relative precision. In the power-saving nonzero terms one may again mark a shared prime before applying the residue-class double sieve. It is at most \(Y=V^{o(1)}\). The summed low-frequency energies of the full packet and its common-prime restrictions are therefore polylogarithmic at \(W_q\). Use the two full packets and exclude overlaps exactly as at \(W_*\). One broad prime guard of norm \((\log V)^{O(1)}\) suffices here: Dirichlet GRH gives a fixed-power normalized prime saving on every nonprincipal invariant mode, and the typical cuspidal rectangle does the same on the other modes. All modes enter the same joint energy sum, so no factor for the number of invariant characters is incurred. This also explains the invariant-character treatment in the proportional-share proof for polynomial moduli.
+
+## Proportional shares for every polynomial angular and ray scale with norm slack
+
+The relative asymptotic above has a shorter proof that removes the upper limits on the fixed polynomial exponents of the ray modulus and the angular resolution. The inverse smooth-count threshold estimates still use the finer smooth-pair arithmetic in their stated ranges.
+
+Fix \(\mu,\kappa\ge0\), \(s>2(1+\mu+\kappa)\), and write \(M=\mathrm N\mathfrak m\le V^\mu\), \(J\le V^\kappa\), \(X=V^s\). Under Dirichlet GRH, outside \(O(T^{1/2})\) negative fundamental discriminants in the dyad, **simultaneously for all such ideal moduli and angular resolutions**, each ray and each arc of length \(1/J\) contain
+\[
+ \bigl(1+O_A((\log V)^{-A})\bigr)
+                  \frac{S_D(X,Y;Z')}{h_{\mathfrak m}J}
+\]
+primitive smooth ideals for every fixed \(A\) and the given coprimality restrictions \(Z'\) including primes of the modulus. At ordinary prime discriminants with trivial finite modulus the same assertion is unconditional on the analogous power-saving typical family. For general discriminants with polylogarithmic finite modulus, the earlier unconditional invariant-character estimate gives the same conclusion off \(O_A(T/(\log T)^A)\) fields.
+
+**A geometric bound for the joint frequency energy.** For each ordinary class choose a representative ideal lattice coprime to \(\mathfrak m\), normalized by the square root of its norm, as in the definition of the angle. Write \(\Lambda_a\) for that lattice, with covolume \(V/2\). The ideals in the class are represented by vectors \(v\in\Lambda_a\), up to the units, and primitive ideals by primitive vectors. If two ideals give the same ray then their representing vectors can be chosen with
+\[
+             w=\pm v+\sqrt M\,z,\qquad z\in\Lambda_{a\mathfrak m},
+\]
+where \(\Lambda_{a\mathfrak m}\) denotes the normalized lattice of the representative ideal times the modulus. This follows by reducing generators modulo that product ideal; the bounded unit rotations do not affect the estimate. The norms of both vectors are their squared lengths. Multiplication by \([\mathfrak m]\) permutes the ordinary lattice classes, preserving their list of minima up to rotation.
+
+Suppose the norms lie in a dyad of size \(W\), and the angular difference is \(O(1/K)\), \(K=J(\log V)^{O(1)}\). Put \(R=\sqrt{W/M}\). For \(z\ne0\) we have \(\|z\|\ll R\) and \(|\sin\angle(v,z)|\ll\min(1,R/(K\|z\|))\) by the determinant identity for \(v,w\). The number of primitive choices of \(v\) for this \(z\) is
+\[
+ O\!\left(1+\frac WV\min(1,R/(K\|z\|))\right).
+\]
+Indeed distinct nonparallel primitive vectors in the dyad have angular spacing \(\gg V/W\), and there are at most two on a common line. No location of the sector is excluded.
+
+In a planar lattice of minimum \(\lambda\) and covolume \(V/2\), the number of nonzero vectors of length at most \(t\) is \(O(t/\lambda+t^2/V)\) by counting rows along a shortest vector and using emptiness for \(t<\lambda\). Partial summation up to \(O(R)\) bounds the sum of the displayed angular weights \(\min(1,R/(K\|z\|))\) by \(O(R\log(2W)/(K\lambda)+R^2/(VK))\). Across the ordinary classes,
+\[
+       \sum_a \lambda_a^{-1}
+       \ll\sum_{d\ll V}\frac{\tau(d)}{\sqrt d}
+       \ll\sqrt V\log(2V).
+\]
+A shortest vector is primitive, its squared length is the norm of an integral ideal in the corresponding class, and planar reduction bounds this norm by \(O(V)\). There are at most \(\tau(d)\) primitive ideals of norm \(d\). This proves the last bound for every field and every permuted collection \(\Lambda_{a\mathfrak m}\).
+
+Summing over \(z\), including the diagonal \(z=0\), therefore bounds all same-ray close pairs by a log power times
+\[
+ V+W+R\sqrt V+R^2+\frac{WR}{\sqrt V K}+\frac{WR^2}{VK}.
+\]
+At \(W=VJM\exp(o(\log V))\) this is \(WV^{o(1)}\). Hence the positive angular kernel yields joint squared low-frequency norm \(V^{o(1)}\) for every dyadic subpacket with maximum atom \(V^{o(1)}/W\), since \(h_{\mathfrak m}\ll VM\log V\). This is deterministic and uniform in the modulus. For \(M=1\) the ordinary primitive sector bound alone gives the same conclusion per first vector. In particular this use of the geometric estimate needs no pair of smoothness factors in the close-pair count.
+
+**Application to the full smooth population.** In the complete-pattern proof put each base packet at \(VJM\) with at most its single-prime overshoot. The strict margin in \(s\) still reserves a polynomial guard after the small exceptional components are removed. For the local deletions an affine ray lattice has minimum difference length at least \(\sqrt M\) and covolume \(MV/2\). Its sector bound at complementary norm \(W'\) is \(O(1+\sqrt{W'/M}+W'/(VJM))\) by the rotated rectangle row estimate. The complement exceeds \((VJ)^2 M\) by a fixed power in these deletions. This absorbs the boundary terms. The sharp-bin estimates, random partitions with disjoint rational prime labels, and endpoint replacement then give the claimed relative error with the geometric energy estimate.
+
+The primitive cuspidal inductions for this polynomial range have analytic conductor and tested height bounded by fixed powers of \(T\). The arithmetic conductor is divisible by \(|D|\), also for angular twists. A single bad representation can consequently occur for at most \(T^{o(1)}\) discriminants by the divisor bound. Choose the fixed zero-free margin small enough in the earlier family density theorem to remove \(O(T^{1/2})\) fields even with this multiplicity. Dirichlet GRH bounds all nonprincipal invariant factors, including ones of small conductor shared by many moduli. Their prime transforms can be included with all other nonprincipal modes in the joint energy estimate. For the unconditional prime-discriminant ordinary assertion there are no such invariant modes, and one applies the same family argument also to the splitting characters. This is why uniformity over the indicated ray moduli costs no Markov factor here.
