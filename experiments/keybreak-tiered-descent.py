@@ -111,6 +111,7 @@ def check_integer_schedule(
     top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,
     h=h, target=target, scales=scales, fractions=fractions, top_ratio_slope=F(0),
     factor_cap=2, first_scale=F(0), cap_slack=slack, row_exponent=None,
+    coordinate_fraction=F(1, 2),
 ):
     mb = n.bit_length()
     d = first_degree(n, mb, delta)
@@ -152,7 +153,7 @@ def check_integer_schedule(
     assert cutoffs[1 + high_count] <= isqrt(d * t**2) < cutoffs[high_count]
     assert 2 * top_box > 3 * global_child + 20 * (len(cutoffs) + 10)**6 * t
 
-    target_bits = (n - 1) // 2 - 2
+    target_bits = floor(coordinate_fraction * (n - 1)) - 2
     remaining = target_bits
     previous_upper = max(base, ceil(first_scale * e0))
     total_factors = 0
