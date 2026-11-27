@@ -193,6 +193,18 @@ theorem pmf_finset_mass_sub_le_totalVariation (p q : PMF B) (T : Finset B) :
   rw [← hd.abs.sum_add_tsum_subtype_compl T]
   linarith only [hsplit, hfinite, hcompl]
 
+private theorem pmf_atom_cap_nonneg (q : PMF B) {m : ℝ} (hatom : ∀ z, (q z).toReal ≤ m) :
+    0 ≤ m := by
+  obtain ⟨z, _⟩ := q.support_nonempty
+  exact (ENNReal.toReal_nonneg (a := q z)).trans (hatom z)
+
+/-- An atom cap times the size of a finite set bounds its probability mass. -/
+theorem pmf_finset_mass_le_card_mul (q : PMF B) (S : Finset B) {m : ℝ}
+    (hatom : ∀ z, (q z).toReal ≤ m) :
+    (∑ z ∈ S, (q z).toReal) ≤ (S.card : ℝ) * m := calc
+  _ ≤ ∑ _z ∈ S, m := sum_le_sum fun z _ => hatom z
+  _ = _ := by simp [nsmul_eq_mul]
+
 /-- A high-mass finite input set limits the image law's proximity to any target
 law whose atoms are uniformly bounded. -/
 theorem pmf_map_totalVariation_ge (p : PMF A) (q : PMF B)
@@ -211,17 +223,45 @@ theorem pmf_map_totalVariation_ge (p : PMF A) (q : PMF B)
     rw [ENNReal.toReal_sum (fun x _ => p.apply_ne_top x),
       ENNReal.toReal_sum (fun z _ => (p.map f).apply_ne_top z)] at hre
     exact hre
-  have hm : 0 ≤ m := by
-    obtain ⟨z, _⟩ := q.support_nonempty
-    exact (ENNReal.toReal_nonneg (a := q z)).trans (hatom z)
-  have htarget : (∑ z ∈ S.image f, (q z).toReal) ≤ (S.card : ℝ) * m := calc
-    _ ≤ ∑ _z ∈ S.image f, m := sum_le_sum fun z _ => hatom z
-    _ = ((S.image f).card : ℝ) * m := by simp [nsmul_eq_mul]
-    _ ≤ _ := mul_le_mul_of_nonneg_right (by exact_mod_cast card_image_le) hm
+  have htarget : (∑ z ∈ S.image f, (q z).toReal) ≤ (S.card : ℝ) * m :=
+    (pmf_finset_mass_le_card_mul q (S.image f) hatom).trans
+      (mul_le_mul_of_nonneg_right (by exact_mod_cast card_image_le) (pmf_atom_cap_nonneg q hatom))
   calc
     _ ≤ (∑ z ∈ S.image f, ((p.map f) z).toReal) - ∑ z ∈ S.image f, (q z).toReal :=
       sub_le_sub (hmass.trans himage) htarget
     _ ≤ _ := pmf_finset_mass_sub_le_totalVariation (p.map f) q (S.image f)
+
+/-- A finite mixture preserves at least the weighted component masses on
+the union of their respective sets. An atom cap bounds the target mass there. -/
+theorem pmf_finite_mixture_totalVariation_ge {ι : Type*} (w : PMF ι) (I : Finset ι)
+    (hw : ∀ i ∉ I, w i = 0) (p : ι → PMF B) (q : PMF B)
+    (S : ι → Finset B) (δ : ι → ℝ) (K : ι → ℕ) (m : ℝ)
+    (hmass : ∀ i ∈ I, δ i ≤ ∑ z ∈ S i, (p i z).toReal)
+    (hsize : ∀ i ∈ I, (S i).card ≤ K i) (hatom : ∀ z, (q z).toReal ≤ m) :
+    (∑ i ∈ I, (w i).toReal * δ i) - m * (∑ i ∈ I, (K i : ℝ)) ≤
+      pmfTotalVariation (w.bind p) q := by
+  classical
+  let U := I.biUnion S
+  have hbind (z : B) : ((w.bind p) z).toReal =
+      ∑ i ∈ I, (w i).toReal * (p i z).toReal := by
+    rw [PMF.bind_apply, tsum_eq_sum (s := I) (fun i hi => by rw [hw i hi, zero_mul]),
+      ENNReal.toReal_sum (fun i _ => ENNReal.mul_ne_top (w.apply_ne_top i) ((p i).apply_ne_top z))]
+    simp only [ENNReal.toReal_mul]
+  have hmix : (∑ i ∈ I, (w i).toReal * δ i) ≤ ∑ z ∈ U, ((w.bind p) z).toReal := calc
+    _ ≤ ∑ i ∈ I, (w i).toReal * (∑ z ∈ U, (p i z).toReal) := by
+      apply sum_le_sum
+      intro i hi
+      apply mul_le_mul_of_nonneg_left _ ENNReal.toReal_nonneg
+      exact (hmass i hi).trans (sum_le_sum_of_subset_of_nonneg
+        (fun z hz => mem_biUnion.mpr ⟨i, hi, hz⟩) (fun _ _ _ => ENNReal.toReal_nonneg))
+    _ = _ := by simp only [mul_sum, hbind]; exact sum_comm
+  have hcard : U.card ≤ ∑ i ∈ I, K i := card_biUnion_le.trans (sum_le_sum hsize)
+  have htarget : (∑ z ∈ U, (q z).toReal) ≤ m * ∑ i ∈ I, (K i : ℝ) := calc
+    _ ≤ (U.card : ℝ) * m := pmf_finset_mass_le_card_mul q U hatom
+    _ ≤ (∑ i ∈ I, (K i : ℝ)) * m :=
+      mul_le_mul_of_nonneg_right (by exact_mod_cast hcard) (pmf_atom_cap_nonneg q hatom)
+    _ = _ := mul_comm _ _
+  exact (sub_le_sub hmix htarget).trans (pmf_finset_mass_sub_le_totalVariation (w.bind p) q U)
 
 #print axioms pmfTotalVariation_eq_totalVariation
 #print axioms one_sub_pmfTotalVariation_eq_tsum_min
@@ -229,6 +269,7 @@ theorem pmf_map_totalVariation_ge (p : PMF A) (q : PMF B)
 #print axioms one_sub_pmfTotalVariation_le_four_mul_moment_bounds
 #print axioms pmf_finset_mass_sub_le_totalVariation
 #print axioms pmf_map_totalVariation_ge
+#print axioms pmf_finite_mixture_totalVariation_ge
 
 end PMFLaws
 
