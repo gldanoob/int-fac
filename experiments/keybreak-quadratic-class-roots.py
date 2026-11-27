@@ -1,4 +1,4 @@
-"""Reduced quadratic forms and their modular comparison roots, discriminant -4N."""
+"""Reduced quadratic forms and their modular comparison roots, discriminants -4N and -8N."""
 from collections import Counter, defaultdict
 from math import gcd, isqrt
 
@@ -21,28 +21,30 @@ def reduce_form(a, b, c):
         x, y, other_x, other_y = other_x, other_y, -x, -y
 
 
-def oriented_square(params, n):
+def oriented_square(params, n, *, radicand=None):
     """Square a primitive ideal coprime to N and return the reduced ideal and root."""
+    radicand = n if radicand is None else radicand
+    assert radicand in (n, 2*n) and n > 1 and n % 2
     a, b, c = params
-    assert a*c == b*b + n and gcd(a, n) == gcd(a, gcd(2*b, c)) == 1
+    assert a*c == b*b + radicand and gcd(a, n) == gcd(a, gcd(2*b, c)) == 1
     content = gcd(a, 2*b)
     t, slope = a // content, 2*b // content
     modulus = t*t
     v = pow(slope, -1, t) if t > 1 else 0
     u = (1 - v*slope) // t
-    lift = (u * t*b + v*((b*b - n)//content)) % modulus
-    assert (lift*lift + n) % modulus == 0
-    reduced, (x, y) = reduce_form(modulus, lift, (lift*lift+n)//modulus)
+    lift = (u * t*b + v*((b*b - radicand)//content)) % modulus
+    assert (lift*lift + radicand) % modulus == 0
+    reduced, (x, y) = reduce_form(modulus, lift, (lift*lift + radicand)//modulus)
     root = (modulus*x + lift*y) * pow(t, -1, n) % n
     assert root*root % n == reduced[0] % n
     return reduced, root
 
 
-def canonical_forms(n):
+def canonical_forms(radicand):
     """Enumerate small fixtures; the large-input proposal samples A with its factors."""
-    for a in range(1, isqrt(4*n//3) + 1):
+    for a in range(1, isqrt(4*radicand//3) + 1):
         for b in range(-((a-1)//2), a//2 + 1):
-            c, rem = divmod(b*b+n, a)
+            c, rem = divmod(b*b+radicand, a)
             if not rem and (a < c or (a == c and b >= 0)) and gcd(a, gcd(2*b, c)) == 1:
                 yield a, b, c
 
@@ -60,10 +62,11 @@ def prime_to_input(form, n):
     raise AssertionError("no primitive representative in fixture search")
 
 
-def check(n):
+def check(n, *, radicand=None):
+    radicand = n if radicand is None else radicand
     distribution = defaultdict(Counter)
-    for form in canonical_forms(n):
-        reduced, root = oriented_square(prime_to_input(form, n), n)
+    for form in canonical_forms(radicand):
+        reduced, root = oriented_square(prime_to_input(form, n), n, radicand=radicand)
         if gcd(reduced[0], n) == 1:
             distribution[reduced][root] += 1
             distribution[reduced][-root % n] += 1
@@ -75,4 +78,6 @@ def check(n):
 
 if __name__ == "__main__":
     inputs = list(range(3, 602, 2))
-    print(f"{len(inputs)} odd moduli, {sum(check(n) for n in inputs)} uniform reduced-form fibers")
+    for multiplier in (1, 2):
+        count = sum(check(n, radicand=multiplier*n) for n in inputs)
+        print(f"-{4*multiplier}N: {len(inputs)} odd moduli, {count} uniform reduced-form fibers")

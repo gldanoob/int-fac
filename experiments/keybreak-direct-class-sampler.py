@@ -1,4 +1,4 @@
-"""Sample unit reduced forms of discriminant -4N with factored leading coefficient."""
+"""Sample unit reduced forms of discriminants -4N and -8N with factored leading coefficient."""
 
 from collections import Counter
 from fractions import Fraction
@@ -32,9 +32,13 @@ def factored_integer(limit, rng):
 
 
 def local_roots(value, prime, exponent):
-    """Return the at most four roots of a unit modulo one prime power."""
-    if value % prime == 0 or exponent < 1:
-        raise ValueError("expected a unit and a positive prime-power exponent")
+    """Return the local roots for a unit or the ramified -8N dyadic branch."""
+    if exponent < 1:
+        raise ValueError("expected a positive prime-power exponent")
+    if prime == 2 and value % 4 == 2:
+        return 2**exponent, (0,) if exponent == 1 else ()
+    if value % prime == 0:
+        raise ValueError("expected a unit outside the ramified dyadic branch")
     if prime == 2:
         roots = [1]
         modulus = 2
@@ -71,9 +75,9 @@ def center_root(root, leading):
     return root if 2 * root <= leading else root - leading
 
 
-def canonical_from_root(n, leading, root):
+def canonical_from_root(radicand, leading, root):
     middle = center_root(root, leading)
-    trailing, remainder = divmod(n + middle * middle, leading)
+    trailing, remainder = divmod(radicand + middle * middle, leading)
     if remainder or trailing < leading or (trailing == leading and middle < 0):
         return None
     if gcd(leading, gcd(2 * middle, trailing)) != 1:
@@ -81,17 +85,21 @@ def canonical_from_root(n, leading, root):
     return leading, middle, trailing
 
 
-def proposal_bounds(n):
+def proposal_bounds(n, *, radicand=None):
     if n <= 1 or n % 2 == 0:
         raise ValueError("N must be odd and greater than one")
-    upper = isqrt(4 * n // 3)
+    radicand = n if radicand is None else radicand
+    if radicand not in (n, 2 * n):
+        raise ValueError("expected radicand N or 2N")
+    upper = isqrt(4 * radicand // 3)
     last = (upper - 1).bit_length()
     return upper, 1 << last, last
 
 
-def sample_reduced_class(n, rng):
+def sample_reduced_class(n, rng, *, radicand=None):
     """Return ((A, b, C), factorization of A) for the form [A, 2b, C]."""
-    upper, power, last = proposal_bounds(n)
+    radicand = n if radicand is None else radicand
+    upper, power, last = proposal_bounds(n, radicand=radicand)
     while True:
         stage = rng.randrange(last + 1)
         start = 1 << stage
@@ -104,12 +112,12 @@ def sample_reduced_class(n, rng):
             continue
 
         factors = factors_d + factors_e
-        branches = [local_roots(-n, p, exponent) for p, exponent in factors.items()]
+        branches = [local_roots(-radicand, p, exponent) for p, exponent in factors.items()]
         root_count = prod(len(roots) for _, roots in branches)
         if rng.randrange(1 << (len(factors) + 1)) >= root_count:
             continue
         root = crt_root((modulus, rng.choice(roots)) for modulus, roots in branches)
-        form = canonical_from_root(n, leading, root)
+        form = canonical_from_root(radicand, leading, root)
         if form is not None:
             return form, factors
 
@@ -132,8 +140,9 @@ def check_factored_weights(limit):
     assert len(accepted) == 1 and next(iter(accepted)) > 0
 
 
-def check_proposal_weights(n, canonical_forms):
-    upper, power, last = proposal_bounds(n)
+def check_proposal_weights(n, canonical_forms, *, radicand=None):
+    radicand = n if radicand is None else radicand
+    upper, power, last = proposal_bounds(n, radicand=radicand)
     multiplicities = Counter()
     for stage in range(last + 1):
         start = 1 << stage
@@ -151,10 +160,10 @@ def check_proposal_weights(n, canonical_forms):
         assert multiplicities[leading] == 1 << len(factors)
         if gcd(leading, n) != 1:
             continue
-        branches = [local_roots(-n, p, exponent) for p, exponent in factors]
+        branches = [local_roots(-radicand, p, exponent) for p, exponent in factors]
         lifts = [[(modulus, root) for root in roots] for modulus, roots in branches]
         roots = {crt_root(choice) for choice in product(*lifts)}
-        assert roots == {root for root in range(leading) if (root * root + n) % leading == 0}
+        assert roots == {root for root in range(leading) if (root * root + radicand) % leading == 0}
         if not roots:
             continue
         mass = (
@@ -163,12 +172,12 @@ def check_proposal_weights(n, canonical_forms):
             / len(roots)
         )
         for root in roots:
-            form = canonical_from_root(n, leading, root)
+            form = canonical_from_root(radicand, leading, root)
             if form is not None:
                 assert form not in weights
                 weights[form] = mass
 
-    assert weights.keys() == {form for form in canonical_forms(n) if gcd(form[0], n) == 1}
+    assert weights.keys() == {form for form in canonical_forms(radicand) if gcd(form[0], n) == 1}
     assert all(mass == Fraction(1, 4 * power * (last + 1)) for mass in weights.values())
     return weights
 
@@ -191,15 +200,15 @@ def parity_dependency(masks):
     return None
 
 
-def check_composed_split(n, oriented_square, seed):
+def check_composed_split(n, oriented_square, seed, *, radicand=None):
     """Trial division stands in for analytic field descent in this finite check."""
     factor_base = (2, 3, 5, 7, 11, 13)
     rng, signs = Random(seed), Random(seed + 1)
     for _ in range(12):
         public_factors, public_masks, private_roots = [], [], []
         for _ in range(1000):
-            form, _ = sample_reduced_class(n, rng)
-            (leading, _, _), root = oriented_square(form, n)
+            form, _ = sample_reduced_class(n, rng, radicand=radicand)
+            (leading, _, _), root = oriented_square(form, n, radicand=radicand)
             if gcd(leading, n) != 1:
                 continue
             cofactor = leading
@@ -239,9 +248,6 @@ if __name__ == "__main__":
     for limit in range(1, 51):
         check_factored_weights(limit)
     fixtures = (3, 15, 21, 45, 55, 63, 105, 175, 225, 315, 525)
-    weights = {n: check_proposal_weights(n, reference["canonical_forms"]) for n in fixtures}
-    assert any(form[0] % 2 == 0 for forms in weights.values() for form in forms)
-    assert any(gcd(form[0], n) > 1 for n in fixtures for form in reference["canonical_forms"](n))
     try:
         proposal_bounds(10)
     except ValueError:
@@ -249,23 +255,42 @@ if __name__ == "__main__":
     else:
         raise AssertionError("even N must be rejected")
 
-    rng = Random(20261127)
-    examples = []
-    for n in fixtures:
-        for _ in range(8):
-            form, factors = sample_reduced_class(n, rng)
-            assert form in weights[n]
-            assert prod(p**exponent for p, exponent in factors.items()) == form[0]
-            assert all(Integer(p).is_prime(proof=True) for p in factors)
-            _, root = reference["oriented_square"](form, n)
-            assert 0 <= root < n
-        examples.append((n, form, sorted(factors.items())))
     print("50 exact Kalai interval-weight checks")
-    print(f"{len(fixtures)} fixtures, {sum(map(len, weights.values()))} exact pointwise weights")
-    print(f"{8 * len(fixtures)} seeded draws checked; last draw for each fixture:")
-    for example in examples:
-        print(example)
+    for multiplier, composed in ((1, (241 * 269, 43**2 * 47)), (2, (211 * 223, 43**2 * 47))):
+        weights = {
+            n: check_proposal_weights(n, reference["canonical_forms"], radicand=multiplier * n)
+            for n in fixtures
+        }
+        assert any(form[0] % 2 == 0 for forms in weights.values() for form in forms)
+        assert any(
+            gcd(form[0], n) > 1 for n in fixtures for form in reference["canonical_forms"](multiplier * n)
+        )
+        if multiplier == 2:
+            for n in fixtures:
+                assert (2, 0, n) in weights[n]
+                assert local_roots(-2 * n, 2, 1) == (2, (0,))
+                assert local_roots(-2 * n, 2, 2) == (4, ())
 
-    for n in (241 * 269, 43**2 * 47):
-        divisor, masks = check_composed_split(n, reference["oriented_square"], seed=20261127)
-        print(f"composed split of {n}: divisor {divisor}, public dependency {masks}")
+        rng = Random(20261127)
+        examples = []
+        saw_even_seed = False
+        for n in fixtures:
+            for _ in range(8):
+                form, factors = sample_reduced_class(n, rng, radicand=multiplier * n)
+                assert form in weights[n]
+                assert prod(p**exponent for p, exponent in factors.items()) == form[0]
+                assert all(Integer(p).is_prime(proof=True) for p in factors)
+                _, root = reference["oriented_square"](form, n, radicand=multiplier * n)
+                assert 0 <= root < n
+                saw_even_seed |= form[0] % 2 == 0
+            examples.append((n, form, sorted(factors.items())))
+        assert saw_even_seed
+        print(f"-{4 * multiplier}N: {len(fixtures)} fixtures, {sum(map(len, weights.values()))} exact pointwise weights")
+        print(f"{8 * len(fixtures)} seeded draws checked; last draw for each fixture:")
+        for example in examples:
+            print(example)
+        for n in composed:
+            divisor, masks = check_composed_split(
+                n, reference["oriented_square"], seed=20261127, radicand=multiplier * n
+            )
+            print(f"composed split of {n}: divisor {divisor}, public dependency {masks}")
