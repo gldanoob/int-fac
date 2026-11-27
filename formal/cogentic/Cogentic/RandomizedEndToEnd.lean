@@ -13,7 +13,9 @@ import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19Thin
+import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
+import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedC5Full
@@ -172,6 +174,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL19SecondMoment.PoissonQuotientInputs.replaceMarginalBounds
 #print axioms Cogentic.RandomizedL19ZeroMode.ZeroModeCertificate.toIdealZeroModeInputs
 #print axioms Cogentic.RandomizedL19Thin.LatticeThinInputs.slot_le
+#print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.toSubexpLeaf
+#print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.slot_le
 #print axioms Cogentic.RandomizedConcreteStageCostS5.s5Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS5.ConcreteC4Hypotheses.withS5
 #print axioms Cogentic.RandomizedC5Coupling.CouplingInputs.stageBudget
@@ -188,6 +192,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.slot_le
 #print axioms Cogentic.RandomizedL4.L4Inputs.toAlgebraicLeaf
+#print axioms Cogentic.RandomizedL20_2.L20_2Inputs.toConcentrationLeaf
+#print axioms Cogentic.RandomizedL20_2.L20_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL34.EffectiveChebotarevInputs.ratedLeaf
 #print axioms Cogentic.RandomizedL19Full.L19FullCertificate.toL19Inputs
 #print axioms Cogentic.RandomizedL19Full.L19FullCertificate.slots_bounds
