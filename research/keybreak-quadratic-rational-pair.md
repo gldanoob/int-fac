@@ -121,3 +121,16 @@ Uniform dilation over all units has pair mean \(K^{-1}|I|^{-1}\sum_{r\in I}R_A(u
 At the bands with \(M\) exceeding \(P^2/V^2\) by a fixed power and \(\rho=M^{-o(1)}\), uniform dilation gives the desired pair scale.
 
 For actual primes \(p\asymp P\), the character-pair expansion for \(A(x_1/p)A(x_2/p)\) inserts \(B(\eta)=\mathbb E_p\eta(p)\) at \(\eta=\chi\psi\), up to conjugation. The part \(\eta=1\) is exactly the uniform-dilation contribution. For every other \(\eta\) Dirichlet GRH gives \(|B(\eta)|\ll P^{-1/2}(\log M)^{O(1)}\). The numerator average supplies \(D_\eta(\chi)=\mathbb E_{r\in I}\overline\chi(u_r)\overline\eta(x_2(r))\), with \(\sum_\chi|D_\eta(\chi)|^2=K/|I|\). Thus Cauchy and \(\sum_{\eta,\chi}|\widehat A(\chi)\widehat A(\eta\chi^{-1})|^2=(KS)^2\) bound the absolute off-diagonal by \(S(\log M)^{O(1)}/\sqrt{P|I|}\). Relative to \(S^2/K^2\) the resulting bound is of order \(M^{3/2}\sqrt P/(V\rho)\) up to logarithms. As a direct description of the missing information, for \(L\) distinct sampled primes the squared Euclidean distance between the joint physical and uniform-dilation probability vectors on pairs of residues equals \(|I|^{-1}(1/L-1/K)\). Each ratio is distinct and its conditional first-coordinate support has size \(L\). The diagonal calculation controls ratios, while these estimates leave the cancellation between cofactor phases on that conditional support open.
+
+## A finite check of the common-anchor moment
+
+At \(p=100003\) and height \(282\), sample 2,048 primitive anchors in each of two dyads, \(3p\le Q<6p\) and \(6p\le Q<12p\), at slopes in \([.57,.63]\) and with odd \(Q\). Enumerate primitive negative fundamental marks of the indicated split parity in a fixed coefficient box by solving for their constant coefficient modulo \(p\). For a dyadic cofactor-size bin estimate its smoothness rate from the observed marks. Conditional independent thinning at those rates gives a comparison at the same raw marks and cofactor sizes.
+
+| Denominator range | Cutoff | Observed ordered smooth pairs | Comparison | Observed fraction of anchors with a hit | Comparison |
+|---|---:|---:|---:|---:|---:|
+| \([3p,6p)\) | 251 | 14 | 15.8 | .0840 | .0837 |
+| \([6p,12p)\) | 251 | 2 | 3.1 | .0391 | .0388 |
+| \([3p,6p)\) | 1009 | 232 | 246.9 | .2974 | .2952 |
+| \([6p,12p)\) | 1009 | 100 | 93.7 | .1943 | .1968 |
+
+The two dyads contain 11,233 and 11,240 raw marks. The enumeration agrees with exhaustive enumeration for every residue in a smaller case at \(p=31\). The strict cutoff 251 gives few actual pairs. The larger cutoff exceeds the mark height, the dyad scales are only constant multiples of the parent here, and the comparison rates are fitted to the same sample. These finite counts leave the uniform asymptotic moment open. Reproduce the two dyads and the intermediate cutoff 503 with `python3 experiments/keybreak-quadratic-rational-moments.py`. [Seeded arithmetic experiment](../experiments/keybreak-quadratic-rational-moments.py)
