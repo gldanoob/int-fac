@@ -12,6 +12,11 @@ import Cogentic.RandomizedGramRank
 import Cogentic.RandomizedHasseIncidence
 import Cogentic.RandomizedFullTableOptimum
 import Cogentic.RandomizedHiddenLabels
+import Cogentic.RandomizedHiddenSpan
+import Cogentic.RandomizedDistinctMoment
+import Cogentic.RandomizedPlantedRoots
+import Cogentic.RandomizedSamplerTransfer
+import Cogentic.RandomizedLatticeWindow
 import Cogentic.RandomizedKrylovProbe
 import Cogentic.RandomizedLimitedIndependence
 import Cogentic.RandomizedOddSplit

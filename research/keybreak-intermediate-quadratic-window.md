@@ -16,7 +16,7 @@ Write \(G=(\mathbb Z/N)^\times\), \(K=G[2]\), and \(Q=G/G^2\). In each class in 
 
 Here is the bound used for the root distribution. For an odd modulus \(r\), let two sets of unit radicands lie in \([1,M_1]\) and \([1,M_2]\), with \(r^{1/3}\le M_i\le r\). For chosen roots of a common unit multiple of their radicands, arbitrary block weights of modulus at most one, and a unit frequency \(c\), the sum of \(e_r(cxy)\) over all weighted pairs of those roots is
 \[
- \ll M_1M_2,r^{-1/24+o(1)}.
+ \ll M_1M_2\,r^{-1/24+o(1)}.
 \]
 To see the application of restricted energy, partition each radicand interval into blocks of width \(W=\lfloor r^{1/3}\rfloor\). For nonnegative weights the two successive Cauchy bounds partition first the \(x\) sum and then the \(y\) sum. If \(R_1,R_2\) count the weighted within-block root differences, this gives
 \[
