@@ -31,7 +31,7 @@ The high raw charge explains the choice of \(1.636\). With \(Q=3\delta b\), the 
 
 ## Exact fixed grid at \(\chi=1.01\)
 
-Use \((\delta,\kappa,\beta)=(1.4197202620,1.3732142239,.6654900015)\), \(\alpha=.50000001\), \(\eta=10^{-8}\), and \(s=10^{-7}\), all as exact rationals. The 4096-stage grid and rounding rule from the preceding certificates give \(h=.584768315988\). Only the scalar helpers from commit \(\texttt{a5160e2}\) are needed. The charges have these strict rational upper bounds.
+Use \((\delta,\kappa,\beta)=(1.4197202620,1.3732142239,.6654900015)\), \(\alpha=.50000001\), \(\eta=10^{-8}\), and \(s=10^{-7}\), all as exact rationals. The 4096-stage grid and rounding rule from the preceding certificates give \(h=.584768315988\). For the private elliptic recognition step choose the rational coefficient \(s_1=s_2=.707106781187\) for curve count and work per curve. Both exceed \(1/\sqrt{2}\). With \(y_0=1/(2\kappa)\), the exact squared slack \(h^2-(s_1+s_2)^2/(3\kappa\delta)\) lies between \(3.67\cdot10^{-13}\) and \(3.68\cdot10^{-13}\). Thus these choices fit the stated \(h\) with positive slack. Only the scalar helpers from commit \(\texttt{a5160e2}\) are needed. The charges have these strict rational upper bounds.
 
 | Charge | Upper bound |
 |---|---:|
