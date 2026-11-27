@@ -151,3 +151,34 @@ Let \(S\) be the cardinality of the common balanced cofactor set, \(S=\rho X\), 
  \frac{M^{3/2}\sqrt P}{\rho V^3}(\log M)^{O(1)}.
 \]
 This saves a factor \(V^2\) compared with summing the fixed-coefficient estimates. It still grows as a power on the intended bands; the absolute two-dimensional Fourier energy alone leaves the needed common-anchor estimate open.
+
+## Root fractions at the spacing of the anchors
+
+For a fixed eligible parent \(p\), take \(n\) in the common cofactor set and prime discriminants \(D\) in the designated dyad. Let \(\mathcal W_p\) consist of the records \((n,D,b\bmod 2pn)\) with \(b^2\equiv D\pmod{4pn}\), using both signs and both orientations at two. Restrict to \(p\nmid n\); this is automatic in the smooth range. For the ordinary balanced prime-bin set write \(W=|\mathcal W_p|\asymp S V^2/\log V\), by the reverse-order count, uniformly in \(p\). Each record supplies a fraction \(x=b/(2pn)\pmod 1\). An upper bound on clustering at the Farey scale,
+\[
+ \#\{(w,w')\in\mathcal W_p^2:\|x_w-x_{w'}\|_{\mathbb R/\mathbb Z}
+                  \le (\log V)^{C_0}/M^2\}
+ \ \ll (\log V)^{C_1}(W+W^2/M^2),                 \tag{8}
+\]
+suffices for the ordinary rational second moment on the tight coefficient box up to logarithmic factors. Here \(C_0\) must dominate the previously fixed height and anchor-range exponents. The ratio \(W/M^2\) is a positive power of \(P\) up to \(P^{o(1)}\) since \(V^3/P\) has a fixed power margin.
+
+To see the transfer, write a mark as \(h=[a,b_h,c]\) and an anchor as \(R=(r,Q)\). Choose \(T=(u,v)\) with \(rv-Qu=1\). Its mixed coefficient \(B_h\) in this basis satisfies
+\[
+ \frac{B_h}{2pn}=\frac vQ-\frac{2ar+b_hQ}{2Qpn}.
+\]
+The correction is \(O((\log V)^{C}/M^2)\) and \(B_h^2\equiv D\pmod{4pn}\). For a given \(R\) the record determines the mark: its residue specifies the unique lift of \(B_h/(2pn)\) sufficiently close to this fixed \(v/Q\), and the remaining coefficient is fixed by the discriminant. Conversely a specified fraction \(x\) can be that close to only \((\log V)^{O(1)}\) different reduced centers \(v/Q\), by elementary Farey spacing for denominators \(\le M(\log V)^C\). Each center determines \(r\) uniquely in the physical slope interval from \(rv\equiv1\pmod Q\). This bounds the number of anchors contributing a given pair. Dividing (8) with this multiplicity by the anchor count proves the asserted upper moment; dyadic probabilities change it by at most polynomial logarithms. Well-spacing for roots of a *fixed* quadratic congruence is used in the classical binary-form large sieve. In (8) the discriminants and smooth cofactor moduli both vary. [Exact completion identity in Lean](../formal/cogentic/Cogentic/RandomizedQuadraticCompletion.lean) · [Balog, Blomer, Dartyge and Tenenbaum, §5.3](https://ems.press/content/serial-article-files/43293)
+
+Two types of close pairs can be excluded exactly. Put \(g=(n_1,n_2)\), \(u_i=n_i/g\). Alter the lift of the first root by a multiple of \(2pn_1\) to take the short circular difference, set \(c_i=(b_i^2-D_i)/(4pn_i)\), and put
+\[
+ t=b_1u_2-b_2u_1,\qquad K=2pg(c_1u_2+c_2u_1)-b_1b_2.
+\]
+Direct expansion gives
+\[
+ t^2=D_1u_2^2+D_2u_1^2+2K u_1u_2,
+ \qquad 4pg\mid K^2-D_1D_2.
+\]
+The divisibility follows by expanding \(K^2\) modulo \(4pg\) and using \(b_i^2\equiv D_i\pmod{4pg}\). At the distance in (8), \(|t|\ll V(\log V)^{C}\max(u_1,u_2)\) since \(pn_i\asymp M^2 V\). Their ratio is bounded and \(D_i<0\), so \(0<K\ll V^2(\log V)^{O(1)}<p/2\). If \(D_1=D_2\), then \(K\equiv\pm D_1\pmod p\), forcing \(K=|D_1|\). The identity becomes \(t^2=-|D_1|(u_1-u_2)^2\), hence \(n_1=n_2\) and the two fractions are identical. They give the same record. For distinct prime discriminants, \(D_1D_2\) is nonsquare. Moreover \(K\ge\sqrt{D_1D_2}\) by the first identity and AM–GM, so \(K^2-D_1D_2\) is a positive multiple of \(4pg\). It follows that every distinct close pair has
+\[
+ D_1\ne D_2,\qquad (n_1,n_2)\ll V^4(\log V)^{O(1)}/p.
+\]
+In particular the same-cofactor diagonal contributes exactly one record per record at this scale because \(pX_R\gg V^4(\log V)^{O(1)}\) in the intended bands. Pairs with different discriminants and a small common cofactor can still contribute to (8).
