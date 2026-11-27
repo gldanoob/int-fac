@@ -6,6 +6,7 @@ import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
 import Cogentic.RandomizedL18_4
+import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedPaperL18_4
 import Cogentic.RandomizedPaperLeafStatements
 import Cogentic.RandomizedEpochAnalyticInputs
@@ -126,6 +127,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCost.s0Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.s7Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCost.ConcreteC4Hypotheses.ofS0S7
+#print axioms Cogentic.RandomizedL18_4.zmod_parseval
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieve
 #print axioms Cogentic.RandomizedPaperL18_4.paperAssumptions_of_L18_4Inputs
 #print axioms Cogentic.RandomizedConcreteHitMassCount.C5abcInputs.compl_le
 #print axioms Cogentic.RandomizedConcreteHitMassCount.C5abcInputs.toHitMassInputs
