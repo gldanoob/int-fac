@@ -25,6 +25,7 @@ import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedL21_2
+import Cogentic.RandomizedL21_2Sub
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL30
@@ -33,6 +34,7 @@ import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedP1
+import Cogentic.RandomizedP1Sub
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
@@ -224,6 +226,10 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2Sub.L20_2SubInputs.toInputs
 #print axioms Cogentic.RandomizedL27_1Sub.toRatedLeaf
 #print axioms Cogentic.RandomizedL4Sub.L4SubInputs.toL4Inputs
+#print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.slot_le
+#print axioms Cogentic.RandomizedP1Sub.P1SubInputs.toP1Leaf
+#print axioms Cogentic.RandomizedP1Sub.p1Sub_reduction
 #print axioms Cogentic.RandomizedConcreteFormSpec.concreteFormSpec
 #print axioms Cogentic.RandomizedL19EnergyMass.mellinEnergyScaleOfGrowth
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
