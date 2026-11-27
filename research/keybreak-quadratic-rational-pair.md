@@ -223,3 +223,41 @@ Dropping the smoothness constraint and averaging the count over parents gives \(
 This follows by writing \(\Delta=gj\) and summing \(2^{\omega(g)}\tau(g)/g^2\) over the tail, using an ordinary fixed divisor-function bound. At \(Y=V^4(\log V)^C\) this proves the raw estimate. Restricting \(Y\) to \(V^{4-\epsilon}\) or imposing \(G\ge V^\epsilon\) gives a fixed power saving and hence negligibility even on the smooth scale for typical parents. The remaining conics have large determinant and require both coordinates to be smooth. [Verified integer identities](../formal/cogentic/Cogentic/RandomizedRootFractionIdentity.lean)
 
 At longer denominator scales, an independent held-out check at \(p=257,V=232,B=229\) used 2,048 calibration anchors and 4,096 reporting anchors per range. For \(Q\asymp p^2\) there were 91,200 ordered smooth pairs, compared with 90,054.68 under conditional independent thinning. The difference per anchor was .280 with 95% interval [−.829,1.388]. For \(Q\asymp p^{5/2}\) there were 508 pairs compared with 434.23; the difference per anchor was .0180 with interval [−.0077,.0437]. The cutoff is below the mark height but this finite experiment takes \(V>\sqrt p\) to obtain enough pairs. Reproduce it with the earlier script and its `--long` option.
+
+### A second smoothness saving after averaging the parent
+
+Write \(n_i=2u_i\) with coprime odd parts, and \(U\asymp X_R\), \(u_i\asymp U\). The estimate below concerns the balanced squarefree bin set. Write \(\rho\) for its density at this scale, so \(\log\rho=-(\log U/\log B)\log d+o(H)\). Besides retaining the full smooth density of the first cofactor, the close-pair average gains
+\[
+             \exp\!\left(-\frac{\log V}{\log B}\log d+o(H)\right)
+\]
+from the second cofactor. All scales are on a fixed positive band as above. This gain holds at the original rational cutoff.
+
+**Removing the parent from the spacing condition.** A physical close pair supplies coarse records \((u_i,A_i,r_i)\), where \(A_i=|D_i|\asymp V^2\) and \(r_i=b_i\bmod u_i\) satisfies \(r_i^2\equiv-A_i\pmod{u_i}\). The short lift of \(t=b_1u_2-b_2u_1\) gives
+\[
+ \left\|r_1/u_1-r_2/u_2\right\|\le (\log V)^{O(1)} V/U .
+\]
+Conversely a specified coarse pair arising from a physical pair fixes this \(t\): its residue modulo \(u_1u_2\) is known and the permitted length \(O(VU(\log V)^{O(1)})\) is smaller than \(u_1u_2/2\). The conic identity above fixes \(K\). For distinct prime discriminants, \(0<K^2-A_1A_2<P^2\) and the parent divides it, so there are \(O(1)\) possible dyadic parents. At each such parent the lift from \((t,u_1,u_2)\) back to the full root residues has bounded multiplicity by the linear-shift argument above with \(g=2\). Equal-discriminant close pairs are the diagonal. Thus the coarse count bounds the sum over parents, with fixed multiplicity.
+
+**Counting coarse neighbours.** Fix the first record and put \(z_i=(r_i+i\sqrt{A_i})/u_i\), using an integer translate of \(z_2\) to realize the close difference. Each \(z_i\) is the upper root of the positive integral form \([u_i,-2r_i,(r_i^2+A_i)/u_i]\), of discriminant \(-4A_i\). Their imaginary parts are comparable to \(V/U\). The formula \(\cosh d(z_1,z_2)=1+|z_1-z_2|^2/(2\Im z_1\Im z_2)\) shows \(e^{d(z_1,z_2)}\le (\log V)^{O(1)}\). Choose one \(\gamma\in\mathrm{SL}_2(\mathbb Z)\) sending \(z_1\) into the standard fundamental domain, with image height \(h_0\ge\sqrt3/2\). Set \(m_0=V/h_0\); the transformed first leading coefficient is the positive integer \(\sqrt{A_1}/h_0\), so \(1\ll m_0\ll V\).
+
+Hyperbolic invariance gives \(h_0/L\le\Im(\gamma z_2)\le L h_0\) and \(|\Re(\gamma z_2)|\le L h_0\), for \(L=(\log V)^{O(1)}\): use \(|\Re(\gamma z_1)|\le1/2\) and the same distance formula. The transformed second integral form \([m,b,c]\) therefore lies in
+\[
+       0<m\le m_0 L,\qquad |b|\le V L,\qquad
+       0<c\le (V^2/m_0)L
+\]
+after increasing the fixed logarithmic power. Here \(m=\sqrt{A_2}/\Im(\gamma z_2)\), \(b=-2m\Re(\gamma z_2)\), \(c=m|\gamma z_2|^2\). The original leading coefficient is \(u_2=mj^2+bjk+ck^2\), where \((j,k)\) is the first column of \(\gamma\) and \((j,k)=1\). The chart is fixed by the first record; the transformed form determines the second record by the inverse change of variables.
+
+Let \(T_0\asymp V^2/m_0\) with a fixed small constant, so \(T_0\gg V\) and \(T_0<U\) on these bands. If \(u_2\) is in the bin set, multiply its distinct primes until their product first exceeds \(T_0/B\); this gives a squarefree divisor \(T_0/B<t_0\le T_0\). Split it as \(t_0=st'\) between primes dividing \(k\) and primes coprime to \(k\). Necessarily \(s\mid m\), since \(s\mid k\) and \((s,j)=1\). There are at most \(m_0 L/s\) positive choices for \(m\). Given \(m,b\), the condition modulo \(t'\) fixes one residue class for \(c\). Its upper range is at least a fixed multiple of \(t'\); thus at most \(O((V^2/m_0)L/t')\) choices occur. The three-dimensional count is \(O(V^3 L^3/t_0)\), also when one factor of the divisor is one. This handles every prime dividing the chart denominator.
+
+Summing \(1/t_0\) over squarefree bin divisors costs at most \(\exp[-(\log T_0/\log B)\log d+o(H)]\) by the prime harmonic factorial tail used in (9). This proves the stated uniform bound for the second record in the neighbourhood of *any* first record, with \(V^3\) as the raw local count. The number of first records is at most \(U\rho\, V^2\exp(o(H))\): each odd cofactor has \(O(d)\) prime factors and hence at most \(2^{O(d)}\) root orientations per discriminant. After summing over parents and dividing by their dyadic prime count, the distinct close pairs consequently number at most
+\[
+   \frac{UV^5}{P}\,\rho\,
+   \exp\!\left(-\frac{\log V}{\log B}\log d+o(H)\right)
+\]
+on average. Splitting polylogarithmically larger cofactor and height ranges into dyads changes only the \(o(H)\) term. For two cofactor dyads with ratio bounded by a polylog, the same chart argument applies with adjusted \(L\).
+
+In the physical anchor moment this is \((V^3/P)^2\rho\exp[-(\log V/\log B)\log d+o(H)]\) for typical parents, by the Farey transfer, Markov's inequality and \(U\asymp M^2V/P\). The shared-odd-prime pairs from (9) and the diagonal fit this upper bound on the two tabulated bands. Together with the typical-parent first moment it gives a probability of at least
+\[
+       \exp\!\left(-\frac{\log(M^2/P)}{\log B}\log d+o(H)\right)
+\]
+of reaching half that parent's smooth mean. The previous trimmed one-cofactor estimate had \(\log U\) in the numerator. This improves the leading probability exponent by \((\log V/\log B)\log d\); it still leaves an exponential gap to a polynomial relative second moment.
