@@ -417,6 +417,43 @@ L19.4-L19.6 leaves and `hitMass` bridge are gone. The remaining adapters are
 `concrete`/`concrete_eq` (the ambient epoch family is the concrete one) and
 `loss_le` (the concrete C5 total loss is dominated by the paper ledger).
 
+### Wave 8: the real reduced-form spec and the sub-lemma layer
+
+`RandomizedConcreteFormSpec.lean` constructs the actual `DirectFormSpec` over
+`ReducedForms N` for discriminant `-8N`:
+
+- `Form = ℕ × ℤ × ℕ` (`[A, 2b, C]`), `U = sqrt (8N/3)`;
+- `roots N A` is the explicit balanced-root image of `x² = -2N` under
+  `ZMod.valMinAbs`;
+- `buildForm` computes `C = (b² + 2N)/A` and accepts exactly the reduced forms;
+- `concreteFormSpec N hN` proves all seven `DirectFormSpec` fields.
+
+This replaces the toy prime modulus in `bigConcreteC3` as the C3 interface.
+
+`RandomizedDischargedAdapters.lean` reduces the three discharged-endpoint
+adapters:
+
+- `concrete`/`concrete_eq` are definitional for `concreteHardFamily` and
+  `concreteCostFamily`;
+- `loss_le` is equivalent to the explicit inequality between the eight-term
+  concrete C5 loss and the twelve-term paper ledger
+  (`loss_le_iff_explicit`);
+- `dischargedInputsOfConcrete` and `dischargedInputsOfConcreteCost` build
+  `DischargedPaperEndpointInputs` from concrete C1–C4/C5 inputs.
+
+The remaining sub-lemma modules are:
+
+| Module | Reduced content |
+|---|---|
+| `RandomizedL18_4LargeSieveResidual` | `perCell_ge_one` and `energy_le` from the spectral energy identity; residual `MellinConvolutionEnergyBudget` |
+| `RandomizedL19EnergyMass`, `RandomizedL19ZeroModeFinite`, `RandomizedL19ThinFinite` | envelope growth, marginal mass, and the finite initial segments |
+| `RandomizedL20_2Sub`, `RandomizedL20_4Sub` | saddle/CRT arithmetic, conditioned Paley–Zygmund, pool/dyad/G.11–G.12 reductions |
+| `RandomizedL27_1Sub`, `RandomizedL30Sub`, `RandomizedL34Sub` | Hasse/Deuring arithmetic, curve-budget/union bounds, probe/class-count/mask arithmetic |
+| `RandomizedL4Sub` | local splitting/CRT, principal-genus bridge, small-band product, reduced-form construction |
+
+These files keep the genuinely paper-level estimates as explicit `Prop`s; no
+loss, mass, count, or error is set to zero.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
