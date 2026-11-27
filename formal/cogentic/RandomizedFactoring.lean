@@ -17,6 +17,12 @@ import Cogentic.RandomizedDistinctMoment
 import Cogentic.RandomizedPlantedRoots
 import Cogentic.RandomizedSamplerTransfer
 import Cogentic.RandomizedLatticeWindow
+import Cogentic.RandomizedLatticePrimitive
+import Cogentic.RandomizedFactoredProposal
+import Cogentic.RandomizedScaledSchedule
+import Cogentic.RandomizedQuadraticShear
+import Cogentic.RandomizedAffineHitCount
+import Cogentic.RandomizedDeficientWeights
 import Cogentic.RandomizedKrylovProbe
 import Cogentic.RandomizedLimitedIndependence
 import Cogentic.RandomizedOddSplit
@@ -65,3 +71,6 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.Randomized.free_rational_search_floor
 #print axioms Cogentic.Randomized.terminal_search_gnfs_floor
 #print axioms Cogentic.Randomized.terminal_gnfs_equality
+#print axioms Cogentic.Randomized.sharp_strict_scaled_finite_schedule_infimum
+#print axioms Cogentic.RandomizedSamplerTransfer.mapped_transcript_indicator_transfer
+#print axioms Cogentic.RandomizedSamplerTransfer.deficient_weights_totalVariation_le
