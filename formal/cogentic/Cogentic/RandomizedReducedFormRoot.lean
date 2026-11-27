@@ -54,12 +54,18 @@ theorem shear (a b c k x y : ℤ) :
     (b + a * k) ^ 2 - a * (c + 2 * b * k + a * k ^ 2) = b ^ 2 - a * c ∧
       formValue a (b + a * k) (c + 2 * b * k + a * k ^ 2) x y =
         formValue a b c (x + k * y) y := by
-  constructor <;> simp only [formValue] <;> ring
+  constructor
+  · ring
+  · unfold formValue
+    ring
 
 /-- A rotation takes the old second basis vector as its new first column. -/
 theorem rotate (a b c x y : ℤ) :
     (-b) ^ 2 - c * a = b ^ 2 - a * c ∧
       formValue c (-b) a x y = formValue a b c (-y) x := by
-  constructor <;> simp only [formValue] <;> ring
+  constructor
+  · ring
+  · unfold formValue
+    ring
 
 end Cogentic.RandomizedReducedFormRoot
