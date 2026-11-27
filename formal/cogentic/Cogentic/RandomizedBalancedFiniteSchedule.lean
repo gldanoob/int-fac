@@ -270,7 +270,8 @@ theorem balanced_finite_private_low_budget {ε : ℝ} (hε : 0 < ε) :
       0.58514027 < p.u ∧ p.u < 0.58514029 ∧
       0.9448547 < p.b ∧ p.b < 0.944855 ∧
       1.4199108 < p.δ ∧ p.δ < 1.4199110 ∧
-      0 < p.q ∧ p.q ≤ 1 / 10 ^ 6 ∧
+      0 < p.q ∧ p.q < 1 / 10 ^ 6 ∧
+      p.h / 3 < p.M ∧ p.b + p.M + 2 * p.h / 3 + p.q < balancedEnvelopeInfimum + ε ∧
       p.lowRaw < balancedEnvelopeInfimum + ε ∧
       ∀ k ≥ K, ∃ w : ℕ → ℝ,
         let z : ℕ → ℝ := fun j => balancedUniformKnot k j
@@ -297,7 +298,7 @@ theorem balanced_finite_private_low_budget {ε : ℝ} (hε : 0 < ε) :
   let p : BalancedPerturbation := ⟨u,b,δ,q⟩
   have hq : 0 < q := lt_min (by positivity) (by positivity)
   have hqτ : q ≤ τ / 10 := min_le_left ..
-  have hqsmall : q ≤ 1 / 10 ^ 6 := by linarith only [hqτ,hτsmall,hτ]
+  have hqsmall : q < 1 / 10 ^ 6 := by linarith only [hqτ,hτsmall]
   have hcharge : q * (2 * coeff) ≤ (6 * b - δ) * τ :=
     (le_div_iff₀ (by positivity)).1 (min_le_right ..)
   have hw : 3 * p.χ * p.α / 2 - 3 / 4 ≤ 3 * q := by
@@ -324,8 +325,12 @@ theorem balanced_finite_private_low_budget {ε : ℝ} (hε : 0 < ε) :
       apply (lt_div_iff₀ (by positivity)).2
       nlinarith only [hu₂]
     linarith only [hMₗ,huᵤ,hqsmall]
+  have hscreen : p.b + p.M + 2 * p.h / 3 + p.q < C + ε := by
+    change b + p.M + 2 * (u + q) / 3 + q < C + ε
+    change b + p.M + 2 * u / 3 = C at hprivate
+    linarith only [hprivate,hqτ,hτε,hε]
   obtain ⟨K, hK⟩ := exists_nat_gt (p.h / τ)
-  refine ⟨p,K,huₗ,huᵤ,hbₗ,hbᵤ,hdₗ,hdᵤ,hq,hqsmall,hraw,?_⟩
+  refine ⟨p,K,huₗ,huᵤ,hbₗ,hbᵤ,hdₗ,hdᵤ,hq,hqsmall,hM,hscreen,hraw,?_⟩
   intro k hk
   let n : ℝ := (k : ℝ) + 1
   have hn : 0 < n := by dsimp [n]; positivity
