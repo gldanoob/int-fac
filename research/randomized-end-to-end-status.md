@@ -510,11 +510,43 @@ exists_concreteC3RealInputs_of_prime (line) :
     Nonempty (ConcreteC3RealInputs N hN h2)
 ```
 
-Consequence: the real reduced-form C3 instance is available for all
-sufficiently large prime moduli, but for general composite `N` the formal
-budget needs a sharper missing-root/TV estimate than the current crude bound.
-This is a formalization gap in the TV accounting, not a claim that the
-manuscript's estimate is false.
+**Wave 11 closes the rough branch.** `RandomizedConcreteC3Rough.lean` proves
+that for `IsRough (roughThreshold n) n` the `1/B` saving dominates the
+polylogarithmic numerator:
+
+```lean
+theorem eventually_heps_le_of_rough (line : DirichletLZerosOnLine) :
+  ∀ᶠ n, ∀ (hN : Odd n), 3 ≤ n → IsRough (roughThreshold n) n →
+    directSamplerEpsilon (realSpec n hN) realEta (realGcdMass n hN) ≤ 1/32
+
+theorem eventually_concreteC3RealInputs_of_rough (line) :
+  ∀ᶠ n, ∀ hN, 3 ≤ n → IsRough (roughThreshold n) n →
+    Nonempty (ConcreteC3RealInputs n hN ...)
+```
+
+The proof uses `∑_{p|N} 1/p ≤ ω(N)/B`, `ω(N) ≤ log N/log B`, and
+`B = exp((log n)^{2/3})` beating `(log N)^83`. So the real C3 budget is
+discharged on exactly the rough branch the randomized endpoint uses; the false
+general-`N` statement is only the small-prime branch, which the prepass handles.
+
+### Wave 11: the last sub-lemma reductions
+
+| Module | Reduction |
+|---|---|
+| `RandomizedL20_2Saddle` | saddle scale/mean to explicit smooth-number count/mass; character sums to `PrimeBinProductBound`/Mellin envelope |
+| `RandomizedL20_4Conditioned` | conditioned two-point/mean to unconditioned second moment + event/complement mass; interior concentration split into base/rational/elliptic |
+| `RandomizedL21_2Perron` | Plancherel split eliminated; tent smoothing reduced to Chebyshev + polynomial absorption; Perron/Fourier/density remain minimal |
+| `RandomizedL27Deuring` | Deuring counts to Frobenius discriminant + Hurwitz lower bound; curve total to the `j`-line stratification |
+| `RandomizedL30Younis` | Younis count to odd relative short-interval + global lower; LPP to raw model count + normalization |
+| `RandomizedL34Dedekind` | zero-free/Stark/range/Chebotarev to smallest equivalent one-sided forms; slack error form |
+| `RandomizedL4Faithful` | coprime composition proved by CRT; non-coprime Cox correction and squaring primitive selection isolated; `FaithfulFormComposition` shown false for odd `N` |
+| `RandomizedP1Analytic` | genus-two/ECM success and cost interfaces; trial-division cost obstruction formalized |
+| `RandomizedConcreteC3Rough` | rough-branch C3 budget discharged under GRH |
+
+The remaining explicit `Prop`s are the genuinely analytic inputs of those
+modules (smooth-number saddle/concentration, Perron/Fourier/tent estimates,
+Hurwitz/Deuring curve counts, Younis/LPP short-interval counts, Dedekind
+zero-free/Stark/Chebotarev, Cox correction, prepass success/cost).
 
 ## What is not proved
 
@@ -523,10 +555,11 @@ manuscript's estimate is false.
    `ConcreteC3Hypotheses` instance (`bigConcreteC3`), concrete S0–S9 stage costs,
    and the C5 `HitMassInputs`/`C5FullInputs` decomposition. Wave 9 supplies the
    real reduced-form `DirectFormSpec`, and wave 10 reduces its C3 budget to the
-   explicit `RealC3BudgetInputs`. That budget is certified for large prime
-   moduli under GRH but is **false for large `N` divisible by 3** under the
-   current crude missing-root bound; a sharper TV estimate is needed for
-   general composite `N`.
+   explicit `RealC3BudgetInputs`. That budget is **discharged on the rough
+   branch** by wave 11 (`eventually_concreteC3RealInputs_of_rough`), which is
+   exactly the branch the randomized endpoint uses. The literal budget is false
+   for large `N` divisible by 3 under the crude missing-root bound, but those
+   inputs go through the small-prime prepass.
 2. **The analytic leaves.** L18.4 and L19.4–L19.6 are now decomposed into
    explicit certificates and recomposed (`L18_4Full`, `L19Full`). The remaining
    paper-level leaves are L20.2, L20.4, L21.2, L27.1, L30, L34, L4/L25/L36, and
