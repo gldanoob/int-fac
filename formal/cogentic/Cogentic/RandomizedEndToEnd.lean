@@ -35,6 +35,7 @@ import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4Mass
 import Cogentic.RandomizedL18_4Thin
 import Cogentic.RandomizedL18_4ThinAggregate
+import Cogentic.RandomizedL18_4Full
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL18_4LargeSieveInputs
 import Cogentic.RandomizedL19SecondMoment
@@ -216,6 +217,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceThinPairFraction
 #print axioms Cogentic.RandomizedL18_4.ThinAggregate.strip_count
 #print axioms Cogentic.RandomizedL18_4.ThinAggregate.replaceThinPairFraction
+#print axioms Cogentic.RandomizedL18_4.L18_4Certificate.toInputs
+#print axioms Cogentic.RandomizedL18_4.L18_4Certificate.toSubexpLeaf
+#print axioms Cogentic.RandomizedL18_4.L18_4Certificate.slot_le
 #print axioms Cogentic.RandomizedL18_4.zmod_parseval
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieve
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieveCertificate
