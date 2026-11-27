@@ -13,12 +13,16 @@ import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19Thin
+import Cogentic.RandomizedL27_1
+import Cogentic.RandomizedL30
+import Cogentic.RandomizedP1
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
 import Cogentic.RandomizedC5HalfMass
 import Cogentic.RandomizedL18_4
 import Cogentic.RandomizedL18_4CellCount
+import Cogentic.RandomizedL18_4CellData
 import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4Mass
 import Cogentic.RandomizedL18_4Thin
@@ -164,6 +168,13 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCostS5.ConcreteC4Hypotheses.withS5
 #print axioms Cogentic.RandomizedC5Coupling.CouplingInputs.stageBudget
 #print axioms Cogentic.RandomizedC5Coupling.goodMass_lower_withCoupling
+#print axioms Cogentic.RandomizedL18_4.eventually_shrunk_field_count
+#print axioms Cogentic.RandomizedL27_1.L27_1Inputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL27_1.L27_1Inputs.slot_le
+#print axioms Cogentic.RandomizedL30.L30Inputs.toSubexpLeaf
+#print axioms Cogentic.RandomizedL30.L30Inputs.slot_le
+#print axioms Cogentic.RandomizedP1.P1Inputs.toP1Leaf
+#print axioms Cogentic.RandomizedP1.trialDivisionGap
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
