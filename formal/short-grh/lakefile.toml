@@ -25,3 +25,6 @@ name = "Cogentic"
 
 [[lean_lib]]
 name = "CogenticWithGRH"
+
+[[lean_lib]]
+name = "RandomizedWithGRH"

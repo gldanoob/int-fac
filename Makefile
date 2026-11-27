@@ -26,11 +26,13 @@ check-randomized-lean:
 check-two-thirds-cached-grh:
 	cd formal/cogentic && "$(LAKE)" env lean -o .lake/build/lib/lean/CogenticWithGRH.olean CogenticWithGRH.lean
 
-.PHONY: check-two-thirds-short-grh
-check-two-thirds-short-grh:
+.PHONY: check-two-thirds-short-grh check-randomized-short-grh
+check-two-thirds-short-grh: SHORT_GRH_TARGET := CogenticWithGRH
+check-randomized-short-grh: SHORT_GRH_TARGET := RandomizedWithGRH
+check-two-thirds-short-grh check-randomized-short-grh:
 	"$(PYTHON)" formal/short-grh/prepare.py
 	cd formal/short-grh && "$(PYTHON)" cache.py "$(LAKE)"
-	cd formal/short-grh && "$(LAKE)" build CogenticWithGRH
+	cd formal/short-grh && "$(LAKE)" build $(SHORT_GRH_TARGET)
 
 check-two-thirds: check-two-thirds-lean
 	"$(PYTHON)" -B experiments/cogentic-fixed-window-audit.py
