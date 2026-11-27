@@ -36,6 +36,11 @@ private def easySplit (n d : ℕ) (hn : 2 ≤ n) (hd : TwoThirdsSearch.ProperDiv
       omega
   ⟨d, q, front + check.2, hd.1, hq2, heq⟩
 
+/-- Apply the counted verifier to an easy divisor certified by the precheck. -/
+def verifiedEasySplit (n d : ℕ) (hn : 2 ≤ n) (hd : TwoThirdsSearch.ProperDivisor n d)
+    (front : ℕ) : SplitOutcome n :=
+  easySplit n d hn hd front
+
 private noncomputable def dispatch (n : ℕ) (hn : 2 ≤ n) (work : ℕ) :
     (result : RandomizedPreprocessing.Result) → result.Sound n → PMF (Branch n)
   | .prime, hp => PMF.pure (.prime work hp)
