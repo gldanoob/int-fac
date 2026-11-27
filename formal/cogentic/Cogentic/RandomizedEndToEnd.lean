@@ -25,6 +25,7 @@ import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
+import Cogentic.RandomizedL20_4Conditioned
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
@@ -37,12 +38,15 @@ import Cogentic.RandomizedL21_2Perron
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL27Analytic
+import Cogentic.RandomizedL27Deuring
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
+import Cogentic.RandomizedL30Younis
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
+import Cogentic.RandomizedL4Faithful
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedConcreteC3Real
 import Cogentic.RandomizedConcreteC3Budget
@@ -231,6 +235,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.slot_le
 #print axioms Cogentic.RandomizedL20_4Sub.L20_4SubInputs.subexpLoss
 #print axioms Cogentic.RandomizedL20_4Sub.L20_4SubInputs.slot_le
+#print axioms Cogentic.RandomizedL20_4Conditioned.L20_4ConditionedInputs.toSubInputs
+#print axioms Cogentic.RandomizedL30Younis.YounisLPPInputs.toAnalyticInputs
+#print axioms Cogentic.RandomizedL4Faithful.realized_of_faithfulArithmetic
 #print axioms Cogentic.RandomizedL4.L4Inputs.toAlgebraicLeaf
 #print axioms Cogentic.RandomizedL20_2.L20_2Inputs.toConcentrationLeaf
 #print axioms Cogentic.RandomizedL20_2.L20_2Inputs.slot_le
@@ -253,6 +260,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL21_2Perron.L21_2PerronInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedP1Analytic.P1AnalyticInputs.toP1Leaf
 #print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
+#print axioms Cogentic.RandomizedL27Deuring.L27DeuringInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL27Deuring.reduction_of_deuring
 #print axioms Cogentic.RandomizedL34Analytic.L34AnalyticCore.ratedLeaf
 #print axioms Cogentic.RandomizedL34Dedekind.L34DedekindCore.ratedLeaf
 #print axioms Cogentic.RandomizedL34Dedekind.L34DedekindCore.toL34AnalyticCore
