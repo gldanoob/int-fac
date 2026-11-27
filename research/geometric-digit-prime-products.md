@@ -1,6 +1,6 @@
 # Geometric digits and complete prime products
 
-Let \(B\) be prime, \(1\le a<B\), and set \(X=B^d\) with \(d\to\infty\) and \(d\log\log X=o(\log B)\). At position \(i\), \(0\le i<d\), allow consecutive digits in \(\{0,\ldots,B-1\}\) of width \(W_i\ge B^\chi\) for fixed \(3/4<\chi<1\). The image
+Let \(B\) be prime, \(1\le a<B\), and set \(X=B^d\) with \(d\to\infty\) and \(d\log\log X=o(\log B)\). At position \(i\), \(0\le i<d\), allow a consecutive integer interval of width \(B^\chi\le W_i\le B\) for fixed \(3/4<\chi<1\). The integer origins are arbitrary. The image
 \[
    \mathcal D_a=\left\{\sum_{i=0}^{d-1}v_i a^i B^{d-1-i}\bmod X:
                   v_i\text{ is an allowed digit}\right\}
@@ -89,4 +89,26 @@ Now weight the subboxes by the continuous bin probabilities from \(dx/\log x\). 
    \left(\frac{1}{|\mathcal D_a|}\sum_{x\in\mathcal D_a}f_J(x)
          +O(B^{-\kappa'})\right)
 \]
-for fixed \(\kappa'>0\). A half-open endpoint convention works on both the line and the circle. The error is absolute on the original digit-density scale, including for intervals whose continuous reference is small.
+for fixed \(\kappa'>0\). For half-open intervals, define the restricted density pointwise by multiplying the continuous density on the line by the indicator of that half-open interval before folding. This fixes its values at integer endpoints. The error is absolute on the original digit-density scale, including for intervals whose continuous reference is small.
+
+
+## Independent unimodal digits
+
+The interval comparison also applies to independent integer digits with arbitrary summable unimodal probability masses \(p_i\) such that
+\[
+             \max_i\sup_{n\in\mathbb Z}p_i(n)\ll B^{-\chi}
+\]
+for some fixed \(\chi>3/4\). Here unimodality means that each positive superlevel set is an integer interval. Write \(\Gamma(x)\) for the probability mass at the actual image \(x=\sum_i v_i a^iB^{d-1-i}\bmod X\). For every sharp true-value interval \(J\) in the prime-product model,
+\[
+ \frac{X}{|\mathcal P|}\sum_{n\in\mathcal P\cap J}\Gamma(n\bmod X)
+    =\sum_{x\bmod X}\Gamma(x)f_J(x)+O(B^{-\kappa''}) ,
+\]
+for a fixed \(\kappa''>0\). This is an absolute error, uniform in the digit locations and in \(J\). It also applies to sharp residue arcs with the corresponding restricted reference. The comparison is relative when the reference is at least \(B^{-o(1)}\).
+
+To see this, for \(t>0\) write \(I_i(t)=\{n:p_i(n)>t\}\). The identity \(p_i(n)=\int_0^\infty{\bf1}_{I_i(t)}(n)\,dt\) expresses the digit law as a mixture of uniform laws on the nonempty finite intervals \(I_i(t)\), with mixing mass \(|I_i(t)|\,dt\). This mass integrates to one. If a superlevel interval has length \(L>B\), split it into \(\lceil L/B\rceil\) consecutive intervals of lengths differing by at most one, weighted by their lengths divided by \(L\). Each length is between \(\lfloor B/2\rfloor\) and \(B\). The split is exact and also covers unbounded original digit support through the mixture.
+
+Fix \(3/4<\chi'<\min(\chi,1)\) and put \(L_0=\lceil B^{\chi'}\rceil\). A digit's mixture mass on original intervals of length below \(L_0\) is at most \(L_0\sup_n p_i(n)\). The new subintervals from long intervals all have length at least \(L_0\) for large \(B\). Thus the total mass of independent boxes with any width below \(L_0\) is at most \(O(d B^{\chi'-\chi})=B^{-(\chi-\chi')+o(1)}\). In each other box the widths are between \(L_0\) and \(B\), and the modular image is injective. Translating its individual intervals to begin at zero adds a common translation to the image. This multiplies each Fourier value by a unit phase, and the reference and arc weight remain evaluated on the actual translated images. Hence the uniform interval estimate at exponent \(\chi'\) applies to each such box. Its normalization is the displayed comparison, since the image mass of each box is \(1/|\mathcal D_a|\) at each of its points.
+
+For the omitted boxes, the normalized comparison costs at most their mixture mass times \(O(X/|\mathcal P|+\|f_J\|_\infty)\). Indeed the product range has length \(O(X)\), so at most \(O(1)\) distinct products lift any given residue, and \(f_J\ll d\). Also \(|\mathcal P|=X B^{o(1)}\), with \(X/|\mathcal P|=B^{o(1)}\). The prime count in a bin is \(\asymp P_j/(d\log P_j)\), and multiplying these populations uses \(\prod_jP_j\asymp X\) and \(d\log\log X=o(\log B)\). The omitted contribution therefore saves a fixed power of \(B\). The good-box errors average without a dependence on the number of boxes. Positivity and the same absolute bounds justify all the mixtures and integrations.
+
+In particular, discrete Gaussian digits with masses proportional to \(\exp(-\pi(n-c_i)^2/\sigma_i^2)\) satisfy the hypotheses for \(\sigma_i\ge B^\chi\), uniformly in the real centers \(c_i\). The normalizing sum is \(\gg \sigma_i\) by the integers within distance \(\sigma_i\) of the center, and the masses are unimodal. The exact interval splitting permits arbitrarily large \(\sigma_i\) with no tail truncation.
