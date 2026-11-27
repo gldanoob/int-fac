@@ -93,6 +93,9 @@ import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
 import Cogentic.RandomizedBalancedAllocation
 import Cogentic.RandomizedBalancedStrip
+import Cogentic.RandomizedEpochCounter
+import Cogentic.RandomizedEpochOutput
+import Cogentic.RandomizedInputTape
 import Cogentic.RandomizedEpochEventCost
 import Cogentic.RandomizedFairEpochTape
 import Cogentic.RandomizedInputAsymptotic
@@ -208,3 +211,5 @@ import Cogentic.RandomizedTaggedKernel
 
 #print axioms Cogentic.RandomizedInputDriver.factor_expected_from_hard
 #print axioms Cogentic.RandomizedSerializedDriver.serializedFactor_expected_eventually
+
+#print axioms Cogentic.RandomizedInputDriver.serialized_epoch_from_critical_line
