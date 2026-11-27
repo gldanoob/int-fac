@@ -86,3 +86,39 @@ The explicit charges are bounded above as follows. The square-root terms in the 
 | Sparse solve and exact extraction | 1.887354840 |
 
 The checks use only the existing abstract charges and the committed knot helpers. They do not replay rounded integer allocations or nonterminal transitions, and in particular do not verify the finite dyadic separation, absolute cutoff or occurrence guards on an integer fixture. The ratio below two is a leading factor-count margin. The coefficient-law one- and two-mark estimates, their incoming-root-conditioned variants, the internal good-state recurrence at the new width, and any changed character or extraction costs still need their own justification. [Top field-pool transfer and its required estimates](keybreak-polynomial-top-field-pool.md)
+
+## A 4096-knot witness at width multiplier \(13/8\)
+
+Use the same definitions, rounded knots, and equalized weights as above, now with the following exact rational parameters.
+
+| Parameter | Value |
+|---|---:|
+| \(\lambda\) | 1.625 |
+| \(\delta\) | 1.33144 |
+| \(\kappa\) | 1.66533 |
+| \(\beta\) | .686514 |
+| \(\alpha\) | .50000001 |
+| \(\lambda_T\) | 1.8462 |
+| \(\lambda_H\) | 1.8465 |
+| \(\eta\) | .00000001 |
+| \(s\) | .0000001 |
+| \(C\) | 2.0190 |
+
+The rational curve coefficient is \(h=.548331780321\). Write \(P=3\delta b\), and denote the total grid weight and common staged gate by \(W\) and \(G\). The bounds in the table use exact rational comparisons, with the algebraic square-root terms checked by squaring the positive residual.
+
+| Charge | Formula | Upper bound |
+|---|---|---:|
+| Raw private slots | \(b+W+s\) | 2.016243610 |
+| Staged screening | \(b+G+s\) | 2.018761959 |
+| Top raw | \(b+\delta\lambda_T/3+1/P+2s\) | 2.007316865 |
+| High raw | \(b+\delta\lambda_H/3+(1+v_1)/P+2s\) | 2.018585699 |
+| Low raw | \(b+\delta\lambda_L/3+1/P+2s\) | 2.018760014 |
+| Top algebraic | \(b+\delta\lambda_T/3+h\sqrt{y_1/y_0}+2s\) | 2.018777919 |
+| High algebraic | \(b+\delta\lambda_H/3+h\sqrt{y_2/y_0}+2s\) | 1.882044472 |
+| Low algebraic | \(b+\delta\lambda_L/3+2s\) | 1.744863726 |
+| Characters | \(b+2\delta/3\) | 1.801678867 |
+| Sparse solve and exact extraction | \(2b\) | 1.828104401 |
+
+All the abstract guard checks listed for the first grid hold with these parameters. In particular, every weight is positive and \(W/M<1.492\). The triple congruence margin \(\lambda v_0-3y_1\) exceeds \(0.00000609\), the high ratio exceeds the top ratio by \(0.0003\), and the interior two-mark kernel margin \(\lambda v_0-2v_1\) exceeds \(0.15\). At the bottom, \(0.49(A_0+L\beta)-1.01R>0.20\). The progression check at exponent \(1/32\) gives \((15/32)(A_0+L\beta)-(33/32)R>0.16\). [Interior moment guards](keybreak-narrow-interior-guards.md)
+
+This certificate covers the real cost model and rational grid. Integer allocation and transition checks, as well as top coefficient-law estimates at width \(13/8\), remain open for this witness.
