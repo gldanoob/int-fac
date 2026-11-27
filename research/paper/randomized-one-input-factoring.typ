@@ -19,13 +19,15 @@
 
 = Statement and model
 
-Write $H(N) = (log N)^(1/3) (log log N)^(2/3)$, with natural logarithms. The manuscript analysis gives a single classical randomized algorithm that, on each integer $N >= 2$, returns every prime factor with its multiplicity and terminates on every random tape. For each $epsilon > 0$ there is an $N_0(epsilon)$ such that every $N >= N_0(epsilon)$ satisfies
+For each integer $N >= 2$, one classical randomized algorithm returns its prime factorization with multiplicities and terminates on every random tape. Its expected bit complexity satisfies
+$ EE T(N) = exp(O(H(N))), quad H(N) = (log N)^(1/3) (log log N)^(2/3), $
+with natural logarithms and expectation over independent fair bits for that input. More precisely, for every $epsilon > 0$ and all sufficiently large $N$, the manuscript gives
 $ EE T(N) <= exp((C_* + epsilon) H(N)), quad C_* = 1.9839824118071388229 dots . $
-Here $T(N)$ counts bit operations and the expectation is over independent fair random bits for the fixed input. In $L$-notation the bound is $L_N[1/3,C_*]$. The work includes preprocessing, sampling fields and private roots, all searches and verifications, square-root reconstruction, failed attempts, and the full recursion. A fixed rational schedule with 4,096 stages gives the separate ceiling $1.984578735$ [3, 6].
+In $L$-notation this is $L_N[1/3,C_*]$. The bound includes all setup, failed searches, verification and recursion. A fixed rational schedule with 4,096 stages gives a coefficient below $1.984578735$ [3, 6].
 
-The algorithm builds two square roots of the same residue modulo $N$ and takes the greatest common divisor of their difference with $N$ when their signs differ across prime factors. Narrower public polynomial coefficients make the algebraic values smaller and lower the descent cost, while the prime-bin estimates supply enough usable relations.
+The algorithm constructs two square roots of the same residue modulo $N$. When their signs agree at some prime factors and differ at others, a greatest common divisor splits $N$. Narrower public polynomial coefficients reduce the descent cost. Estimates for products of primes in short intervals show that enough usable relations remain.
 
-The construction adapts KeyBreak's multilevel descent. KeyBreak's Theorem 1.2 gives $2.97$ with its own parameters under the critical-line theorem for Dirichlet $L$-functions, including the zeta case. Alpöge's Lean proof of that theorem has been independently checked. The improved coefficient uses the analytic proofs in the pinned KeyBreak manuscript together with the local estimates for the modified field law and sampler [1–5]. The result at $C_*$ is a manuscript-level deduction.
+KeyBreak’s multilevel descent gives a coefficient of $2.97$ under the critical-line theorem for Dirichlet $L$-functions, including zeta [1, Thm. 1.2]. Alpöge’s Lean proof of that theorem has been independently checked [2]. The bound at $C_*$ combines KeyBreak’s analytic arguments with estimates for the modified field distribution and sampler [3–5]. Its end-to-end proof is at manuscript level.
 
 = Private rows from reduced forms
 
