@@ -24,28 +24,36 @@ import Cogentic.RandomizedL20_2Sub
 import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_2SmoothLower
+import Cogentic.RandomizedL20_2SmoothMass
 import Cogentic.RandomizedL20_2CoordinateEnergy
+import Cogentic.RandomizedL20_2Decay
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
 import Cogentic.RandomizedL20_4Interior
 import Cogentic.RandomizedL20_4TwoPoint
+import Cogentic.RandomizedL20_4Mean
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
 import Cogentic.RandomizedL34Dedekind
 import Cogentic.RandomizedL34ZeroFree
+import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
 import Cogentic.RandomizedL21_2Perron
 import Cogentic.RandomizedL21_2Density
+import Cogentic.RandomizedL21_2Shift
+import Cogentic.RandomizedL21_2Fourier
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL27Analytic
 import Cogentic.RandomizedL27Deuring
 import Cogentic.RandomizedL27Stratification
+import Cogentic.RandomizedL27Hurwitz
+import Cogentic.RandomizedL27StageOne
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
@@ -55,6 +63,7 @@ import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
 import Cogentic.RandomizedL4Faithful
+import Cogentic.RandomizedL4SquaringSelection
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedConcreteC3Real
 import Cogentic.RandomizedConcreteC3Budget
@@ -268,7 +277,16 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2Saddle.L20_2SaddleInputs.toConcentrationLeaf
 #print axioms Cogentic.RandomizedL20_2SmoothLower.smoothNumberCountLower_twoPow
 #print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
+#print axioms Cogentic.RandomizedL20_2SmoothMass.smoothNumberMassLogLower_selfSmooth
+#print axioms Cogentic.RandomizedL27StageOne.L27StageOneInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL20_2CoordinateEnergy.coordinateEnergyBudget_of_mellinEnvelope
+#print axioms Cogentic.RandomizedL20_2Decay.primeBinCharacterDecay_of_criticalLine
+#print axioms Cogentic.RandomizedL20_4Mean.PairConditionedBase.toPairConditionedData
+#print axioms Cogentic.RandomizedL21_2Shift.L21_2ShiftInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL21_2Fourier.L21_2FourierInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL34Sides.L34SidesCore.ratedLeaf
+#print axioms Cogentic.RandomizedL4SquaringSelection.squaringPrimitiveSelection_of_odd
+#print axioms Cogentic.RandomizedL27Hurwitz.L27HurwitzInputs.hurwitzClassLower
 #print axioms Cogentic.RandomizedL20_4Interior.TopInteriorData.toTopConditionedData
 #print axioms Cogentic.RandomizedL20_4TwoPoint.TwoPointReducedData.toPairConditionedData
 #print axioms Cogentic.RandomizedL18_4.LargeSieveConvolutionData.toSpectralData
