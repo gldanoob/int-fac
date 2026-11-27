@@ -24,7 +24,7 @@ private theorem product_saving {ι : Type} [Fintype ι] [DecidableEq ι]
 
 /-- A sharp prefix of one prime product pattern saves the square root of the
 product scale. The loss per slot is explicit even when the number of slots varies. -/
-theorem primeBin_relative_prefix_from_critical_line (line : DirichletLZerosOnLine) :
+def PrimeBinRelativePrefixBound : Prop :=
     ∃ C K E : ℝ, 0 < C ∧ 0 < K ∧ 0 ≤ E ∧
     ∀ (X : ℝ) (m q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q), χ ≠ 1 →
     ∀ {ι : Type} [Fintype ι] [DecidableEq ι] (A B : ι → ℕ) (U : ℝ),
@@ -40,7 +40,10 @@ theorem primeBin_relative_prefix_from_critical_line (line : DirichletLZerosOnLin
         U * ((B i : ℝ) - A i)) →
       ‖∑ n ∈ (primeBinProducts A B).filter (· ≤ m), χ n‖ ≤
         ((4*Real.exp 2/Real.pi)*Real.log X*(U^Fintype.card ι/Real.sqrt X) + K/X^2) *
-          (primeBinProducts A B).card := by
+          (primeBinProducts A B).card
+
+theorem primeBin_relative_prefix_from_critical_line (line : DirichletLZerosOnLine) :
+    PrimeBinRelativePrefixBound := by
   obtain ⟨C, K, hC, hK, prefixBound⟩ := primeBin_product_prefix_from_critical_line line
   obtain ⟨E, hE, supply⟩ := primeBin_supply_from_critical_line line
   refine ⟨C,K,E,hC,hK,hE,?_⟩
