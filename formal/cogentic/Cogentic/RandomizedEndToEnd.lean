@@ -1,3 +1,5 @@
+import Cogentic.RandomizedConcreteEpoch
+import Cogentic.RandomizedPaperLeafStatements
 import Cogentic.RandomizedEpochAnalyticInputs
 import Cogentic.RandomizedEpochWork
 import Cogentic.RandomizedEpochPool
@@ -105,5 +107,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedEpochTV.assembledAttempt_hit_prob_ge_of_directSampler
 #print axioms Cogentic.RandomizedEpochPrivate.PrivateSupplyInputs.privateSlotProbability_lower
 #print axioms Cogentic.RandomizedEpochPrivate.PrivateSupplyInputs.goodLeading_card_le_rankin
+#print axioms Cogentic.RandomizedConcreteEpoch.ConcreteEpochData.pubWork_eq_zero_iff
+#print axioms Cogentic.RandomizedPaperLeafStatements.epochAnalyticInputs_of_paperAssumptions
+#print axioms Cogentic.RandomizedPaperLeafStatements.hardEpochAsymptoticBound_of_paperAssumptions
 
 end Cogentic.RandomizedEndToEnd
