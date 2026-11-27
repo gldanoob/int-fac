@@ -11,7 +11,9 @@ import Cogentic.RandomizedC5Algebra
 import Cogentic.RandomizedC5Coupling
 import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
+import Cogentic.RandomizedL19EnergyMass
 import Cogentic.RandomizedL19ZeroMode
+import Cogentic.RandomizedL19ZeroModeFinite
 import Cogentic.RandomizedL19Thin
 import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
@@ -175,6 +177,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL19Poisson.PoissonDenominatorData.A_bound
 #print axioms Cogentic.RandomizedL19SecondMoment.PoissonQuotientInputs.replaceMarginalBounds
 #print axioms Cogentic.RandomizedL19ZeroMode.ZeroModeCertificate.toIdealZeroModeInputs
+#print axioms Cogentic.RandomizedL19ZeroModeFinite.FiniteZeroModeCertificate.toZeroModeCertificate
+#print axioms Cogentic.RandomizedL19EnergyMass.mellinEnvelope_le_exp_of_growth
+#print axioms Cogentic.RandomizedL19EnergyMass.gridPrefixEnvelope_le_exp_of_growth
 #print axioms Cogentic.RandomizedL19Thin.LatticeThinInputs.slot_le
 #print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.slot_le
