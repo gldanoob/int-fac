@@ -154,3 +154,23 @@ The finite product is \(\le T^{o(1)}\) in absolute value there: its logarithm is
 For a fixed smooth compactly supported weight on the nonnegative line that is constant near zero, its Mellin transform is rapidly decreasing vertically in the strip. Mellin inversion and a shift across the pole to \(1-\delta\) give the residue \(C_Z U\int_0^\infty W(v)\,dv\) with error \(O_W(U^{1-\delta}T^{o(1)})\). To justify truncation at \(T^{1/2}\), the initial Dirichlet series is absolutely bounded there on the initial line by \(\zeta(1+1/\log T)^2\); within the rectangle \(\zeta(z)\) has polynomial vertical growth, absorbed by Mellin decay. The transform decays to arbitrary order, so the truncation errors are negligible uniformly up to the fixed maximum \(U\). Sandwich the sharp cutoff at one by smooth positive majorants and minorants of integrals \(1+O(\epsilon)\) and \(1-O(\epsilon)\), then send \(\epsilon\) to zero. This proves the uniform total count.
 
 On this same family the usual explicit formula in the zero-free rectangle gives split-prime asymptotics at all fixed polynomial scales. For example a fixed smoothed dyad uses the Mellin transform as in the ordinary-class prime-guard proof, with nonprincipal error \(O(y^{1-\eta}\log(2T)+yT^{-1}\log(2T)+\sqrt y\log^2(2y))\). Smooth upper and lower bounds and a geometric sum of dyads give the sharp prefix uniformly on a compact interval of positive exponents. Applying the factorial-count argument above with the new total count at \(j=0\) therefore yields \(C_ZV^s(\rho(s/c)+o(1))\) at every fixed \(s,c>0\). This total count below \(s=1\) does not imply a positive proportion of all classes have a representative there. [Prime weights and the explicit formula](keybreak-quadratic-majority-products.md#every-class-at-arbitrary-fixed-smoothness-for-almost-all-discriminants)
+
+## Mean and higher moments of the least coprime norm
+
+With \(M_Z(g)\) and \(\gamma_Z(D)\) defined in the class-tail result, the uniform-class mean for fixed \(Z\) is
+\[
+ \frac1h\sum_g M_Z(g)=\frac{\pi}{4\zeta(2)}
+              \bigl(\gamma_Z(D)+o(1)\bigr)V\log V .
+\]
+This uses the same typical discriminants, or Dirichlet GRH. In the split-at-two example with \(Z=2\), the leading coefficient is \(1/\pi\). More generally the same additive \(o(V\log V)\) precision holds if \(\operatorname{rad}(2Z)^2=o(\log V)\). [Least coprime norm and its tail](keybreak-quadratic-majority-products.md#how-many-classes-require-a-large-coprime-representative)
+
+Indeed, when the shortest reduced norm \(a\) is ineligible, \(M_Z(g)=d(a)^2V^2/(4a)+O(a\operatorname{rad}(2Z)^2)\), where \(d(a)\in\{1,2\}\) is the parity factor from that proof. Eligible shortest norms contribute at most \(O(V)\) per class. Restrict the reciprocal sum to \(a\le V/4\) at a further cost \(O(V)\) per class; the short primitive ideals in this range count classes injectively. The convergence of the harmonic measure in the real-moment proof gives \(\sum_{a\le V/4} a_Z(a)/a=(1+o(1))C_Z\log V\), also with exclusions \(1\) and \(2\). Subtract the allowed harmonic masses, weighting the odd ineligible ones by four in the exceptional parity case, and apply the class number formula. This avoids integrating a tail asymptotic beyond its range of uniformity.
+
+For every fixed real \(r>1\) and fixed \(Z\), the higher moments have an **unconditional** formula valid for every sufficiently large negative fundamental discriminant. Write \(F_Z(r)=\sum_{n\ge1}a_Z(n)n^{-r}\). Then
+\[
+ \frac{4^r}{V^{2r}}\sum_g M_Z(g)^r
+ = F_1(r)-F_Z(r)
+   +\mathbf 1_{2\mid Z,\ D\equiv1\ (8)}
+          (4^r-1)(F_2(r)-F_Z(r))+o(1).
+\]
+To verify this, fix \(K\) and restrict first to ineligible shortest norms \(a\le K\). Each short primitive ideal gives one class and its scaled term differs from \(d(a)^{2r}/a^r\) by \(o(1)\), uniformly for fixed \(K\). The terms with \(a>K\) from ineligible classes are \(O_Z(\sum_{a>K}\tau(a)/a^r)\) after scaling, since \(a\ll V\) and \(M_Z(g)\ll_Z V^2/a\). The chosen shortest ideal per class gives at most \(\tau(a)\) such classes of norm \(a\). Eligible classes contribute \(O(hV^{-r})=o(1)\). Letting \(K\) tend to infinity gives the absolutely convergent Euler sums displayed above. For \(2\) split, \(Z=2\), and \(r=2\), the mean square is \(V^4(F_1(2)+o(1))/(40h)\); the local fraction at two in this reciprocal-square sum is \(2/5\).
