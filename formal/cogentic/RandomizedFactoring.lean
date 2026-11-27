@@ -91,6 +91,38 @@ import Cogentic.RandomizedProbeCount
 import Cogentic.RandomizedPublicSpan
 import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
+import Cogentic.RandomizedBalancedAllocation
+import Cogentic.RandomizedBalancedStrip
+import Cogentic.RandomizedEpochEventCost
+import Cogentic.RandomizedFairEpochTape
+import Cogentic.RandomizedInputAsymptotic
+import Cogentic.RandomizedPreprocessingCost
+import Cogentic.RandomizedPrimeProductGridFourier
+import Cogentic.RandomizedSerializedDriver
+import Cogentic.RandomizedTotalEpochSplit
+import Cogentic.RandomizedBalancedFiniteSchedule
+import Cogentic.RandomizedBalancedRationalSchedule
+import Cogentic.RandomizedBalancedScalarMargins
+import Cogentic.RandomizedCappedEpoch
+import Cogentic.RandomizedDiagonalTransfer
+import Cogentic.RandomizedFixedCurveAllowance
+import Cogentic.RandomizedPreprocessing
+import Cogentic.RandomizedPrescribedPrimeCompletion
+import Cogentic.RandomizedPrimeProductPlancherel
+import Cogentic.RandomizedRelativePrefix
+import Cogentic.RandomizedVectorPerron
+import Cogentic.RandomizedEpochKernel
+import Cogentic.RandomizedFactorLawAsymptotic
+import Cogentic.RandomizedBalancedEnvelopeInfimum
+import Cogentic.RandomizedCostedFactorLaw
+import Cogentic.RandomizedHiddenOutputLaw
+import Cogentic.RandomizedHiddenSplitLaw
+import Cogentic.RandomizedOneThirdAsymptotic
+import Cogentic.RandomizedProductPerron
+import Cogentic.RandomizedRestartExpectation
+import Cogentic.RandomizedServiceMachine
+import Cogentic.RandomizedSplitVerification
+import Cogentic.RandomizedUniformBits
 import Cogentic.RandomizedPrimePatternProgression
 import Cogentic.RandomizedPrimeBinRelativeError
 import Cogentic.RandomizedScheduleFloor
@@ -166,3 +198,13 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedCenteredBoxRatio.card_centeredBox_dilate_le
 #print axioms Cogentic.RandomizedSplitWork.expected_work_le_log2
 #print axioms Cogentic.Randomized.primeBin_product_from_critical_line
+#print axioms Cogentic.Randomized.primeBin_product_prefix_from_critical_line
+#print axioms Cogentic.Randomized.balanced_finite_private_low_budget
+#print axioms Cogentic.Randomized.serviceStates_at_deadline
+#print axioms Cogentic.RandomizedUniformBits.expectedCoins_lt
+#print axioms Cogentic.RandomizedHiddenOutputLaw.comparisonRatio_uniform
+#print axioms Cogentic.RandomizedEpochKernel.repeatedKernel_mean_le
+#print axioms Cogentic.RandomizedCostedFactorLaw.expectedCost_eventually_le_exp
+
+#print axioms Cogentic.RandomizedInputDriver.factor_expected_from_hard
+#print axioms Cogentic.RandomizedSerializedDriver.serializedFactor_expected_eventually
