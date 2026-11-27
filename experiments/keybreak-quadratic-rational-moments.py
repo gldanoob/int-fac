@@ -1,8 +1,11 @@
 """Measure smooth quadratic values at independent synthetic primitive anchors."""
 
+from argparse import ArgumentParser
 from collections import Counter
-from math import gcd, inf, isqrt, prod
+from functools import cache
+from math import gcd, hypot, inf, isqrt, prod, sqrt
 from random import Random
+from statistics import fmean, stdev
 
 
 PARENT = 100_003
@@ -112,8 +115,115 @@ def report(rows, cutoff):
           f"hit={hits/size:.4f}, flat_hit={flat_hits/size:.4f}, by_size_hit={independent_hits/size:.4f}")
 
 
+def is_smooth(value, primorial):
+    while value > 1:
+        shared = gcd(value, primorial)
+        if shared == 1:
+            return False
+        value //= shared
+    return True
+
+
+def draw_long_anchors(rng, size, lower, parent, marks, primorial):
+    rows = []
+    for _ in range(size):
+        r, q = sample_anchor(rng, lower, parent)
+        slope = r * pow(q, -1, parent) % parent
+        rr, rq, qq = r * r, r * q, q * q
+        raw = Counter()
+        smooth = Counter()
+        for a, b, c in marks(slope):
+            value, remainder = divmod(a * rr + b * rq + c * qq, parent)
+            assert remainder == 0 and value > 0
+            band = value.bit_length()
+            raw[band] += 1
+            if is_smooth(value, primorial):
+                smooth[band] += 1
+        rows.append((raw, smooth))
+    return rows
+
+
+def report_long(calibration, reporting):
+    calibration_raw = Counter()
+    calibration_smooth = Counter()
+    for raw, smooth in calibration:
+        calibration_raw.update(raw)
+        calibration_smooth.update(smooth)
+    rates = {band: calibration_smooth[band] / count for band, count in calibration_raw.items()}
+
+    size = len(reporting)
+    raw_totals, smooth_totals, iid_means, iid_hits, iid_pairs = [], [], [], [], []
+    gradient = Counter()
+    for raw, smooth in reporting:
+        raw_totals.append(raw.total())
+        smooth_totals.append(smooth.total())
+        iid_mean = sum(count * rates[band] for band, count in raw.items())
+        iid_means.append(iid_mean)
+        iid_hits.append(1 - prod((1 - rates[band]) ** count for band, count in raw.items()))
+        iid_pairs.append(iid_mean**2 - sum(count * rates[band] ** 2 for band, count in raw.items()))
+        for band, count in raw.items():
+            gradient[band] += 2 * count * (iid_mean - rates[band]) / size
+
+    observed_pairs = [count * (count - 1) for count in smooth_totals]
+    pair_differences = [observed - iid for observed, iid in zip(observed_pairs, iid_pairs)]
+    # Treat each anchor as a single sampling unit in both independent streams.
+    calibration_size = len(calibration)
+    calibration_weights = {
+        band: slope * calibration_size / calibration_raw[band] for band, slope in gradient.items()
+    }
+    calibration_influence = [
+        sum(weight * (smooth[band] - rates[band] * raw[band]) for band, weight in calibration_weights.items())
+        for raw, smooth in calibration
+    ]
+    anchor_se = stdev(pair_differences) / sqrt(size)
+    calibration_se = stdev(calibration_influence) / sqrt(calibration_size)
+    diff = fmean(pair_differences)
+    margin = 1.96 * hypot(anchor_se, calibration_se)
+    print(f"  calibration raw={calibration_raw.total()} smooth={calibration_smooth.total()}; "
+          f"report raw={sum(raw_totals)} smooth={sum(smooth_totals)}, raw/anchor={fmean(raw_totals):.4f}")
+    print(f"  smooth/anchor={fmean(smooth_totals):.6f}, iid={fmean(iid_means):.6f}, "
+          f"hit={fmean(count > 0 for count in smooth_totals):.6f}, iid_hit={fmean(iid_hits):.6f}")
+    print(f"  ordered pairs={sum(observed_pairs)}, iid={sum(iid_pairs):.2f}, "
+          f"pair-positive anchors={sum(count >= 2 for count in smooth_totals)}")
+    print(f"  pairs/anchor={fmean(observed_pairs):.6f}, raw pairs/anchor="
+          f"{fmean(count * (count - 1) for count in raw_totals):.4f}, iid_pairs/anchor={fmean(iid_pairs):.6f}, "
+          f"difference={diff:.6f}, approx. 95% CI=[{diff-margin:.6f},{diff+margin:.6f}], "
+          f"SE(anchor,calibration)=({anchor_se:.6f},{calibration_se:.6f})")
+
+
+def run_long():
+    parent, height, cutoff = 257, 232, 229
+    calibration_size, reporting_size = 2_048, 4_096
+    calibration_seed, reporting_seed = 20261128, 20261129
+    flags = primes_up_to(parent)
+    assert flags[parent] and cutoff < height < parent
+    primes = [prime for prime in range(2, cutoff + 1) if flags[prime]]
+    primorial = prod(primes)
+    assert all(is_smooth(n, primorial) == (smooth_threshold(n, primes) <= cutoff) for n in range(1, 2_001))
+    squarefree = squarefree_up_to(4 * height**2)
+
+    @cache
+    def marks(slope):
+        return tuple(root_marks(parent, height, slope, squarefree))
+
+    calibration_rng, reporting_rng = Random(calibration_seed), Random(reporting_seed)
+    print(f"p={parent}, V={height}, B={cutoff}, calibration={calibration_size} seed={calibration_seed}, "
+          f"reporting={reporting_size} seed={reporting_seed} per dyad")
+    for power, lower in ((2, parent**2), (2.5, isqrt(parent**5))):
+        calibration = draw_long_anchors(calibration_rng, calibration_size, lower, parent, marks, primorial)
+        reporting = draw_long_anchors(reporting_rng, reporting_size, lower, parent, marks, primorial)
+        print(f"Q≈p^{power}, Q=[{lower},{2*lower}), odd primitive anchors, 0.57≤r/Q≤0.63")
+        report_long(calibration, reporting)
+
+
 def main():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("--long", action="store_true", help="use longer dyads and a held-out report")
+    args = parser.parse_args()
     check_enumeration()
+    if args.long:
+        run_long()
+        return
     rng = Random(SEED)
     flags = primes_up_to(12 * PARENT)
     assert flags[PARENT]
