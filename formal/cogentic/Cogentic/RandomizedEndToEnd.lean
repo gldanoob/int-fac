@@ -19,6 +19,7 @@ import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_4
+import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedC5Full
@@ -202,6 +203,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.slot_le
+#print axioms Cogentic.RandomizedL20_4Sub.L20_4SubInputs.subexpLoss
+#print axioms Cogentic.RandomizedL20_4Sub.L20_4SubInputs.slot_le
 #print axioms Cogentic.RandomizedL4.L4Inputs.toAlgebraicLeaf
 #print axioms Cogentic.RandomizedL20_2.L20_2Inputs.toConcentrationLeaf
 #print axioms Cogentic.RandomizedL20_2.L20_2Inputs.slot_le
