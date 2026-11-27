@@ -8,6 +8,7 @@ import Cogentic.RandomizedConcreteStageCostS469
 import Cogentic.RandomizedConcreteStageCostS5
 import Cogentic.RandomizedConcreteStageCostS8
 import Cogentic.RandomizedC5Algebra
+import Cogentic.RandomizedC5AlgebraSub
 import Cogentic.RandomizedC5Coupling
 import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
@@ -19,19 +20,23 @@ import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_2Sub
+import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
+import Cogentic.RandomizedL34Analytic
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
+import Cogentic.RandomizedL27Analytic
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
+import Cogentic.RandomizedL4Composition
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedP1Sub
@@ -50,6 +55,7 @@ import Cogentic.RandomizedL18_4Full
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL18_4LargeSieveInputs
 import Cogentic.RandomizedL18_4LargeSieveResidual
+import Cogentic.RandomizedL18_4EnergyBudget
 import Cogentic.RandomizedL18_4LatticeCount
 import Cogentic.RandomizedL19SecondMoment
 import Cogentic.RandomizedL19Muq
@@ -223,9 +229,16 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL34Sub.probeMiss_le_exp_of_estimates
 #print axioms Cogentic.RandomizedL30Sub.FailureData.subexpLoss
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieveResidualData
+#print axioms Cogentic.RandomizedL18_4.LargeSieveSpectralData.toResidualData
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieveSpectralData
+#print axioms Cogentic.RandomizedC5AlgebraSub.C5AlgebraSubInputs.stageBudget
 #print axioms Cogentic.RandomizedL20_2Sub.L20_2SubInputs.toInputs
 #print axioms Cogentic.RandomizedL27_1Sub.toRatedLeaf
 #print axioms Cogentic.RandomizedL4Sub.L4SubInputs.toL4Inputs
+#print axioms Cogentic.RandomizedL20_2Char.L20_2CharInputs.toConcentrationLeaf
+#print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
+#print axioms Cogentic.RandomizedL34Analytic.L34AnalyticCore.ratedLeaf
+#print axioms Cogentic.RandomizedL4Composition.realized_of_bandInputs
 #print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.slot_le
 #print axioms Cogentic.RandomizedP1Sub.P1SubInputs.toP1Leaf
