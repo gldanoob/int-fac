@@ -40,9 +40,17 @@ At \(\epsilon=3/20\) the saving in this exponent is \(229/400\). The high-freque
 
 ## Scope on Gaussian phases
 
-For a Gaussian on each Cartesian support phase this interval estimate can be multiplied by the normalized two-dimensional variation of the Gaussian and the residual affine phase, by two-dimensional partial summation. A bound \(V^{a+o(1)}\) there permits any fixed \(a<1-3\epsilon+\epsilon^2\). The high-frequency \(X^{-c}\) term absorbs any such fixed power of \(V\). Uniform bounds per support phase combine with their positive ideal Gaussian masses. An image-event restriction allowing a common divisor retains the same counting estimate whenever division multiplies frequency by a unit modulo \(b_i^h\) and preserves the ratio \(X_i/m_i\). These two facts must be checked on the specified support before taking conditional expectations. [Image-event restriction](keybreak-thin-top-pairs.md#conditioning-on-the-public-root-and-dividing)
+For a Gaussian on each Cartesian support phase, multiply the interval estimate by the normalized two-dimensional variation of the Gaussian and the residual affine phase, including the factors \(X_i/T_i^{\mathrm{marg}}\) from normalization by the actual marginal widths \(T_i^{\mathrm{marg}}\). A combined loss \(V^{a+o(1)}\) permits any fixed \(a<1-3\epsilon+\epsilon^2\). The high-frequency \(X^{-c}\) term absorbs any such fixed power of \(V\). Uniform bounds per support phase combine with their positive ideal Gaussian masses.
 
-The twisted-Gaussian variation lemma gives this loss with \(a=2\zeta\) for angle sine \(\gg V^{-\zeta}\), marginal cutoff polylogarithmic in \(X\), and Mahalanobis frequency polylogarithmic in \(X\). Its explicit tail remains negligible after summing \(X^{\epsilon+o(1)}\) modes for a cutoff of at least \(\log X\). [Gaussian variation and lattice normalization](keybreak-gaussian-variation.md)
+For an image-event restriction forcing a common divisor \(q\) of both values, verify that the restricted raw image is still a union of Cartesian phases for the original raw periods \(m_i^{\mathrm{raw}}\), with \(q\mid m_i^{\mathrm{raw}}\). On division, take \(m_i=m_i^{\mathrm{raw}}/q\), \(X_i=X_i^{\mathrm{raw}}/q\), and \(\theta_i=q\theta_i^{\mathrm{raw}}\) up to affine phase constants. Then both inputs to the discrete count are preserved exactly:
+\[
+  \frac{X_i}{m_i}=\frac{X_i^{\mathrm{raw}}}{m_i^{\mathrm{raw}}},
+  \qquad
+  m_i\theta_i=m_i^{\mathrm{raw}}\theta_i^{\mathrm{raw}}\pmod 1.
+\]
+The conductor property concerns the progression step frequency, so these identities apply after restricting and dividing, including at the first occupied height. [Image-event restriction](keybreak-thin-top-pairs.md#conditioning-on-the-public-root-and-dividing)
+
+The twisted-Gaussian variation lemma gives this loss with \(a=2\zeta\) for angle sine \(\gg V^{-\zeta}\), endpoint-to-marginal-width ratios \(X_i/T_i^{\mathrm{marg}}=V^{o(1)}\), and Mahalanobis frequency polylogarithmic in \(X\). The ratios include both the marginal cutoff and the center. Its lattice mesh hypothesis is required on each phase. The explicit tail remains negligible after summing \(X^{\epsilon+o(1)}\) modes for a cutoff of at least \(\log X\). [Gaussian variation and lattice normalization](keybreak-gaussian-variation.md)
 
 This estimate concerns ordinary two-coordinate tests. Applying it to a complexity theorem also requires the reference moment at the new field width, the geometric and one-point estimates, and the costs of any changed schedule.
 
