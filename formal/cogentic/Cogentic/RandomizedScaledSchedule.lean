@@ -1,4 +1,4 @@
-import Cogentic.RandomizedOptimalCost
+import Cogentic.RandomizedSharpSchedule
 
 namespace Cogentic.Randomized
 
@@ -208,6 +208,40 @@ theorem twoThirds_width_schedule_floor {u b δ v : ℝ}
     (twoThirds_scaled_sqrt_sq hu.ne' hden.ne hp) hprivate hterminal
 
 
+private theorem twoThirds_width_finite_grid_floor_at_root {n : ℕ} (z w : ℕ → ℝ)
+    {θ C b δ curve h ratio v height Z u : ℝ} (hθ : 2/3 ≤ θ)
+    (hl : twoThirdsRootLower < u) (hr : u < twoThirdsRootUpper)
+    (hp : twoThirdsRootPolynomial u = 0)
+    (hbudget : C ≤ scaledSupportingCost (2/3) u)
+    (hstrict : 2/3 < θ ∨ C < scaledSupportingCost (2/3) u)
+    (hb : 0 < b) (hd : 0 < δ) (hc : 0 < curve) (hZ : 0 < Z) (hh : curve ≤ h)
+    (hz0 : z 0 = 0) (hzn : z n = Z) (hstep : ∀ i < n, z i ≤ z (i+1))
+    (htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ C-b-h*z (i+1))
+    (hmoment : 4*θ/(9*curve^2) ≤ ∑ i ∈ Finset.range n, z (i+1)^2*w i)
+    (hratio : 0 ≤ ratio) (hheight : (1 + δ*Z^2/(2*(2/(3*curve^2))))/δ^3 ≤ height)
+    (hbox : height+v ≤ ratio*(b/δ))
+    (hmean : ratio/3 + 1/(3*δ^2*b) ≤ 2*v-b/δ)
+    (hraw : b+δ*ratio/3+1/(3*δ*b) ≤ C) : False := by
+  have hgate := scaled_finite_private_gate z w hc hZ hh hz0 hzn hstep htail hmoment
+  have hwidth : scaledPrivateCost (2/3) (curve*Z) ≤ scaledPrivateCost θ (curve*Z) := by
+    unfold scaledPrivateCost
+    gcongr
+  have hu : 0 < curve*Z := mul_pos hc hZ
+  have he : δ/(2*(2/(3*(curve*Z)^2))) = δ*Z^2/(2*(2/(3*curve^2))) := by field_simp
+  have ht := terminal_tradeoff_of_search b δ (2/(3*(curve*Z)^2)) ratio v height
+    (scaledSupportingCost (2/3) u) hb hd (by positivity) hratio
+    (by simpa only [he] using hheight) hbox hmean (hraw.trans hbudget)
+  have hi : 1/(2/(3*(curve*Z)^2)) = 3*(curve*Z)^2/2 := by field_simp
+  rw [hi] at ht
+  apply twoThirds_width_schedule_floor hl hr hp hd hu _ ht
+  unfold scaledPrivateCost at hwidth
+  unfold scaledPrivateCost
+  rcases hstrict with hstrict | hstrict
+  · have hwidth' : 4*(2/3 : ℝ)/(9*(curve*Z)^2) < 4*θ/(9*(curve*Z)^2) :=
+      div_lt_div_of_pos_right (mul_lt_mul_of_pos_left hstrict (by norm_num)) (by positivity)
+    linarith only [hwidth', hgate, hbudget]
+  · linarith only [hwidth, hgate, hstrict]
+
 /-- Any coordinate width at least two thirds inherits the limiting-width
 lower bound for the finite private grid and the physical terminal costs. -/
 theorem twoThirds_width_finite_grid_floor {n : ℕ} (z w : ℕ → ℝ)
@@ -223,20 +257,221 @@ theorem twoThirds_width_finite_grid_floor {n : ℕ} (z w : ℕ → ℝ)
     (hraw : b+δ*ratio/3+1/(3*δ*b) ≤ C) : False := by
   obtain ⟨u, hl, hr, hp⟩ := exists_twoThirdsRoot
   have hC := hbudget.trans_lt (twoThirdsCost_bounds hl hr).1
-  have hgate := scaled_finite_private_gate z w hc hZ hh hz0 hzn hstep htail hmoment
-  have hwidth : scaledPrivateCost (2/3) (curve*Z) ≤ scaledPrivateCost θ (curve*Z) := by
-    unfold scaledPrivateCost
+  exact twoThirds_width_finite_grid_floor_at_root z w hθ hl hr hp hC.le (Or.inr hC)
+    hb hd hc hZ hh hz0 hzn hstep htail hmoment hratio hheight hbox hmean hraw
+
+
+/-- The finite private grid with a moment scaled by the width of one smooth
+coordinate and the original physical terminal constraints. -/
+structure ScaledFinitePrivateSchedule (θ C : ℝ) where
+  n : ℕ
+  z : ℕ → ℝ
+  w : ℕ → ℝ
+  b : ℝ
+  δ : ℝ
+  curve : ℝ
+  h : ℝ
+  ratio : ℝ
+  v : ℝ
+  height : ℝ
+  Z : ℝ
+  hb : 0 < b
+  hd : 0 < δ
+  hc : 0 < curve
+  hZ : 0 < Z
+  hh : curve ≤ h
+  hz0 : z 0 = 0
+  hzn : z n = Z
+  hstep : ∀ i < n, z i ≤ z (i+1)
+  hpositive : ∀ i < n, 0 < w i
+  htail : ∀ i < n, (∑ j ∈ Finset.Ico i n, w j) ≤ C-b-h*z (i+1)
+  hmoment : 4*θ/(9*curve^2) ≤ ∑ i ∈ Finset.range n, z (i+1)^2*w i
+  hratio : 0 ≤ ratio
+  hheight : (1+δ*Z^2/(2*(2/(3*curve^2))))/δ^3 ≤ height
+  hbox : height+v ≤ ratio*(b/δ)
+  hmean : ratio/3+1/(3*δ^2*b) ≤ 2*v-b/δ
+  hraw : b+δ*ratio/3+1/(3*δ*b) ≤ C
+
+private theorem twoThirds_terminal_attainment {u : ℝ} (hl : twoThirdsRootLower < u)
+    (hr : u < twoThirdsRootUpper) (hp : twoThirdsRootPolynomial u = 0) :
+    let θ : ℝ := 2/3
+    let C := scaledSupportingCost θ u
+    let b := C - scaledPrivateCost θ u
+    let δ := 2 / scaledSupportingSqrt θ u
+    ∃ ratio v height : ℝ, 0 < b ∧ 0 < δ ∧ 0 < u ∧ 0 < ratio ∧
+      u/3 < 4*θ/(9*u^2) ∧ b+scaledPrivateCost θ u = C ∧
+      (1+δ/(2*(2/(3*u^2))))/δ^3 = height ∧ height+v = ratio*(b/δ) ∧
+      ratio/3+1/(3*δ^2*b) = 2*v-b/δ ∧ b+δ*ratio/3+1/(3*δ*b) = C := by
+  let θ : ℝ := 2/3
+  let C := scaledSupportingCost θ u
+  let p := scaledPrivateCost θ u
+  let b := C-p
+  let s := scaledSupportingSqrt θ u
+  let δ := 2/s
+  let x := 2/(3*u^2)
+  have hul : (64/100 : ℝ) < u := (by norm_num [twoThirdsRootLower] : (64/100 : ℝ) ≤ twoThirdsRootLower).trans_lt hl
+  have huh : u < (65/100 : ℝ) := hr.trans_le (by norm_num [twoThirdsRootUpper])
+  have hu : 0 < u := by linarith only [hul]
+  have hu2lo := pow_le_pow_left₀ (by norm_num : (0 : ℝ) ≤ 64/100) hul.le 2
+  have hu2hi := pow_le_pow_left₀ hu.le huh.le 2
+  have hC : 2 < C := (by norm_num : (2 : ℝ) < 2.07377842496623257).trans
+    (twoThirdsCost_bounds hl hr).1
+  have hqlo : (7/10 : ℝ) < 4*θ/(9*u^2) := by
+    apply (lt_div_iff₀ (by positivity)).mpr
+    dsimp [θ]
+    nlinarith only [hu2hi]
+  have hqhi : 4*θ/(9*u^2) < (4/5 : ℝ) := by
+    apply (div_lt_iff₀ (by positivity)).mpr
+    dsimp [θ]
+    nlinarith only [hu2lo]
+  have hp₀ : 1 < p := by dsimp [p,scaledPrivateCost]; linarith only [hul, hqlo]
+  have hp₁ : p < (13/10 : ℝ) := by dsimp [p,scaledPrivateCost]; linarith only [huh, hqhi]
+  have hb₀ : (7/10 : ℝ) < b := by dsimp [b]; linarith only [hC, hp₁]
+  have hb : 0 < b := by linarith only [hb₀]
+  have hbp : (7/10 : ℝ) < b*p := by
+    simpa only [mul_one] using mul_lt_mul hb₀ hp₀.le zero_lt_one hb.le
+  have hval : 6*b*p = 3*u^2/2+4*s := by dsimp [b,s,C,p,scaledSupportingSqrt]; ring
+  have hs : 0 < s := by nlinarith only [hval, hbp, hu2hi]
+  have hd : 0 < δ := by dsimp [δ]; positivity
+  have hsq : s^2 = C := twoThirds_scaled_sqrt_sq hu.ne' (twoThirds_den_neg hu hr).ne hp
+  have hinv : 1/x = 3*u^2/2 := by dsimp [x]; field_simp
+  have heδ : 4/δ+C*δ = 4*s := by
+    dsimp [δ]
+    rw [← hsq]
+    field_simp
+    ring
+  have hb' : C-b = p := by dsimp [b]; ring
+  have ht : 1/x+4/δ+C*δ = 6*b*(C-b) := by rw [hb']; linarith only [hinv, heδ, hval]
+  obtain ⟨ratio, v, height, hratio, _, _, hheight, hbox, hmean, hraw⟩ :=
+    terminal_tradeoff_attainment b δ x C hb hd (by dsimp [x]; positivity) (by linarith only [hC]) ht
+  refine ⟨ratio, v, height, hb, hd, hu, hratio, ?_, ?_, hheight, hbox, hmean, hraw⟩
+  · linarith only [hqlo, huh]
+  · change b+p = C
+    dsimp [b]
+    ring
+
+
+/-- Every strict cost ceiling above the limiting optimum admits a finite
+grid with width strictly above two thirds and arbitrarily close to it. -/
+theorem scaled_finite_schedule_near_twoThirds {u C ξ : ℝ}
+    (hl : twoThirdsRootLower < u) (hr : u < twoThirdsRootUpper)
+    (hp : twoThirdsRootPolynomial u = 0) (hC : scaledSupportingCost (2/3) u < C) (hξ : 0 < ξ) :
+    ∃ θ : ℝ, 2/3 < θ ∧ θ < 1 ∧ θ < 2/3+ξ ∧
+      ∃ s : ScaledFinitePrivateSchedule θ C, s.Z = 1 ∧ s.h = s.curve := by
+  let C₀ := scaledSupportingCost (2/3) u
+  let b := C₀ - scaledPrivateCost (2/3) u
+  let δ := 2 / scaledSupportingSqrt (2/3) u
+  let ε := C-C₀
+  have hε : 0 < ε := sub_pos.mpr hC
+  obtain ⟨ratio, v, height, hb, hd, hu, hratio, hbase, hprivate, hheight, hbox, hmean, hraw⟩ :=
+    twoThirds_terminal_attainment hl hr hp
+  change 0 < b at hb
+  change 0 < δ at hd
+  change b + scaledPrivateCost (2/3) u = C₀ at hprivate
+  change (1+δ/(2*(2/(3*u^2))))/δ^3 = height at hheight
+  change height+v = ratio*(b/δ) at hbox
+  change ratio/3+1/(3*δ^2*b) = 2*v-b/δ at hmean
+  change b+δ*ratio/3+1/(3*δ*b) = C₀ at hraw
+  let r := min (ξ/2) (min (1/6) (ε*(9*u^2)/8))
+  let θ : ℝ := 2/3+r
+  let W := 4*θ/(9*u^2)
+  have hrpos : 0 < r := lt_min (half_pos hξ) (lt_min (by norm_num) (by positivity))
+  have hrξ : r ≤ ξ/2 := min_le_left _ _
+  have hr₁ : r ≤ 1/6 := (min_le_right _ _).trans (min_le_left _ _)
+  have hrε : r ≤ ε*(9*u^2)/8 := (min_le_right _ _).trans (min_le_right _ _)
+  have hθ₀ : (2/3 : ℝ) < θ := by dsimp [θ]; linarith only [hrpos]
+  have hθ₁ : θ < 1 := by dsimp [θ]; linarith only [hr₁]
+  have hθξ : θ < 2/3+ξ := by dsimp [θ]; linarith only [hrξ, hξ]
+  have hW : u/3 < W := by
+    refine hbase.trans_le ?_
+    dsimp [W]
     gcongr
-  have hu : 0 < curve*Z := mul_pos hc hZ
-  have he : δ/(2*(2/(3*(curve*Z)^2))) = δ*Z^2/(2*(2/(3*curve^2))) := by field_simp
-  have ht := terminal_tradeoff_of_search b δ (2/(3*(curve*Z)^2)) ratio v height
-    (scaledSupportingCost (2/3) u) hb hd (by positivity) hratio
-    (by simpa only [he] using hheight) hbox hmean (hraw.trans hC.le)
-  have hi : 1/(2/(3*(curve*Z)^2)) = 3*(curve*Z)^2/2 := by field_simp
-  rw [hi] at ht
-  apply twoThirds_width_schedule_floor hl hr hp hd hu _ ht
-  unfold scaledPrivateCost at hwidth
-  unfold scaledPrivateCost
-  linarith only [hwidth, hgate, hC]
+  have hwidth : W ≤ 4*(2/3)/(9*u^2)+ε/2 := by
+    have hinc : 4*r/(9*u^2) ≤ ε/2 := by
+      apply (div_le_iff₀ (by positivity)).2
+      linarith only [hrε]
+    have he : W = 4*(2/3)/(9*u^2) + 4*r/(9*u^2) := by dsimp [W, θ]; ring
+    linarith only [he, hinc]
+  obtain ⟨k, hk⟩ := exists_nat_gt (u/(ε/2))
+  let n : ℝ := (k : ℝ)+1
+  let z : ℕ → ℝ := fun i => (i : ℝ)/n
+  have hn : 0 < n := by dsimp [n]; positivity
+  have hmesh : u/n ≤ ε/2 := by
+    have hc' := (div_lt_iff₀ (half_pos hε)).1 hk
+    apply (div_le_iff₀ hn).2
+    dsimp [n]
+    nlinarith only [hc', hε]
+  obtain ⟨w, _, hpositive, hmoment, hgate, _, herror⟩ := uniform_private_grid_upper k hu hW
+  change (∑ i ∈ Finset.range (k+1), z (i+1)^2*w i) = W at hmoment
+  have htail (i : ℕ) (hi : i < k+1) :
+      (∑ j ∈ Finset.Ico i (k+1), w j) ≤ C-b-u*z (i+1) := by
+    have hg := hgate i hi
+    change u*z (i+1)+(∑ j ∈ Finset.Ico i (k+1), w j) =
+      W+2*u/3+(u/(2*n)-u/(6*n^2)) at hg
+    change u/(2*n)-u/(6*n^2) ≤ u/n at herror
+    unfold scaledPrivateCost at hprivate
+    dsimp [ε] at hwidth hmesh
+    linarith only [hg, herror, hmesh, hprivate, hwidth]
+  refine ⟨θ, hθ₀, hθ₁, hθξ, {
+    n := k+1
+    z := z
+    w := w
+    b := b
+    δ := δ
+    curve := u
+    h := u
+    ratio := ratio
+    v := v
+    height := height
+    Z := 1
+    hb := hb
+    hd := hd
+    hc := hu
+    hZ := by norm_num
+    hh := le_rfl
+    hz0 := by simp [z]
+    hzn := by simpa [z, n] using div_self hn.ne'
+    hstep := fun i _ => div_le_div_of_nonneg_right (by exact_mod_cast Nat.le_succ i) hn.le
+    hpositive := hpositive
+    htail := htail
+    hmoment := hmoment.ge
+    hratio := hratio.le
+    hheight := by simpa only [one_pow, mul_one] using hheight.le
+    hbox := hbox.le
+    hmean := hmean.le
+    hraw := hraw.le.trans hC.le
+  }, rfl, rfl⟩
+
+/-- With strict width above two thirds, precisely the budgets strictly
+above the limiting optimum admit a finite scaled schedule. -/
+theorem strict_scaled_finite_budget_iff {u C : ℝ}
+    (hl : twoThirdsRootLower < u) (hr : u < twoThirdsRootUpper)
+    (hp : twoThirdsRootPolynomial u = 0) :
+    (∃ θ : ℝ, 2/3 < θ ∧ θ < 1 ∧ Nonempty (ScaledFinitePrivateSchedule θ C)) ↔
+      scaledSupportingCost (2/3) u < C := by
+  constructor
+  · rintro ⟨θ, hθ, _, ⟨s⟩⟩
+    by_contra! hC
+    exact twoThirds_width_finite_grid_floor_at_root s.z s.w hθ.le hl hr hp hC (Or.inl hθ)
+      s.hb s.hd s.hc s.hZ s.hh s.hz0 s.hzn s.hstep s.htail s.hmoment
+      s.hratio s.hheight s.hbox s.hmean s.hraw
+  · intro hC
+    obtain ⟨θ, hθ, hθ₁, _, s, _, _⟩ := scaled_finite_schedule_near_twoThirds hl hr hp hC
+      (show (0 : ℝ) < 1 by norm_num)
+    exact ⟨θ, hθ, hθ₁, ⟨s⟩⟩
+
+/-- The limiting optimum is the greatest lower bound with width restricted
+to the physically admissible open interval. -/
+theorem sharp_strict_scaled_finite_schedule_infimum {u : ℝ}
+    (hl : twoThirdsRootLower < u) (hr : u < twoThirdsRootUpper)
+    (hp : twoThirdsRootPolynomial u = 0) :
+    IsGLB {C : ℝ | ∃ θ : ℝ, 2/3 < θ ∧ θ < 1 ∧ Nonempty (ScaledFinitePrivateSchedule θ C)}
+      (scaledSupportingCost (2/3) u) := by
+  have hset : {C : ℝ | ∃ θ : ℝ, 2/3 < θ ∧ θ < 1 ∧ Nonempty (ScaledFinitePrivateSchedule θ C)} =
+      Set.Ioi (scaledSupportingCost (2/3) u) := by
+    ext C
+    exact strict_scaled_finite_budget_iff hl hr hp
+  rw [hset]
+  exact isGLB_Ioi
 
 end Cogentic.Randomized
