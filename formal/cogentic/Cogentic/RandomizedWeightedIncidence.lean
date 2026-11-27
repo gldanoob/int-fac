@@ -4,11 +4,72 @@ import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
 open Finset
-open scoped BigOperators
+open scoped BigOperators Finset
 
 namespace Cogentic.RandomizedWeightedIncidence
 
 variable {H L : Type*}
+
+/-- Reindexing by object counts its weight once per incident label. -/
+theorem sum_incident_eq_degree_mul (objects : Finset H) (labels : Finset L)
+    (R : H → L → Prop) [DecidableRel R] (w : H → ℝ) :
+    (∑ l ∈ labels, ∑ x ∈ objects.filter (fun x => R x l), w x) =
+      ∑ x ∈ objects, ((labels.filter (R x)).card : ℝ) * w x := by
+  simp_rw [sum_filter]
+  rw [sum_comm]
+  simp_rw [← sum_filter, sum_const, nsmul_eq_mul]
+
+/-- Each pair contributes its weight once for every shared label. -/
+theorem sum_incident_pair_weights_eq (objects : Finset H) (labels : Finset L)
+    (R : H → L → Prop) [DecidableRel R] (w : H → H → ℝ) :
+    (∑ l ∈ labels, ∑ x ∈ objects.filter (fun x => R x l),
+      ∑ y ∈ objects.filter (fun y => R y l), w x y) =
+      ∑ x ∈ objects, ∑ y ∈ objects,
+        ((labels.filter (fun l => R x l ∧ R y l)).card : ℝ) * w x y := by
+  calc
+    _ = ∑ l ∈ labels, ∑ z ∈ (objects ×ˢ objects).filter (fun z => R z.1 l ∧ R z.2 l),
+        w z.1 z.2 := by
+      apply sum_congr rfl
+      intro l _
+      rw [filter_product (fun x => R x l) (fun y => R y l)]
+      exact (sum_product' _ _ w).symm
+    _ = _ := by
+      rw [sum_incident_eq_degree_mul]
+      exact sum_product _ _ (fun p : H × H =>
+        ((labels.filter (fun l => R p.1 l ∧ R p.2 l)).card : ℝ) * w p.1 p.2)
+
+/-- With nonnegative weights, the smaller incident degree controls each pair. -/
+theorem sum_incident_pair_weights_le (objects : Finset H) (labels : Finset L)
+    (R : H → L → Prop) [DecidableRel R] (w : H → H → ℝ) (d : H → ℕ)
+    (hw : ∀ x ∈ objects, ∀ y ∈ objects, 0 ≤ w x y)
+    (hd : ∀ x ∈ objects, (labels.filter (R x)).card ≤ d x) :
+    (∑ l ∈ labels, ∑ x ∈ objects.filter (fun x => R x l),
+      ∑ y ∈ objects.filter (fun y => R y l), w x y) ≤
+      ∑ x ∈ objects, ∑ y ∈ objects, (min (d x) (d y) : ℝ) * w x y := by
+  rw [sum_incident_pair_weights_eq]
+  apply sum_le_sum
+  intro x hx
+  apply sum_le_sum
+  intro y hy
+  have hleft : (labels.filter (fun l => R x l ∧ R y l)).card ≤ (labels.filter (R x)).card :=
+    card_le_card fun _ hl =>
+      mem_filter.mpr ⟨(mem_filter.mp hl).1, (mem_filter.mp hl).2.1⟩
+  have hright : (labels.filter (fun l => R x l ∧ R y l)).card ≤ (labels.filter (R y)).card :=
+    card_le_card fun _ hl =>
+      mem_filter.mpr ⟨(mem_filter.mp hl).1, (mem_filter.mp hl).2.2⟩
+  have hdegree : (labels.filter (fun l => R x l ∧ R y l)).card ≤ min (d x) (d y) :=
+    le_min (hleft.trans (hd x hx)) (hright.trans (hd y hy))
+  exact mul_le_mul_of_nonneg_right (by exact_mod_cast hdegree) (hw x hx y hy)
+
+theorem sum_incident_pair_weights_le_of_degree_le (objects : Finset H) (labels : Finset L)
+    (R : H → L → Prop) [DecidableRel R] (w : H → H → ℝ) (d : ℕ)
+    (hw : ∀ x ∈ objects, ∀ y ∈ objects, 0 ≤ w x y)
+    (hd : ∀ x ∈ objects, (labels.filter (R x)).card ≤ d) :
+    (∑ l ∈ labels, ∑ x ∈ objects.filter (fun x => R x l),
+      ∑ y ∈ objects.filter (fun y => R y l), w x y) ≤
+      (d : ℝ) * ∑ x ∈ objects, ∑ y ∈ objects, w x y := by
+  simpa only [min_self, ← mul_sum] using
+    sum_incident_pair_weights_le objects labels R w (fun _ => d) hw hd
 
 /-- The square of each label's incident weight counts ordered object pairs. -/
 theorem sum_incident_sq_eq (objects : Finset H) (labels : Finset L)
@@ -16,26 +77,31 @@ theorem sum_incident_sq_eq (objects : Finset H) (labels : Finset L)
     (∑ l ∈ labels, (∑ x ∈ objects.filter (fun x => R x l), w x) ^ 2) =
       ∑ x ∈ objects, ∑ y ∈ objects,
         ((labels.filter (fun l => R x l ∧ R y l)).card : ℝ) * (w x * w y) := by
+  simpa only [pow_two, sum_mul_sum] using
+    sum_incident_pair_weights_eq objects labels R (fun x y => w x * w y)
+
+/-- The second moment of label mass is bounded by its largest possible
+value times the incidence degree bound and total object weight. -/
+theorem sum_incident_sq_le_of_mass_cap (objects : Finset H) (labels : Finset L)
+    (R : H → L → Prop) [DecidableRel R] (w : H → ℝ) (d : ℕ) (C : ℝ)
+    (hw : ∀ x ∈ objects, 0 ≤ w x) (hC : 0 ≤ C)
+    (hd : ∀ x ∈ objects, (labels.filter (R x)).card ≤ d)
+    (hcap : ∀ l ∈ labels, (∑ x ∈ objects.filter (fun x => R x l), w x) ≤ C) :
+    (∑ l ∈ labels, (∑ x ∈ objects.filter (fun x => R x l), w x) ^ 2) ≤
+      C * (d : ℝ) * ∑ x ∈ objects, w x := by
   calc
-    _ = ∑ l ∈ labels, ∑ x ∈ objects, ∑ y ∈ objects,
-        (if R x l then w x else 0) * (if R y l then w y else 0) := by
-      simp_rw [sum_filter, pow_two, sum_mul, mul_sum]
-    _ = ∑ x ∈ objects, ∑ y ∈ objects, ∑ l ∈ labels,
-        (if R x l then w x else 0) * (if R y l then w y else 0) := by
-      rw [sum_comm]
-      apply sum_congr rfl
-      intro x _
-      rw [sum_comm]
-    _ = _ := by
-      apply sum_congr rfl
-      intro x _
-      apply sum_congr rfl
-      intro y _
-      have hterm (l : L) :
-          (if R x l then w x else 0) * (if R y l then w y else 0) =
-            if R x l ∧ R y l then w x * w y else 0 := by
-        by_cases hx : R x l <;> by_cases hy : R y l <;> simp [hx, hy]
-      simp_rw [hterm, ← sum_filter, sum_const, nsmul_eq_mul]
+    _ ≤ ∑ l ∈ labels, C * ∑ x ∈ objects.filter (fun x => R x l), w x := by
+      apply sum_le_sum
+      intro l hl
+      rw [pow_two]
+      exact mul_le_mul_of_nonneg_right (hcap l hl)
+        (sum_nonneg fun x hx => hw x (mem_filter.mp hx).1)
+    _ = C * ∑ x ∈ objects, ((labels.filter (R x)).card : ℝ) * w x := by
+      rw [← mul_sum, sum_incident_eq_degree_mul]
+    _ ≤ C * ∑ x ∈ objects, (d : ℝ) * w x :=
+      mul_le_mul_of_nonneg_left (sum_le_sum fun x hx =>
+        mul_le_mul_of_nonneg_right (Nat.cast_le.mpr (hd x hx)) (hw x hx)) hC
+    _ = _ := by rw [← mul_sum, mul_assoc]
 
 /-- Pairwise common-label and individual degree bounds control the second
 moment of the total weight incident to a label. -/
@@ -149,6 +215,11 @@ theorem card_le_twice_sum_card_sub_one_of_cover [DecidableEq L]
 #print axioms mul_le_twice_center_mul_add_sq
 #print axioms sum_weighted_mul_le_twice_center_add_sq
 #print axioms sum_weighted_sq_sub_eq_of_centered
+#print axioms sum_incident_eq_degree_mul
+#print axioms sum_incident_pair_weights_eq
+#print axioms sum_incident_pair_weights_le
+#print axioms sum_incident_pair_weights_le_of_degree_le
+#print axioms sum_incident_sq_le_of_mass_cap
 #print axioms sum_incident_sq_eq
 #print axioms sum_incident_sq_le
 
