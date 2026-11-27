@@ -111,7 +111,7 @@ def check_integer_schedule(
     top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,
     h=h, target=target, scales=scales, fractions=fractions, top_ratio_slope=F(0),
     factor_cap=2, first_scale=F(0), cap_slack=slack, row_exponent=None,
-    coordinate_fraction=F(1, 2),
+    coordinate_fraction=F(1, 2), paired_half_products=False,
 ):
     mb = n.bit_length()
     d = first_degree(n, mb, delta)
@@ -154,14 +154,22 @@ def check_integer_schedule(
     assert 2 * top_box > 3 * global_child + 20 * (len(cutoffs) + 10)**6 * t
 
     target_bits = floor(coordinate_fraction * (n - 1)) - 2
+    copies = 2 if paired_half_products else 1
+    if paired_half_products:
+        assert coordinate_fraction == F(1, 2)
     remaining = target_bits
+    combined_bits = combined_lower = combined_upper = 0
     previous_upper = max(base, ceil(first_scale * e0))
     total_factors = 0
     passed_levels = set()
     for i, (a, fraction) in enumerate(zip(scales, fractions)):
         upper = floor(a * e0)
-        size = remaining if i == len(scales) - 1 else floor(fraction * target_bits)
-        remaining -= size
+        allocation = remaining if i == len(scales) - 1 else floor(fraction * target_bits)
+        remaining -= allocation
+        # Both halves use the same strip and allocation. Round both down to keep
+        # their prime-product supports identical for the genus pairing.
+        size = allocation // copies
+        assert size > 0 and upper > 0
         count_base = ceil(F(size, upper))
         count_bits = count_base.bit_length()
         count = count_base + ceil(F(count_base, count_bits))
@@ -172,10 +180,21 @@ def check_integer_schedule(
         local_box, local_child = descent(upper, local_ratio)
         assert lower >= previous_upper and lower >= local_box
         assert local_child <= global_child and local_child < lower
-        assert shortfall <= count * width // 2 <= shortfall + count
+        central_index = count * width // 2
+        assert 0 <= shortfall <= central_index <= shortfall + count
         assert 2 * count_bits * (width + 1) >= upper
+        # H.20 fixes the sum of dyadic indices and loses at most one bit
+        # per prime between the band upper endpoint and the prime itself.
+        log_upper = count * upper - central_index
+        log_lower = log_upper - count
+        assert 0 < size - 2 * count <= log_lower < log_upper <= size
+        threshold = copies * (size - 2 * count)
+        assert 0 < threshold <= copies * log_lower
+        combined_bits += copies * size
+        combined_lower += copies * log_lower
+        combined_upper += copies * log_upper
         previous_upper = upper
-        total_factors += count
+        total_factors += copies * count
 
         # The largest local child can pass through each fitting global box unchanged.
         level = 1
@@ -186,8 +205,14 @@ def check_integer_schedule(
         assert local_child == base or local_child > cutoffs[level + 1]
 
     assert remaining == 0 and total_factors <= factor_cap * k0
+    assert target_bits - (copies - 1) * len(scales) <= combined_bits <= target_bits
+    assert 0 < combined_bits - 2 * total_factors <= combined_lower <= combined_upper <= combined_bits
+    if paired_half_products:
+        # From N >= 2^(n-1), the combined upper product is at most sqrt(N)/4.
+        assert 2 * (combined_upper + 2) <= n - 1
     assert min(passed_levels) == 0 and max(passed_levels) > 0
-    print(f"rounded schedule: {high_count} high, {low_count} low, {len(scales)} private allocations, "
+    mode = "paired half-product schedule" if paired_half_products else "schedule"
+    print(f"rounded {mode}: {high_count} high, {low_count} low, {len(scales)} private allocations, "
           f"up to {max(passed_levels)} identity levels for a band maximum")
 
 

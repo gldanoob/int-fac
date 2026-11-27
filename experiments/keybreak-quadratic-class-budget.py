@@ -98,13 +98,14 @@ def check_schedule(count, delta, kappa, beta, ceiling):
         room = ceiling - (b + delta * ratio / 3 + 2 * slack)
         assert room > 0 and room**2 > curve**2 * child / y0
 
-    replay(
-        2**20_000, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=slope-alpha,
-        top_ratio=top, high_ratio=high, low_ratio=low, height=height, h=curve,
-        target=ceiling, scales=scales, fractions=fractions, top_ratio_slope=top-1,
-        factor_cap=2, first_scale=scales[0]*F(".98"), cap_slack=slack, row_exponent=b,
-        coordinate_fraction=theta,
-    )
+    for paired_half_products in (False, True):
+        replay(
+            2**20_000, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=slope-alpha,
+            top_ratio=top, high_ratio=high, low_ratio=low, height=height, h=curve,
+            target=ceiling, scales=scales, fractions=fractions, top_ratio_slope=top-1,
+            factor_cap=2, first_scale=scales[0]*F(".98"), cap_slack=slack, row_exponent=b,
+            coordinate_fraction=theta, paired_half_products=paired_half_products,
+        )
     for label, cost in charges.items():
         print(f"{label}: {float(cost):.12f}")
     print(f"{count}-stage strict half-width ceiling: {float(ceiling):.8f}")
