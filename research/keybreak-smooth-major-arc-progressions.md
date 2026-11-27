@@ -10,7 +10,7 @@ The bound below pays no polynomial factor in the support period \(m=V^{O(1)}\) a
 
 ## A single-progression bound
 
-Assume \(m=V^{O(1)}\), \(X=V^{\omega(1)}\), \(\log\log X=o(\log V)\), \(y=X^{o(1)}\), and \(\log y/\log\log X\to\infty\). Fix \(\eta<1/2\) and assume \(T\le X^\eta\). For integers \(n\equiv r\bmod m\), let \(g=(r,m)\), \(m'=m/g\), and \(U=X/g\). If \(g\) has a prime factor greater than \(y\), the ordinary smooth probe at \(n\ne0\) is zero. Otherwise, for every interval \(I\subset[-X,X]\), under the pinned Dirichlet GRH estimate its character sum satisfies
+Assume \(m=V^{O(1)}\), \(X=V^{\omega(1)}\), \(\log\log X=o(\log V)\), \(y=X^{o(1)}\), and \(\log y/\log\log X\to\infty\). Fix \(0<\eta<1/2\) and assume \(T\le X^\eta\). For integers \(n\equiv r\bmod m\), let \(g=(r,m)\), \(m'=m/g\), and \(U=X/g\). If \(g\) has a prime factor greater than \(y\), the ordinary smooth probe at \(n\ne0\) is zero. Otherwise, for every interval \(I\subset[-X,X]\), under the pinned Dirichlet GRH estimate its character sum satisfies
 
 \[
 \left|\sum_{\substack{n\in I,\ n\equiv r\bmod m\\n\ne0,\ P^+(|n|)\le y}}
@@ -24,7 +24,15 @@ Assume \(m=V^{O(1)}\), \(X=V^{\omega(1)}\), \(\log\log X=o(\log V)\), \(y=X^{o(1
 
 for each fixed \(\tau>0\), uniformly in the residue. The first term can be omitted if \((q,m')>1\). For \(T\le V^C\) with fixed \(C\), the factor \(T^{o(1)}\) is \(V^{o(1)}\). Relative to the unweighted progression scale \(X/m=U/m'\), the main term is the smooth density \(\Psi(U,y)/U\) times this saving. The error in (1) has arbitrary fixed power slack from the pinned GRH estimate. [KeyBreak, (G.7)–(G.8)](https://crypto.sjtu.edu.cn/factoring.pdf#page=106)
 
-To see the principal term, first consider positive prefixes and put \(n=gu\), \(u=r'+m'k\), \(r'=r/g\). The phase, up to a constant, is \(e(ak/q+\delta u/m')\). Apply (G.8) to each residue \(k\bmod q\), hence each \(u\) residue modulo \(m'q\), and use partial summation for \(e(\delta u/m')\). The total error is \(O_\tau(q(1+D)X^{1/2+\tau}(mq)^\tau)\). The principal progression count depends only on the gcd of the residue with \(m'q\). If \(p\mid(q,m')\), then \(p\nmid u\) since \((r',m')=1\). The gcd is unchanged as the \(p\)-part of \(k\bmod q\) varies with its other components fixed. The additive character on that \(p\)-part is primitive and sums to zero. This proves the asserted vanishing.
+For a positive raw prefix \((0,x]\), put \(n=gu\), \(u=r'+m'k\), and \(r'=r/g\). Up to a constant phase the twist is \(e(ak/q+\delta u/m')\). For each \(k\bmod q\), apply (G.8) to the corresponding \(u\) residue modulo \(m'q\). For a prefix \((0,t]\) in \(u\), split at \(t/2,t/4,\ldots\), ending when the endpoint is below \(4\). The dyadic errors sum to \(O_\tau((1+t)^{1/2+\tau}(m'q)^\tau)\) by a geometric series, including the \(O(1)\) final segment. Equivalently, the same prefix estimate follows directly from (G.7) by character orthogonality after dividing out the residue gcd. All characters modulo the resulting modulus are allowed, including imprimitive characters. Partial summation against \(e(\delta u/m')\) now costs at most a constant times \(1+|\delta|x/m=1+D x/X\) on this error. Summation over the \(q\) residues therefore gives prefix error
+
+\[
+ O_\tau\!\left(q(1+D x/X)(1+x/g)^{1/2+\tau}(m'q)^\tau\right),
+\]
+
+which is at most the error in (1). The \(q\) factor counts the refined residues and the factor \(1+D x/X\) comes from variation on the prefix.
+
+The principal progression count depends only on the gcd of the residue with \(m'q\). If \(p\mid(q,m')\), then \(p\nmid u\) since \((r',m')=1\). The gcd is unchanged as the \(p\)-part of \(k\bmod q\) varies with its other components fixed. The additive character on that \(p\)-part is primitive and sums to zero. This proves the asserted vanishing for every prefix.
 
 If \((q,m')=1\), the additive rational phase is \(e(a' u/q)\) times a constant, where \(a'\equiv a(m')^{-1}\bmod q\). Group the refined residues by \(h=(u,q)\). Writing \(u=hv\) and summing their primitive additive phases gives the Ramanujan sum \(\mu(q/h)\). At a raw prefix endpoint \(x\le X\), the principal term, up to its constant phase, is exactly
 
@@ -38,7 +46,7 @@ If \((q,m')=1\), the additive rational phase is \(e(a' u/q)\) times a constant, 
 
 The formula also covers \(q=1\). Negative prefixes follow by reflection of the interval and conjugation of the phase, with the same divisibility and frequency conditions.
 
-Expand the coprimality constraint in (2) by Möbius inversion over \(j\mid m'q/h\), retaining only \(y\)-smooth \(j\). Each resulting unrestricted smooth sum has endpoint \(x/(ghj)\) and additive frequency \(\delta hj/m'\). Apply Harper’s Theorem 1 with rational denominator \(1\) and normalized offset \(D_x=D x/X\). Since \(h j\le m'q\), its size hypothesis is satisfied throughout \(\sqrt X\le x\le X\). Indeed at \(x=X\) the quantity \(y^3ghj(1+D_x)^2/x\) is at most \(m y^3 T^2/X=X^{2\eta-1+o(1)}\), and at \(x=\sqrt X\) it is \(X^{\eta-1/2+o(1)}\). Between them the quantity is a positive multiple of \(1/x+2D/X+(D/X)^2x\), which is convex. The range of smoothness cutoffs in Harper holds uniformly, since \(x/(ghj)\ge X^{1/2-\eta-o(1)}\). Shorter raw prefixes are bounded by \(O(\sqrt X)\).
+Expand the coprimality constraint in (2) by Möbius inversion over \(j\mid m'q/h\), retaining only \(y\)-smooth \(j\). Each resulting unrestricted smooth sum has endpoint \(x/(ghj)\) and fixed additive frequency \(\delta hj/m'\). At that endpoint its normalized offset is exactly \(D_x=D x/X\). Apply Harper’s Theorem 1 with rational approximation \(0/1\). Since \(h j\le m'q\), its size hypothesis is satisfied throughout \(\sqrt X\le x\le X\). Indeed at \(x=X\) the quantity \(y^3ghj(1+D_x)^2/x\) is at most \(m y^3 T^2/X\le X^{2\eta-1+o(1)}\), using \(q(1+D)^2\le T^2\). At \(x=\sqrt X\) it is at most \(X^{\eta-1/2+o(1)}\), using \(D_x\le X^{\eta-1/2}\). Between them the quantity is a positive multiple of \(1/x+2D/X+(D/X)^2x\), which is convex. The range of smoothness cutoffs in Harper holds uniformly, since \(x/(ghj)\ge X^{1/2-\eta-o(1)}\).
 
 Let \(\alpha=\alpha(U,y)=1-o(1)\) be the saddle point for the global endpoint. The smooth scaling estimate gives
 
@@ -46,7 +54,9 @@ Let \(\alpha=\alpha(U,y)=1-o(1)\) be the saddle point for the global endpoint. T
 \Psi(x/(ghj),y)\ll ((X/x)hj)^{-\alpha}\Psi(U,y).
 \]
 
-Harper’s oscillatory factor is \((1+D_x)^{-1/2}V^{o(1)}T^{o(1)}\). Because \(1+D_x\ge(x/X)(1+D)\) and \(\alpha>1/2\) eventually, the product of these two bounds is at most \(\Psi(U,y)(hj)^{-\alpha}(1+D)^{-1/2}V^{o(1)}T^{o(1)}\). The harmless losses absorb the logarithmic factors and Harper’s saddle-point correction, uniformly in the shorter endpoints. Finally,
+For \(x\ge\sqrt X\), Harper’s oscillatory factor is \((1+D_x)^{-1/2}V^{o(1)}T^{o(1)}\). Because \(1+D_x\ge(x/X)(1+D)\) and \(\alpha>1/2\) eventually, the product of the scaling and oscillatory bounds is at most \(\Psi(U,y)(hj)^{-\alpha}(1+D)^{-1/2}V^{o(1)}T^{o(1)}\). The logarithmic factors cost \(V^{o(1)}\), and the saddle-point correction costs \(T^{o(1)}\) uniformly, since the saddle point at every permitted divided endpoint tends to \(1\).
+
+For \(0<x<\sqrt X\), use the trivial bound by \(\Psi(x/(ghj),y)\) in each Möbius term. The scaling estimate still uses \(U\) as its reference endpoint, even if \(x/(ghj)<y\), and the term is empty if \(x/(ghj)<1\). It contributes the same bound since \((x/X)^\alpha\le X^{-\alpha/2}\le (1+D)^{-1/2}\) eventually, using \(1+D\le X^\eta\) and \(\alpha>\eta\). Thus the principal term itself satisfies the same long-scale saving on every prefix. Finally,
 
 \[
 \sum_{h\mid q}\frac{h^{-\alpha}}{\phi(q/h)}
