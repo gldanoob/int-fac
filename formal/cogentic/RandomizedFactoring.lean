@@ -95,11 +95,13 @@ import Cogentic.RandomizedBalancedAllocation
 import Cogentic.RandomizedBalancedStrip
 import Cogentic.RandomizedEpochCounter
 import Cogentic.RandomizedEpochOutput
+import Cogentic.RandomizedEpochSuccess
 import Cogentic.RandomizedInputTape
 import Cogentic.RandomizedEpochEventCost
 import Cogentic.RandomizedFairEpochTape
 import Cogentic.RandomizedInputAsymptotic
 import Cogentic.RandomizedPreprocessingCost
+import Cogentic.RandomizedPrimeGridPrefixEnergy
 import Cogentic.RandomizedPrimeProductGridFourier
 import Cogentic.RandomizedSerializedDriver
 import Cogentic.RandomizedTotalEpochSplit
@@ -213,3 +215,5 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedSerializedDriver.serializedFactor_expected_eventually
 
 #print axioms Cogentic.RandomizedInputDriver.serialized_epoch_from_critical_line
+#print axioms Cogentic.RandomizedEpochSuccess.epoch_verified_split_probability_half
+#print axioms Cogentic.Randomized.primeBinProducts_gridPrefix_from_critical_line

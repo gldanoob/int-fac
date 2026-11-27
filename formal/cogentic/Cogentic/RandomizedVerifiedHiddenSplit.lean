@@ -106,6 +106,19 @@ private theorem verifiedTrial_spec {N : ℕ} (hN : 3 ≤ N) (x : SquareFiber (1 
     have hvalid : TwoThirdsSearch.ProperDivisor N d := ⟨hproper.1, hproper.2, hdvd⟩
     simp [hvalid, ratioTrial_pair x pair ht, d]
 
+/-- The charged verifier returns only proper pairs, for every represented ratio. -/
+theorem verifiedTrial_budget_sound {N : ℕ} (hN : 3 ≤ N) (x : SquareFiber (1 : (ZMod N)ˣ)) :
+    (verifiedTrial x).2 ≤ trialBudget N ∧
+      ∀ pair, (verifiedTrial x).1 = some pair → 2 ≤ pair.1 ∧ 2 ≤ pair.2 ∧ pair.1 * pair.2 = N := by
+  obtain ⟨hvalue, hcost⟩ := verifiedTrial_spec hN x
+  refine ⟨hcost, fun pair heq => ?_⟩
+  rw [hvalue] at heq
+  cases h : ratioTrial x with
+  | none => simp [h] at heq
+  | some out =>
+    have hv : out.val = pair := by simpa [h] using heq
+    exact hv ▸ out.property
+
 variable {Coins Label Public : Type*} [DecidableEq Label] {N : ℕ}
 
 /-- The charged divisor result on a positive-probability public transcript.
@@ -163,14 +176,7 @@ theorem conditional_verified_split (hN : 3 ≤ N) (ho : Odd N) (hnot : ¬ IsPrim
     rwa [hevent]
   · intro outcome hout
     obtain ⟨x, _, rfl⟩ := PMF.mem_support_map_iff _ _ _ |>.mp hout
-    obtain ⟨hvalue, hcost⟩ := verifiedTrial_spec hN x
-    refine ⟨hcost, fun pair heq => ?_⟩
-    rw [hvalue] at heq
-    cases h : ratioTrial x with
-    | none => simp [h] at heq
-    | some out =>
-      have hv : out.val = pair := by simpa [h] using heq
-      exact hv ▸ out.property
+    exact verifiedTrial_budget_sound hN _
 
 #print axioms conditional_verified_split
 
