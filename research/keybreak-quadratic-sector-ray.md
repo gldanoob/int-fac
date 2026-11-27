@@ -291,3 +291,42 @@ At \(W=VJM\exp(o(\log V))\) this is \(WV^{o(1)}\). Hence the positive angular ke
 **Application to the full smooth population.** In the complete-pattern proof put each base packet at \(VJM\) with at most its single-prime overshoot. The strict margin in \(s\) still reserves a polynomial guard after the small exceptional components are removed. For the local deletions an affine ray lattice has minimum difference length at least \(\sqrt M\) and covolume \(MV/2\). Its sector bound at complementary norm \(W'\) is \(O(1+\sqrt{W'/M}+W'/(VJM))\) by the rotated rectangle row estimate. The complement exceeds \((VJ)^2 M\) by a fixed power in these deletions. This absorbs the boundary terms. The sharp-bin estimates, random partitions with disjoint rational prime labels, and endpoint replacement then give the claimed relative error with the geometric energy estimate.
 
 The primitive cuspidal inductions for this polynomial range have analytic conductor and tested height bounded by fixed powers of \(T\). The arithmetic conductor is divisible by \(|D|\), also for angular twists. A single bad representation can consequently occur for at most \(T^{o(1)}\) discriminants by the divisor bound. Choose the fixed zero-free margin small enough in the earlier family density theorem to remove \(O(T^{1/2})\) fields even with this multiplicity. Dirichlet GRH bounds all nonprincipal invariant factors, including ones of small conductor shared by many moduli. Their prime transforms can be included with all other nonprincipal modes in the joint energy estimate. For the unconditional prime-discriminant ordinary assertion there are no such invariant modes, and one applies the same family argument also to the splitting characters. This is why uniformity over the indicated ray moduli costs no Markov factor here.
+
+
+## Sharp geometric count for primitive ideals in one ray and sector
+
+Let \(D<-4\) be a negative fundamental discriminant, \(V=\sqrt{|D|}\), and \(\mathfrak m\) a nonzero integral ideal of norm \(M\). Fix one ray class and an arc of length \(\pi/J\) in the angle coordinate modulo \(\pi\), with \(J\ge1\). Count primitive ideals in this ray, coprime to \(\mathfrak m\), with norms in \([X/2,X]\) and angle in the arc. Here primitive means the ideal is not contained in \(p\mathcal O_D\) for any rational prime \(p\). Allow \(X,M,J\) to be bounded by fixed powers of \(V\).
+
+Choose an integral ideal \(\mathfrak a\) coprime to \(\mathfrak m\) in the inverse of the underlying ordinary class. An ideal \(\mathfrak b\) in that ordinary class has \(\mathfrak a\mathfrak b=(\alpha)\) with \(\alpha\in\mathfrak a\), unique up to sign. Conversely \(\alpha\in\mathfrak a\setminus\{0\}\) gives the integral ideal \((\alpha)\mathfrak a^{-1}\). Its norm is \(|v|^2\), where \(v=\alpha/\sqrt{\mathrm N\mathfrak a}\). Also \(\mathfrak b\subseteq p\mathcal O_D\) exactly when \(v\in p\Lambda\), where \(\Lambda=\mathfrak a/\sqrt{\mathrm N\mathfrak a}\) has covolume \(V/2\). For a reference generator \(\alpha_0\) in the selected ray, ray equality fixes \(\alpha\) modulo \(\mathfrak a\mathfrak m\) up to sign. This follows since \(\alpha_0\) is a unit at each prime of \(\mathfrak m\), and equality modulo \(\mathfrak m\) at these primes is equivalent to global membership of the difference in \(\mathfrak a\mathfrak m\). Hence the generator vectors are in the coset \(v_0+\Gamma\) and its negative, with \(\Gamma=\mathfrak a\mathfrak m/\sqrt{\mathrm N\mathfrak a}\) of covolume \(VM/2\). If the cosets coincide, count in one lift of the angle arc to the complex plane. If they are distinct, count the two cosets in one lift and divide by no further factor, since each ideal then has exactly one vector in that lift. Equivalently, count just \(v_0+\Gamma\) in the two antipodal lifts in the distinct-coset case. In the coincident case the same two-lift count must be divided by two. Arc endpoint conventions can be half-open throughout.
+
+For a single lifted annular sector \(\mathcal R\) and one eligible coset, the primitive vector count is
+\[
+ \frac{\operatorname{area}(\mathcal R)}{VM/2}
+ \prod_{p\nmid M}(1-p^{-2})
+ + O_\epsilon\!\left(
+     V^\epsilon\left(1+\frac{\sqrt X\,\lambda}{VM}
+                      +\frac{\sqrt X}{\lambda}\right)
+                 \right),
+ \qquad \lambda=\lambda_1(\Gamma).
+\]
+In particular, the ideal main term is this area term multiplied by one or two according as the two cosets coincide or are distinct. One lifted arc has annular area \(\pi X/(4J)\). All constants are uniform over rays, moduli, and arc positions, for fixed polynomial bounds and \(\epsilon>0\).
+
+To see the estimate, take a reduced basis \(e_1,e_2\) of \(\Gamma\) with \(|e_1|=\lambda\) and write \(v=v_0+u e_1+w e_2\). The lattice of rows has transverse spacing \(VM/(2\lambda)\). For a real row coordinate \(w\) let \(L(w)\) be the length in the \(u\)-coordinate of its intersection with the sector. Each row consists of a bounded number of intervals, and \(L\) has supremum and total variation \(O(\sqrt X/\lambda)\). For the variation bound, split the angular wedge into a bounded number of convex wedges, and write each annular piece as the difference of two disk sections of that wedge. A convex planar region has a concave slice-length function on its projection interval. Including any jumps to zero at the endpoints, the variation of each slice-length function is at most twice its maximum. Half-open boundaries contribute at most a bounded number of endpoints per transverse row. A boundary that contains a whole row counts in the variation estimate as a change at one row. In these coordinates \(\int L(w)\,dw=\operatorname{area}(\mathcal R)/(VM/2)\).
+
+Set \(F(w)=\det(e_1,v)/\det\Lambda\), using a compatible orientation. This is an integer affine function of integral \(w\), with slope \(M\). If \(p\mid M\), then \(v\notin p\Lambda\) since \(\alpha\) is a unit at a prime ideal above \(p\) dividing \(\mathfrak m\). For squarefree \(d\) coprime to \(M\), the change of basis from \(\Lambda\) to \(\Gamma\) is invertible modulo \(d\). Consequently \(v\in d\Lambda\) holds on one residue of \(u\) for each \(w\) satisfying \(d\mid F(w)\), and on no other rows.
+
+Omit the possible row \(F(w)=0\), at a cost \(O(1+\sqrt X/\lambda)\). On every other row, Möbius inversion counts its primitive vectors by
+\[
+ L(w)\sum_{\substack{d\mid F(w)\\(d,M)=1}}\frac{\mu(d)}{d}
+ +O\bigl(\tau(|F(w)|)\bigr).
+\]
+For nonempty rows \(|F(w)|\le 2\lambda\sqrt X/V\), so the divisor bound and the transverse spacing give a total row error \(O_\epsilon(V^\epsilon(1+\sqrt X\,\lambda/(VM)))\). Sum the main terms by \(d\), whose range may be extended to any polynomial cutoff above both the bound on \(|F|\) and \(X\). For \(d\) coprime to \(M\), \(d\mid F(w)\) fixes one row class modulo \(d\). The elementary spacing estimate for a function of bounded variation gives
+\[
+ \sum_{w:\,d\mid F(w)} L(w)
+   =\frac1d\int L(w)\,dw+O(\sqrt X/\lambda).
+\]
+This estimate remains valid after deleting the possible zero row. Multiplying by \(\mu(d)/d\) and summing yields a logarithmic factor in the error and the absolutely convergent product \(\prod_{p\nmid M}(1-p^{-2})\) in the main term. This proves the asserted estimate.
+
+The minimum satisfies \(\sqrt M\le\lambda\ll\sqrt{VM}\). The lower bound follows because a nonzero \(\alpha\in\mathfrak a\mathfrak m\) generates an integral ideal contained in \(\mathfrak a\mathfrak m\), and planar reduction gives the upper bound. Thus the relative error saves a fixed power whenever \(\sqrt X\) exceeds \(JVM/\lambda\) by a fixed power of \(V\). This gives a uniform power-slack asymptotic above \(X=(VJ)^2M\), and above \(X=VMJ^2\) for modulus lattices with \(\lambda\asymp\sqrt{VM}\). For rational \(\mathfrak m=q\mathcal O_D\), the uniform scale is sharp at the level of powers. A generator in the principal ray has imaginary part either zero or of magnitude at least \(qV/2\). An arc of length \(\pi/J\) just off the real axis therefore has no such nonreal vector below a constant times \((VJ)^2q^2\) for large \(J\).
+
+The row argument treats coprimality in a lattice coset. It places no smoothness condition on the represented norm. The proportional-share theorem for smooth ideals above uses two packets, and the diagonal term in their joint energy still depends on the number of ray and angular cells regardless of the shape of an individual modulus lattice.
