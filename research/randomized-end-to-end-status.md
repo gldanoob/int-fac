@@ -472,14 +472,61 @@ loss, mass, count, or error is set to zero.
   only the eight unreduced paper leaves, C1-C4, the full certificates, and the
   concrete adapters left.
 
+### Wave 10: the real C3 budget and its exact obstruction
+
+`RandomizedConcreteC3Budget.lean` discharges the definitional C3 fields for
+`realEpoch`:
+
+- `eta = 0`, `hideal` by reflexivity (`ideal` is the uniform law itself);
+- `hactual` by reflexivity (`actual` is the direct retry law);
+- `gcdMass = (gcdExitProb (realSpec N hN) (realJ N)).toReal`, `hgcd` by
+  `le_rfl`.
+
+It reduces `heps_le` to the single explicit inequality
+
+```text
+2·L·(1+log L)·(∑_{p|N} 4/(p−1))·(log 2N)^80 / #(ReducedForms N)
+  + ∑_{p|N} 1/p  ≤  1/32,        L = sqrt(8N/3).
+```
+
+**This inequality is false for every sufficiently large `N` divisible by 3**
+under the current crude `directMissingRootMass` bound: the numerator carries
+`(log 2N)^80`, while the GRH class-number lower bound is only `√N/log N`, and
+`∑_{p|N} 1/p ≥ 2` for `3 ∣ N`. The budget therefore grows like
+`(log N)^82`, not decays. The file proves this and does not assert an
+eventual-for-all-`N` statement.
+
+For **prime** `N` the reciprocal sum is `4/(N−1)` and the budget is
+`O((log N)^82 / N)`, so `heps_le` does hold eventually under
+`DirichletLZerosOnLine`:
+
+```lean
+eventually_heps_le_of_prime (line : DirichletLZerosOnLine) :
+  ∃ N₀, ∀ N ≥ N₀, ∀ hN h2, Nat.Prime N →
+    directSamplerEpsilon (realSpec N hN) realEta (realGcdMass N hN) ≤ 1/32
+
+exists_concreteC3RealInputs_of_prime (line) :
+  ∃ N₀, ∀ N ≥ N₀, ∀ hN h2, Nat.Prime N →
+    Nonempty (ConcreteC3RealInputs N hN h2)
+```
+
+Consequence: the real reduced-form C3 instance is available for all
+sufficiently large prime moduli, but for general composite `N` the formal
+budget needs a sharper missing-root/TV estimate than the current crude bound.
+This is a formalization gap in the TV accounting, not a claim that the
+manuscript's estimate is false.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
    construction-level S0–S9 epoch (`ConcreteEpochData`), a full concrete
    `ConcreteC3Hypotheses` instance (`bigConcreteC3`), concrete S0–S9 stage costs,
-   and the C5 `HitMassInputs`/`C5FullInputs` decomposition. The paper's actual
-   class-group sampler is still not defined; the `bigConcreteC3` modulus is a
-   huge opaque prime, not the paper's form class group.
+   and the C5 `HitMassInputs`/`C5FullInputs` decomposition. Wave 9 supplies the
+   real reduced-form `DirectFormSpec`, and wave 10 reduces its C3 budget to the
+   explicit `RealC3BudgetInputs`. That budget is certified for large prime
+   moduli under GRH but is **false for large `N` divisible by 3** under the
+   current crude missing-root bound; a sharper TV estimate is needed for
+   general composite `N`.
 2. **The analytic leaves.** L18.4 and L19.4–L19.6 are now decomposed into
    explicit certificates and recomposed (`L18_4Full`, `L19Full`). The remaining
    paper-level leaves are L20.2, L20.4, L21.2, L27.1, L30, L34, L4/L25/L36, and
@@ -495,10 +542,12 @@ loss, mass, count, or error is set to zero.
 5. **The full manuscript bound.** Consequently, the numerical
    `L_N[1/3, 1.9839824…]` claim is not a theorem of this branch. What is a
    theorem is the reduction from the named ledger to the serialized driver, the
-   wave-2 paper-assumption endpoint, and the wave-7 discharged endpoint
-   `serialized_assembled_balancedEnvelopeInfimum_from_dischargedInputs`, whose
-   only remaining inputs are the eight unreduced paper leaves, C1–C4, the
-   concrete C5 certificate, and the three concrete adapters.
+   wave-2 paper-assumption endpoint, the wave-7 discharged endpoint, and the
+   wave-9 fully discharged endpoint
+   `serialized_assembled_balancedEnvelopeInfimum_from_fullyDischargedInputs`,
+   whose remaining inputs are the eight unreduced paper leaves, C1–C4, the full
+   L18.4/L19/C5 certificates, and the concrete adapters. The real C3 budget is
+   certified for prime moduli; composite `N` needs a sharper TV accounting.
 
 ## Reading order
 
