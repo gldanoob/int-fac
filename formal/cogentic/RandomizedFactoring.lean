@@ -53,6 +53,7 @@ import Cogentic.RandomizedFixedMoebius
 import Cogentic.RandomizedPrimitiveQuadraticRoot
 import Cogentic.RandomizedQuadraticInvolution
 import Cogentic.RandomizedQuadraticCompletion
+import Cogentic.RandomizedRootFractionIdentity
 import Cogentic.RandomizedClassMajority
 import Cogentic.RandomizedWeightedIncidence
 import Cogentic.RandomizedCenteredBoxRatio

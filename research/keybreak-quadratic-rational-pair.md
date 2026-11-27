@@ -182,3 +182,44 @@ The divisibility follows by expanding \(K^2\) modulo \(4pg\) and using \(b_i^2\e
  D_1\ne D_2,\qquad (n_1,n_2)\ll V^4(\log V)^{O(1)}/p.
 \]
 In particular the same-cofactor diagonal contributes exactly one record per record at this scale because \(pX_R\gg V^4(\log V)^{O(1)}\) in the intended bands. Pairs with different discriminants and a small common cofactor can still contribute to (8).
+
+### Pairs with a shared bin prime are negligible at both tabulated budgets
+
+In the actual anchor moment the two odd cofactor parts may be required to be coprime at a negligible cost. More generally, after the raw pair \(h,g\) and the parent have been fixed, prescribe any nonzero integer \(J=J_{h,g,p}\) with \(\log(2+|J|)\le(\log V)^C\). The contribution from pairs for which an **odd** bin prime of either cofactor divides \(J\) is at most
+\[
+ \left(\frac{V^3}{P}\right)^2
+ \exp\!\left(-\log B-\frac{\log(M^2/P)}{\log B}\log d+o(H)\right),       \tag{9}
+\]
+where \(H=(\log N)^{1/3}(\log\log N)^{2/3}\) and the top scales are fixed. To get the coprimality conclusion take \(J=\operatorname{Res}(h,g)\), since at a primitive anchor a prime common to the values must divide the resultant. Multiplying \(J\) by any of the nonzero coefficients, minors, or discriminants of the fixed pair costs only polynomially many additional prime tests in the estimate.
+
+For a specified parent root and a specified offending \(q\mid J\) of the first cofactor, \(q=B^{1-o(1)}\). The odd cofactor part is squarefree. Its remaining bin primes have product \(\asymp X_R/q\), larger than \(T=M^2/(pq)\) by order \(V\). Multiplying these other primes until the product first exceeds \(T/B\) gives \(T/B<k\le T\). Both \(q\) and the primes of \(k\) divide \(h(R)\); they are distinct and different from \(p\). There are at most \(2^{1+\omega(k)}\) projective root choices, since \(h\) is primitive. Together with the fixed parent root each determines a planar congruence lattice of index \(pqk\le M^2\), including projective infinity when it occurs at another prime. The primitive-point bound above gives \(O((M')^2/(pqk))\) anchors in each lattice.
+
+To sum \(2^{\omega(k)}/k\), the bin support forces \(\omega(k)\ge \log(T/B)/\log B\). For \(j\) prime factors the sum is at most \((2\sum_{\ell\le B}1/\ell)^j/j!\), summing over primes \(\ell\). The tail beginning at \(j\asymp d\) is at most \(\exp(-\log(T)\log d/\log B+o(H))\) by the prime harmonic sum and the factorial estimate. There are only polynomially many \(q\mid J\). Summing the raw pairs by (1), dividing by the anchor count and exchanging the two forms gives (9). This uses only one cofactor after the offending prime has been identified and holds uniformly at each parent.
+
+On a band put \(P=M^y, V=M^v\), so \(2v<y\). Write \(bH=\log B+o(H)\). The saving in (9) compared with the square of the balanced first-moment scale is at least
+\[
+ \left(b-\frac{2+2v-y}{3\delta b}\right)H+o(H)
+ \ \ge\left(b-\frac{2}{3\delta b}\right)H+o(H).
+\]
+Indeed the actual bin density is \(\exp[-(\log X_R/\log B)\log d+o(H)]\). In the two finite tables, \(b=\delta\beta\) gives a margin exceeding \(.44H\) in the wider table and \(.45H\) in the narrower table at leading order. Thus odd prime overlap and pair-specific exceptional prime factors are negligible on the needed *smooth-pair* scale. The correlation of pairs with disjoint odd supports remains open. [Quadratic finite budgets](keybreak-quadratic-top-budget.md#finite-witnesses-and-limiting-arithmetic)
+
+### A uniform conic upper bound for nearby fractions
+
+In (8), set \(A_i=|D_i|\), \(\Delta=K^2-A_1A_2\). Distinct close records give distinct primes \(A_1,A_2\) and \(0<\Delta\ll V^4(\log V)^C\). For fixed \(p,g,A_1,A_2,K\), the primitive triple \((u_1,u_2,t)\) lies on the nonsingular conic with symmetric matrix
+\[
+ \begin{pmatrix}A_2&-K&0\\-K&A_1&0\\0&0&1\end{pmatrix}.
+\]
+Its determinant has absolute value \(\Delta\), and its two-by-two minors have gcd one because they include the distinct primes \(A_1,A_2\). In a box of sides \(O(U),O(U),O(VU(\log V)^C)\), \(U=X_R/g\), the uniform conic estimate gives at most \(O(\tau(\Delta)(1+UV^{1/3}(\log V)^C/\Delta^{1/3}))\) primitive triples. [Browning and Heath-Brown, Corollary 2](https://arxiv.org/pdf/math/0404456#page=4)
+
+For each triple the linear equation in \(b_1,b_2\) leaves a common integer shift \((u_1j,u_2j)\) with \(j\bmod 2pg\). At every odd prime dividing \(pg\) one of the two slopes is a unit. Its square-root condition leaves at most two choices there. The factor at two is bounded since the bin cofactors have precisely one factor of two. Thus there are \(O(2^{\omega(g)})\) lifts. For a fixed \(\Delta<P^2\) there is at most one parent in the dyad dividing it. Each \(K\ll V^2(\log V)^C\) gives at most two ordered prime pairs by \(A_1A_2=K^2-\Delta\).
+
+Dropping the smoothness constraint and averaging the count over parents gives \(O((\log V)^C M^2V^6/P^2)\) distinct close pairs, at the raw scale. In detail the additive one in the conic estimate contributes \(O((\log V)^C V^6/P)\) by \(\sum_{\Delta\le Y}\tau(\Delta)3^{\omega(\Delta)}\ll Y(\log Y)^5\). The volume part for \(g\ge G\) is at most
+\[
+ \frac{V^2 X_R V^{1/3}}{P}(\log V)^C
+ \sum_{\Delta\le Y}\tau(\Delta)\Delta^{-1/3}
+          \sum_{g\mid\Delta,\ g\ge G}\frac{2^{\omega(g)}}g
+ \ \ll\ \frac{V^{7/3}X_R}{P}\,\frac{Y^{2/3}}G(\log V)^C .
+\]
+This follows by writing \(\Delta=gj\) and summing \(2^{\omega(g)}\tau(g)/g^2\) over the tail, using an ordinary fixed divisor-function bound. At \(Y=V^4(\log V)^C\) this proves the raw estimate. Restricting \(Y\) to \(V^{4-\epsilon}\) or imposing \(G\ge V^\epsilon\) gives a fixed power saving and hence negligibility even on the smooth scale for typical parents. The remaining conics have large determinant and require both coordinates to be smooth. [Verified integer identities](../formal/cogentic/Cogentic/RandomizedRootFractionIdentity.lean)
+
+At longer denominator scales, an independent held-out check at \(p=257,V=232,B=229\) used 2,048 calibration anchors and 4,096 reporting anchors per range. For \(Q\asymp p^2\) there were 91,200 ordered smooth pairs, compared with 90,054.68 under conditional independent thinning. The difference per anchor was .280 with 95% interval [−.829,1.388]. For \(Q\asymp p^{5/2}\) there were 508 pairs compared with 434.23; the difference per anchor was .0180 with interval [−.0077,.0437]. The cutoff is below the mark height but this finite experiment takes \(V>\sqrt p\) to obtain enough pairs. Reproduce it with the earlier script and its `--long` option.
