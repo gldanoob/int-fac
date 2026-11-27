@@ -39,6 +39,8 @@ import Cogentic.RandomizedFormReductionSize
 import Cogentic.RandomizedReductionSteps
 import Cogentic.RandomizedConductorCount
 import Cogentic.RandomizedNarrowEnvelope
+import Cogentic.RandomizedNarrowEndpoint
+import Cogentic.RandomizedRectangularAbel
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -112,3 +114,6 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedConductorCount.unsaturated_prefix
 #print axioms Cogentic.Randomized.narrow_envelope_37_20_lower
 #print axioms Cogentic.RandomizedFormReductionSize.reduce_size_bounds
+#print axioms Cogentic.Randomized.narrow_envelope_endpoint_lower
+#print axioms Cogentic.Randomized.narrow_envelope_endpoint_upper
+#print axioms Cogentic.RandomizedRectangularAbel.norm_sum_le_prefix_bound_mul_variation
