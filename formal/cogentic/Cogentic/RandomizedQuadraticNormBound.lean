@@ -1,6 +1,7 @@
 import Cogentic.RandomizedPrimitiveQuadraticRoot
 import Mathlib.Algebra.Group.Int.Units
 import Mathlib.Algebra.Order.Ring.Abs
+import Mathlib.Analysis.Real.Sqrt
 import Mathlib.RingTheory.Coprime.Basic
 import Mathlib.Tactic.Linarith
 
@@ -140,6 +141,82 @@ theorem abs_mul_le_two_of_sq_le_discriminant {R : Type*} [CommRing R] [LinearOrd
   have hmul := mul_le_mul_of_nonneg_right hD (sq_nonneg v)
   nlinarith only [hnorm, hmul, sq_nonneg t]
 
+/-- A nonzero coefficient divisible by the ray modulus forces a lower bound
+on the product of the two norms. The squares allow either sign of the modulus. -/
+theorem ray_norm_gap {D g t v q n m : ℤ} (hq : q ∣ v)
+    (hnorm : g ^ 2 * (t ^ 2 + |D| * v ^ 2) = 4 * n * m) :
+    v = 0 ∨ g ^ 2 * |D| * q ^ 2 ≤ 4 * n * m := by
+  by_cases hv : v = 0
+  · exact Or.inl hv
+  right
+  have habs : |q| ≤ |v| := Int.le_of_dvd (abs_pos.mpr hv) ((abs_dvd_abs q v).mpr hq)
+  have hsq : q ^ 2 ≤ v ^ 2 := by
+    simpa only [sq_abs] using pow_le_pow_left₀ (abs_nonneg q) habs 2
+  have hmul := mul_le_mul_of_nonneg_left hsq (mul_nonneg (sq_nonneg g) (abs_nonneg D))
+  have ht := mul_nonneg (sq_nonneg g) (sq_nonneg t)
+  nlinarith only [hnorm, hmul, ht]
+
+theorem ray_imaginary_eq_zero_of_small_norm_product {D g t v q n m : ℤ}
+    (hg : g ≠ 0) (hq : q ∣ v) (hnorm : g ^ 2 * (t ^ 2 + |D| * v ^ 2) = 4 * n * m)
+    (hsmall : 4 * n * m < |D| * q ^ 2) : v = 0 := by
+  have h1 : 1 ≤ g ^ 2 := by
+    have hpos := sq_pos_of_ne_zero hg
+    omega
+  have hscale := mul_le_mul_of_nonneg_right h1 (mul_nonneg (abs_nonneg D) (sq_nonneg q))
+  rcases ray_norm_gap hq hnorm with hv | hgap
+  · exact hv
+  · nlinarith only [hscale, hgap, hsmall]
+
+/-- Below the usual square-root cutoff on both norms, the principal
+generator has vanishing imaginary coordinate. One cutoff may be weak. -/
+theorem ray_imaginary_eq_zero_of_small_norms {D g t v q n m : ℤ}
+    (hg : g ≠ 0) (hq : q ∣ v) (hnorm : g ^ 2 * (t ^ 2 + |D| * v ^ 2) = 4 * n * m)
+    (hn : 0 ≤ n)
+    (hnlt : (n : ℝ) < Real.sqrt |(D : ℝ)| * |(q : ℝ)| / 2)
+    (hmle : (m : ℝ) ≤ Real.sqrt |(D : ℝ)| * |(q : ℝ)| / 2) : v = 0 := by
+  let B : ℝ := Real.sqrt |(D : ℝ)| * |(q : ℝ)| / 2
+  have hB : 0 < B := (show (0 : ℝ) ≤ n by exact_mod_cast hn).trans_lt hnlt
+  have hnm : (n : ℝ) * m < B * B :=
+    (mul_le_mul_of_nonneg_left hmle (show (0 : ℝ) ≤ n by exact_mod_cast hn)).trans_lt
+      (mul_lt_mul_of_pos_right hnlt hB)
+  have hBsq : 4 * (B * B) = |(D : ℝ)| * (q : ℝ) ^ 2 := by
+    calc
+      _ = (Real.sqrt |(D : ℝ)|) ^ 2 * |(q : ℝ)| ^ 2 := by unfold B; ring
+      _ = _ := by rw [Real.sq_sqrt (abs_nonneg _), sq_abs]
+  apply ray_imaginary_eq_zero_of_small_norm_product hg hq hnorm
+  have hreal : 4 * (n : ℝ) * m < |(D : ℝ)| * (q : ℝ) ^ 2 := by linarith only [hnm, hBsq]
+  exact_mod_cast hreal
+
+/-- If the imaginary coordinate vanishes, primitivity forces the generator
+to be a unit. The common divisor then equals both nonnegative norms. -/
+theorem primitive_norm_diagonal_of_ray_imaginary_eq_zero {D g t v u B n m : ℤ}
+    (hg : 0 < g) (hn : 0 ≤ n) (hgn : g ∣ n) (hgm : g ∣ m)
+    (ht : t = 2 * u + B * v) (hprimitive : u.gcd v = 1) (hv : v = 0)
+    (hnorm : g ^ 2 * (t ^ 2 + |D| * v ^ 2) = 4 * n * m) :
+    (t = 2 ∨ t = -2) ∧ n = g ∧ m = g := by
+  rw [hv, Int.gcd_zero_right] at hprimitive
+  have hu : u = 1 ∨ u = -1 := by simpa only [Int.natCast_one] using Int.natAbs_eq_iff.mp hprimitive
+  have ht' : t = 2 ∨ t = -2 := by
+    rcases hu with hu | hu <;> simp [ht, hv, hu]
+  have ht_sq : t ^ 2 = 4 := by rcases ht' with h | h <;> norm_num [h]
+  have hprod : n * m = g ^ 2 := by
+    rw [hv, ht_sq] at hnorm
+    nlinarith only [hnorm]
+  obtain ⟨n₀, hn₀⟩ := hgn
+  obtain ⟨m₀, hm₀⟩ := hgm
+  have hfactor : g ^ 2 * (n₀ * m₀ - 1) = 0 := by
+    rw [hn₀, hm₀] at hprod
+    nlinarith only [hprod]
+  have hunits := sub_eq_zero.mp ((mul_eq_zero.mp hfactor).resolve_left (pow_ne_zero _ hg.ne'))
+  rcases Int.eq_one_or_neg_one_of_mul_eq_one' hunits with ⟨h₁, h₂⟩ | ⟨h₁, _⟩
+  · exact ⟨ht', by simpa [h₁] using hn₀, by simpa [h₂] using hm₀⟩
+  · rw [h₁, mul_neg_one] at hn₀
+    omega
+
+#print axioms ray_norm_gap
+#print axioms ray_imaginary_eq_zero_of_small_norm_product
+#print axioms ray_imaginary_eq_zero_of_small_norms
+#print axioms primitive_norm_diagonal_of_ray_imaginary_eq_zero
 #print axioms discriminant_window_mul
 #print axioms discriminant_window
 #print axioms discriminant_window_of_discriminant_le
