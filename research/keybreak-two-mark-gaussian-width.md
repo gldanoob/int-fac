@@ -98,3 +98,29 @@ For \(h=X^r\) the integral energy is \(\sum k_i^2\), giving \(e=1\). For example
  e(X-a)=\min\{1/(1-a^2),\,2/(1+a)\}.
 \]
 One unit site and two adjacent sites with opposite signs realize the two candidates. If \(\sum k_i^2\ge4\), coercivity gives \(4/(1+a)^2\ge2/(1+a)\). At squared norm two the optimal separation is one. At squared norm three, write \(x,y\) for the powers of \(a\) across the successive gaps and \(u,v\in\{\pm1\}\) for adjacent sign products. The numerator of the energy is \(1+2(1+ux)(1+vy)\ge1\). In particular, for \(a>1/2\) the two-site pattern controls the transition. [Lean comparisons of the two-, three- and four-site energy bounds](../formal/cogentic/Cogentic/RandomizedStableEnergy.lean)
+
+### Uniform relative error and the transition profile
+
+For a stable limiting symbol as above, the threshold for the **maximum relative error of individual image masses**, uniformly over shifts, is
+\[
+               B\sqrt{\frac{\log n}{\pi e(h)}}.
+\]
+At a fixed factor above it, the short-vector cluster sum already proved gives \(\Theta_{K^*}(\sigma)-1=o(1)\). Fiber Poisson summation then gives \(A(y)=1+o(1)\) uniformly in every image point and shift. At a fixed factor below it, with \(\sigma\) equal to that factor times the displayed width, take zero shift and the zero image point. There all phases are one. The \(n-O(\log n)\) interior translates of an energy-minimizing pattern contribute in total \(\gg n\exp[-\pi(\sigma/B)^2(e(h)+o(1))]\), which diverges. The normalizing factor \(\mathbb E_Q A\) is \(1+o(1)\) here: the exact Gaussian mass ratio is the ratio of the shifted Poisson corrections for the ambient integer lattice and fixed-rank projected lattice, both \(1+o(1)\) at this width. The factor of \(\sqrt2\) relative to the total-variation threshold comes from taking the first power of the dual weights rather than their squares.
+
+Uniform relative accuracy persists after restricting to any common nonempty event in the image, by dividing by its total mass under each law. In particular, for polynomial pairs with all roots in a fixed disk of radius \(s<1\) the upper width \(C_{r,s} B\sqrt{\log n}\) is uniform without passing to a limiting symbol: the singular-value bounds give a product of one-dimensional theta sums directly. For a full coefficient parity translate use \(\sigma/2\) as the width in this test. These estimates concern approximation of the full image and its image-constrained versions; they also give the corresponding sufficient width for the Gaussian comparison in the wide pair estimate.
+
+For the family \(H_n=BX^r+1\) there is an explicit profile inside the narrower total-variation transition. Assume \(B/\log n\to\infty\) and
+\[
+        \pi(\sigma/B)^2=(\log n+c)/2,\qquad \lambda=e^{-c/2},
+\]
+with \(c\) fixed. Then, writing \(\Phi\) for the standard normal distribution function,
+\[
+          d_{\rm TV}\ \longrightarrow\ 2\Phi(\lambda/\sqrt2)-1
+\]
+uniformly in the center. Put \(t=\lambda/\sqrt n\), \(m=n-r\). Since \(G_n=I+O(1/B)\) in operator norm, replace the Fourier amplitudes \(\exp(-\pi(\sigma/B)^2 k^tG_n k)\) by \(t^{\|k\|^2}\), preserving their linear phases. The squared \(L^2(Q)\) error tends to zero. On the diagonal of the grouped second-moment argument, the squared weights have bounded mass and bounded fixed moments of \(\|k\|^2\): this follows by differentiating, or expanding, the product theta sums at parameter \((1-O(1/B))(\log n+c)\). The mean-value bound for the change of amplitude therefore costs \(O((\log n/B)^2)\). For the off-diagonal use \(e^{-a\|k\|^2}\) to dominate both amplitudes, \(a=(1-O(1/B))(\log n+c)/2\). At a difference \(d=M^tz\), summing the two majorants costs at most \(O(1)\exp(-a\|d\|^2/2)\) by completing the square. As \(\|Pz\|^2\asymp\|d\|^2/B^2\), combining this with the projected dual Gaussian leaves \(\sum_{0\ne z\in\mathbb Z^n}\exp(-c_0\sigma^2\|z\|^2)=o(1)\).
+
+If \(\theta_j\) are the rotated phases of the dual basis characters under the ideal law, the substituted series factors as \(\prod_{j=1}^m(1+2t\cos\theta_j+O(t^4))\). Its logarithm is
+\[
+ 2t\sum_{j=1}^m\cos\theta_j-2t^2\sum_{j=1}^m\cos^2\theta_j+o(1)
+\]
+with a uniform remainder. At each fixed moment order every noncanceling character has kernel component of norm \(O(1/B)\) and nonzero integer lift, so its projected frequency lies at distance at least \(1-O(B^{-2})\) from \(L^*\). Its expectation is \(O(\exp(-c_0\sigma^2))\), uniformly even after the rotations. The error summed over any fixed number of moment indices tends to zero. The normalized cosine sum therefore has the independent uniform-circle limit by the method of moments, and the mean cosine square tends in probability to \(1/2\). The logarithm converges in distribution to \(N(-\lambda^2,2\lambda^2)\). The original density has the same lognormal limit by the \(L^2\) comparison and the ambient normalization. Integrating the bounded positive part \((1-dP/dQ)_+\) gives the stated profile.
