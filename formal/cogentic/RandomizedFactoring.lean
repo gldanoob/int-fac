@@ -27,6 +27,7 @@ import Cogentic.RandomizedUnitaryDivisorSign
 import Cogentic.RandomizedUnitCircleMoment
 import Cogentic.RandomizedTwoFactorFourier
 import Cogentic.RandomizedQuadraticNormBound
+import Cogentic.RandomizedQuadraticCoefficientCongruence
 import Cogentic.RandomizedSectorNormBound
 import Cogentic.RandomizedClassSchedule
 import Cogentic.RandomizedClassKnotThreshold

@@ -261,3 +261,34 @@ In the physical anchor moment this is \((V^3/P)^2\rho\exp[-(\log V/\log B)\log d
        \exp\!\left(-\frac{\log(M^2/P)}{\log B}\log d+o(H)\right)
 \]
 of reaching half that parent's smooth mean. The previous trimmed one-cofactor estimate had \(\log U\) in the numerator. This improves the leading probability exponent by \((\log V/\log B)\log d\); it still leaves an exponential gap to a polynomial relative second moment.
+
+### Averaging the reduced charts raises the divisor level to nearly the box volume
+
+Assume in addition \(U/V\gg V^3\) by a fixed power, as on the two tabulated bands. For every fixed \(0<\epsilon<1\) the preceding close-pair bound holds with \((3-\epsilon)\log V\) in place of \(\log V\) in the second smoothness saving. In particular the numerator in the heavy-anchor probability becomes \(\log(U/V^{3-\epsilon})\). The residual exponent is positive on both tabulated bands.
+
+Put \(\delta=\epsilon/4\) and \(T_*=V^{3-4\delta}\). Reduce each first record as before, retaining its actual transformed leading coefficient \(m_1\asymp w\) in dyadic groups. Fix a tie convention on the boundary of the fundamental domain. There are \(O(wV^2)\) possible first reduced forms per group: \(m_1\asymp w\), \(|b_1|\le m_1\), and \(c_1\ll V^2/w\). The primitive vector \((j,k)\) representing \(u_1\asymp U\) lies in a rectangle
+\[
+ |j|\ll\sqrt{U/w},\qquad |k|\ll\sqrt{Uw}/V.
+\]
+This follows by completing the square in the reduced first form, with \(|b_1|\le m_1\) and \(w\ll V\). Its area is \(O(U/V)\). The two side lengths exceed one. A fixed reduced form and a fixed vector determine at most one first coarse record: unimodular completions differ by adding an integer multiple of the vector in their second column, changing the middle coefficient by a multiple of \(2u_1\). Thus for \(w<V^{1-\delta}\) there are in total \(O(UV^{2-\delta})\) first records, even without smoothness. Each has at most \(V^3(\log V)^{O(1)}\) coarse neighbours by the previous box. This contribution saves a fixed power of \(V\), negligible compared with both smooth densities.
+
+For the other groups the widths of the enclosing centred box for the second form can be chosen as \(wL,VL,V^2L/w\), with a common \(L=(\log V)^{O(1)}\). Their product is \(V^3L^3\) and the smallest width is \(\gg V^{1-\delta}\). Majorize the indicator by a constant times the product of centred Gaussians at these widths. For any squarefree divisor \(t\in(T_*/B,T_*]\) of a second cofactor, impose
+\[
+       m j^2+bjk+c k^2\equiv0\pmod t .
+\]
+Additive orthogonality and one-dimensional Poisson summation in each coefficient give a principal term \(O(V^3L^3/t)\), uniformly in the chart. For a nonprincipal frequency reduce the multiplier to a unit modulo \(e=t/(h,t)>1\). Relative to the principal scale the dual Gaussian is negligible unless the least absolute residues of each of
+\[
+        h'(j^2,jk,k^2)\pmod e,\qquad (h',e)=1 ,
+\]
+are at most \(R=eV^{-1+\delta}(\log V)^2\), with a fixed constant if needed. Nonminimal lifts and larger coordinates have total relative error \(O(V^{-C})\) for any designated \(C\), even after summing polynomially many frequencies. If \(R<1\) there is no nonprincipal tuple in the truncated box.
+
+To average the remaining positive error, a fixed unimodular residue triple determines at most one projective slope \((j:k)\bmod e\). At each prime dividing \(e\) the first or last coordinate is a unit; dividing the middle coordinate by it determines the other affine coordinate. CRT applies because \(e\) is squarefree. At any fixed primitive chart the triple also determines the unit multiplier uniquely. Each slope gives an index-\(e\) lattice. Scaling the above rectangle to a square preserves the elementary primitive-point estimate \(O(1+(U/V)/e)=O(U/(Ve))\): in rank one only the two primitive vectors on the line contribute; in rank two the row count is bounded by a constant times area over covolume. Equivalently, primitivity in the ambient integer lattice implies primitivity in the congruence lattice, enough for this upper bound.
+
+Write the short signed lift as \((A_0,A_1,A_2)\). It satisfies \(A_0A_2=A_1^2+le\) with \(|l|\ll R^2/e\). For each \(A_1,l\) with nonzero right side the divisor bound gives \(V^{o(1)}\) possibilities for \(A_0,A_2\). If the right side vanishes then \(e\mid A_1^2\), hence \(A_1=0\) by squarefreeness and \(R<e\), and the axes give \(O(R)\) nonzero triples. The total for \(R\ge1\) is \(O((R+R^3/e)V^{o(1)})\). Dividing the chart error sum by \(U/V\), and summing over \(e\mid t\), bounds the average relative error by
+\[
+ V^{o(1)}\big(V^{-1+\delta}+tV^{-3+3\delta}\big)
+       \ll V^{-\delta+o(1)} .
+\]
+This estimate treats slopes at infinity and both signs of the dual lifts. It needs only \(e\le T_*\le U/V\) for the chart count.
+
+Use the principal term **with the actual first smooth records**. Its sum over \(t\) gives \(V^3\exp[-(\log T_*/\log B)\log d+o(H)]\) per first record, by the harmonic factorial bound. For the error one may use all first forms in the group, multiplying the chart sum by at most \(O(wV^2)\). Using the harmonic bound \(\sum_{t\le T_*}1/t=O(\log V)\) and summing dyadically in \(w\ll V\) leaves \(O(UV^5V^{-\delta+o(1)})\) error. The bin densities are \(V^{-o(1)}\), so this is negligible. The coarse-to-physical transfer and overlap estimate are exactly as in the preceding proof. The resulting probability lower bound improves the trimmed first-moment exponent by \((3-\epsilon)(\log V/\log B)\log d\) on each fixed band. Passing to a liminf of normalized exponents allows \(\epsilon\downarrow0\); the displayed bounds are for fixed \(\epsilon\).
