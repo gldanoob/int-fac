@@ -8,6 +8,69 @@ namespace Cogentic.Randomized
 open Finset
 open scoped BigOperators
 
+/-- Tick that serves the zero-based unit `k` of job `j`. -/
+def dyadicServiceSlot (j k : ℕ) : ℕ := 2^j * (2*k + 1)
+
+private theorem dyadicServiceSlot_succ (j k : ℕ) :
+    dyadicServiceSlot (j + 1) k = 2 * dyadicServiceSlot j k := by
+  unfold dyadicServiceSlot
+  rw [pow_succ]
+  ring
+
+/-- No two job units compete for a tick. -/
+theorem dyadicServiceSlot_injective : Function.Injective (fun p : ℕ × ℕ ↦
+    dyadicServiceSlot p.1 p.2) := by
+  suffices h : ∀ j i k l, dyadicServiceSlot j k = dyadicServiceSlot i l →
+      j = i ∧ k = l by
+    intro p q heq
+    exact Prod.ext (h p.1 q.1 p.2 q.2 heq).1 (h p.1 q.1 p.2 q.2 heq).2
+  intro j
+  induction j with
+  | zero =>
+    intro i k l heq
+    cases i with
+    | zero =>
+      simp [dyadicServiceSlot] at heq
+      exact ⟨rfl, by omega⟩
+    | succ i =>
+      rw [dyadicServiceSlot_succ] at heq
+      simp [dyadicServiceSlot] at heq
+      omega
+  | succ j ih =>
+    intro i k l heq
+    rw [dyadicServiceSlot_succ] at heq
+    cases i with
+    | zero =>
+      simp [dyadicServiceSlot] at heq
+      omega
+    | succ i =>
+      rw [dyadicServiceSlot_succ] at heq
+      obtain ⟨rfl, rfl⟩ := ih i k l (by omega)
+      exact ⟨rfl, rfl⟩
+
+/-- At the exact deadline, job `j` has received precisely its first `w` units. -/
+theorem dyadicServiceSlot_le_deadline (j k w : ℕ) (hw : 0 < w) :
+    dyadicServiceSlot j k ≤ 2^j * (2*w - 1) ↔ k < w := by
+  have hj : 0 < (2 : ℕ)^j := by positivity
+  unfold dyadicServiceSlot
+  constructor
+  · intro h
+    have := Nat.le_of_mul_le_mul_left h hj
+    omega
+  · intro h
+    exact Nat.mul_le_mul_left _ (by omega)
+
+theorem dyadicServiceSlot_last (j w : ℕ) (hw : 0 < w) :
+    dyadicServiceSlot j (w - 1) = 2^j * (2*w - 1) := by
+  unfold dyadicServiceSlot
+  congr 1
+  omega
+
+theorem dyadicServiceSlot_deadline_le (j w : ℕ) :
+    2^j * (2*w - 1) ≤ 2^(j + 1) * w := by
+  rw [pow_succ, Nat.mul_assoc]
+  exact Nat.mul_le_mul_left _ (Nat.sub_le _ _)
+
 /-- A conditional failure bound of one quarter gives geometric survival. -/
 theorem quarter_survival_le (p : ℕ → ℝ) (h₀ : p 0 ≤ 1)
     (hstep : ∀ j, p (j + 1) ≤ (1/4 : ℝ) * p j) :
