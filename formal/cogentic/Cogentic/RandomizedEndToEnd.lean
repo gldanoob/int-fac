@@ -28,6 +28,7 @@ import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
+import Cogentic.RandomizedL34Dedekind
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
@@ -253,6 +254,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedP1Analytic.P1AnalyticInputs.toP1Leaf
 #print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
 #print axioms Cogentic.RandomizedL34Analytic.L34AnalyticCore.ratedLeaf
+#print axioms Cogentic.RandomizedL34Dedekind.L34DedekindCore.ratedLeaf
+#print axioms Cogentic.RandomizedL34Dedekind.L34DedekindCore.toL34AnalyticCore
 #print axioms Cogentic.RandomizedL4Composition.realized_of_bandInputs
 #print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL21_2Sub.L21_2ReducedInputs.slot_le
