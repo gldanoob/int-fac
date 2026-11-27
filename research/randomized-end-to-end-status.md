@@ -381,23 +381,55 @@ For C4, `s0Cost ≤ 4·(log₂N+1)²` and `s7Cost ≤ 12·(log₂N+1)⁴` are pr
 `ConcreteC4Hypotheses.ofS0S7` discharges those two stages. The other eight stage
 costs remain explicit.
 
+## Waves 4-7: sub-lemma discharge and the discharged endpoint
+
+Waves 4-7 replace most of the opaque `PaperEndpointInputs` fields by smaller
+explicit certificates and compose them.
+
+| Module group | Content |
+|---|---|
+| `RandomizedL18_4{CellData,CellCount,Numerator,Mass,Thin,ThinAggregate,LargeSieve,LargeSieveInputs,LatticeCount,Full}.lean` | L18.4 fully decomposed and recomposed: large sieve, RH cell counts, numerator count, mass/error, thin-pair lattice aggregation, canonical cell data, rational-cell lattice count, and the full `L18_4Certificate` |
+| `RandomizedL19{SecondMoment,Energy,Poisson,ZeroMode,Thin,ThinFinite,Muq,Full}.lean` | L19.4-L19.6 decomposed into energy/denominator/zero-mode/thin certificates and recomposed in `L19FullCertificate` |
+| `RandomizedC5{Algebra,Coupling,HalfMass,Full}.lean` | C5.a-e decomposed into pool coverage, H.8 half-mass, algebra (L34-L37), adaptive coupling, and recomposed in `C5FullInputs` |
+| `RandomizedConcreteStageCost{S1S2,S3,S469,S5,S8}.lean` | Concrete S0-S9 costs; all ten stages have polynomial bounds and `ConcreteC4Hypotheses` compatibility |
+| `RandomizedL{20_2,20_4,21_2,27_1,30,34,4,P1}.lean` | The remaining paper leaves decomposed into explicit paper-level inputs |
+| `RandomizedPaperEndpointDischarged.lean` | Composes L18.4Full, L19Full and C5Full into `DischargedPaperEndpointInputs`; no `hitMass` field remains |
+
+The capstone theorem is
+
+```lean
+theorem serialized_assembled_balancedEnvelopeInfimum_from_dischargedInputs
+    (line : DirichletLZerosOnLine) :
+  ∃ (k : ℕ) (sound : ∀ n ≥ 2, ...),
+  ∀ (E : ∀ s n, 3 ≤ n → HardEpochData n),
+    (∀ s D, s.Valid D → DischargedPaperEndpointInputs (E s) D) →
+    1.9839824118071388228 < balancedEnvelopeInfimum ∧
+    balancedEnvelopeInfimum < 1.9839824118071388230 ∧
+    (decoder permutation correctness) ∧
+    ∀ ε > 0, ∀ᶠ n, ∀ hn : 2 ≤ n,
+      mean (serializedFactor ...) ... ≤
+        ofReal (exp ((balancedEnvelopeInfimum + ε) * scale n))
+```
+
+`DischargedPaperEndpointInputs` contains the eleven paper leaves not reduced
+here, the C1-C4 inputs, and the C5Full certificate. The old opaque L18.4 leaf,
+L19.4-L19.6 leaves and `hitMass` bridge are gone. The remaining adapters are
+`concrete`/`concrete_eq` (the ambient epoch family is the concrete one) and
+`loss_le` (the concrete C5 total loss is dominated by the paper ledger).
+
 ## What is not proved
 
-1. **The concrete epoch's analytic content.** Wave 2 supplies the
-   construction-level S0–S9 epoch (`ConcreteEpochData`) and a C3/C4 bridge. Wave
-   3 supplies a full concrete `ConcreteC3Hypotheses` instance
-   (`bigConcreteC3`), concrete S0/S7 stage costs, and a C5 `HitMassInputs`
-   decomposition, but `HardEpochData` still exposes no field-pool object, moment
-   functionals, or recognizer events. The other eight stage costs and the paper's
-   actual class-group sampler remain explicit; the `bigConcreteC3` modulus is a
+1. **The concrete epoch's analytic content.** Waves 2-5 supply the
+   construction-level S0–S9 epoch (`ConcreteEpochData`), a full concrete
+   `ConcreteC3Hypotheses` instance (`bigConcreteC3`), concrete S0–S9 stage costs,
+   and the C5 `HitMassInputs`/`C5FullInputs` decomposition. The paper's actual
+   class-group sampler is still not defined; the `bigConcreteC3` modulus is a
    huge opaque prime, not the paper's form class group.
-2. **The analytic leaves.** L19.4–L19.6 (narrow-width second moment), L20.2
-   (interior concentration), L20.4 (child-root-conditioned two-point bound),
-   L21.2 (RH smooth numbers near integer centres), L27.1 (Lenstra–Pomerance
-   ECM), L30 (genus-two partial factorer), L34 (effective Chebotarev), and
-   L4/L25/L36 (non-maximal-order form composition) remain paper-level. L18.4 is
-   now decomposed into explicit large-sieve, cell-count, numerator-count, and
-   thin-pair inputs; those inputs are themselves not yet fully proved.
+2. **The analytic leaves.** L18.4 and L19.4–L19.6 are now decomposed into
+   explicit certificates and recomposed (`L18_4Full`, `L19Full`). The remaining
+   paper-level leaves are L20.2, L20.4, L21.2, L27.1, L30, L34, L4/L25/L36, and
+   P1, each with its own explicit sub-input structure. Their genuinely
+   paper-level sub-lemmas are not proved.
 3. **P1.** Trial division to `roughThreshold n = exp((log n)^{2/3})` has the
    correct splitting behaviour but cost `exp((log n)^{2/3})`, not
    `exp(o(scale n))`. The rough endpoint keeps this as an explicit hypothesis.
@@ -407,9 +439,11 @@ costs remain explicit.
    behind a non-vacuous costed endpoint.
 5. **The full manuscript bound.** Consequently, the numerical
    `L_N[1/3, 1.9839824…]` claim is not a theorem of this branch. What is a
-   theorem is the reduction from the named ledger to the serialized driver, and
-   (wave 2) the reduction from the twelve paper leaves plus C1–C4 and the C5
-   `hitMass` bridge to that same driver.
+   theorem is the reduction from the named ledger to the serialized driver, the
+   wave-2 paper-assumption endpoint, and the wave-7 discharged endpoint
+   `serialized_assembled_balancedEnvelopeInfimum_from_dischargedInputs`, whose
+   only remaining inputs are the eight unreduced paper leaves, C1–C4, the
+   concrete C5 certificate, and the three concrete adapters.
 
 ## Reading order
 
@@ -434,5 +468,11 @@ costs remain explicit.
 14. `Cogentic/RandomizedConcreteHitMass{,Count}.lean` — the C5 `hitMass`
     decomposition and the C5.a–c counting reduction.
 15. `Cogentic/RandomizedConcreteTV.lean` and
-    `Cogentic/RandomizedConcreteStageCost.lean` — the full concrete C3 instance
-    and the S0/S7 cost bounds.
+    `Cogentic/RandomizedConcreteStageCost*.lean` — the full concrete C3 instance
+    and the concrete S0-S9 cost bounds.
+16. `Cogentic/RandomizedL18_4Full.lean` — the recomposed L18.4 certificate.
+17. `Cogentic/RandomizedL19Full.lean` — the recomposed L19.4-L19.6 certificate.
+18. `Cogentic/RandomizedC5Full.lean` — the recomposed C5.a-e hit-mass
+    certificate.
+19. `Cogentic/RandomizedPaperEndpointDischarged.lean` — the discharged endpoint
+    with no opaque L18.4/L19/`hitMass` fields.
