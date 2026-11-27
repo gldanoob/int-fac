@@ -52,6 +52,7 @@ import Cogentic.RandomizedSubsetFiber
 import Cogentic.RandomizedFixedMoebius
 import Cogentic.RandomizedPrimitiveQuadraticRoot
 import Cogentic.RandomizedQuadraticInvolution
+import Cogentic.RandomizedClassMajority
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -141,3 +142,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedFixedMoebius.transform_norm_sub_le
 #print axioms Cogentic.RandomizedPrimitiveQuadraticRoot.square_discriminant_of_common_multiple
 #print axioms Cogentic.Randomized.prime_dvd_quadraticPencilMap_of_dvd
+#print axioms Cogentic.RandomizedClassMajority.card_goodChoices_ge
