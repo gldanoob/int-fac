@@ -95,6 +95,82 @@ theorem pmfTotalVariation_eq_totalVariation [Fintype B] (p q : PMF B) :
     pmfTotalVariation p q = totalVariation (fun z => (p z).toReal) (fun z => (q z).toReal) := by
   rw [pmfTotalVariation, totalVariation, tsum_fintype]
 
+private theorem pmf_tsum_toReal (p : PMF B) : (∑' z, (p z).toReal) = 1 := by
+  rw [← ENNReal.tsum_toReal_eq p.apply_ne_top, p.tsum_coe, ENNReal.toReal_one]
+
+private theorem summable_pmf_min (p q : PMF B) :
+    Summable (fun z => min (p z).toReal (q z).toReal) :=
+  Summable.of_nonneg_of_le
+    (fun _ => le_min ENNReal.toReal_nonneg ENNReal.toReal_nonneg)
+    (fun _ => min_le_left _ _) (ENNReal.summable_toReal p.tsum_coe_ne_top)
+
+/-- The complement of total variation is the common mass of the two laws. -/
+theorem one_sub_pmfTotalVariation_eq_tsum_min (p q : PMF B) :
+    1 - pmfTotalVariation p q = ∑' z, min (p z).toReal (q z).toReal := by
+  have hp := ENNReal.summable_toReal p.tsum_coe_ne_top
+  have hq := ENNReal.summable_toReal q.tsum_coe_ne_top
+  have hmin := summable_pmf_min p q
+  have habs := (hp.sub hq).abs
+  have hpoint (z : B) : (p z).toReal + (q z).toReal =
+      2 * min (p z).toReal (q z).toReal + |(p z).toReal - (q z).toReal| := by
+    rcases le_total (p z).toReal (q z).toReal with h | h
+    · rw [min_eq_left h, abs_of_nonpos (sub_nonpos.mpr h)]
+      ring
+    · rw [min_eq_right h, abs_of_nonneg (sub_nonneg.mpr h)]
+      ring
+  have h : (∑' z, ((p z).toReal + (q z).toReal)) =
+      ∑' z, (2 * min (p z).toReal (q z).toReal + |(p z).toReal - (q z).toReal|) :=
+    tsum_congr hpoint
+  rw [hp.tsum_add hq, (hmin.mul_left 2).tsum_add habs, tsum_mul_left,
+    pmf_tsum_toReal p, pmf_tsum_toReal q] at h
+  unfold pmfTotalVariation
+  linarith only [h]
+
+/-- Separation of the two centers bounds the common mass by their two
+centered second moments. Charging both deviations gives the constant two. -/
+theorem one_sub_pmfTotalVariation_le_centered_second_moments (p q : PMF B)
+    (T : B → ℝ) {a b : ℝ} (hab : a < b)
+    (hp : Summable (fun z => (p z).toReal * (T z - a) ^ 2))
+    (hq : Summable (fun z => (q z).toReal * (T z - b) ^ 2)) :
+    1 - pmfTotalVariation p q ≤
+      2 * ((∑' z, (p z).toReal * (T z - a) ^ 2) +
+        (∑' z, (q z).toReal * (T z - b) ^ 2)) / (b - a) ^ 2 := by
+  let overlap (z : B) := min (p z).toReal (q z).toReal
+  have hpoint (z : B) : (b - a) ^ 2 * overlap z ≤
+      2 * ((p z).toReal * (T z - a) ^ 2 + (q z).toReal * (T z - b) ^ 2) := by
+    have hgap : (b - a) ^ 2 ≤ 2 * ((T z - a) ^ 2 + (T z - b) ^ 2) := by
+      nlinarith only [sq_nonneg (2 * T z - a - b)]
+    calc
+      _ ≤ (2 * ((T z - a) ^ 2 + (T z - b) ^ 2)) * overlap z :=
+        mul_le_mul_of_nonneg_right hgap (le_min ENNReal.toReal_nonneg ENNReal.toReal_nonneg)
+      _ = 2 * (overlap z * (T z - a) ^ 2 + overlap z * (T z - b) ^ 2) := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left
+        (add_le_add (mul_le_mul_of_nonneg_right (min_le_left _ _) (sq_nonneg _))
+          (mul_le_mul_of_nonneg_right (min_le_right _ _) (sq_nonneg _))) (by norm_num)
+  have h := ((summable_pmf_min p q).mul_left ((b - a) ^ 2)).tsum_le_tsum hpoint
+    ((hp.add hq).mul_left 2)
+  rw [tsum_mul_left, tsum_mul_left, hp.tsum_add hq] at h
+  apply (le_div_iff₀ (sq_pos_of_pos (sub_pos.mpr hab))).2
+  rw [one_sub_pmfTotalVariation_eq_tsum_min, mul_comm]
+  exact h
+
+/-- The constant-four separation bound stated with upper bounds on the
+two centered second moments. -/
+theorem one_sub_pmfTotalVariation_le_four_mul_moment_bounds (p q : PMF B)
+    (T : B → ℝ) {a b Vp Vq : ℝ} (hab : a < b)
+    (hp : Summable (fun z => (p z).toReal * (T z - a) ^ 2))
+    (hq : Summable (fun z => (q z).toReal * (T z - b) ^ 2))
+    (hVp : (∑' z, (p z).toReal * (T z - a) ^ 2) ≤ Vp)
+    (hVq : (∑' z, (q z).toReal * (T z - b) ^ 2) ≤ Vq) :
+    1 - pmfTotalVariation p q ≤ 4 * (Vp + Vq) / (b - a) ^ 2 := by
+  have hVp₀ : 0 ≤ Vp :=
+    (tsum_nonneg fun _ => mul_nonneg ENNReal.toReal_nonneg (sq_nonneg _)).trans hVp
+  have hVq₀ : 0 ≤ Vq :=
+    (tsum_nonneg fun _ => mul_nonneg ENNReal.toReal_nonneg (sq_nonneg _)).trans hVq
+  apply (one_sub_pmfTotalVariation_le_centered_second_moments p q T hab hp hq).trans
+  apply div_le_div_of_nonneg_right _ (sq_nonneg _)
+  linarith only [hVp, hVq, hVp₀, hVq₀]
+
 /-- The difference between the masses of a finite event is bounded by total variation. -/
 theorem pmf_finset_mass_sub_le_totalVariation (p q : PMF B) (T : Finset B) :
     (∑ z ∈ T, (p z).toReal) - (∑ z ∈ T, (q z).toReal) ≤ pmfTotalVariation p q := by
@@ -102,13 +178,9 @@ theorem pmf_finset_mass_sub_le_totalVariation (p q : PMF B) (T : Finset B) :
   have hp := ENNReal.summable_toReal p.tsum_coe_ne_top
   have hq := ENNReal.summable_toReal q.tsum_coe_ne_top
   have hd : Summable d := hp.sub hq
-  have hpsum : (∑' z, (p z).toReal) = 1 := by
-    rw [← ENNReal.tsum_toReal_eq p.apply_ne_top, p.tsum_coe, ENNReal.toReal_one]
-  have hqsum : (∑' z, (q z).toReal) = 1 := by
-    rw [← ENNReal.tsum_toReal_eq q.apply_ne_top, q.tsum_coe, ENNReal.toReal_one]
   have hzero : (∑' z, d z) = 0 := by
     unfold d
-    rw [hp.tsum_sub hq, hpsum, hqsum, sub_self]
+    rw [hp.tsum_sub hq, pmf_tsum_toReal p, pmf_tsum_toReal q, sub_self]
   have hsplit := hd.sum_add_tsum_subtype_compl T
   rw [hzero] at hsplit
   have hfinite : ∑ z ∈ T, d z ≤ ∑ z ∈ T, |d z| := sum_le_sum fun _ _ => le_abs_self _
@@ -152,6 +224,9 @@ theorem pmf_map_totalVariation_ge (p : PMF A) (q : PMF B)
     _ ≤ _ := pmf_finset_mass_sub_le_totalVariation (p.map f) q (S.image f)
 
 #print axioms pmfTotalVariation_eq_totalVariation
+#print axioms one_sub_pmfTotalVariation_eq_tsum_min
+#print axioms one_sub_pmfTotalVariation_le_centered_second_moments
+#print axioms one_sub_pmfTotalVariation_le_four_mul_moment_bounds
 #print axioms pmf_finset_mass_sub_le_totalVariation
 #print axioms pmf_map_totalVariation_ge
 
