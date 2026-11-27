@@ -108,3 +108,16 @@ There is a second obstruction to a direct bound from the total square-modulus ch
  S-\frac1Q\sum_{x\bmod Q}S_x^2=(1-o(1))S .
 \]
 This estimate holds at each such prime \(Q\). In particular an average of these individual total energies cannot itself certify cancellation on the physical one-lift graph. A joint estimate exploiting how the *same* cofactor set meets the selected traces at different denominators is a separate possibility.
+
+## Averaging the parent and the numerator
+
+Averaging the parent prime before determining the two constant coefficients makes its common multiplicative dilation explicit. The following calculation applies to a common zero-one cofactor set \(A\) of units of size \(S=\rho X\) on an interval of length \(O(X)\), \(X\asymp M^2V/P\), satisfying \(|\widehat A(\chi)|\le S X^{-1/2}M^{o(1)}\) at every nonprincipal character. This calculation concerns a common test. A shape test varying with the individual discriminants requires a separate comparison. Put \(K=\phi(Q^2)\), let \(I\) be the physical numerator interval with \(|I|\asymp M\) distinct unit residues modulo \(Q\), and freeze the two nonproportional pairs of leading coefficients. Write \(x_i(r)=a_i r^2+b_i rQ\), and \(u_r=x_1(r)/x_2(r)\bmod Q^2\). The ratios are distinct on \(I\).
+
+Uniform dilation over all units has pair mean \(K^{-1}|I|^{-1}\sum_{r\in I}R_A(u_r)\), where \(R_A(u)=\sum_z A(z)A(z/u)\). The Fourier coefficients of this correlation are \(|\widehat A(\chi)|^2\). Parseval, the character bound and the injective ratios give relative mean-square error for \(R_A(u_r)\) around \(S^2/K\) at most
+\[
+ \frac{K^2}{|I| S X}M^{o(1)}
+ \ll \frac{P^2}{M V^2\rho}M^{o(1)}.
+\]
+At the bands with \(M\) exceeding \(P^2/V^2\) by a fixed power and \(\rho=M^{-o(1)}\), uniform dilation gives the desired pair scale.
+
+For actual primes \(p\asymp P\), the character-pair expansion for \(A(x_1/p)A(x_2/p)\) inserts \(B(\eta)=\mathbb E_p\eta(p)\) at \(\eta=\chi\psi\), up to conjugation. The part \(\eta=1\) is exactly the uniform-dilation contribution. For every other \(\eta\) Dirichlet GRH gives \(|B(\eta)|\ll P^{-1/2}(\log M)^{O(1)}\). The numerator average supplies \(D_\eta(\chi)=\mathbb E_{r\in I}\overline\chi(u_r)\overline\eta(x_2(r))\), with \(\sum_\chi|D_\eta(\chi)|^2=K/|I|\). Thus Cauchy and \(\sum_{\eta,\chi}|\widehat A(\chi)\widehat A(\eta\chi^{-1})|^2=(KS)^2\) bound the absolute off-diagonal by \(S(\log M)^{O(1)}/\sqrt{P|I|}\). Relative to \(S^2/K^2\) the resulting bound is of order \(M^{3/2}\sqrt P/(V\rho)\) up to logarithms. As a direct description of the missing information, for \(L\) distinct sampled primes the squared Euclidean distance between the joint physical and uniform-dilation probability vectors on pairs of residues equals \(|I|^{-1}(1/L-1/K)\). Each ratio is distinct and its conditional first-coordinate support has size \(L\). The diagonal calculation controls ratios, while these estimates leave the cancellation between cofactor phases on that conditional support open.
