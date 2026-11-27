@@ -13,7 +13,10 @@ import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19Thin
+import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_4
+import Cogentic.RandomizedL34
+import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL30
@@ -185,6 +188,11 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.slot_le
 #print axioms Cogentic.RandomizedL4.L4Inputs.toAlgebraicLeaf
+#print axioms Cogentic.RandomizedL34.EffectiveChebotarevInputs.ratedLeaf
+#print axioms Cogentic.RandomizedL19Full.L19FullCertificate.toL19Inputs
+#print axioms Cogentic.RandomizedL19Full.L19FullCertificate.slots_bounds
+#print axioms Cogentic.RandomizedC5Full.C5FullInputs.toHitMassInputs
+#print axioms Cogentic.RandomizedC5Full.C5FullInputs.hitMass_of_inputs
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
