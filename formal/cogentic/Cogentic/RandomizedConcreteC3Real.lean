@@ -155,6 +155,7 @@ theorem realBuildForm_map_val (N A : ℕ) (b : ℤ) :
   · rename_i f hf
     have hfmem : f ∈ ReducedForms N := (concreteBuildForm_eq_some_iff.mp hf).1
     simp [hf, hfmem]
+
 /-- The canonical root set of the concrete specification is exactly the
 `rootCount` set; in particular their cardinalities agree. -/
 theorem concreteRoots_card_eq_rootCount {N A : ℕ} (hA : A ≠ 0) :

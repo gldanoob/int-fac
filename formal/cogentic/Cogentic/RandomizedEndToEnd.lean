@@ -42,6 +42,7 @@ import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedConcreteC3Real
+import Cogentic.RandomizedConcreteC3Budget
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedP1Sub
 import Cogentic.RandomizedConcreteTV
@@ -253,6 +254,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteFormSpec.concreteFormSpec
 #print axioms Cogentic.RandomizedConcreteC3Real.c3Inputs
 #print axioms Cogentic.RandomizedConcreteC3Real.hit_prob_ge
+#print axioms Cogentic.RandomizedConcreteC3Budget.heps_le_of_criticalLineGcdBudget
+#print axioms Cogentic.RandomizedConcreteC3Budget.eventually_heps_le_of_prime
+#print axioms Cogentic.RandomizedConcreteC3Budget.exists_concreteC3RealInputs_of_prime
 #print axioms Cogentic.RandomizedC5GoodIff.ofToyEpoch_hitMass
 #print axioms Cogentic.RandomizedC5GoodIff.fullOfSolver_good_iff
 #print axioms Cogentic.RandomizedL19EnergyMass.mellinEnergyScaleOfGrowth
