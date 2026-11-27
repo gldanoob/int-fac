@@ -32,6 +32,11 @@ import Cogentic.RandomizedReducedFormRoot
 import Cogentic.RandomizedFormDivisor
 import Cogentic.RandomizedQuadraticRamification
 import Cogentic.RandomizedGenusMixing
+import Cogentic.RandomizedEvenDiscriminantGenus
+import Cogentic.RandomizedTargetGenus
+import Cogentic.RandomizedFormReduction
+import Cogentic.RandomizedReductionSteps
+import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
 import Cogentic.RandomizedKrylovProbe
@@ -94,3 +99,9 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.Randomized.zmod_quadratic_normalized_not_global_sign
 #print axioms Cogentic.RandomizedGenusMixing.identity_mass_bias
 #print axioms Cogentic.Randomized.half_width_at_least_353_stages
+#print axioms Cogentic.RandomizedEvenDiscriminantGenus.primitive_reduced_ambiguous_iff
+#print axioms Cogentic.RandomizedTargetGenus.target_uniform
+#print axioms Cogentic.RandomizedFormReduction.Result.first_column
+#print axioms Cogentic.RandomizedReductionSteps.gauss_strict_swap_count_le_log2
+#print axioms Cogentic.RandomizedQuadraticTargetRoot.targeted_first_column_root_mod
+#print axioms Cogentic.RandomizedGenusMixing.equal_label_pair_count_after_deleting

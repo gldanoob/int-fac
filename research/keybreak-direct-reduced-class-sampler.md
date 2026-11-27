@@ -33,13 +33,7 @@ For \((m,N)=1\), the root bound \(R(m)\le2\cdot2^{\omega(m)}\) applies. Counting
 \]
 This bounds even the forms dropped before enforcing primitivity and the boundary convention. For all \(N\), the product is at most a power of \(\log(2N)\). Indeed its logarithm is \(O(\sum_{q\mid N}1/q)\), and splitting at \(\log(2N)\), then using the harmonic sum below that cutoff and \(\omega(N)\le\log_2 N\) above it, gives \(O(1+\log\log(2N))\). The union over \(p\mid N\) therefore bounds the excluded count by \(U(\log(2N))^{O(1)}/p_{\min}\), where \(p_{\min}\) is the least prime divisor of \(N\).
 
-Write \(\Delta=f^2\Delta_0\) with fundamental \(\Delta_0\). The ring class number formula, followed by Littlewood's lower bound under Dirichlet GRH, gives
-\[
-h(\Delta)=\frac{w(\Delta)\sqrt{|\Delta|}}{2\pi}
- L(1,\chi_{\Delta_0})\prod_{q\mid f}\left(1-\frac{\chi_{\Delta_0}(q)}q\right)
-\gg \frac{\sqrt{N}}{(\log(2N))^{O(1)}}.
-\]
-Here \(w(\Delta)\ge2\) counts units in the order. The conductor product is at least \(\prod_{q\mid f}(1-1/q)\), which is bounded below by an inverse power of \(\log(2N)\) by the same prime split. The class number argument applies to nonfundamental discriminants, so it includes repeated prime factors in \(N\). Therefore on the rough branch \(\log p_{\min}/H\to\infty\), the omitted fraction is at most \((\log(2N))^{O(1)}/p_{\min}=e^{-\omega(H)}\). A weaker separation \(p_{\min}\ge e^{bH}\) gives the corresponding \(e^{-(b-o(1))H}\) estimate. The total variation distance between the uniform full class law and its restriction to the coprime canonical representatives equals the omitted fraction. [Ring class number relation](https://londmathsoc.onlinelibrary.wiley.com/doi/10.1112/jlms.12744) · [Lamzouri–Li–Soundararajan, GRH bounds at \(s=1\)](https://arxiv.org/abs/1309.3595)
+In \([\sqrt N/4,\sqrt N/2]\), Dirichlet GRH gives \(\gg\sqrt N/\log N\) primes split in the quadratic field and prime to \(2N\). Each contributes a distinct strictly reduced primitive form with unit leading coefficient. Thus both the accepted count and the whole class number have this lower bound, including for nonfundamental discriminants. Dividing the excluded count above by the class number gives an omitted fraction at most \((\log(2N))^{O(1)}/p_{\min}=e^{-\omega(H)}\) on the rough branch. If only \(p_{\min}\ge e^{bH}\) is assumed, the bound is \(e^{-(b-o(1))H}\). The total variation distance between the uniform full class law and its uniform restriction is exactly the omitted fraction. [Direct upper and lower class counts for both discriminants](keybreak-reduced-form-smooth-supply.md#normalization-and-upper-count)
 
 ## Restarts, gcd exits, and caps
 
