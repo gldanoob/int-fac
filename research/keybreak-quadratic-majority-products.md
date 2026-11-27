@@ -203,3 +203,35 @@ For the convolved probability \(p\), write \(hp(g)=1+I(g)+R(g)\), with \(I\) the
  \le \exp\bigl((1-2C\eta')E_0+o(E_0)\bigr).
 \]
 Outside the stated fraction \(hp(g)\ge1/2\). Dividing this probability by the largest tuple probability gives the count. For the third assertion take two disjoint packets at norm \(V\). Cauchy–Schwarz bounds the sum of absolute products of their transforms by \(\exp(E_0+o(E_0))\). The guards then give the uniform error \(\sup_g|R(g)|\le\exp((1-C\eta')E_0+o(E_0))\). The two packets account for the density loss \(2E_0\).
+
+### Averaging equal-class pairs gives the sharp almost-all-classes threshold
+
+For the same subpower cutoff and any fixed \(\delta>0\), one can take \(C=1+\delta\) in the almost-all-classes conclusion above. For every fixed \(A\), outside \(O_A(T/(\log T)^A)\) discriminants in the dyad, all but an \(\exp(-c_\delta E_0)\) proportion of classes have at least
+\[
+ \frac{X}{h}\exp(-(1+o(1))E_0),\qquad
+ X=V\exp((1+\delta)E_0)
+\]
+primitive smooth ideals. Combined with the earlier upper bound for the occupied fraction below \(V\exp((1-\delta)E_0)\), this identifies the leading coefficient of \(E_0\) in the transition. With two packets, **every** class has at least \((X/h)\exp(-(2+o(1))E_0)\) representatives by \(X=V^2\exp((2+\delta)E_0)\). The second assertion is an upper bound on the norm sufficient to cover every class. It also holds if the fields are restricted to prime discriminants, after increasing the logarithmic power in the exceptional-set bound.
+
+Fix a common norm scale \(W\asymp V\exp(E_0)\) and common bin cutoffs throughout a discriminant dyad; fixed factors in \(V\), \(W\) and the final norm allowance can be absorbed in the slack \(\delta\). The index-sum packet uses squarefree odd norms \(n\asymp W\) with \(O(u_0)\) rational factors. Let \(S\) denote the set of candidate rational norms before enforcing splitting. The global Rankin estimate gives \(|S|\le W\exp(-E_0+o(E_0))\). For each typical field the splitting estimates yield \(S_D\ge W\exp(-E_0+o(E_0))\) distinct primitive ideals in the packet, with one chosen orientation in each slot. For its uniform probability \(p_D\), the relative squared Fourier norm is
+\[
+ \sum_{\chi}|\widehat p_D(\chi)|^2
+   =\frac h{S_D^2}\#\{(I,J)\text{ from the packet}:[I]=[J]\}.
+\]
+We will bound its average over the fields by \(\exp(o(E_0))\), in place of the single-field bound \(\exp(E_0+o(E_0))\) at norm \(V\).
+
+Fix a pair of candidate norms \(n_1,n_2\). When \([I]=[J]\), the product \(I\bar J\) is principal. Divide it by the rational ideal \((g)\) formed from the common primes whose orientations in \(I,J\) agree. The quotient remains principal and is primitive. At a common prime with opposite orientations it has a square on just one branch. A generator \((t+v\sqrt D)/2\) therefore satisfies
+\[
+  t^2+|D|v^2=4m,\qquad m=n_1n_2/g^2 .
+\]
+If an odd prime divides \(m,v\), it divides \(t\) and divides the generator as a rational integer, contradicting primitivity. The case \(v=0\) forces the primitive generator to be a unit and \(I=J\). This contributes at most \(|S|\exp(o(E_0))\) pairs per field even if all orientations are counted.
+
+For \(v\ne0\), let \(Z_0=\sqrt m\asymp W/g\). Then \(|v|\ll Z_0/V\) and \(0\le 2Z_0-|t|\ll V^2v^2/Z_0\), by the difference of squares. For each \(v\) the congruence \(t^2\equiv4m\bmod v^2\) has \(O(2^{\omega(v)})\) roots modulo \(v^2\), including the absolute factor at two since \(m\) is odd. Each pair \((t,v)\) determines at most one \(D\). Summing the residue-class bounds gives at most
+\[
+ O\!\left((V+Z_0/V)\log(2W)\right)
+\]
+possibilities per \(g\), using \(\sum_{j\le L}2^{\omega(j)}\ll L\log(2L)\). If the range of \(v\) is empty there is no contribution. Choices of \(g\) and ideal orientations cost \(2^{O(u_0)}=\exp(o(E_0))\). As \(W<V^2\), all off-diagonal pairs over the entire discriminant family number at most \(V|S|^2\exp(o(E_0))\). [Lean discriminant window inequalities](../formal/cogentic/Cogentic/RandomizedQuadraticNormBound.lean)
+
+There are \(\asymp V^2\) fundamental discriminants in the dyad, or \(\asymp V^2/\log V\) in a fixed admissible prime-discriminant progression. Using \(h\ll V\log V\) and the two estimates for the packet size proves the averaged Fourier bound, including its diagonal since \(V/S_D=\exp(o(E_0))\). Markov's inequality permits a relative squared Fourier norm \(\exp(o(E_0))\) after removing a further \(O_A(T/(\log T)^A)\) fields. This also applies to any fixed number of disjoint packets by intersecting the good sets. A polylogarithmic ray index changes the squared norm bound by at most that index.
+
+Spend at most \(\delta E_0+O(1)\) further log norm on the small prime guards of the preceding construction. They suppress cuspidal frequencies by \(\exp(-(\eta'\delta+o(1))E_0)\), while one guard controls the invariant frequencies. Parseval with one base packet gives the claimed exceptional fraction of classes; Cauchy–Schwarz with two gives the uniform lower count. The base packets use disjoint prime lists and the guards lie below them. Their maximum tuple probabilities give the displayed counts. The exclusion from the earlier analytic prime estimates remains part of the result.
