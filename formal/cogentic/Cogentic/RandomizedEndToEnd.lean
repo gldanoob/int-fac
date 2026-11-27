@@ -23,6 +23,7 @@ import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_2Sub
 import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_2Saddle
+import Cogentic.RandomizedL20_2SmoothLower
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
@@ -257,6 +258,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL4Sub.L4SubInputs.toL4Inputs
 #print axioms Cogentic.RandomizedL20_2Char.L20_2CharInputs.toConcentrationLeaf
 #print axioms Cogentic.RandomizedL20_2Saddle.L20_2SaddleInputs.toConcentrationLeaf
+#print axioms Cogentic.RandomizedL20_2SmoothLower.smoothNumberCountLower_twoPow
+#print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
 #print axioms Cogentic.RandomizedL21_2Perron.L21_2PerronInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedP1Analytic.P1AnalyticInputs.toP1Leaf
 #print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
