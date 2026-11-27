@@ -22,6 +22,7 @@ import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL20_2Sub
 import Cogentic.RandomizedL20_2Char
+import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL34
@@ -31,6 +32,7 @@ import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
+import Cogentic.RandomizedL21_2Perron
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL27Analytic
@@ -46,6 +48,7 @@ import Cogentic.RandomizedConcreteC3Budget
 import Cogentic.RandomizedConcreteC3Rough
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedP1Sub
+import Cogentic.RandomizedP1Analytic
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
@@ -245,6 +248,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27_1Sub.toRatedLeaf
 #print axioms Cogentic.RandomizedL4Sub.L4SubInputs.toL4Inputs
 #print axioms Cogentic.RandomizedL20_2Char.L20_2CharInputs.toConcentrationLeaf
+#print axioms Cogentic.RandomizedL20_2Saddle.L20_2SaddleInputs.toConcentrationLeaf
+#print axioms Cogentic.RandomizedL21_2Perron.L21_2PerronInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedP1Analytic.P1AnalyticInputs.toP1Leaf
 #print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
 #print axioms Cogentic.RandomizedL34Analytic.L34AnalyticCore.ratedLeaf
 #print axioms Cogentic.RandomizedL4Composition.realized_of_bandInputs
