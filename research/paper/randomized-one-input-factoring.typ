@@ -1,33 +1,55 @@
 // Compile with typst compile randomized-one-input-factoring.typ.
 #set document(title: "Randomized factoring with leading coefficient below two")
-#set page(paper: "a4", margin: (x: 24mm, top: 20mm, bottom: 20mm), numbering: "1")
-#set text(font: "Libertinus Serif", size: 11.25pt)
-#set par(justify: true, leading: 0.64em, spacing: 0.92em)
-#set heading(numbering: "1.")
-#show heading.where(level: 1): set text(size: 15pt)
+#set page(paper: "us-letter", margin: (x: 80pt, top: 72pt, bottom: 70pt),
+  numbering: "1", footer-descent: 19pt)
+#set text(font: "New Computer Modern", size: 10.9pt, lang: "en")
+#set par(justify: true, leading: 0.52em, spacing: 0.55em, first-line-indent: 16pt)
+#show math.equation.where(block: true): set block(above: 6pt, below: 6pt)
+#set heading(numbering: "1.1")
+#show heading.where(level: 1): it => block(above: 14pt, below: 7pt, sticky: true)[
+  #set text(size: 14.4pt, weight: "bold")
+  #if it.numbering != none [#counter(heading).display("1")#h(10pt)]#it.body
+]
+#show heading.where(level: 2): it => block(above: 13pt, below: 7pt, sticky: true)[
+  #set text(size: 12pt, weight: "bold")
+  #counter(heading).display("1.1")#h(8pt)#it.body
+]
 
 #let repo = "https://github.com/gldanoob/int-fac/blob/explore/randomized-one-third/"
 #let note(file, label) = link(repo + "research/" + file + ".md", label)
 #let lean(file, label) = link(repo + "formal/cogentic/Cogentic/" + file + ".lean", label)
 #let core(file, label) = link(repo + "formal/cogentic/" + file + ".lean", label)
 
+#v(33pt)
 #align(center)[
-  #text(size: 24pt, weight: "bold")[Randomized factoring with #linebreak() leading coefficient below two]
-  #v(5pt)
-  #text(size: 10.5pt)[27 November 2026]
+  #set par(leading: 9pt)
+  #text(size: 17.3pt, weight: "bold")[Randomized factoring#linebreak()with leading coefficient below two]
+  #v(12pt)
+  #text(size: 12pt)[November 27, 2026]
+]
+#v(23pt)
+#align(center, text(size: 10pt, weight: "bold")[Abstract])
+#block(inset: (x: 27pt), above: 5pt, below: 6pt)[
+  #set text(size: 10pt)
+  #set par(leading: 5.1pt)
+  #h(14pt)We study the expected bit complexity of factoring a single integer $N$ with all setup charged to that input. We adapt KeyBreak’s multilevel descent by narrowing the public polynomial coefficients and counting products of primes in short intervals. The resulting manuscript bound is $L_N thin [1\/3,C_*]$ with $C_* = 1.9839824118071388229 dots$. A fixed rational schedule already gives a coefficient below $1.984578735$. The analysis uses the verified Dirichlet critical-line theorem. Lean checks the scalar optimization and several components of the algorithm. Verification of the full expected-time bound remains open.
 ]
 
-= Statement and model
-
-For each integer $N >= 2$, one classical randomized algorithm returns its prime factorization with multiplicities and terminates on every random tape. Its expected bit complexity on that input satisfies
-$ EE T(N) <= L_N thin [1/3,C_*], quad C_* = 1.9839824118071388229 dots . $
-Here $L_N thin [alpha,c] = exp((c+o(1))(log N)^alpha (log log N)^(1-alpha))$, with natural logarithms. Writing $H(N) = (log N)^(1/3) (log log N)^(2/3)$ gives the coarser bound $EE T(N) = exp(O(H(N)))$. The displayed upper bound means that for every $epsilon > 0$, all sufficiently large $N$ satisfy $EE T(N) <= exp((C_*+epsilon)H(N))$.
-
-The expectation is over independent fair bits. The bit count includes all setup, failed searches, verification and recursion. A fixed rational schedule with 4,096 stages gives a coefficient below $1.984578735$ [3, 6].
+= Introduction
 
 The algorithm constructs two square roots of the same residue modulo $N$. When their signs agree at some prime factors and differ at others, a greatest common divisor splits $N$. Narrower public polynomial coefficients reduce the descent cost. Estimates for products of primes in short intervals show that enough usable relations remain.
 
-KeyBreak’s multilevel descent gives a coefficient of $2.97$ under the critical-line theorem for Dirichlet $L$-functions, including zeta [1, Thm. 1.2]. Alpöge’s Lean proof of that theorem has been independently checked [2]. The bound at $C_*$ combines KeyBreak’s analytic arguments with estimates for the modified field distribution and sampler [3–5]. Its end-to-end proof is at manuscript level.
+KeyBreak’s multilevel descent gives a coefficient of $2.97$ under the critical-line theorem for Dirichlet $L$-functions, including zeta [1, Thm. 1.2]. Alpöge’s Lean proof of that theorem has been independently checked [2]. Our analysis combines KeyBreak’s analytic arguments with estimates for the modified field distribution and sampler [3–5].
+
+== Main result
+
+Write $H(N) = (log N)^(1/3) (log log N)^(2/3)$ with natural logarithms, and use
+$ L_N thin [alpha,c] = exp((c+o(1))(log N)^alpha (log log N)^(1-alpha)). $
+
+*Theorem 1.1* (Single-input factorization, manuscript bound). _There is one classical randomized algorithm that, on each integer $N >= 2$, terminates on every random tape and returns the prime factorization with multiplicities. Its expected bit complexity satisfies_
+$ EE T(N) <= L_N thin [1\/3,C_*], quad C_* = 1.9839824118071388229 dots . $
+
+Equivalently, for every $epsilon > 0$, all sufficiently large $N$ satisfy $EE T(N) <= exp((C_*+epsilon)H(N))$. In big-$O$ notation this gives $EE T(N) = exp(O(H(N)))$. The expectation is over independent fair bits. The bit count includes setup, failed searches, verification and recursion. A fixed rational schedule with 4,096 stages yields the explicit ceiling in the abstract [3, 6].
 
 = Private rows from reduced forms
 
@@ -37,8 +59,6 @@ $ a A = (a x + b y)^2 + N y^2, quad
 The inverse exists because the accepted seeds are units. The algorithm verifies the congruence and passes only $A$ to the public search [3].
 
 For a uniform class, the preimages of a fixed squared class form a coset of the 2-torsion subgroup. Twisting by the ideal classes associated with coprime divisors of $N$ gives every relative Chinese remainder sign, and a fair independent global sign gives the uniform law on all roots of $A$. A whole-transcript total-variation comparison transfers that ideal law to the capped sampler. The private stage tests use prescribed prime size bands. To count usable $A$, the analysis multiplies the quadratic genus-character biases over the ordered prime slots. The principal-genus fraction cancels against the index of the squared classes. Upper bounds on the number passing each prefix limit the screening work [3].
-
-#pagebreak()
 
 = The public fields and the top predicate
 
@@ -54,8 +74,6 @@ The ordinary smooth-number upper bound gives the same leading logarithmic densit
 *Changing the distribution.* The one-point estimate is normalized by $mu = |cal(S)|/X$ itself. On each bin pattern the Dirichlet character bounds multiply, giving relative cancellation $X^(-1/2) V^(o(1))$ on the top size-$V$ box scale. A truncated Perron integral transfers the bound to product prefixes. Prescribing a child prime removes one free prime and gives the same estimate at the divided size, with the completion density at most a polynomial multiple of $mu$ in the normalized incidence bound [4].
 
 The two-mark transfer also needs control over the actual pair distribution. The multiplier and the Cartesian phases give nearly uniform marginal progression phases, including when a child root is already prescribed. Parseval controls average Fourier energy over the progression grid. Cauchy–Schwarz on the two marginals handles their determinant constraint. The coefficient width is $V_(max)^chi$ up to polynomial factors in the input bit length, where $V_(max)$ is the largest top box scale. The relative grid energy saves $V^(-(chi-1)+o(1))$ in a size-$V$ box, enough to absorb Gaussian variation for a sufficiently small angular cutoff and any fixed $chi > 1$. The near-parallel pairs discarded in this estimate have power-small frequency. These are averaged estimates for the new top law. The interior deletion recurrence uses KeyBreak's estimates with the multiplier fixed [1, 4].
-
-#pagebreak()
 
 = Shared descent and the square comparison
 
@@ -76,8 +94,6 @@ Root isolation and the supporting-tangent inequality give
 $ 1.9839824118071388228 < C_* < 1.9839824118071388230 . $
 Here the infimum concerns these cost inequalities. The other budget and geometry inequalities have strict room at the limiting point, with top and high ratios $1.43$ and $1.636$. Costing the finite rational schedule at $chi=1.01$ bounds private screening by $1.984578735$, low raw work by $1.984515433$, and all other leading charges by smaller values [6].
 
-#pagebreak()
-
 = From fixed schedules to one algorithm
 
 The analytic transfer uses only widths with $chi>1$. Given any positive excess, fix rational parameters with $chi$ close enough to 1, use a sufficiently fine finite grid, and choose positive slack in the analytic guards. Then take the input limit with that schedule fixed. This order gives fixed schedules with expected splitter exponents arbitrarily close to $C_*$ [3, 6].
@@ -92,7 +108,8 @@ The key remaining formal lemma is a uniform per-call expected-work bound for the
 
 #heading(numbering: none)[References]
 
-#text(size: 9.4pt)[
+#text(size: 10pt)[
+  #set par(first-line-indent: 0pt, hanging-indent: 13pt, spacing: 7pt)
   [1] The KeyBreak Cryptanalysis Agent. #link("https://crypto.sjtu.edu.cn/factoring.pdf")[_Provable Integer Factorization via Multilevel Descent: Approaching Heuristic Bounds_]. 26 November 2026. Thm. 1.2 and Apps. E, G–H. Pinned SHA-256 `2b534eaf77fb2b9712018879059d8d4667c40c0a4adf2fff90efc22fb356cfc9`.
 
   [2] A. Sutherland, independent verification of #link("https://math.mit.edu/~drew/grh/")[Alpöge’s Lean proof of RH and Dirichlet GRH] and of the #link("https://math.mit.edu/~drew/shortgrh/")[shorter proof] at #link("https://github.com/lsernau/grh-lean/tree/72fead10")[commit 72fead10].
