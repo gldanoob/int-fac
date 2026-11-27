@@ -1,6 +1,6 @@
 # Smooth primitive ideals in a majority of quadratic classes
 
-Let \(D<0\) be fundamental, let \(V=\sqrt{|D|}\), and fix a constant \(C\). Put \(X=V^{101/100}\) and \(Y=V^{9/10}\). For every integer \(Z\ge1\) with \(\log Z\le (\log V)^C\), consider primitive integral ideals of norm at most \(X\) coprime to \(Z\). An ideal is primitive if no rational integer greater than one divides it as an ideal. Under Dirichlet GRH, more than sixty percent of all ideal classes contain at least one eighth of the predicted per-class total as such ideals with \(Y\)-smooth norms, uniformly for large \(V\). The same conclusion holds for every smoothness cutoff \(y\ge Y\).
+Let \(D<0\) be fundamental, let \(V=\sqrt{|D|}\), and fix a constant \(C\). Put \(X=V^{101/100}\) and \(Y=V^{9/10}\). For every integer \(Z\ge1\) with \(\log Z\le (\log V)^C\), consider primitive integral ideals of norm at most \(X\) coprime to \(Z\). An ideal is primitive if no rational integer greater than one divides it as an ideal. Under Dirichlet GRH, more than sixty percent of all ideal classes contain at least one eighth of the predicted per-class total as such ideals with \(Y\)-smooth norms, uniformly for large \(V\). The same conclusion holds for every smoothness cutoff \(y\ge Y\). More generally, every fixed cutoff exponent \(c>e^{-1/2}\) gives a fixed majority at norm scale \(X=V^{1+\varepsilon}\) for suitable \(\varepsilon>0\) and a positive per-class count threshold.
 
 ## The global bad-ideal upper bound
 
@@ -72,3 +72,32 @@ Put \(\mu=C_ZX/h_D\). If a balanced class contains fewer than \(\mu/8\) smooth a
 \]
 
 of all classes have at least \(\mu/8\) coprime primitive ideals with \(Y\)-smooth norms. Summing the balanced-class count also shows that the global bad fraction among all admitted ideals is at most \(11e/90+o(1)\).
+
+## Sharper cutoff by real moments
+
+Fix \(\varepsilon>0\), set \(X=V^{1+\varepsilon}\) and \(Y=V^c\), and assume \((1+\varepsilon)/2<c<1+\varepsilon\). The same balanced-class argument applies since \(R/\lambda_1\le V^{\varepsilon/2}(\log V)^{K/2}\), while the area main term has size \(V^{\varepsilon}\mathcal D_Z\). If \(c\ge1+\varepsilon\) every admitted norm already satisfies the cutoff.
+
+Define a finite positive measure \(\nu_V\) on \([0,1]\) by placing mass \(a_Z(m)m^{-1-1/\log V}/(C_Z\log V)\) at \(u=m^{-1/\log V}\) for every \(m\ge1\). For each fixed integer \(j\ge0\) its \(j\)-th moment is
+
+\[
+ \int_0^1 u^j\,d\nu_V(u)
+ =\frac{F_Z(1+(j+1)/\log V)}{C_Z\log V}
+ =\frac{1}{j+1}+o(1).
+\]
+
+The estimates on the real Euler product near \(1\) give these errors uniformly in \(D,Z\) for every fixed \(j\). The zeroth moment bounds the mass uniformly, so polynomial approximation gives convergence against every fixed continuous function to its Lebesgue integral, with the same uniformity.
+
+For a fixed \(T<\infty\), change coordinates to \(t=-\log u\). The masses \(a_Z(m)/(m C_Z\log V)\) at \(t=\log m/\log V\) are obtained by multiplying \(\nu_V\) by \(u^{-1}\). On \(t\in[0,T]\) this weight is bounded. Continuous upper and lower approximations at the endpoint \(u=e^{-T}\) justify the restriction to the closed interval, since Lebesgue measure has no atom there. Under the change of variables \(u^{-1}du\) becomes \(dt\). Hence the restricted harmonic measure converges uniformly against every fixed continuous function on \([0,T]\) to its integral against \(dt\).
+
+As before, there is at most one prime factor above \(Y\) and the ramified contribution is \(o(C_ZX)\). On \(Y\le z\le X\), the split-prime upper bound can use the denominator \(\log z\), giving \(2\pi_{\mathrm{split}}(z)\le(1+o(1))z/\log z\) uniformly. Apply this at \(z=X/m\) and write \(t_m=\log m/\log V\). The normalized bad count is at most
+
+\[
+ (1+o(1))\sum_{m\le X/Y}
+ \frac{a_Z(m)}{m C_Z\log V}\frac{1}{1+\varepsilon-t_m}+o(1)
+ =\int_0^{1+\varepsilon-c}\frac{dt}{1+\varepsilon-t}+o(1)
+ =\log\frac{1+\varepsilon}{c}+o(1).
+\]
+
+The kernel is continuous on this fixed interval because its denominator is at least \(c\). Since the balanced classes alone supply \((1-o(1))C_ZX\) admitted ideals, this is also an upper bound on the global bad fraction.
+
+For \(e^{-1/2}<c<1\), choose fixed \(\varepsilon>0\) with \(1+\varepsilon<e^{1/2}c\). Then \(\lambda=\log((1+\varepsilon)/c)<1/2\) and the one-large-prime condition holds. For any fixed \(0<\tau<1-2\lambda\), a balanced class with fewer than \(\tau\mu\) admitted smooth ideals accounts for at least \((1-\tau-o(1))\mu\) bad ideals, where \(\mu=C_ZX/h_D\). It follows that at least \(1-\lambda/(1-\tau)-o(1)>1/2\) of all classes have at least \(\tau\mu\) such ideals. The result for \(c\ge1\) follows by retaining any fixed cutoff in \((e^{-1/2},1)\).
