@@ -89,3 +89,26 @@ Increasing \(H\) makes the fraction of targets below half the uniform probabilit
  8\,f(x,y)=(4x+y)^2+|D|y^2\ \ge\ |D|.
 \]
 Thus the smallest admitted norm in this class is at least \(V^2/8\). This applies also to negative prime discriminants in this progression. The upper bound differs by a power of \(\log V\); the uniform lower bound is an exponent statement and gives no lower bound of that logarithmic size. Membership of a single class in the exceptional set at the smaller norm scale is consistent with the almost-all-classes estimate.
+
+## How many classes require a large coprime representative?
+
+The obstruction at the smallest reduced coefficient gives an asymptotic count across the entire class group. Let \(M_Z(g)\) be the least norm of a primitive integral ideal of class \(g\) coprime to \(Z\); impose no smoothness restriction for this count. Write \(P_Z=C_Z/C_1\) for the product of local coprimality densities among primitive ideals. Assume \(W/V\to\infty\), \(W\le V^{2-\epsilon}\) for fixed \(\epsilon>0\), and \(\operatorname{rad}(2Z)^2V/W\to0\). In particular \(Z\) may be any fixed positive integer. Outside the power-saving exceptional family in the total norm estimate, or for all fields under Dirichlet GRH,
+\[
+ \frac{\#\{g:M_Z(g)>W\}}{h}
+   =\frac{\pi}{4\zeta(2)}\bigl(\gamma_Z(D)+o(1)\bigr)\frac VW,
+ \qquad
+ \gamma_Z(D)=
+ \begin{cases}
+  2-4P_Z,&2\mid Z,\quad D\equiv1\pmod8,\\
+  1-P_Z,&\text{otherwise}.
+ \end{cases}
+\]
+For example, if \(2\) splits and \(Z=2\), the fraction is \((1/\pi+o(1))V/W\). It is a lower bound for the fraction of classes that also lack a smooth representative at that norm. The two sides agree to additive \(o(V/W)\), including cases with zero local obstruction. [Total norm estimate on all polynomial scales](keybreak-quadratic-smooth-majority.md#total-and-smooth-counts-below-the-lattice-scale)
+
+Take a reduced primitive form \([a,b,c_0]\) for the class, with \(|b|\le a\le c_0\) and \(a\le V/\sqrt3\). Its primitive values are precisely the primitive ideal norms in that class, after choosing the usual form–ideal convention. If \((a,Z)=1\), the minimum is \(a\le W\). Otherwise a permitted value requires \(y\ne0\). Let \(d=2\) if \(2\mid Z,\ D\equiv1\pmod8,\ a\) is odd; let \(d=1\) otherwise. In the special case \(b\) is odd and \(c_0\) is even, since \(4ac_0=b^2-D\equiv0\pmod8\). Odd \(y\) then forces an even value, hence \(|y|\ge d\). Completing the square gives the lower bound \(M_Z(g)\ge d^2V^2/(4a)\).
+
+Conversely take \(y=d\). At every odd prime \(p\mid Z\), the polynomial in \(x\) is nonzero modulo \(p\) by primitivity and \(p\nmid d\); at most two residues are excluded. At two, when \(d=2\) choose \(x\) odd. When \(d=1\) and \(2\mid Z\), the value modulo two is \((a+b)x+c_0\). Its identical vanishing would force \(c_0\) even and \(a,b\) both odd by primitivity, precisely the case already assigned \(d=2\). CRT now allows a suitable \(x\) within \(O(\operatorname{rad}(2Z))\) of \(-bd/(2a)\), with \((x,d)=1\). The upper bound is \(M_Z(g)\le d^2V^2/(4a)+O(a\operatorname{rad}(2Z)^2)\). Thus the classes above threshold correspond to ineligible shortest norms \(a\) below \(d^2V^2/(4W)\), up to a band of relative width \(o(1)\), uniformly under the hypotheses. Powers in \(Z\) can be removed before applying the total norm estimate.
+
+Each primitive ideal of norm in this short range is the unique shortest primitive ideal in its class. Indeed norms of two independent primitive vectors in the normalized ideal lattice have product at least \(V^2/4\) by the determinant, while collinear primitive vectors agree up to sign. Here all relevant cutoff norms are \(o(V)\). Equivalently the exact integral identity reads \(4f(x,y)f(u,v)=B_f((x,y),(u,v))^2+|D|(xv-yu)^2\), with \(B_f\) the integral polarization. Consequently the total ideal count on short intervals counts classes here as well. [Lean determinant identity and primitive uniqueness](../formal/cogentic/Cogentic/RandomizedPrimitiveQuadraticRoot.lean) · [Lean odd-value bounds](../formal/cogentic/Cogentic/RandomizedQuadraticNormBound.lean)
+
+Put \(U=V^2/(4W)\). If \(d=1\) for every ineligible norm, the count is \(C_1 U(1-P_Z+o(1))\) from the total and coprime asymptotics. In the split-at-two case with \(2\mid Z\), primitive even norms have density \(2/3\) relative to \(C_1\) since the primitive Euler factor at two is three. Count them up to \(U\). The odd ineligible norms have density \(1/3-P_Z\) and are counted up to \(4U\). The transition bands contribute \(o(C_1 U)\) by the uniform total asymptotic at these fixed-power scales. Finally \(C_1=L(1,\chi_D)/\zeta(2)\) and \(h=V L(1,\chi_D)/\pi\) for \(D<-4\). This yields the stated constant.
