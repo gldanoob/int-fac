@@ -41,6 +41,9 @@ import Cogentic.RandomizedConductorCount
 import Cogentic.RandomizedNarrowEnvelope
 import Cogentic.RandomizedNarrowEndpoint
 import Cogentic.RandomizedRectangularAbel
+import Cogentic.RandomizedSurvivorMoment
+import Cogentic.RandomizedPoolCoverage
+import Cogentic.RandomizedMarginalModes
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -117,3 +120,8 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.Randomized.narrow_envelope_endpoint_lower
 #print axioms Cogentic.Randomized.narrow_envelope_endpoint_upper
 #print axioms Cogentic.RandomizedRectangularAbel.norm_sum_le_prefix_bound_mul_variation
+#print axioms Cogentic.Randomized.survivorMoment_count
+#print axioms Cogentic.RandomizedPoolCoverage.poolMissMass_le_card_mul
+#print axioms Cogentic.RandomizedMarginalModes.coupled_mode_sum
+#print axioms Cogentic.Randomized.balanced_envelope_endpoint_lower
+#print axioms Cogentic.Randomized.balanced_envelope_endpoint_upper
