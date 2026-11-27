@@ -8,6 +8,7 @@ import Cogentic.RandomizedConcreteHitMassCount
 import Cogentic.RandomizedL18_4
 import Cogentic.RandomizedL18_4CellCount
 import Cogentic.RandomizedL18_4Numerator
+import Cogentic.RandomizedL18_4Thin
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedPaperL18_4
 import Cogentic.RandomizedPaperLeafStatements
@@ -134,6 +135,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_of_cellData
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_from_critical_line
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceCellNumeratorCount
+#print axioms Cogentic.RandomizedL18_4.ThinPairInputs.thin_pair_fraction
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceThinPairFraction
 #print axioms Cogentic.RandomizedL18_4.zmod_parseval
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieve
 #print axioms Cogentic.RandomizedPaperL18_4.paperAssumptions_of_L18_4Inputs
