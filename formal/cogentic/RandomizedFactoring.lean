@@ -91,6 +91,7 @@ import Cogentic.RandomizedProbeCount
 import Cogentic.RandomizedPublicSpan
 import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
+import Cogentic.RandomizedPrimeBinBias
 import Cogentic.RandomizedScheduleFloor
 import Cogentic.RandomizedSemisimpleZero
 import Cogentic.RandomizedSignCount
@@ -163,3 +164,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedWeightedIncidence.sum_incident_sq_le
 #print axioms Cogentic.RandomizedCenteredBoxRatio.card_centeredBox_dilate_le
 #print axioms Cogentic.RandomizedSplitWork.expected_work_le_log2
+#print axioms Cogentic.Randomized.primeBin_product_from_critical_line
