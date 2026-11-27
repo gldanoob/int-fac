@@ -39,18 +39,22 @@ proved, not assumed.
 
 ## The marginal mass
 
-The Mellin marginal mass is the reference count `ν`.  The grid-prefix marginal
-mass is `√φ(m) · ν`, matching `E_i = √C_i L_i / √φ(m_i)`.  The paper's count is
+For the grid-prefix marginal the mass is `√φ(m) · ν`, matching
+`E_i = √C_i L_i / √φ(m_i)`.  The paper's count is
 
 `V ^ (2η) ≤ φ(m)`
 
-together with `1 ≤ ν`.  Taking square roots gives `V ^ η ≤ √φ(m) · ν`, which is
-`mass_lower`; this is `mass_lower_of_totient_count`.  No mass is set to zero:
-the count is a lower bound and `φ(m) > 0` follows from `m ≠ 0`.
+together with a positive reference count `ν = massCount`.  Taking square roots
+gives `V ^ η ≤ √φ(m) · ν`, which is `mass_lower`; this is
+`mass_lower_of_totient_count`.  For the Mellin marginal the Plancherel sum runs
+over `(ZMod q)ˣ`, so the corresponding count is `φ(q)` and the mass is `√φ(q)`;
+this is `mass_lower_sqrt_totient`.  No mass is set to zero: the count is a lower
+bound and `φ(m) > 0` follows from `m ≠ 0`.
 
 Finally `mellinEnergyScaleOfGrowth` and `gridPrefixEnergyScaleOfGrowth` build
 the concrete `EnergyScaleInputs` without the two former hypothesis parameters
-`henv`, `hmass`.
+`henv`, `hmass`; their `...OfTotientCount` variants replace the mass input by
+the explicit reduced-residue count.
 
 Nothing here is a `sorry`, an `admit`, an `axiom`, or `native_decide`.
 -/
@@ -346,8 +350,8 @@ noncomputable def gridPrefixEnvelopeExponent {ι : Type} [Fintype ι]
 the displayed exponentials, then each product factor of `gridPrefixEnvelope`
 grows like `exp (cF s)`. -/
 theorem gridPrefixFactor_le_exp {C U mB X s cC cU cMB cX : ℝ}
-    (hC : 0 < C) (hU : 2 ≤ U) (hmB : 1 ≤ mB) (hX : 2 ≤ X)
-    (hcC : 0 ≤ cC) (hcU : 0 ≤ cU) (hcMB : 0 ≤ cMB) (hcX : 0 ≤ cX)
+    (_hC : 0 < C) (_hU : 2 ≤ U) (hmB : 1 ≤ mB) (_hX : 2 ≤ X)
+    (_hcC : 0 ≤ cC) (hcU : 0 ≤ cU) (_hcMB : 0 ≤ cMB) (_hcX : 0 ≤ cX)
     (hs : 2 ≤ s)
     (hCle : C ≤ exp (cC * s)) (hUle : U ≤ exp (cU * s))
     (hmBle : mB ≤ exp (cMB * s)) (hXle : X ≤ exp (cX * s)) :
@@ -444,7 +448,7 @@ theorem gridPrefixEnvelope_le_exp_of_growth {ι : Type} [Fintype ι] [DecidableE
     (X : ℕ → ℝ) (A U : ℕ → ι → ℕ)
     {cC cU cMB cX cK cN S : ℝ}
     (_hcC : 0 ≤ cC) (hcU : 0 ≤ cU) (hcMB : 0 ≤ cMB) (_hcX : 0 ≤ cX)
-    (hcK : 0 ≤ cK) (hcN : 0 ≤ cN) (hS : 2 ≤ S)
+    (_hcK : 0 ≤ cK) (_hcN : 0 ≤ cN) (hS : 2 ≤ S)
     (hU : ∀ n i, 2 ≤ U n i)
     (hX : ∀ n, S ≤ scale n → 2 ≤ X n)
     (hCle : ∀ n, S ≤ scale n →
@@ -706,7 +710,7 @@ positive integer reference count `ν = massCount`; taking square roots gives
 `V ^ η ≤ √φ(m) · ν`. -/
 theorem mass_lower_of_totient_count (m : ℕ → ℕ) (massCount : ℕ → ℕ)
     (W : ℕ → ℝ) (η : ℝ)
-    (hm : ∀ n, m n ≠ 0) (hcount : ∀ n, 0 < massCount n)
+    (_hm : ∀ n, m n ≠ 0) (hcount : ∀ n, 0 < massCount n)
     (htotient : ∀ n, exp (2 * η * W n) ≤ ((m n).totient : ℝ)) :
     MarginalMassCount
       (fun n => Real.sqrt (((m n).totient : ℝ)) * (massCount n : ℝ)) W η := by
@@ -727,6 +731,25 @@ theorem mass_lower_of_totient_count (m : ℕ → ℕ) (massCount : ℕ → ℕ)
     _ = Real.sqrt (((m n).totient : ℝ)) * 1 := by ring
     _ ≤ Real.sqrt (((m n).totient : ℝ)) * (massCount n : ℝ) :=
       mul_le_mul_of_nonneg_left hcount1 hsqrt_nonneg
+
+/-- **The Mellin marginal mass from the reduced-residue count.**  The Plancherel
+sum runs over `(ZMod q)ˣ`, so the count is `φ(q)`.  The paper's
+`V ^ (2η) ≤ φ(q)` gives `V ^ η ≤ √φ(q)`, the marginal mass used by the Mellin
+normalization. -/
+theorem mass_lower_sqrt_totient (q : ℕ → ℕ) (W : ℕ → ℝ) (η : ℝ)
+    (_hq : ∀ n, q n ≠ 0)
+    (htotient : ∀ n, exp (2 * η * W n) ≤ ((q n).totient : ℝ)) :
+    MarginalMassCount (fun n => Real.sqrt (((q n).totient : ℝ))) W η := by
+  intro n
+  have hA : 0 < exp (η * W n) := exp_pos _
+  have hsq : exp (η * W n) ^ 2 = exp (2 * η * W n) := by
+    rw [sq, ← Real.exp_add]
+    congr 1
+    ring
+  have hsqrt : exp (η * W n) ≤ Real.sqrt (((q n).totient : ℝ)) := by
+    rw [← Real.sqrt_sq hA.le, hsq]
+    exact Real.sqrt_le_sqrt (htotient n)
+  simpa using hsqrt
 
 /-! ## 5. The Mellin growth certificate -/
 
@@ -854,6 +877,29 @@ noncomputable def mellinEnergyScaleOfGrowth (line : DirichletLZerosOnLine)
   mellinEnergyScale line hW0 hW hη q G.hq A B G.hB hAB hdisj σ t ν hσ hν
     G.envelope_poly M
 
+/-- **Mellin certificate from the reduced-residue count.**  The marginal mass is
+the actual count `√φ(q)`, and its lower bound is the paper's
+`V ^ (2η) ≤ φ(q)`. -/
+noncomputable def mellinEnergyScaleOfTotientCount (line : DirichletLZerosOnLine)
+    {W : ℕ → ℝ} (hW0 : ∀ n, 0 ≤ W n) (hW : DominatesScale W)
+    {η : ℝ} (hη : 0 < η)
+    (q : ℕ → ℕ) {ι : Type} [Fintype ι] [DecidableEq ι]
+    (A B : ℕ → ι → ℕ) (hAB : ∀ n i, A n i ≤ B n i)
+    (hdisj : ∀ n, Pairwise fun i j =>
+      Disjoint (primeBin (A n i) (B n i)) (primeBin (A n j) (B n j)))
+    (σ t : ℕ → ℝ) (hσ : ∀ n, 0 ≤ σ n)
+    (G : MellinEnvelopeGrowth line q B t)
+    (htotient : ∀ n, exp (2 * η * W n) ≤ ((q n).totient : ℝ)) :
+    EnergyScaleInputs W :=
+  mellinEnergyScaleOfGrowth line hW0 hW hη q A B hAB hdisj σ t
+    (fun n => Real.sqrt (((q n).totient : ℝ))) hσ
+    (fun n => by
+      have hqpos : 0 < q n := Nat.pos_of_ne_zero (G.hq n)
+      have hφ : (0 : ℝ) < ((q n).totient : ℝ) := by
+        exact_mod_cast Nat.totient_pos.mpr hqpos
+      exact Real.sqrt_pos.mpr hφ)
+    G (mass_lower_sqrt_totient q W η G.hq htotient)
+
 /-- **Sharp-prefix marginal certificate without `henv` / `hmass`.** -/
 noncomputable def gridPrefixEnergyScaleOfGrowth (line : DirichletLZerosOnLine)
     {W : ℕ → ℝ} (hW0 : ∀ n, 0 ≤ W n) (hW : DominatesScale W)
@@ -913,9 +959,11 @@ noncomputable def gridPrefixEnergyScaleOfTotientCount
 #print axioms mellinEnvelope_le_exp_of_growth
 #print axioms gridPrefixEnvelope_le_exp_of_growth
 #print axioms mass_lower_of_totient_count
+#print axioms mass_lower_sqrt_totient
 #print axioms MellinEnvelopeGrowth.envelope_poly
 #print axioms GridPrefixEnvelopeGrowth.envelope_poly
 #print axioms mellinEnergyScaleOfGrowth
+#print axioms mellinEnergyScaleOfTotientCount
 #print axioms gridPrefixEnergyScaleOfGrowth
 #print axioms gridPrefixEnergyScaleOfTotientCount
 

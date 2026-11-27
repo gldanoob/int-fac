@@ -18,6 +18,7 @@ import Cogentic.RandomizedL19Thin
 import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
+import Cogentic.RandomizedL20_2Sub
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL34
@@ -25,9 +26,12 @@ import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL27_1
+import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL4
+import Cogentic.RandomizedL4Sub
+import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
@@ -43,6 +47,7 @@ import Cogentic.RandomizedL18_4ThinAggregate
 import Cogentic.RandomizedL18_4Full
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL18_4LargeSieveInputs
+import Cogentic.RandomizedL18_4LargeSieveResidual
 import Cogentic.RandomizedL18_4LatticeCount
 import Cogentic.RandomizedL19SecondMoment
 import Cogentic.RandomizedL19Muq
@@ -215,6 +220,12 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedC5Full.C5FullInputs.hitMass_of_inputs
 #print axioms Cogentic.RandomizedL34Sub.probeMiss_le_exp_of_estimates
 #print axioms Cogentic.RandomizedL30Sub.FailureData.subexpLoss
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieveResidualData
+#print axioms Cogentic.RandomizedL20_2Sub.L20_2SubInputs.toInputs
+#print axioms Cogentic.RandomizedL27_1Sub.toRatedLeaf
+#print axioms Cogentic.RandomizedL4Sub.L4SubInputs.toL4Inputs
+#print axioms Cogentic.RandomizedConcreteFormSpec.concreteFormSpec
+#print axioms Cogentic.RandomizedL19EnergyMass.mellinEnergyScaleOfGrowth
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
 #print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
