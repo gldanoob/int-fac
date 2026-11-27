@@ -187,7 +187,7 @@ theorem exists_large_centeredBinPatterns {J k : ℕ} (hJ : 1 ≤ J) (hk : 1 ≤ 
   have hMle : M ≤ k * J := by
     dsimp only [M]
     have h1 : k * (J - 1) + k = k * J := by
-      rw [← Nat.mul_succ, Nat.sub_add_cancel hJ]
+      rw [← mul_add_one, Nat.sub_add_cancel hJ]
     omega
   have hmaps : ∀ s ∈ (range J).powersetCard k, (∑ j ∈ s, j) ∈ range M := by
     intro s hs
@@ -280,7 +280,8 @@ theorem primeBinPatternProducts_density_lower (A B : ℕ → ℕ)
                 refine Finset.prod_le_prod (fun j _ => mul_nonneg (hep j (mem_range.mp (hsub j.2))) hW)
                   fun j _ => ?_
                 have hj := hpop j (mem_range.mp (hsub j.2))
-                simpa only [W, mul_div_assoc, mul_comm (ep j)] using hj
+                calc ep j * W = c₀ * δ * ep j / Real.log y := by dsimp only [W]; ring
+                  _ ≤ _ := hj
 
 /-- Every integer in `centeredBinProducts P δ J k a` is `y`-smooth once all upper
 bin floors are at most `y`. -/
@@ -327,7 +328,7 @@ theorem centeredBinProducts_density_of_supply (supply : PrimeBinSupplyBound) :
   have ha_le : (a : ℝ) / (m : ℝ) ≤ (J : ℝ) := by
     have ha1 : a ≤ m * (J - 1) := Nat.lt_succ_iff.mp (mem_range.mp ha)
     have ha2 : a ≤ m * J := ha1.trans (Nat.mul_le_mul_left m (Nat.sub_le J 1))
-    exact (div_le_iff₀ hmr).mpr (by exact_mod_cast ha2)
+    exact (div_le_iff₀ hmr).mpr (by rw [mul_comm]; exact_mod_cast ha2)
   have ha_nonneg : 0 ≤ (a : ℝ) / (m : ℝ) := by positivity
   have hbin_lo (j : ℕ) : P * Real.exp (-(δ * (J : ℝ))) ≤ centeredBinEndpoint P δ a m j := by
     unfold centeredBinEndpoint
@@ -443,7 +444,7 @@ theorem eventually_le_bins_of_width {u y δ : ℕ → ℝ} {J m : ℕ → ℕ} {
     mul_le_mul_of_nonneg_left hδu (Nat.cast_nonneg _)
   have h3 : Cδ * (m n : ℝ) ≤ (J n : ℝ) * Cδ := by
     have h := h1.trans h2
-    rw [mul_div_assoc, le_div_iff₀ hmr] at h
+    rw [← mul_div_assoc, le_div_iff₀ hmr] at h
     exact h
   have h4 : (m n : ℝ) ≤ (J n : ℝ) := by nlinarith only [h3, hCδ]
   exact_mod_cast h4
@@ -571,7 +572,7 @@ theorem eventually_primeBinStrip_density_lower
       exact_mod_cast this
     have h2 : (m : ℝ) * (J n : ℝ) ≤ (m : ℝ) ^ 2 * (J n : ℝ) := by
       have hm1r : (1 : ℝ) ≤ m := by exact_mod_cast hm1
-      nlinarith only [hm1r, hm_pos, hJ_pos]
+      exact mul_le_mul_of_nonneg_right (le_self_pow₀ hm1r (by norm_num)) hJ_pos.le
     have hge1 : (1 : ℝ) ≤ (m : ℝ) ^ 2 * (J n : ℝ) := h1.trans h2
     have hlog_nonneg : 0 ≤ Real.log ((m : ℝ) ^ 2 * (J n : ℝ)) := Real.log_nonneg hge1
     have hprod_nonneg : 0 ≤ u n * Real.log (u n) := mul_nonneg hu_pos.le hlu_pos.le
@@ -612,7 +613,9 @@ theorem eventually_primeBinStrip_density_lower
     nlinarith only [h2, hu_pos]
   have hsum_linear : 2 * (2 + Real.log 3) * u n + 2 * |Real.log C| * u n = 2 * K * u n := by
     dsimp [K]; ring
-  linarith only [hlogmJ_le, hterm1, hterm2, hterm3, hK_budget, hsum_linear]
+  have hεX : 0 ≤ ε * (u n * Real.log (u n)) :=
+    mul_nonneg hε.le (mul_nonneg hu_pos.le hlu_pos.le)
+  linarith only [hlogmJ_le, hterm1, hterm2, hterm3, hK_budget, hsum_linear, hεX]
 
 /-- End-to-end asymptotic leading density theorem for `centeredBinProducts`
 under `DirichletLZerosOnLine`. -/
@@ -765,7 +768,7 @@ theorem eventually_oneThird_density_scale {a b δ ε : ℝ} (ha : 0 < a) (hb : 0
   have h2 := mul_le_mul_of_nonneg_left h1.le (show 0 ≤ 1 + δ by linarith)
   have h3 : (1 + δ) * (a / (3 * b) + ε / (1 + δ)) = (1 + δ) * (a / (3 * b)) + ε := by
     field_simp
-  rw [← mul_assoc, h3] at h2
+  rw [← mul_assoc (1 + δ) (a / (3 * b) + ε / (1 + δ)), h3] at h2
   linarith only [h2]
 
 /-! ## Section 4: Rankin Smooth-Number Upper Bounds -/
@@ -773,7 +776,6 @@ theorem eventually_oneThird_density_scale {a b δ ε : ℝ} (ha : 0 < a) (hb : 0
 private theorem geom_sum_le_inv_one_sub {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (N : ℕ) :
     (∑ k ∈ range N, r ^ k) ≤ (1 - r)⁻¹ := by
   have h1mr : 0 < 1 - r := sub_pos.mpr hr1
-  rw [le_inv_comm₀ (by positivity) h1mr]
   have hmul : (1 - r) * (∑ k ∈ range N, r ^ k) = 1 - r ^ N := by
     have hdiff : ∀ k : ℕ, (1 - r) * r ^ k = r ^ k - r ^ (k + 1) := fun k => by
       rw [pow_succ]; ring
@@ -783,8 +785,8 @@ private theorem geom_sum_le_inv_one_sub {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) 
   have hle : (1 - r) * (∑ k ∈ range N, r ^ k) ≤ 1 := by
     rw [hmul]
     linarith only [pow_nonneg hr0 N]
-  have hinv_le := (le_div_iff₀' h1mr).mpr hle
-  rwa [one_div] at hinv_le
+  rw [← one_div, le_div_iff₀' h1mr]
+  exact hle
 
 /-- Master finite Euler product bound: for any finite set `S` of positive `y`-smooth
 integers and any `α > 0`,
@@ -809,14 +811,16 @@ theorem sum_rpow_neg_le_euler_prod {S : Finset ℕ} {y α : ℝ}
       have hple : p ≤ ⌊y⌋₊ := (Nat.le_floor_iff hy).mpr ((hS n hn).2 p hp)
       exact mem_filter.mpr ⟨mem_Icc.mpr ⟨hpPrime.two_le, hple⟩, hpPrime⟩
     calc
-      φ (ψ n) = ∏ p ∈ P, p ^ (n.factorization p) := Finset.prod_coe_sort P _
+      φ (ψ n) = ∏ p ∈ P, p ^ (n.factorization p) := by
+            dsimp only [φ, ψ]
+            exact Finset.prod_coe_sort P (fun p => p ^ n.factorization p)
       _ = ∏ p ∈ n.primeFactors, p ^ (n.factorization p) := by
             symm
             refine Finset.prod_subset hsub fun p _ hpnot => ?_
-            rw [Nat.factorization_eq_zero_of_not_mem_primeFactors hpnot, pow_zero]
+            rw [(Finsupp.notMem_support_iff (f := n.factorization)).mp hpnot, pow_zero]
       _ = n := by
             simpa only [Finsupp.prod, Nat.support_factorization] using
-              Nat.factorization_prod_pow_eq_self hnpos.ne'
+              Nat.prod_factorization_pow_eq_self hnpos.ne'
   have hψmem : ∀ n ∈ S, ψ n ∈ Box := by
     intro n hn
     have hnpos : 0 < n := (hS n hn).1
@@ -829,7 +833,7 @@ theorem sum_rpow_neg_le_euler_prod {S : Finset ℕ} {y α : ℝ}
         _ ≤ (p : ℕ) ^ (n.factorization (p : ℕ)) := Nat.pow_le_pow_left hpPrime.two_le _
         _ ≤ n := Nat.le_of_dvd hnpos (Nat.ordProj_dvd n p)
     have hleE : n ≤ E := Finset.le_sup (f := id) hn
-    exact mem_range.mpr (by omega)
+    exact mem_range.mpr (show n.factorization (p : ℕ) < E + 1 by omega)
   have hψinj : Set.InjOn ψ S := by
     intro a ha b hb hab
     rw [← hφψ a ha, ← hφψ b hb, hab]
@@ -838,7 +842,8 @@ theorem sum_rpow_neg_le_euler_prod {S : Finset ℕ} {y α : ℝ}
       (∑ n ∈ S, (n : ℝ) ^ (-α))
           = ∑ n ∈ S, ((φ (ψ n) : ℕ) : ℝ) ^ (-α) :=
               Finset.sum_congr rfl fun n hn => by rw [hφψ n hn]
-      _ = ∑ e ∈ S.image ψ, ((φ e : ℕ) : ℝ) ^ (-α) := (Finset.sum_image hψinj).symm
+      _ = ∑ e ∈ S.image ψ, ((φ e : ℕ) : ℝ) ^ (-α) :=
+              (Finset.sum_image (f := fun e => ((φ e : ℕ) : ℝ) ^ (-α)) hψinj).symm
       _ ≤ ∑ e ∈ Box, ((φ e : ℕ) : ℝ) ^ (-α) :=
               Finset.sum_le_sum_of_subset_of_nonneg
                 (Finset.image_subset_iff.mpr hψmem)
@@ -847,7 +852,8 @@ theorem sum_rpow_neg_le_euler_prod {S : Finset ℕ} {y α : ℝ}
       ((φ e : ℕ) : ℝ) ^ (-α) = ∏ p : P, ((p : ℝ) ^ (-α)) ^ (e p) := by
     intro e
     dsimp only [φ]
-    rw [Nat.cast_prod, Real.finset_prod_rpow _ _ (fun _ _ => by positivity)]
+    rw [Nat.cast_prod, ← Real.finsetProd_rpow Finset.univ
+      (fun i : P => (((i : ℕ) ^ e i : ℕ) : ℝ)) (fun _ _ => by positivity)]
     refine Finset.prod_congr rfl fun p _ => ?_
     rw [Nat.cast_pow, ← Real.rpow_natCast, ← Real.rpow_mul (Nat.cast_nonneg _),
       mul_comm, Real.rpow_mul (Nat.cast_nonneg _), Real.rpow_natCast]
@@ -869,16 +875,17 @@ theorem sum_rpow_neg_le_euler_prod {S : Finset ℕ} {y α : ℝ}
     (∑ n ∈ S, (n : ℝ) ^ (-α)) ≤ ∑ e ∈ Box, ((φ e : ℕ) : ℝ) ^ (-α) := hstep1
     _ = ∏ p : P, ∑ k ∈ range (E + 1), ((p : ℝ) ^ (-α)) ^ k := hstep2
     _ ≤ ∏ p : P, (1 - (p : ℝ) ^ (-α))⁻¹ := hstep3
-    _ = ∏ p ∈ P, (1 - (p : ℝ) ^ (-α))⁻¹ := Finset.prod_coe_sort P _
+    _ = ∏ p ∈ P, (1 - (p : ℝ) ^ (-α))⁻¹ :=
+        Finset.prod_coe_sort P (fun p : ℕ => (1 - (p : ℝ) ^ (-α))⁻¹)
 
 /-- Elementary Rankin upper bound for `y`-smooth integers `≤ ⌊x⌋₊`:
 for any `1 ≤ x`, `2 ≤ y`, and `α ∈ (0, 1)` (in fact any `0 < α`),
 `Ψ(x, y) ≤ x^α * ∏_{p ≤ y, p prime} (1 - p^(-α))⁻¹`. -/
 theorem smoothCount_rankin_upper {x y α : ℝ} (hx : 1 ≤ x) (hy : 2 ≤ y)
     (hα0 : 0 < α) (_hα1 : α < 1) :
-    (((Finset.Icc 1 ⌊x⌋₊).filter (fun n => ∀ p ∈ n.primeFactors, (p : ℝ) ≤ y)).card : ℝ) ≤
+    (((Finset.Icc 1 ⌊x⌋₊).filter (fun n : ℕ => ∀ p ∈ n.primeFactors, (p : ℝ) ≤ y)).card : ℝ) ≤
       x ^ α * ∏ p ∈ (Finset.Icc 2 ⌊y⌋₊).filter Nat.Prime, (1 - (p : ℝ) ^ (-α))⁻¹ := by
-  let S := (Finset.Icc 1 ⌊x⌋₊).filter (fun n => ∀ p ∈ n.primeFactors, (p : ℝ) ≤ y)
+  let S := (Finset.Icc 1 ⌊x⌋₊).filter (fun n : ℕ => ∀ p ∈ n.primeFactors, (p : ℝ) ≤ y)
   have hxpos : 0 < x := by linarith only [hx]
   have hS : ∀ n ∈ S, 1 ≤ n ∧ ∀ p ∈ n.primeFactors, (p : ℝ) ≤ y := by
     intro n hn
@@ -906,9 +913,9 @@ for any `0 < T`, `2 ≤ y`, and `α ∈ (0, 1)`,
 theorem smoothReciprocal_rankin_upper {T U y α : ℝ} (hT : 0 < T) (hy : 2 ≤ y)
     (hα0 : 0 < α) (hα1 : α < 1) :
     (∑ d ∈ (Finset.Icc 1 ⌊U⌋₊).filter
-        (fun d => T ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y), (1 / (d : ℝ))) ≤
+        (fun d : ℕ => T ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y), (1 / (d : ℝ))) ≤
       T ^ (α - 1) * ∏ p ∈ (Finset.Icc 2 ⌊y⌋₊).filter Nat.Prime, (1 - (p : ℝ) ^ (-α))⁻¹ := by
-  let S := (Finset.Icc 1 ⌊U⌋₊).filter (fun d => T ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y)
+  let S := (Finset.Icc 1 ⌊U⌋₊).filter (fun d : ℕ => T ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y)
   have hS : ∀ d ∈ S, 1 ≤ d ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y := by
     intro d hd
     obtain ⟨hIcc, _, hsm⟩ := mem_filter.mp hd
@@ -930,15 +937,19 @@ theorem smoothReciprocal_rankin_upper {T U y α : ℝ} (hT : 0 < T) (hy : 2 ≤ 
 /-- Companion weighted smooth reciprocal bound with natural-number endpoints `1 ≤ T`, `U`. -/
 theorem smoothReciprocal_Icc_rankin_upper {T U : ℕ} {y α : ℝ} (hT : 1 ≤ T) (hy : 2 ≤ y)
     (hα0 : 0 < α) (hα1 : α < 1) :
-    (∑ d ∈ (Finset.Icc T U).filter (fun d => ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y), (1 / (d : ℝ))) ≤
+    (∑ d ∈ (Finset.Icc T U).filter (fun d : ℕ => ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y), (1 / (d : ℝ))) ≤
       (T : ℝ) ^ (α - 1) * ∏ p ∈ (Finset.Icc 2 ⌊y⌋₊).filter Nat.Prime, (1 - (p : ℝ) ^ (-α))⁻¹ := by
   have hTpos : (0 : ℝ) < T := by exact_mod_cast (show 0 < T by omega)
-  have hset : (Finset.Icc T U).filter (fun d => ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y) =
+  have hset : (Finset.Icc T U).filter (fun d : ℕ => ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y) =
       (Finset.Icc 1 ⌊(U : ℝ)⌋₊).filter
-        (fun d => (T : ℝ) ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y) := by
+        (fun d : ℕ => (T : ℝ) ≤ (d : ℝ) ∧ ∀ p ∈ d.primeFactors, (p : ℝ) ≤ y) := by
     ext d
     simp only [mem_filter, mem_Icc, Nat.floor_natCast, Nat.cast_le]
-    omega
+    constructor
+    · rintro ⟨⟨h1, h2⟩, h3⟩
+      exact ⟨⟨by omega, h2⟩, h1, h3⟩
+    · rintro ⟨⟨_, h2⟩, h3, h4⟩
+      exact ⟨⟨h3, h2⟩, h4⟩
   rw [hset]
   exact smoothReciprocal_rankin_upper hTpos hy hα0 hα1
 

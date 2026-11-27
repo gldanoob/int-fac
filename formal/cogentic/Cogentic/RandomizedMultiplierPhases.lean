@@ -119,8 +119,9 @@ private theorem centeredBaseQRem_invariant (d' : ℕ) {r Q target : ℤ}
     intro hn
     have hprev := ih (Nat.le_of_succ_le hn)
     have hstep := centeredBaseQRem_step (target := target) hcop (Nat.lt_of_succ_le hn)
-    rw [Finset.sum_range_succ, hprev, hstep, pow_succ]
-    ring
+    rw [Finset.sum_range_succ, pow_succ]
+    rw [hstep] at hprev
+    linear_combination hprev
 
 /-- The centered base-`Q` form evaluates at `(r, Q)` to `target`. -/
 theorem centeredBaseQCoeffs_eval_eq (d' : ℕ) {r Q target : ℤ}
@@ -581,6 +582,7 @@ theorem derivative_zero_modN_dvd_sub {N d' : ℕ} (hd : 1 ≤ d') {Q r : ℤ}
     (N : ℤ) ∣ s₁ - s₂ := by
   have heq₁ := derivative_eval₂_constShift_modN hd (r := r) c₀ s s₁ hQ
   have heq₂ := derivative_eval₂_constShift_modN hd (r := r) c₀ s s₂ hQ
+  dsimp only at heq₁ heq₂
   rw [h₁] at heq₁
   rw [h₂] at heq₂
   have hdiff : (2 * (Q : ZMod N)) * ((s₁ - s₂ : ℤ) : ZMod N) = 0 := by
@@ -897,7 +899,7 @@ def phaseShift (g : ℤ) (ℓ : ℕ) : ZMod ℓ →+ ZMod (2 * g.natAbs * ℓ) :
       (Int.castAddHom (ZMod (2 * g.natAbs * ℓ))), by
     change ((2 * g : ℤ) : ZMod (2 * g.natAbs * ℓ)) * ((ℓ : ℤ) : ZMod (2 * g.natAbs * ℓ)) = 0
     rw [← Int.cast_mul, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    have hg : (g.natAbs : ℤ) ∣ g := Int.natAbs_dvd.mpr dvd_rfl
+    have hg : |g| ∣ g := (abs_dvd g g).mpr dvd_rfl
     push_cast
     exact mul_dvd_mul_right (mul_dvd_mul_left 2 hg) (ℓ : ℤ)⟩
 
@@ -1012,13 +1014,13 @@ theorem perturbation_affine_coset_iff {d' q : ℕ} (hd : 1 ≤ d')
     ext
     · simp only [Prod.fst_add, z₀]
       rw [homogeneousFormEval_perturbation hd,
-        Int.add_ediv_of_dvd_left hF₁, mul_assoc, Int.mul_ediv_assoc _ hs₁]
-      push_cast
+        Int.add_ediv_of_dvd_left hF₁, Int.mul_ediv_assoc _ hs₁]
       dsimp only [g₁, t₁]
+      push_cast
       ring
     · simp only [Prod.snd_add, z₀]
       rw [homogeneousFormEval_perturbation hd,
-        Int.add_ediv_of_dvd_left hF₂, mul_assoc, Int.mul_ediv_assoc _ hs₂]
+        Int.add_ediv_of_dvd_left hF₂, Int.mul_ediv_assoc _ hs₂]
       have h2eq : ((2 * g₂ * t₂ : ℤ) : ZMod (2 * g₂.natAbs * ℓ)) =
           ((2 * g₂ * (u₀ ^ (d' - 1) * t₁) : ℤ) : ZMod (2 * g₂.natAbs * ℓ)) := by
         rw [← sub_eq_zero, ← Int.cast_sub, ZMod.intCast_zmod_eq_zero_iff_dvd]
@@ -1026,12 +1028,12 @@ theorem perturbation_affine_coset_iff {d' q : ℕ} (hd : 1 ≤ d')
         have hfactor : 2 * g₂ * t₂ - 2 * g₂ * (u₀ ^ (d' - 1) * t₁) =
             -(2 * g₂ * (u₀ ^ (d' - 1) * t₁ - t₂)) := by ring
         rw [hfactor]
-        have hg₂ : (g₂.natAbs : ℤ) ∣ g₂ := Int.natAbs_dvd.mpr dvd_rfl
+        have hg₂ : |g₂| ∣ g₂ := (abs_dvd g₂ g₂).mpr dvd_rfl
         push_cast
         exact dvd_neg.mpr (mul_dvd_mul (mul_dvd_mul_left 2 hg₂) hdvdℓ)
       rw [Int.cast_add]
       congr 1
-      simpa only [g₂, t₂] using h2eq
+      all_goals simpa only [g₂, t₂] using h2eq
   · rintro ⟨t, rfl⟩
     let x := Int.gcdA a₁ b₁
     let y := Int.gcdB a₁ b₁
@@ -1050,17 +1052,17 @@ theorem perturbation_affine_coset_iff {d' q : ℕ} (hd : 1 ≤ d')
     ext
     · simp only [Prod.fst_add, z₀]
       rw [homogeneousFormEval_perturbation hd,
-        Int.add_ediv_of_dvd_left hF₁, mul_assoc, Int.mul_ediv_assoc _ hs₁, hs₁_eq,
+        Int.add_ediv_of_dvd_left hF₁, Int.mul_ediv_assoc _ hs₁, hs₁_eq,
         Int.mul_ediv_cancel_left _ hqne]
-      push_cast
       dsimp only [g₁]
+      push_cast
       ring
     · simp only [Prod.snd_add, z₀]
       rw [homogeneousFormEval_perturbation hd,
-        Int.add_ediv_of_dvd_left hF₂, mul_assoc, Int.mul_ediv_assoc _ hs₂, hs₂_eq,
+        Int.add_ediv_of_dvd_left hF₂, Int.mul_ediv_assoc _ hs₂, hs₂_eq,
         mul_assoc (q : ℤ), Int.mul_ediv_cancel_left _ hqne]
-      push_cast
       dsimp only [g₂]
+      push_cast
       ring
 
 /-- Anchor-mark evaluation congruence: for primitive anchor `R = (r, Q)` with
@@ -1149,7 +1151,7 @@ theorem card_supportedResidues (M ℓ : ℕ) (hM : 0 < M) (hℓ : 0 < ℓ) :
       exact (ZMod.isUnit_iff_coprime p.1.val.val M).mp (by simpa using p.1.isUnit)
     · intro hcop
       have hu : IsUnit ((z.val % M : ℕ) : ZMod M) := by
-        rw [ZMod.isUnit_iff_coprime, Nat.coprime_iff_gcd_eq_one, Nat.gcd_comm, ← Nat.gcd_rec,
+        rw [ZMod.isUnit_iff_coprime, Nat.coprime_iff_gcd_eq_one, ← Nat.gcd_rec,
           Nat.gcd_comm]
         exact hcop.gcd_eq_one
       have hdiv_lt : z.val / M < ℓ := by
@@ -1174,6 +1176,7 @@ theorem baseResidue_unit_bijective {g : ℤ} (hg : g ≠ 0) {zStar h : ℤ}
       (∀ k, (f k : ZMod M) = ((zStar + ((k.val.val : ℤ) - 1) * h : ℤ) : ZMod M)) ∧
       Function.Bijective f := by
   intro M
+  haveI : NeZero M := ⟨by have := Int.natAbs_pos.mpr hg; omega⟩
   have hunit (k : (ZMod M)ˣ) : IsUnit ((zStar + ((k.val.val : ℤ) - 1) * h : ℤ) : ZMod M) := by
     have hkcop : Nat.Coprime k.val.val M :=
       (ZMod.isUnit_iff_coprime k.val.val M).mp (by simpa using k.isUnit)
@@ -1189,8 +1192,8 @@ theorem baseResidue_unit_bijective {g : ℤ} (hg : g ≠ 0) {zStar h : ℤ}
         subst hp_eq
         have hk2 : Nat.Coprime k.val.val 2 := hkcop.coprime_dvd_right (dvd_mul_right 2 g.natAbs)
         have hkeven : (2 : ℤ) ∣ (k.val.val : ℤ) - 1 := by
-          have := Nat.coprime_two_right.mp hk2
-          omega
+          obtain ⟨m, hm⟩ := Nat.coprime_two_right.mp hk2
+          exact ⟨(m : ℤ), by rw [hm]; push_cast; ring⟩
         have hz2 : (2 : ℤ) ∣ zStar := by
           have := dvd_sub hp1 (dvd_mul_of_dvd_left hkeven h)
           simpa using this
@@ -1224,14 +1227,14 @@ theorem baseResidue_unit_bijective {g : ℤ} (hg : g ≠ 0) {zStar h : ℤ}
     simpa [ZMod.natCast_self, mul_zero, add_zero, mul_comm] using hmod
   let f : (ZMod M)ˣ → (ZMod M)ˣ := fun k => (hunit k).unit
   refine ⟨f, fun k => rfl, ?_⟩
-  rw [Finite.injective_iff_bijective]
+  rw [← Finite.injective_iff_bijective]
   intro k₁ k₂ hfk
   have heq : ((zStar + ((k₁.val.val : ℤ) - 1) * h : ℤ) : ZMod M) =
       ((zStar + ((k₂.val.val : ℤ) - 1) * h : ℤ) : ZMod M) := congrArg Units.val hfk
   have hdvd : (M : ℤ) ∣ ((k₁.val.val : ℤ) - (k₂.val.val : ℤ)) * h := by
     have hsub : ((zStar + ((k₁.val.val : ℤ) - 1) * h -
         (zStar + ((k₂.val.val : ℤ) - 1) * h) : ℤ) : ZMod M) = 0 := by
-      push_cast; rw [heq, sub_self]
+      rw [Int.cast_sub, heq, sub_self]
     have h := (ZMod.intCast_zmod_eq_zero_iff_dvd _ M).mp hsub
     convert h using 1
     ring
@@ -1242,16 +1245,17 @@ theorem baseResidue_unit_bijective {g : ℤ} (hg : g ≠ 0) {zStar h : ℤ}
     ((ZMod.isUnit_iff_coprime k₂.val.val M).mp (by simpa using k₂.isUnit)).coprime_dvd_right
       (dvd_mul_right 2 g.natAbs)
   have h2diff : (2 : ℤ) ∣ (k₁.val.val : ℤ) - (k₂.val.val : ℤ) := by
-    have h1 := Nat.coprime_two_right.mp hk₁2
-    have h2 := Nat.coprime_two_right.mp hk₂2
-    omega
+    obtain ⟨a₁, ha₁⟩ := Nat.coprime_two_right.mp hk₁2
+    obtain ⟨a₂, ha₂⟩ := Nat.coprime_two_right.mp hk₂2
+    exact ⟨(a₁ : ℤ) - a₂, by rw [ha₁, ha₂]; push_cast; ring⟩
   have hdvdM : (M : ℤ) ∣ (k₁.val.val : ℤ) - (k₂.val.val : ℤ) := by
     by_cases h2g : 2 ∣ g.natAbs
     · have h2zh : (2 : ℤ) ∣ zStar - h := (Int.ofNat_dvd.mpr h2g).trans hdiv
       have hhodd : Nat.Coprime h.natAbs 2 := by
         rw [Nat.coprime_two_right]
         by_contra heven
-        have h2h : (2 : ℤ) ∣ h := Int.natCast_dvd.mpr (by omega)
+        have h2h : (2 : ℤ) ∣ h :=
+          Int.natCast_dvd.mpr (even_iff_two_dvd.mp (Nat.not_odd_iff_even.mp heven))
         have h2z : (2 : ℤ) ∣ zStar := by
           have := dvd_add h2zh h2h
           simpa using this
@@ -1308,14 +1312,18 @@ theorem marginalPhase_exact_uniform {g : ℤ} {ℓ : ℕ} (hg : g ≠ 0) (hℓ :
       (∀ z : ZMod m,
         (Finset.univ.filter (fun p : (ZMod M)ˣ × ZMod ℓ => Φ p = z)).card =
           if z.val.Coprime M then 1 else 0) := by
-  intro M m Φ
+  intro M m
+  haveI : NeZero M := ⟨by have := Int.natAbs_pos.mpr hg; omega⟩
+  haveI : NeZero ℓ := ⟨hℓ.ne'⟩
+  haveI : NeZero m := ⟨Nat.mul_ne_zero (by have := Int.natAbs_pos.mpr hg; omega) hℓ.ne'⟩
+  intro Φ
   have hMpos : 0 < M := by have := Int.natAbs_pos.mpr hg; omega
   obtain ⟨f, hfval, hfbi⟩ := baseResidue_unit_bijective hg hzOdd hdiv hhcop
   let red : ZMod m →+* ZMod M := ZMod.castHom (dvd_mul_right M ℓ) (ZMod M)
   have hred_shift (t : ZMod ℓ) : red (phaseShift g ℓ t) = 0 := by
     have ht : ((t.val : ℤ) : ZMod ℓ) = t := by simp
     rw [← ht, phaseShift_intCast, map_intCast, ZMod.intCast_zmod_eq_zero_iff_dvd]
-    have hg' : (g.natAbs : ℤ) ∣ g := Int.natAbs_dvd.mpr dvd_rfl
+    have hg' : |g| ∣ g := (abs_dvd g g).mpr dvd_rfl
     change ((2 * g.natAbs : ℕ) : ℤ) ∣ 2 * g * (t.val : ℤ)
     push_cast
     exact dvd_mul_of_dvd_left (mul_dvd_mul_left 2 hg') _
@@ -1344,7 +1352,7 @@ theorem marginalPhase_exact_uniform {g : ℤ} {ℓ : ℕ} (hg : g ≠ 0) (hℓ :
     rw [← ZMod.isUnit_iff_coprime]
     have hcast : ((Φ p).val : ZMod M) = red (Φ p) := by
       have hz' : (((Φ p).val : ℕ) : ZMod m) = Φ p := ZMod.natCast_zmod_val (Φ p)
-      rw [← hz', map_natCast]
+      rw [← map_natCast red (Φ p).val, ZMod.natCast_zmod_val]
     rw [hcast, hred_Φ p]
     exact (f p.1).isUnit
   have himg : Finset.univ.image Φ = supportedResidues M ℓ := by
@@ -1427,7 +1435,8 @@ theorem multiplier_marginal_uniform_from_forms {d' N q ℓ : ℕ} {r Q a b : ℤ
     have hmodNL : (N : ℤ) * homogeneousFormEval d' cL a b ≡
         (Int.gcdA r Q * a + Int.gcdB r Q * b) ^ d' * (N : ℤ) [ZMOD g] := by
       have := hmodL.mul_left (N : ℤ)
-      rwa [mul_comm (N : ℤ)] at this
+      rw [mul_comm _ (N : ℤ)]
+      exact this
     have hdiff : g ∣ homogeneousFormEval d' cStar a b - (N : ℤ) * homogeneousFormEval d' cL a b :=
       Int.modEq_iff_dvd.mp (hmodNL.trans hmodF.symm)
     have hdiff' : (g.natAbs : ℤ) ∣ (q : ℤ) * (zStar - h) := by
@@ -1549,7 +1558,7 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
   have hWpos : (0 : ℝ) < (W : ℝ) := by linarith
   have hMpos : 0 < M := NeZero.pos M
   have hMr : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast hMpos
-  have hWM1 : (1 : ℝ) ≤ (W : ℝ) * (M : ℝ) := by nlinarith
+  have hWM1 : (1 : ℝ) ≤ (W : ℝ) * (M : ℝ) := one_le_mul_of_one_le_of_one_le (by linarith) hMr
   have hlogWM_nonneg : 0 ≤ Real.log ((W : ℝ) * (M : ℝ)) := Real.log_nonneg hWM1
   let L : ℝ := 1 + Real.log ((W : ℝ) * (M : ℝ))
   have hL1 : 1 ≤ L := by dsimp only [L]; linarith
@@ -1719,7 +1728,7 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
     have h2W : ((2 * W : ℕ) : ℝ) = 2 * (W : ℝ) := by push_cast; ring
     rw [h2W, Real.log_mul (by norm_num) hWpos.ne']
     have hWM : Real.log (W : ℝ) ≤ Real.log ((W : ℝ) * (M : ℝ)) :=
-      Real.log_le_log hWpos (by nlinarith)
+      Real.log_le_log hWpos (le_mul_of_one_le_right hWpos.le hMr)
     dsimp only [L]
     linarith
   have hlog6WM_le : 1 + Real.log (3 * (M : ℝ) * ((2 * W : ℕ) : ℝ)) ≤ 3 * L := by
@@ -1729,7 +1738,7 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
     linarith
   have hlogM_le : Real.log (M : ℝ) ≤ L := by
     have hMle : Real.log (M : ℝ) ≤ Real.log ((W : ℝ) * (M : ℝ)) :=
-      Real.log_le_log (by positivity) (by nlinarith)
+      Real.log_le_log (by positivity) (le_mul_of_one_le_left (by positivity) (by linarith))
     dsimp only [L]
     linarith
   have hinvP : 1 / (P.card : ℝ) ≤ 2 * L / (W : ℝ) := by
@@ -1756,7 +1765,10 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
     have hmul := mul_le_mul_of_nonneg_left hdiff_cop (div_nonneg htot_pos.le hPpos_r.le)
     refine hmul.trans_eq ?_
     have hneT : (M.totient : ℝ) ≠ 0 := htot_pos.ne'
-    field_simp [hneT]
+    have hneP : (P.card : ℝ) ≠ 0 := hPpos_r.ne'
+    change (M.totient : ℝ) / (P.card : ℝ) * _ = _
+    field_simp
+    all_goals ring
   have hbracket :
       (M.totient : ℝ) *
         (2 * K₂ * (1 + Real.log (3 * M * ((2 * W : ℕ) : ℝ))) ^ 2 *
@@ -1771,10 +1783,11 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
         have hnonneg : 0 ≤ 1 + Real.log (3 * (M : ℝ) * ((2 * W : ℕ) : ℝ)) := by
           have : (1 : ℝ) ≤ 3 * (M : ℝ) * ((2 * W : ℕ) : ℝ) := by
             have : (2 : ℝ) ≤ ((2 * W : ℕ) : ℝ) := by exact_mod_cast (by omega : 2 ≤ 2 * W)
-            nlinarith
+            calc (1 : ℝ) ≤ 3 * 1 * 2 := by norm_num
+              _ ≤ 3 * (M : ℝ) * ((2 * W : ℕ) : ℝ) := by gcongr
           linarith [Real.log_nonneg this]
         have := pow_le_pow_left₀ hnonneg hlog6WM_le 2
-        linarith
+        exact this.trans_eq (by ring)
       have hrt : Real.sqrt ((2 * W : ℕ) : ℝ) ≤ 2 * Real.sqrt (W : ℝ) := by
         rw [show ((2 * W : ℕ) : ℝ) = 2 * (W : ℝ) by push_cast; ring, Real.sqrt_mul (by norm_num)]
         exact mul_le_mul_of_nonneg_right hsqrt2 (Real.sqrt_nonneg _)
@@ -1814,8 +1827,9 @@ theorem prime_multiplier_equidistribution_from_critical_line (line : DirichletLZ
         rw [hsqrt_div]
         apply add_le_add le_rfl
         have hL23 : L ^ 2 ≤ (M : ℝ) * L ^ 3 := by
-          have h1 : L ^ 2 ≤ L ^ 3 := by nlinarith
-          have h2 : L ^ 3 ≤ (M : ℝ) * L ^ 3 := by nlinarith [pow_nonneg (by linarith : 0 ≤ L) 3]
+          have h1 : L ^ 2 ≤ L ^ 3 := pow_le_pow_right₀ hL1 (by norm_num)
+          have h2 : L ^ 3 ≤ (M : ℝ) * L ^ 3 :=
+            le_mul_of_one_le_left (pow_nonneg (by linarith : 0 ≤ L) 3) hMr
           exact h1.trans h2
         calc
           4 * (1 / (W : ℝ)) * L ^ 2

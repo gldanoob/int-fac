@@ -36,6 +36,13 @@ This file formalizes:
    probability at most `δ_small + m.log2 * δ_split`.
 -/
 
+/-- Splitting an `ℝ≥0∞`-valued sum over `Option α` into the `none` term and the rest. -/
+private lemma tsum_option_ennreal {α : Type*} (f : Option α → ℝ≥0∞) :
+    ∑' o, f o = f none + ∑' a, f (some a) := by
+  rw [← (Equiv.optionEquivSumPUnit.{0} α).symm.tsum_eq,
+    Summable.tsum_sum ENNReal.summable ENNReal.summable]
+  simp [Equiv.optionEquivSumPUnit, add_comm]
+
 /-! ## Part 1: 1D Unimodal Riemann Tile Comparison & Residue-Class Probability Bounds -/
 
 section DiscreteGaussian1D
@@ -314,7 +321,7 @@ private lemma unimodal_gaussian_zero_shifted (r σ m : ℝ) (hσ : 0 < σ) (hm :
         intervalIntegral.integral_mono_on hle intervalIntegrable_const (hg_ii _ _) hbd
   -- Center interval [xneg 0, xpos 0] = [r - m, r] containing 0
   have hcenter_lo : (∫ t in xneg 0..xpos 0, g t) ≤ m := by
-    have hle : xneg 0 ≤ xpos 0 := by dsimp [xneg, xpos]; linarith
+    have hle : xneg 0 ≤ xpos 0 := by dsimp [xneg, xpos]; push_cast; linarith
     calc
       (∫ t in xneg 0..xpos 0, g t)
           ≤ ∫ _t in xneg 0..xpos 0, (1 : ℝ) :=
@@ -324,7 +331,7 @@ private lemma unimodal_gaussian_zero_shifted (r σ m : ℝ) (hσ : 0 < σ) (hm :
         dsimp [xneg, xpos]; ring
   have hcenter_hi : m * (g (xneg 0) + g (xpos 0)) ≤ (∫ t in xneg 0..xpos 0, g t) + m := by
     have hle1 : xneg 0 ≤ 0 := hneg_nonpos 0
-    have hle2 : 0 ≤ xpos 0 := by dsimp [xpos]; linarith
+    have hle2 : 0 ≤ xpos 0 := by dsimp [xpos]; push_cast; linarith
     have hleft : (m - r) * g (xneg 0) ≤ ∫ t in xneg 0..0, g t := by
       calc
         (m - r) * g (xneg 0) = ∫ _t in xneg 0..0, g (xneg 0) := by
@@ -423,21 +430,15 @@ private lemma unimodal_gaussian_zero_shifted (r σ m : ℝ) (hσ : 0 < σ) (hm :
   have hsum_neg' : Summable (fun n : ℕ => f (-((n : ℤ) + 1))) := by
     have hrew : (fun n : ℕ => f (-((n : ℤ) + 1))) = fun n : ℕ => g (xneg n) := by
       ext n
-      simpa only [neg_add, ← sub_eq_add_neg] using hf_eq_neg n
+      simp only [f, g, xneg] <;> congr 1 <;> push_cast <;> ring
     rw [hrew]; exact hsum_neg
-  have hsum_int : Summable f :=
-    summable_int_of_summable_nat hsum_pos' (by
-      have := hsum_neg'
-      simpa [Int.negSucc_eq] using (summable_nat_add_iff 1).mpr (by
-        have hrew : (fun n : ℕ => f (-(↑(n + 1) : ℤ))) = fun n : ℕ => f (-((n : ℤ) + 1)) := by
-          ext n; push_cast; rfl
-        rw [hrew]; exact hsum_neg'))
+  have hsum_int : Summable f := Summable.of_nat_of_neg_add_one hsum_pos' hsum_neg'
   have htsum_split : (∑' k : ℤ, f k) = (∑' n : ℕ, g (xpos n)) + (∑' n : ℕ, g (xneg n)) := by
     rw [tsum_of_nat_of_neg_add_one hsum_pos' hsum_neg']
     congr 1
-    · exact tsum_congr fun n => hf_eq_pos n
-    · exact tsum_congr fun n => by
-        simpa only [neg_add, ← sub_eq_add_neg] using hf_eq_neg n
+    all_goals
+      refine tsum_congr fun n => ?_
+      simp only [f, g, xpos, xneg] <;> congr 1 <;> push_cast <;> ring
   have hupper : (∑' k : ℤ, f k) ≤ σ / m + 1 := by
     rw [htsum_split]
     have htend : Tendsto (fun N : ℕ => (∑ n ∈ Finset.range (N + 1), g (xpos n)) +
@@ -473,7 +474,8 @@ private lemma unimodal_gaussian_zero_shifted (r σ m : ℝ) (hσ : 0 < σ) (hm :
     dsimp [xneg]
     have h1 : Tendsto (fun n : ℕ => ((n : ℝ) + 1) * m) atTop atTop :=
       Tendsto.atTop_mul_const hm (tendsto_atTop_add_const_right atTop 1 tendsto_natCast_atTop_atTop)
-    exact tendsto_const_nhds_sub_atTop r h1
+    simpa only [sub_eq_add_neg, Function.comp_def] using
+      tendsto_atBot_add_const_left atTop r (tendsto_neg_atTop_atBot.comp h1)
   have htend_int : Tendsto (fun N : ℕ => ∫ t in xneg N..xpos N, g t) atTop (𝓝 σ) := by
     rw [← gaussian_integral_eq σ hσ]
     exact intervalIntegral_tendsto_integral hg_int hxneg_bot hxpos_top
@@ -506,19 +508,19 @@ theorem unimodal_gaussian_progression_bounds (r μ σ m : ℝ) (hσ : 0 < σ) (h
     linarith
   have hbase := unimodal_gaussian_zero_shifted r' σ m hσ hm hr0 hrm
   let e : ℤ ≃ ℤ := Equiv.addRight (-k₀)
-  have hcomp : (fun k : ℤ => coeffGaussian (r + k * m) μ σ) ∘ (Equiv.addRight k₀) =
+  have hcomp : (fun k : ℤ => coeffGaussian (r + k * m) μ σ) ∘ e =
       fun k : ℤ => coeffGaussian (r' + k * m) 0 σ := by
     ext k
-    simp only [Function.comp_apply, Equiv.coe_addRight, coeffGaussian, sub_zero, r']
+    simp only [Function.comp_apply, e, Equiv.coe_addRight, coeffGaussian, sub_zero, r']
     congr 2
     push_cast
     ring
   have hsum : Summable (fun k : ℤ => coeffGaussian (r + k * m) μ σ) := by
-    rw [← (Equiv.addRight k₀).summable_iff, hcomp]
+    rw [← e.summable_iff, hcomp]
     exact hbase.1
   have htsum : (∑' k : ℤ, coeffGaussian (r + k * m) μ σ) =
       ∑' k : ℤ, coeffGaussian (r' + k * m) 0 σ := by
-    rw [← (Equiv.addRight k₀).tsum_eq, ← hcomp]
+    rw [← e.tsum_eq, ← hcomp]
     rfl
   rw [htsum]
   exact ⟨hsum, hbase.2.1, hbase.2.2⟩
@@ -546,8 +548,10 @@ theorem residue_class_tsum_eq (a : ℤ) (q : ℕ) (hq : 0 < q) (μ σ : ℝ) :
   have hrew : (fun n : ℤ => if (n : ZMod q) = (a : ZMod q) then coeffGaussian n μ σ else 0) =
       Set.indicator (Set.range f) (fun n : ℤ => coeffGaussian n μ σ) := by
     ext n
-    simp [Set.indicator_apply, hrange]
-  rw [hrew, tsum_indicator_range hf_inj]
+    by_cases h : (n : ZMod q) = (a : ZMod q)
+    · rw [if_pos h, Set.indicator_of_mem ((hrange n).mp h)]
+    · rw [if_neg h, Set.indicator_of_notMem (fun hm => h ((hrange n).mpr hm))]
+  rw [hrew, ← tsum_subtype, tsum_range (fun n : ℤ => coeffGaussian (n : ℝ) μ σ) hf_inj]
   apply tsum_congr
   intro k
   simp [f]
@@ -565,7 +569,10 @@ private lemma nine_mul_exp_neg_pi_sq_le_inv {τ : ℝ} (hτ : 1 ≤ τ) :
   have hτ4 : τ ≤ τ ^ 4 := by nlinarith
   have hτ6 : τ ≤ τ ^ 6 := by nlinarith
   have h1 : 9 * τ ≤ Real.exp (π * τ ^ 2) := by
-    have hpow2 : 9 * τ ^ 4 ≤ (π * τ ^ 2) ^ 2 := by nlinarith [sq_nonneg τ]
+    have hpow2 : 9 * τ ^ 4 ≤ (π * τ ^ 2) ^ 2 := by
+      have : (3 * τ ^ 2) ^ 2 ≤ (π * τ ^ 2) ^ 2 :=
+        pow_le_pow_left₀ (by positivity) (by nlinarith [sq_nonneg τ]) 2
+      linarith
     have hpow3 : 27 * τ ^ 6 ≤ (π * τ ^ 2) ^ 3 := by
       have : (3 * τ ^ 2) ^ 3 ≤ (π * τ ^ 2) ^ 3 :=
         pow_le_pow_left₀ (by positivity) (by nlinarith [sq_nonneg τ]) 3
@@ -604,11 +611,6 @@ theorem gaussian_residue_class_prob_sharp (a : ℤ) (q : ℕ) (hq : 0 < q) (μ �
       rw [neg_mul, Real.exp_neg] at this
       have h2 : 9 * (Real.exp (π * (σ / (q : ℝ)) ^ 2))⁻¹ ≤ 1 := this.trans h1
       have hpos := Real.exp_pos (π * (σ / (q : ℝ)) ^ 2)
-      have := (mul_le_iff_le_one_right hpos).mp (by
-        calc
-          9 * (Real.exp (π * (σ / (q : ℝ)) ^ 2))⁻¹ * Real.exp (π * (σ / (q : ℝ)) ^ 2)
-              ≤ 1 * Real.exp (π * (σ / (q : ℝ)) ^ 2) := mul_le_mul_of_nonneg_right h2 hpos.le
-          _ = Real.exp (π * (σ / (q : ℝ)) ^ 2) := one_mul _)
       -- simpler: directly use h2
       have h3 : 9 = 9 * (Real.exp (π * (σ / (q : ℝ)) ^ 2))⁻¹ * Real.exp (π * (σ / (q : ℝ)) ^ 2) := by
         field_simp [hpos.ne']
@@ -796,7 +798,10 @@ theorem mahalanobis_norm_sq (T₁ T₂ c₁ c₂ ρ : ℝ) (hρ : |ρ| < 1) (x :
     linarith
   unfold euclidNorm2 mahalanobisCoord
   dsimp only
-  rw [Real.sq_sqrt (by positivity), div_pow, Real.sq_sqrt h1ρ.le]
+  rw [Real.sq_sqrt (by positivity), div_pow ((x.2 - c₂) / T₂ - ρ * ((x.1 - c₁) / T₁)),
+    Real.sq_sqrt h1ρ.le]
+  generalize (x.1 - c₁) / T₁ = u₁
+  generalize (x.2 - c₂) / T₂ = u₂
   field_simp [h1ρ.ne']
   ring
 
@@ -875,8 +880,9 @@ theorem mahalanobis_tile_radius_lip (T₁ T₂ c₁ c₂ ρ h₁ h₂ : ℝ)
     unfold euclidNorm2
     have hsq : du₁ ^ 2 + (-ρ * du₁ / κ) ^ 2 = (du₁ / κ) ^ 2 := by
       have hκsq : κ ^ 2 = 1 - ρ ^ 2 := Real.sq_sqrt h1ρ.le
-      rw [div_pow, div_pow, hκsq]
-      field_simp [h1ρ.ne']
+      have hκ2 : κ ^ 2 ≠ 0 := pow_ne_zero 2 hκ.ne'
+      rw [div_pow (-ρ * du₁) κ 2, div_pow du₁ κ 2, eq_div_iff hκ2, add_mul,
+        div_mul_cancel₀ _ hκ2, hκsq]
       ring
     rw [hsq, Real.sqrt_sq_eq_abs, abs_div, abs_of_pos hκ]
   have hnorm2 : euclidNorm2 (0, du₂ / κ) = |du₂| / κ := by
@@ -894,6 +900,16 @@ theorem mahalanobis_tile_radius_lip (T₁ T₂ c₁ c₂ ρ h₁ h₂ : ℝ)
       add_le_add (div_le_div_of_nonneg_right hdu₁ hκ.le) (div_le_div_of_nonneg_right hdu₂ hκ.le)
     _ = mahalanobisMesh T₁ T₂ ρ h₁ h₂ := by
       unfold mahalanobisMesh; dsimp only [κ]; ring
+
+/-- Lebesgue change of variables for a nonzero dilation on `ℝ`. -/
+private lemma lintegral_comp_mul_left_real (f : ℝ → ℝ≥0∞) {a : ℝ} (ha : a ≠ 0) :
+    (∫⁻ x : ℝ, f (a * x)) = ENNReal.ofReal |a⁻¹| * ∫⁻ x : ℝ, f x := by
+  have h := lintegral_map_equiv f (Homeomorph.mulLeft₀ a ha).toMeasurableEquiv
+    (μ := (volume : Measure ℝ))
+  have hmap : Measure.map ((Homeomorph.mulLeft₀ a ha).toMeasurableEquiv) (volume : Measure ℝ) =
+      ENNReal.ofReal |a⁻¹| • volume := Real.map_volume_mul_left ha
+  rw [hmap, lintegral_smul_measure, smul_eq_mul] at h
+  exact h.symm
 
 /-- Change of variables in `lintegral` for `mahalanobisCoord`: Jacobian is `T₁ * T₂ * κ`. -/
 private lemma lintegral_comp_mahalanobisCoord (T₁ T₂ c₁ c₂ ρ : ℝ)
@@ -934,14 +950,10 @@ private lemma lintegral_comp_mahalanobisCoord (T₁ T₂ c₁ c₂ ρ : ℝ)
       field_simp [hT₂.ne', hκ.ne']
       ring
     rw [hrew]
-    have hmul := lintegral_mul_left_eq_self (fun y => F (u₁, y + b)) a
     -- Use MeasureTheory.Measure.lintegral_comp_mul_left_add
     have hstep1 : (∫⁻ x₂ : ℝ, F (u₁, a * x₂ + b)) =
         ENNReal.ofReal |a⁻¹| * ∫⁻ y₂ : ℝ, F (u₁, y₂ + b) := by
-      have := lintegral_mul_left_eq_self (f := fun y => F (u₁, y + b)) (a := a)
-      -- lintegral_mul_left_eq_self : ∫⁻ x, f (a * x) = ENNReal.ofReal |a⁻¹| * ∫⁻ x, f x
-      -- Wait: let's check direction using Measure.map_mul_left_eq_self or direct calc
-      simpa using this
+      exact lintegral_comp_mul_left_real (fun y => F (u₁, y + b)) ha
     rw [hstep1, lintegral_add_right_eq_self (fun y₂ => F (u₁, y₂)) b]
     congr 1
     rw [inv_inv, abs_of_pos (mul_pos hT₂ hκ)]
@@ -959,7 +971,7 @@ private lemma lintegral_comp_mahalanobisCoord (T₁ T₂ c₁ c₂ ρ : ℝ)
     have hrew : (fun x₁ : ℝ => G ((x₁ - c₁) / T₁)) = fun x₁ : ℝ => G (T₁⁻¹ * x₁ + (-c₁ / T₁)) := by
       ext x₁; congr 1; ring
     change (∫⁻ x₁ : ℝ, G ((x₁ - c₁) / T₁)) = ENNReal.ofReal T₁ * ∫⁻ y₁ : ℝ, G y₁
-    rw [hrew, lintegral_mul_left_eq_self (f := fun y => G (y + (-c₁ / T₁))) (a := T₁⁻¹),
+    rw [hrew, lintegral_comp_mul_left_real (fun y => G (y + (-c₁ / T₁))) (inv_ne_zero hT₁.ne'),
       lintegral_add_right_eq_self G (-c₁ / T₁), inv_inv, abs_of_pos hT₁]
   rw [houter, ← mul_assoc, ← ENNReal.ofReal_mul (mul_pos hT₂ hκ).le]
   congr 2
@@ -970,16 +982,15 @@ private lemma lintegral_comp_mahalanobisCoord (T₁ T₂ c₁ c₂ ρ : ℝ)
 private lemma lintegral_radial_2D (F : ℝ → ℝ≥0∞) (hF : Measurable F) :
     (∫⁻ y : ℝ × ℝ, F (euclidNorm2 y)) =
       ENNReal.ofReal (2 * π) * ∫⁻ r in Ioi (0 : ℝ), ENNReal.ofReal r * F r := by
-  rw [← Real.lintegral_comp_polarCoord_symm]
+  rw [← lintegral_comp_polarCoord_symm]
   have htarget : polarCoord.target = Ioi (0 : ℝ) ×ˢ Ioo (-π) π := rfl
-  rw [htarget, Measure.restrict_prod_eq_prod_restrict]
+  rw [htarget, Measure.volume_eq_prod, ← Measure.prod_restrict]
   have hmeas_int : Measurable (fun p : ℝ × ℝ =>
       ENNReal.ofReal p.1 • F (euclidNorm2 (polarCoord.symm p))) := by
     have h1 : Measurable (fun p : ℝ × ℝ => ENNReal.ofReal p.1) := by fun_prop
     have h2 : Measurable (fun p : ℝ × ℝ => euclidNorm2 (polarCoord.symm p)) := by
-      unfold euclidNorm2 polarCoord
-      simp only [PartialHomeomorph.coe_symm_mk]
-      fun_prop
+      have hc : Continuous euclidNorm2 := by unfold euclidNorm2; fun_prop
+      exact (hc.comp continuous_polarCoord_symm).measurable
     exact h1.mul (hF.comp h2)
   rw [lintegral_prod _ hmeas_int.aemeasurable]
   have hcongr : ∀ r ∈ Ioi (0 : ℝ),
@@ -1009,13 +1020,14 @@ private lemma integral_Ioi_mul_exp_neg_pi_sq (a : ℝ) :
     intro t _
     have h1 : HasDerivAt (fun x : ℝ => -π * x ^ 2) (-2 * π * t) t := by
       have := (hasDerivAt_pow 2 t).const_mul (-π)
-      convert this using 1; ring
+      refine this.congr_deriv ?_
+      simp only [show (2 : ℕ) - 1 = 1 from rfl, pow_one, Nat.cast_ofNat]
+      ring
     have h2 : HasDerivAt (fun x : ℝ => -Real.exp (-π * x ^ 2) / (2 * π))
         (-(Real.exp (-π * t ^ 2) * (-2 * π * t)) / (2 * π)) t :=
       ((h1.exp).neg).div_const (2 * π)
     convert h2 using 1
     field_simp [Real.pi_pos.ne']
-    ring
   have hnonneg : ∀ t ∈ Ioi a, 0 ≤ t * Real.exp (-π * t ^ 2) → True := fun _ _ _ => trivial
   have htend : Tendsto F atTop (𝓝 0) := by
     dsimp [F]
@@ -1061,7 +1073,8 @@ private lemma integral_Ioi_mul_exp_neg_pi_sq (a : ℝ) :
         mul_le_mul_of_nonneg_right (by linarith [abs_nonneg a]) (Real.exp_pos _).le
   have hval := integral_Ioi_of_hasDerivAt_of_tendsto' hderiv hint htend
   dsimp [F] at hval
-  linarith
+  rw [neg_div, sub_neg_eq_add, zero_add] at hval
+  exact hval
 
 /-- Exact radial upper integral `2π ∫_{0}^∞ r exp(-π (max (r - δ) 0)^2) dr = 1 + π δ + π δ^2`. -/
 private lemma lintegral_radial_upper (δ : ℝ) (hδ : 0 ≤ δ) :
@@ -1088,9 +1101,9 @@ private lemma lintegral_radial_upper (δ : ℝ) (hδ : 0 ≤ δ) :
       dsimp [g]
       rw [max_eq_right (sub_nonpos.mpr hr.2), zero_pow (by norm_num), mul_zero, Real.exp_zero, mul_one]
     rw [setLIntegral_congr_fun measurableSet_Ioc hcongr1]
-    rw [← ofReal_integral_eq_lintegral_ofReal (continuousOn_id.integrableOn_Icc.mono_set Ioc_subset_Icc_self)
-      (Eventually.of_forall (fun r => by exact id) |> fun _ => by
-        filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr; exact hr.1.le)]
+    rw [← ofReal_integral_eq_lintegral_ofReal (f := fun x : ℝ => x)
+      ((continuousOn_id.integrableOn_Icc (a := 0) (b := δ)).mono_set Ioc_subset_Icc_self)
+      (by filter_upwards [ae_restrict_mem measurableSet_Ioc] with r hr; exact hr.1.le)]
     rw [← intervalIntegral.integral_of_le hδ, integral_id]
     congr 1; ring
   -- Part 2: on Ioi δ, substitute t = r - δ
@@ -1104,7 +1117,7 @@ private lemma lintegral_radial_upper (δ : ℝ) (hδ : 0 ≤ δ) :
     rw [setLIntegral_congr_fun measurableSet_Ioi hcongr2]
     have hshift : (∫⁻ r in Ioi δ, ENNReal.ofReal (r * Real.exp (-π * (r - δ) ^ 2))) =
         ∫⁻ t in Ioi (0 : ℝ), ENNReal.ofReal ((t + δ) * Real.exp (-π * t ^ 2)) := by
-      have h := lintegral_add_right_eq_self (fun t => (Ioi (0 : ℝ)).indicator
+      have h := lintegral_add_right_eq_self (μ := volume) (fun t => (Ioi (0 : ℝ)).indicator
         (fun s => ENNReal.ofReal ((s + δ) * Real.exp (-π * s ^ 2))) t) (-δ)
       rw [← lintegral_indicator measurableSet_Ioi, ← lintegral_indicator measurableSet_Ioi]
       rw [← h]
@@ -1194,7 +1207,7 @@ private lemma lintegral_radial_lower (δ : ℝ) (hδ : 0 ≤ δ) :
   -- Shift t = r + δ
   have hshift : (∫⁻ r in Ioi (0 : ℝ), ENNReal.ofReal (r * Real.exp (-π * (r + δ) ^ 2))) =
       ∫⁻ t in Ioi δ, ENNReal.ofReal ((t - δ) * Real.exp (-π * t ^ 2)) := by
-    have h := lintegral_add_right_eq_self (fun t => (Ioi δ).indicator
+    have h := lintegral_add_right_eq_self (μ := volume) (fun t => (Ioi δ).indicator
       (fun s => ENNReal.ofReal ((s - δ) * Real.exp (-π * s ^ 2))) t) δ
     rw [← lintegral_indicator measurableSet_Ioi, ← lintegral_indicator measurableSet_Ioi]
     rw [← h]
@@ -1236,7 +1249,8 @@ private lemma lintegral_radial_lower (δ : ℝ) (hδ : 0 ≤ δ) :
   have hint_c : IntegrableOn (fun t : ℝ => δ * Real.exp (-π * t ^ 2)) (Ioi δ) volume :=
     ((integrable_exp_neg_mul_sq Real.pi_pos).const_mul δ).integrableOn
   have hint_sub : IntegrableOn (fun t : ℝ => (t - δ) * Real.exp (-π * t ^ 2)) (Ioi δ) volume := by
-    simpa [sub_mul] using hint_t.sub hint_c
+    exact (hint_t.sub hint_c).congr_fun (fun t _ => by simp only [Pi.sub_apply]; ring)
+      measurableSet_Ioi
   rw [← ofReal_integral_eq_lintegral_ofReal hint_sub (by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
     exact mul_nonneg (sub_nonneg.mpr ht.le) (Real.exp_pos _).le)]
@@ -1298,7 +1312,7 @@ private lemma latticeTile_iUnion_eq_univ (x₀ : ℝ × ℝ) {h₁ h₂ : ℝ} (
     have h1 := mul_le_mul_of_nonneg_right hlo hh₁.le
     have h2 := mul_lt_mul_of_pos_right hhi hh₁
     have heq : ((x₁ - x₀.1) / h₁ + 1 / 2) * h₁ = x₁ - x₀.1 + h₁ / 2 := by
-      field_simp [hh₁.ne']; ring
+      field_simp [hh₁.ne']
     rw [heq] at h1 h2
     exact ⟨by linarith, by linarith⟩
   · have hlo := Int.floor_le ((x₂ - x₀.2) / h₂ + 1 / 2)
@@ -1306,14 +1320,15 @@ private lemma latticeTile_iUnion_eq_univ (x₀ : ℝ × ℝ) {h₁ h₂ : ℝ} (
     have h1 := mul_le_mul_of_nonneg_right hlo hh₂.le
     have h2 := mul_lt_mul_of_pos_right hhi hh₂
     have heq : ((x₂ - x₀.2) / h₂ + 1 / 2) * h₂ = x₂ - x₀.2 + h₂ / 2 := by
-      field_simp [hh₂.ne']; ring
+      field_simp [hh₂.ne']
     rw [heq] at h1 h2
     exact ⟨by linarith, by linarith⟩
 
 private lemma latticeTile_pairwiseDisjoint (x₀ : ℝ × ℝ) {h₁ h₂ : ℝ} (hh₁ : 0 < h₁) (hh₂ : 0 < h₂) :
-    Pairwise (Disjoint on latticeTile x₀ h₁ h₂) := by
+    Pairwise (Function.onFun Disjoint (latticeTile x₀ h₁ h₂)) := by
   intro k l hkl
-  rw [Function.onFun, Set.disjoint_left]
+  show Disjoint (latticeTile x₀ h₁ h₂ k) (latticeTile x₀ h₁ h₂ l)
+  rw [Set.disjoint_left]
   intro ⟨x₁, x₂⟩ hk hl
   apply hkl
   have huniq : ∀ (a b c : ℝ) (hc : 0 < c) (i j : ℤ),
@@ -1427,7 +1442,7 @@ theorem mahalanobis_2d_lattice_mass_bounds (T₁ T₂ c₁ c₂ ρ h₁ h₂ : �
     lintegral_radial_upper δ hδ] at hsum_hi
   have hlo_bound : ENNReal.ofReal Z * ENNReal.ofReal (1 - π * δ - π * δ ^ 2) ≤
       ENNReal.ofReal (h₁ * h₂) * ∑' k : ℤ × ℤ, ENNReal.ofReal (g k) :=
-    (mul_le_mul_left' (lintegral_radial_lower δ hδ) _).trans hsum_lo
+    (mul_le_mul_right (lintegral_radial_lower δ hδ) _).trans hsum_lo
   -- Deduce finiteness and Summable g
   have hfinite : (∑' k : ℤ × ℤ, ENNReal.ofReal (g k)) ≠ ⊤ := by
     intro htop
@@ -1455,7 +1470,7 @@ theorem mahalanobis_2d_lattice_mass_bounds (T₁ T₂ c₁ c₂ ρ h₁ h₂ : �
         (mul_nonneg (mul_pos hh₁ hh₂).le (tsum_nonneg hg_nonneg))
   refine ⟨hsumm, ?_, ?_⟩
   · rw [le_div_iff₀ hZ, mul_comm]; exact hlower_real
-  · rw [div_le_iff₀ hZ, mul_comm]; exact hupper_real
+  · rw [div_le_iff₀ hZ]; exact hupper_real.trans_eq (mul_comm _ _)
 
 /-- In particular, whenever the Mahalanobis mesh satisfies `δ ≤ 1 / 10`, the full 2D lattice
 mass satisfies `Z_lat ≥ Z / (2 * h₁ * h₂)` (matching `keybreak-gaussian-variation.md`). -/
@@ -1509,10 +1524,10 @@ theorem continuous_inner_ellipse_mass_le (r₀ : ℝ) (hr₀ : 0 ≤ r₀) :
     dsimp [F]
     by_cases h1 : 0 < r <;> by_cases h2 : r < r₀ <;>
       simp [Set.indicator_apply, h1, h2]
-  rw [hsub, ← ofReal_integral_eq_lintegral_ofReal
-    (continuousOn_id.integrableOn_Icc.mono_set Ioo_subset_Icc_self)
+  rw [hsub, ← ofReal_integral_eq_lintegral_ofReal (f := fun x : ℝ => x)
+    ((continuousOn_id.integrableOn_Icc (a := 0) (b := r₀)).mono_set Ioo_subset_Icc_self)
     (by filter_upwards [ae_restrict_mem measurableSet_Ioo] with r hr; exact hr.1.le)]
-  rw [MeasureTheory.integral_Ioo_eq_integral_Ioc, ← intervalIntegral.integral_of_le hr₀,
+  rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le hr₀,
     integral_id, ← ENNReal.ofReal_mul (by positivity)]
   apply ENNReal.ofReal_le_ofReal
   ring_nf; exact le_rfl
@@ -1560,9 +1575,9 @@ theorem mahalanobis_2d_inner_ellipse_mass_le (T₁ T₂ c₁ c₂ ρ h₁ h₂ :
         ENNReal.ofReal_le_one.mpr (Real.exp_le_one_iff.mpr (by nlinarith [Real.pi_pos, sq_nonneg (rad k)]))
       calc
         ENNReal.ofReal (h₁ * h₂) * ENNReal.ofReal (g k)
-            ≤ ENNReal.ofReal (h₁ * h₂) * 1 := mul_le_mul_left' hg1 _
+            ≤ ENNReal.ofReal (h₁ * h₂) * 1 := mul_le_mul_right hg1 _
         _ = ∫⁻ _x in latticeTile x₀ h₁ h₂ k, (1 : ℝ≥0∞) := by
-          rw [setLIntegral_const, latticeTile_volume x₀ hh₁ hh₂ k, mul_one]
+          rw [setLIntegral_const, latticeTile_volume x₀ hh₁ hh₂ k, mul_one, one_mul]
         _ ≤ ∫⁻ x in latticeTile x₀ h₁ h₂ k, indBall (φ x) := by
           apply setLIntegral_mono' (latticeTile_measurable x₀ h₁ h₂ k)
           intro x hx
@@ -1576,7 +1591,7 @@ theorem mahalanobis_2d_inner_ellipse_mass_le (T₁ T₂ c₁ c₂ ρ h₁ h₂ :
           have hlt : euclidNorm2 (φ x) < r₀ + δ := by dsimp [rad, δ] at hk ⊢; linarith
           simp [indBall, hlt]
     · rw [if_neg hk, ENNReal.ofReal_zero, mul_zero]
-      exact zero_le _
+      exact zero_le
   have hsum_ball :
       ENNReal.ofReal (h₁ * h₂) * (∑' k : ℤ × ℤ, ENNReal.ofReal (if rad k < r₀ then g k else 0)) ≤
         ∫⁻ x : ℝ × ℝ, indBall (φ x) := by
@@ -1597,10 +1612,10 @@ theorem mahalanobis_2d_inner_ellipse_mass_le (T₁ T₂ c₁ c₂ ρ h₁ h₂ :
       apply lintegral_congr; intro r
       dsimp [F]
       by_cases h1 : 0 < r <;> by_cases h2 : r < r₀ + δ <;> simp [Set.indicator_apply, h1, h2]
-    rw [hsub, ← ofReal_integral_eq_lintegral_ofReal
-      (continuousOn_id.integrableOn_Icc.mono_set Ioo_subset_Icc_self)
+    rw [hsub, ← ofReal_integral_eq_lintegral_ofReal (f := fun x : ℝ => x)
+      ((continuousOn_id.integrableOn_Icc (a := 0) (b := r₀ + δ)).mono_set Ioo_subset_Icc_self)
       (by filter_upwards [ae_restrict_mem measurableSet_Ioo] with r hr; exact hr.1.le)]
-    rw [MeasureTheory.integral_Ioo_eq_integral_Ioc, ← intervalIntegral.integral_of_le (by linarith),
+    rw [← integral_Ioc_eq_integral_Ioo, ← intervalIntegral.integral_of_le (by linarith),
       integral_id, ← ENNReal.ofReal_mul (by positivity)]
     congr 1; ring
   rw [hdisk, ← ENNReal.ofReal_mul hZ.le] at hsum_ball
@@ -1613,7 +1628,7 @@ theorem mahalanobis_2d_inner_ellipse_mass_le (T₁ T₂ c₁ c₂ ρ h₁ h₂ :
       hsumm_g
   have hnonneg_inner (k : ℤ × ℤ) : 0 ≤ if rad k < r₀ then g k else 0 := by
     split_ifs <;> [exact (Real.exp_pos _).le; rfl]
-  rw [ENNReal.ofReal_tsum_of_nonneg hnonneg_inner hsumm_inner,
+  rw [← ENNReal.ofReal_tsum_of_nonneg hnonneg_inner hsumm_inner,
     ← ENNReal.ofReal_mul (mul_pos hh₁ hh₂).le] at hsum_ball
   have hnum_le : h₁ * h₂ * (∑' k : ℤ × ℤ, if rad k < r₀ then g k else 0) ≤
       Z * (π * (r₀ + δ) ^ 2) :=
@@ -1672,14 +1687,14 @@ theorem primeFactors_card_le_log2 (N : ℕ) : N.primeFactors.card ≤ N.log2 := 
   by_cases hN : N = 0
   · simp [hN]
   have h1 : N.primeFactors.card ≤ Ω N := by
-    rw [ArithmeticFunction.cardFactors_apply, ← Nat.toFinset_primeFactorsList]
+    rw [ArithmeticFunction.cardFactors_apply, ← Nat.toFinset_factors]
     exact List.toFinset_card_le _
   exact h1.trans (RandomizedSplitWork.cardFactors_le_log2 N)
 
 /-- Applying `RandomizedHasseIncidence.rich_hasse_centres_mul_le` to primes in the dyad
 `(P, 2P]` bounds the number of primes with at least `k` Hasse-interval witnesses in `W`. -/
 theorem dyadic_rich_hasse_primes_mul_le (W : Finset ℤ) (P k : ℕ) :
-    ((primeBin P (2 * P)).filter fun p =>
+    ((primeBin P (2 * P)).filter fun p : ℕ =>
         k ≤ (W.filter fun w => (w - ((p : ℤ) + 1)) ^ 2 ≤ 4 * (p : ℤ)).card).card * k ≤
       (2 * Nat.sqrt (8 * P) + 1) * W.card := by
   let D := primeBin P (2 * P)
@@ -1690,9 +1705,11 @@ theorem dyadic_rich_hasse_primes_mul_le (W : Finset ℤ) (P k : ℕ) :
     have hp2P : p ≤ 2 * P := (Finset.mem_Ioc.mp (Finset.mem_filter.mp hp).1).2
     omega
   have hinj : Function.Injective (fun p : ℕ => (p : ℤ) + 1) := by
-    intro a b h; omega
+    intro a b h
+    have h' : (a : ℤ) + 1 = (b : ℤ) + 1 := h
+    omega
   have hcard :
-      (D.filter fun p => k ≤ (W.filter fun w => (w - ((p : ℤ) + 1)) ^ 2 ≤ 4 * (p : ℤ)).card).card =
+      (D.filter fun p : ℕ => k ≤ (W.filter fun w => (w - ((p : ℤ) + 1)) ^ 2 ≤ 4 * (p : ℤ)).card).card =
       (C.filter fun c => k ≤ (W.filter fun w => (w - c) ^ 2 ≤ 4 * (c - 1)).card).card := by
     rw [← Finset.card_image_of_injective _ hinj]
     congr 1
@@ -1751,7 +1768,7 @@ theorem dyadic_hasse_exceptional_fraction_le {P N k : ℕ} {c : ℝ}
     (hsupply_pos : 0 < c * (P : ℝ) / Real.log P)
     (hsupply : c * (P : ℝ) / Real.log P ≤ ((primeBin P (2 * P)).card : ℝ)) :
     let D := primeBin P (2 * P)
-    let E_hasse := D.filter fun p =>
+    let E_hasse := D.filter fun p : ℕ =>
       k ≤ (W.filter fun w => (w - ((p : ℤ) + 1)) ^ 2 ≤ 4 * (p : ℤ)).card
     let E_total := E_hasse ∪ (D.filter fun p => p ∣ N)
     (E_total.card : ℝ) / (D.card : ℝ) ≤
@@ -1759,7 +1776,7 @@ theorem dyadic_hasse_exceptional_fraction_le {P N k : ℕ} {c : ℝ}
         (c * (P : ℝ) / Real.log P) := by
   dsimp only
   let D := primeBin P (2 * P)
-  let E_hasse := D.filter fun p =>
+  let E_hasse := D.filter fun p : ℕ =>
     k ≤ (W.filter fun w => (w - ((p : ℤ) + 1)) ^ 2 ≤ 4 * (p : ℤ)).card
   let E_N := D.filter fun p => p ∣ N
   have hhasse : (E_hasse.card : ℝ) ≤ (((2 * Nat.sqrt (8 * P) + 1) * W.card : ℕ) : ℝ) / (k : ℝ) := by
@@ -1797,14 +1814,15 @@ theorem dyadic_prime_supply_eventually (line : DirichletLZerosOnLine) :
     let C : ℝ := K * 4 * (6 ^ (1 / 4 : ℝ)) * Real.sqrt 2
     have hC : 0 ≤ C := by positivity
     have htend : Tendsto (fun x : ℝ => C * x ^ (-1 / 4 : ℝ)) atTop (𝓝 0) := by
-      have h0 : Tendsto (fun x : ℝ => x ^ (-1 / 4 : ℝ)) atTop (𝓝 0) :=
-        tendsto_rpow_neg_atTop (by norm_num : (0 : ℝ) < 1 / 4)
+      have h0 : Tendsto (fun x : ℝ => x ^ (-1 / 4 : ℝ)) atTop (𝓝 0) := by
+        have := tendsto_rpow_neg_atTop (by norm_num : (0 : ℝ) < 1 / 4)
+        rwa [show (-(1 / 4 : ℝ)) = -1 / 4 by norm_num] at this
       simpa using h0.const_mul C
     have hlt : ∀ᶠ x : ℝ in atTop, C * x ^ (-1 / 4 : ℝ) < 1 / 2 :=
       htend.eventually (gt_mem_nhds (by norm_num))
     filter_upwards [eventually_gt_atTop (1 : ℝ), hlt,
-      (hlog_littleO.bound (show (0 : ℝ) < 1 / 2 by norm_num)).comp_tendsto
-        (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 6))] with x hx hCx hlog6
+      (tendsto_id.const_mul_atTop (by norm_num : (0 : ℝ) < 6)).eventually
+        (hlog_littleO.bound (show (0 : ℝ) < 1 / 2 by norm_num))] with x hx hCx hlog6
     have hx0 : 0 < x := by linarith
     have h6x1 : 1 ≤ 6 * x := by linarith
     have hlog_nonneg : 0 ≤ Real.log (6 * x) := Real.log_nonneg h6x1
@@ -1824,7 +1842,7 @@ theorem dyadic_prime_supply_eventually (line : DirichletLZerosOnLine) :
         _ = 4 * (6 ^ (1 / 4 : ℝ) * x ^ (1 / 4 : ℝ)) := by
           rw [Real.mul_rpow (by norm_num) hx0.le]
     have hsqrt : Real.sqrt (2 * x) = Real.sqrt 2 * x ^ (1 / 2 : ℝ) := by
-      rw [Real.sqrt_mul (by norm_num), Real.sqrt_eq_rpow]
+      rw [Real.sqrt_mul (by norm_num), Real.sqrt_eq_rpow x]
     have hxpow : x ^ (1 / 4 : ℝ) * x ^ (1 / 2 : ℝ) = x ^ (-1 / 4 : ℝ) * x := by
       rw [← Real.rpow_add hx0, ← Real.rpow_add_one hx0.ne']
       congr 1; norm_num
@@ -1942,11 +1960,11 @@ abbrev ProperSplit (n : ℕ) := {p : ℕ × ℕ // 2 ≤ p.1 ∧ 2 ≤ p.2 ∧ p
 
 private lemma ProperSplit.fst_lt {n : ℕ} (p : ProperSplit n) : p.val.1 < n := by
   obtain ⟨ha, hb, hab⟩ := p.property
-  exact hab ▸ lt_mul_of_one_lt_right (by omega : 0 < p.val.1) (by omega)
+  exact lt_of_lt_of_eq (lt_mul_of_one_lt_right (by omega : 0 < p.val.1) (by omega)) hab
 
 private lemma ProperSplit.snd_lt {n : ℕ} (p : ProperSplit n) : p.val.2 < n := by
   obtain ⟨ha, hb, hab⟩ := p.property
-  exact hab ▸ lt_mul_of_one_lt_left (by omega : 0 < p.val.2) (by omega)
+  exact lt_of_lt_of_eq (lt_mul_of_one_lt_left (by omega : 0 < p.val.2) (by omega)) hab
 
 /-- **Recursive elliptic factorizer**: given a fallible splitting kernel `ellipticSplit` on
 composite integers `n ≥ 2` returning either `none` (local rejection) or a verified proper split
@@ -2039,7 +2057,7 @@ theorem recursiveEllipticFactor_sound
 private lemma pmf_tsum_some_le_one {α : Type*} (p : PMF (Option α)) :
     (∑' x : α, p (some x)) ≤ 1 := by
   have h1 : (∑' x : α, p (some x)) ≤ ∑' o : Option α, p o := by
-    rw [tsum_option (f := fun o => p o) ENNReal.summable]
+    rw [tsum_option_ennreal (fun o => p o)]
     exact le_add_self
   exact h1.trans_eq p.tsum_coe
 
@@ -2051,20 +2069,20 @@ private lemma pmf_option_append_fail_le (p q : PMF (Option (List ℕ))) :
       | some left => q.map fun
         | none => none
         | some right => some (left ++ right)) none ≤ p none + q none := by
-  rw [PMF.bind_apply, tsum_option ENNReal.summable]
+  rw [PMF.bind_apply, tsum_option_ennreal _]
   simp only [PMF.pure_apply_self, mul_one]
-  refine add_le_add_left ?_ (p none)
+  refine add_le_add_right ?_ (p none)
   have hmap (left : List ℕ) :
       (q.map fun
         | none => (none : Option (List ℕ))
         | some right => some (left ++ right)) none = q none := by
-    rw [PMF.map_apply, tsum_option ENNReal.summable]
+    rw [PMF.map_apply, tsum_option_ennreal _]
     simp
   simp_rw [hmap]
   rw [ENNReal.tsum_mul_right]
   calc
     (∑' left : List ℕ, p (some left)) * q none ≤ 1 * q none :=
-      mul_le_mul_right' (pmf_tsum_some_le_one p) _
+      mul_le_mul_left (pmf_tsum_some_le_one p) _
     _ = q none := one_mul _
 
 /-- **Strong-induction failure probability bound for recursive elliptic splitting** (in terms of
@@ -2106,7 +2124,7 @@ theorem recursiveEllipticFactor_fail_le_cardFactors
       · rw [dif_pos hp]
         simp
       · rw [dif_neg hp]
-        rw [PMF.bind_apply, tsum_option ENNReal.summable]
+        rw [PMF.bind_apply, tsum_option_ennreal _]
         simp only [PMF.pure_apply_self, mul_one]
         have hchild (p : ProperSplit n) :
             ((recursiveEllipticFactor ellipticSplit p.val.1).bind fun
@@ -2138,8 +2156,11 @@ theorem recursiveEllipticFactor_fail_le_cardFactors
             ArithmeticFunction.cardFactors_pos_iff_one_lt.mpr (by omega)
           have hΩ2 : 1 ≤ Ω p.val.2 :=
             ArithmeticFunction.cardFactors_pos_iff_one_lt.mpr (by omega)
-          have hΩn : Ω n = Ω p.val.1 + Ω p.val.2 :=
-            hab ▸ ArithmeticFunction.cardFactors_mul (by omega) (by omega)
+          have hΩn : Ω n = Ω p.val.1 + Ω p.val.2 := by
+            have h := ArithmeticFunction.cardFactors_mul (show p.val.1 ≠ 0 by omega)
+              (show p.val.2 ≠ 0 by omega)
+            rw [hab] at h
+            exact h
           have hsub_eq : (Ω p.val.1 - 1) + (Ω p.val.2 - 1) = Ω n - 2 := by omega
           calc
             _ ≤ recursiveEllipticFactor ellipticSplit p.val.1 none +
@@ -2164,11 +2185,11 @@ theorem recursiveEllipticFactor_fail_le_cardFactors
           calc
             _ ≤ ∑' p : ProperSplit n, ellipticSplit n h2 hp (some p) *
                 ENNReal.ofReal (((Ω n - 2 : ℕ) : ℝ) * δ_split) :=
-              ENNReal.tsum_le_tsum fun p => mul_le_mul_left' (hchild p) _
+              ENNReal.tsum_le_tsum fun p => mul_le_mul_right (hchild p) _
             _ = (∑' p : ProperSplit n, ellipticSplit n h2 hp (some p)) *
                 ENNReal.ofReal (((Ω n - 2 : ℕ) : ℝ) * δ_split) := ENNReal.tsum_mul_right
             _ ≤ 1 * ENNReal.ofReal (((Ω n - 2 : ℕ) : ℝ) * δ_split) :=
-              mul_le_mul_right' (pmf_tsum_some_le_one _) _
+              mul_le_mul_left (pmf_tsum_some_le_one _) _
             _ = ENNReal.ofReal (((Ω n - 2 : ℕ) : ℝ) * δ_split) := one_mul _
         have hΩ_ge2 : 2 ≤ Ω n := by
           by_contra hlt
@@ -2191,7 +2212,7 @@ theorem recursiveEllipticFactor_fail_le_cardFactors
             rw [← ENNReal.ofReal_add hδ (mul_nonneg (Nat.cast_nonneg _) hδ)]
             congr 1
             have : (1 : ℝ) + ((Ω n - 2 : ℕ) : ℝ) = ((Ω n - 1 : ℕ) : ℝ) := by exact_mod_cast hstep_eq
-            linarith
+            rw [← this]; ring
 
 /-- Corollary bounding recursive elliptic splitting failure by `n.log2 * δ_split`. -/
 theorem recursiveEllipticFactor_fail_le_log2
@@ -2284,7 +2305,7 @@ theorem twoStageRecognizer_fail_le
       ENNReal.ofReal (δ_small + (m.log2 : ℝ) * δ_split) by
     have hre := ENNReal.toReal_mono ENNReal.ofReal_ne_top hE
     rwa [ENNReal.toReal_ofReal (add_nonneg hδ_small (mul_nonneg (Nat.cast_nonneg _) hδ_split))] at hre
-  rw [twoStageRecognizer, PMF.bind_apply, tsum_option ENNReal.summable]
+  rw [twoStageRecognizer, PMF.bind_apply, tsum_option_ennreal _]
   simp only [PMF.pure_apply_self, mul_one]
   have hsmallE : smallFactor none ≤ ENNReal.ofReal δ_small := by
     rw [← ENNReal.ofReal_toReal (PMF.apply_ne_top _ _)]
@@ -2325,15 +2346,16 @@ theorem twoStageRecognizer_fail_le
             | none => (none : Option (List ℕ))
             | some larges => some (sc.1 ++ larges)) none =
           recursiveEllipticFactor ellipticSplit sc.2 none := by
-        rw [PMF.map_apply, tsum_option ENNReal.summable]
+        rw [PMF.map_apply, tsum_option_ennreal _]
         simp
       rw [hmap]
-      apply mul_le_mul_left'
+      apply mul_le_mul_right
       rw [← ENNReal.ofReal_toReal (PMF.apply_ne_top _ _)]
       apply ENNReal.ofReal_le_ofReal
       have hfail := recursiveEllipticFactor_fail_le_log2 ellipticSplit Eligible δ_split hδ_split
         hsplit_fail hcof_pos hcof_elig
-      have hlog_le : sc.2.log2 ≤ m.log2 := Nat.log2_le_log2 hcof_le
+      have hlog_le : sc.2.log2 ≤ m.log2 := by
+        rw [Nat.log2_eq_log_two, Nat.log2_eq_log_two]; exact Nat.log_mono_right hcof_le
       exact hfail.trans (mul_le_mul_of_nonneg_right (by exact_mod_cast hlog_le) hδ_split)
   have hsum : (∑' sc : List ℕ × ℕ, smallFactor (some sc) *
         ((recursiveEllipticFactor ellipticSplit sc.2).map fun
@@ -2346,7 +2368,7 @@ theorem twoStageRecognizer_fail_le
       _ = (∑' sc : List ℕ × ℕ, smallFactor (some sc)) * ENNReal.ofReal ((m.log2 : ℝ) * δ_split) :=
         ENNReal.tsum_mul_right
       _ ≤ 1 * ENNReal.ofReal ((m.log2 : ℝ) * δ_split) :=
-        mul_le_mul_right' (pmf_tsum_some_le_one _) _
+        mul_le_mul_left (pmf_tsum_some_le_one _) _
       _ = ENNReal.ofReal ((m.log2 : ℝ) * δ_split) := one_mul _
   calc
     smallFactor none + (∑' sc : List ℕ × ℕ, smallFactor (some sc) *
@@ -2382,8 +2404,8 @@ theorem twoStageRecognizer_success_ge
   have hfail := twoStageRecognizer_fail_le hm Eligible hm_elig smallFactor hsmall_sound
     ellipticSplit δ_small δ_split hδ_small hδ_split hsmall_fail hsplit_fail
   have hpart : P none + P.toOuterMeasure {o | o.isSome} = 1 := by
-    rw [PMF.toOuterMeasure_apply, ← P.tsum_coe, tsum_option ENNReal.summable,
-      tsum_option ENNReal.summable]
+    rw [PMF.toOuterMeasure_apply, ← P.tsum_coe, tsum_option_ennreal _,
+      tsum_option_ennreal _]
     simp [Set.indicator_apply]
   have hfin1 : P none ≠ ⊤ := P.apply_ne_top none
   have hfin2 : P.toOuterMeasure {o | o.isSome} ≠ ⊤ := by
