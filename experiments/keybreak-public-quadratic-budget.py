@@ -60,6 +60,10 @@ def stationary_limit():
 
 def grid(moment, curve, first, count):
     knots = [first + (1-first)*i/(count-1) for i in range(count)]
+    return grid_from_knots(moment, curve, knots)
+
+
+def grid_from_knots(moment, curve, knots):
     scales = [z*z for z in knots]
     weights = [curve*(right-left) for left, right in zip(knots, knots[1:])]
     weights.append(moment-sum(a*w for a, w in zip(scales, weights)))

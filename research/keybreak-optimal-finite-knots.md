@@ -55,3 +55,40 @@ The scalar recurrence is short, but its exact rational values still have rapidly
 For practical certificates, round the scalar recurrence down to a $p_0$-bit dyadic grid at every step. The update $v\mapsto4/[27(1-v)^2]$ is increasing with derivative at most one on $[0,1/3]$, so $K$ updates cause absolute error at most $K2^{-p_0}$. Evaluate the ratios from these rounded values and round the ratios down as well. Their errors are $O(K2^{-p_0})$ since $v\mapsto2/[3(1-v)]$ has derivative at most $3/2$ on this interval. Each rounded ratio is strictly between zero and one for $p_0\ge2$. Forming their suffix products exactly gives strict dyadic knots with $O(Kp_0)$ bits each and maximum knot error $O(K^2 2^{-p_0})$.
 
 The gate error from these perturbed knots does not gain another factor of $K$. If two strict partitions differ by at most $\Delta$ at every knot, comparing their summands while keeping one interval length fixed costs at most $2\Delta$ in total since the lengths sum to one. In the remaining length difference, summation by parts transfers the difference of adjacent knot errors to the monotone squared coefficients. The endpoint errors vanish and the squared coefficients have total variation at most one, so this part costs at most $\Delta$. The objective difference is thus at most $3\Delta$. This gives an exact certificate by simple dyadic arithmetic for a finite partition arbitrarily close to the sharp gate, without storing the exact rational optimizer.
+
+## How many stages give 2.033?
+
+For the half-width schedule put \(C_0=2033/1000\). Summation by parts in the tail constraints gives the necessary private inequality
+\[
+ b+p_K(u)\le C_0,\qquad
+ p_K(u)=2/(9u^2)+(1-V_K)u .
+\]
+It applies to arbitrary nonnegative weights on the knots; choosing the equalized weights realizes its gate when the last weight is positive. The ordinary terminal inequality, after optimizing the degree, gives \(6b(C_0-b)\ge3u^2/2+4\sqrt{C_0}\). If a smaller budget \(C\) were feasible then the same terminal inequality would hold at \(C_0\): feasibility implies \(6b>4/\sqrt C\), so \(6b(s-b)-4\sqrt s\) increases for \(s\ge C\).
+
+To exclude \(K=352\), round the Bellman sequence upward at every step to a multiple of \(10^{-20}\). The map is increasing below one. Its output \(v\) is a rigorous upper bound on \(V_{352}\) and on the value of any shorter grid, since a partition can be padded with zero-length intervals. Set \(p(u)=2/(9u^2)+(1-v)u\), \(u_0=.55648169\) and \(b_0=C_0-p(u_0)\), where \(0<2b_0<C_0\). The supporting line of the concave quadratic \(6b(C_0-b)\) has positive slope at \(b_0\). The convex tangent of \(p\) therefore bounds the possible terminal surplus by
+\[
+ 6b_0(C_0-b_0)-3u_0^2/2-4\sqrt{C_0}
+ + L(u-u_0)-3(u-u_0)^2/2,\qquad
+ L=-6(C_0-2b_0)p'(u_0)-3u_0 .
+\]
+The linear and quadratic remainder is at most \(L^2/6\). Rounding the square root down to twelve decimal places gives total surplus below \(-4.3\cdot10^{-7}\). Conversely a 353-stage grid, using an integer-rounded knot recurrence and independently verified rational charges, gives positive margin at 2.033 for the complete schedule. This proves the minimum count at this particular target and for this half-width cost model. [Full exact computation and positive witness](../experiments/keybreak-quadratic-class-budget.py) · [Lean optimum over finite grids](../formal/cogentic/Cogentic/RandomizedFiniteKnotCost.lean) · [Lean 353-stage necessity from the grid and terminal constraints](../formal/cogentic/Cogentic/RandomizedClassKnotThreshold.lean)
+
+## Approach of the coupled coefficient to its limit
+
+Write \(p(u,\lambda)=2/(9u^2)+\lambda u\), with \(\lambda_0=2/3\) and \(\lambda_K=1-V_K\). At the continuum optimum \((C_*,u_*,b_*)\) the inequality \(b_*<C_*/2\) is strict. Near this point one maximizes feasible terminal surplus by using \(b=C-p\):
+\[
+ F(C,u,\lambda)=6(C-p)p-3u^2/2-4\sqrt C .
+\]
+At the optimum \(F=F_u=0\), \(F_C=6p-2/\sqrt C>0\) and \(F_{uu}=6(C-2p)p_{uu}-12p_u^2-3<0\). The implicit function theorem gives a smooth optimum \(C(\lambda)\) nearby. To see that this is the relevant global optimum, any feasible sequences with budgets tending to \(C_*\) have \(b\in[0,C]\) and \(u\) bounded above by the terminal inequality and away from zero by the private inequality. Their limits attain the continuum optimum. Its tangent certificate has strict quadratic remainder away from \(u_*,b_*\), so this limit is unique. The other leading shape and descent guards have strict room there; after each large fixed \(K\) is chosen, rational allowances can approach the local optimum from the feasible side.
+
+Using \(F_u=0\) gives
+\[
+ D_*:=C'(\lambda_0)
+ =\frac{6(C_*-2b_*)u_*}{6(C_*-b_*)-2/\sqrt{C_*}}>0 .
+\]
+Thus the finite-stage coefficient in this model is
+\[
+ C_K=C_*+\frac{4D_*}{9K}
+        -\frac{4D_*\log K}{81K^2}+O(K^{-2}).
+\]
+The coefficient \(4D_*/9\) is approximately 0.042. These are limits of fixed schedules with input length tending to infinity for each stage count. The 353- and 4096-stage results above use direct finite certificates.

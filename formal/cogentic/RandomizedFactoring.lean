@@ -25,6 +25,7 @@ import Cogentic.RandomizedCutoffCrossing
 import Cogentic.RandomizedTwoMarkResidue
 import Cogentic.RandomizedUnitaryDivisorSign
 import Cogentic.RandomizedClassSchedule
+import Cogentic.RandomizedClassKnotThreshold
 import Cogentic.RandomizedClassSignFibers
 import Cogentic.RandomizedReducedFormMinimum
 import Cogentic.RandomizedReducedFormRoot
@@ -92,3 +93,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedFormDivisor.normalize_private_root
 #print axioms Cogentic.Randomized.zmod_quadratic_normalized_not_global_sign
 #print axioms Cogentic.RandomizedGenusMixing.identity_mass_bias
+#print axioms Cogentic.Randomized.half_width_at_least_353_stages

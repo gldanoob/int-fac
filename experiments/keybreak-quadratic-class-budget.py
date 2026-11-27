@@ -1,20 +1,54 @@
 """Certify a strict half-width one-coordinate cost schedule below 2.033."""
 
 from fractions import Fraction as F
+from math import isqrt
 from pathlib import Path
 from runpy import run_path
 
 
-def check_schedule():
-    here = Path(__file__).parent
-    half_width = run_path(str(here / "keybreak-public-quadratic-budget.py"))
-    half_width["stationary_limit"]()
-    grid = half_width["grid"]
-    replay = run_path(str(here / "keybreak-tiered-descent.py"))["check_integer_schedule"]
+def rounded_optimal_knots(count):
+    # The stationary equation determines the next knot up to a common scale.
+    points = [0, 10**15]
+    while len(points) <= count:
+        left, right = points[-2:]
+        points.append(right + (right**2 - left**2) // (2 * right))
+    assert len(points) == count + 1 and all(a < b for a, b in zip(points, points[1:]))
+    return [F(point, points[-1]) for point in points[1:]]
 
-    theta, delta, kappa, beta, alpha = map(F, ".5 1.40272978 1.53600607 .672864055 .50000001".split())
-    height, curve, factor_cost = map(F, ".48024639 .55625114 1.41421357".split())
-    top, high, eta, slack, ceiling = map(F, "1.63 1.72 .00000001 .0000001 2.03297".split())
+
+def root_upper(value):
+    scale = 10**12
+    return F(isqrt(value.numerator * scale**2 // value.denominator) + 1, scale)
+
+
+def exclude_shorter_grid():
+    # Outward round the best possible 352-interval left sum using the exact recurrence.
+    scale = 10**20
+    upper = F(0)
+    for _ in range(1, 352):
+        next_upper = 4 / (27 * (1 - upper)**2)
+        upper = F(-(-next_upper.numerator * scale // next_upper.denominator), scale)
+    ceiling, u = F("2.033"), F(".55648169")
+    linear = 1 - upper
+    p = 2 / (9*u**2) + linear*u
+    b = ceiling - p
+    assert 0 < 2*b < ceiling
+    slope = -6*(ceiling - 2*b)*(linear - 4/(9*u**3)) - 3*u
+    # Tangents to the concave terminal and convex screening costs, with the
+    # exact quadratic remainder from -(3/2)u². Round sqrt(C) downward.
+    root_lower = root_upper(ceiling) - F(1, 10**12)
+    surplus = 6*b*(ceiling-b) - 3*u**2/2 - 4*root_lower + slope**2/6
+    assert surplus < F("-.00000043")
+    print(f"352-stage upper bound on terminal surplus at 2.033: {float(surplus):.12f}")
+
+
+def check_schedule(count, delta, kappa, beta, ceiling):
+    here = Path(__file__).parent
+    grid = run_path(str(here / "keybreak-public-quadratic-budget.py"))["grid_from_knots"]
+    replay = run_path(str(here / "keybreak-tiered-descent.py"))["check_integer_schedule"]
+    delta, kappa, beta, ceiling = map(F, (delta, kappa, beta, ceiling))
+    theta, alpha = F(1, 2), F(".500000000001")
+    top, high, eta, slack = map(F, "1.63 1.72 .00000000001 .00000000001".split())
     b, radix = delta * beta, delta**-3
     y0 = 1 / (2 * kappa)
     v0 = alpha * y0
@@ -22,6 +56,9 @@ def check_schedule():
     v1 = alpha * y1
     y2 = v1 / high
     actual_height = radix * (1 + 2 * v0)
+    height = actual_height + eta
+    factor_cost = root_upper(F(2))
+    curve = root_upper(factor_cost**2 * 2*y0 / (3*delta))
     low = (beta + 2 * height + radix / (3 * beta) + 4 * eta) / (2 * beta - F(1, 3))
     slope = low - (height + eta) / beta
 
@@ -36,7 +73,7 @@ def check_schedule():
     assert factor_cost**2 > 2 and curve**2 > factor_cost**2 * 2 * y0 / (3 * delta)
 
     moment = 2 * theta * kappa * delta / 3
-    scales, fractions, tail, gate = grid(moment, curve, F(".002"), 4096)
+    scales, fractions, tail, gate = grid(moment, curve, rounded_optimal_knots(count))
     assert 2 * theta * tail / moment < 2
     for scale in scales:
         parent, box = scale * y0, scale * v0
@@ -65,13 +102,16 @@ def check_schedule():
         2**20_000, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=slope-alpha,
         top_ratio=top, high_ratio=high, low_ratio=low, height=height, h=curve,
         target=ceiling, scales=scales, fractions=fractions, top_ratio_slope=top-1,
-        factor_cap=2, first_scale=F(".0000039"), cap_slack=slack, row_exponent=b,
+        factor_cap=2, first_scale=scales[0]*F(".98"), cap_slack=slack, row_exponent=b,
         coordinate_fraction=theta,
     )
     for label, cost in charges.items():
         print(f"{label}: {float(cost):.12f}")
-    print(f"strict half-width ceiling: {float(ceiling):.5f}")
+    print(f"{count}-stage strict half-width ceiling: {float(ceiling):.8f}")
 
 
 if __name__ == "__main__":
-    check_schedule()
+    run_path(str(Path(__file__).with_name("keybreak-public-quadratic-budget.py")))["stationary_limit"]()
+    exclude_shorter_grid()
+    check_schedule(353, "1.402688813", "1.534781893", ".6727839471", "2.033")
+    check_schedule(4096, "1.402726234", "1.535900278", ".6728571597", "2.03289126")

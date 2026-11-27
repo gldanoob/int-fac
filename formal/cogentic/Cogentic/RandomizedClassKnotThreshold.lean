@@ -1,3 +1,4 @@
+import Cogentic.RandomizedKnotCount
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
@@ -73,5 +74,31 @@ theorem class_knot_threshold_exclusion {m u b δ : ℝ}
   have hprivate' : b + (2 / (9 * u ^ 2) + q * u) ≤ C :=
     (add_le_add le_rfl (add_le_add le_rfl (mul_le_mul_of_nonneg_right hcoef hu.le))).trans hprivate
   exact exclude_with_tangent hv hu hδ hs rfl rfl rfl hgap hnum hprivate' hterminal
+
+/-- Every normalized half-width grid with budget at most 2.033 and the ordinary
+terminal constraints has at least 353 screening stages. -/
+theorem half_width_at_least_353_stages {k : ℕ} (z w : ℕ → ℝ) {C b u δ : ℝ}
+    (hC : 0 < C) (hcap : C ≤ 2033 / 1000) (hu : 0 < u) (hδ : 0 < δ)
+    (hz0 : z 0 = 0) (hz1 : z (k + 1) = 1)
+    (hstep : ∀ i < k + 1, z i ≤ z (i + 1))
+    (htail : ∀ i < k + 1, (∑ j ∈ Finset.Ico i (k + 1), w j) ≤ C - b - u * z (i + 1))
+    (hmoment : 2 / (9 * u ^ 2) ≤ ∑ i ∈ Finset.range (k + 1), z (i + 1) ^ 2 * w i)
+    (hterminal : 3 * u ^ 2 / 2 + 4 / δ + C * δ ≤ 6 * b * (C - b)) :
+    353 ≤ k + 1 := by
+  by_contra hfew
+  have hk : k ≤ 351 := by omega
+  have hgate := finite_knot_private_floor k z w hu.le hz0 hz1 hstep htail
+  have hprivate : b + classKnotPrivateCost (finiteKnotMaximum k) u ≤ 2033 / 1000 := by
+    unfold classKnotPrivateCost
+    rw [mul_comm (1 - finiteKnotMaximum k) u]
+    linarith only [hmoment, hgate, hcap]
+  have hpos : 0 < C * (6 * b - δ) := by
+    nlinarith only [hterminal, sq_nonneg u, sq_nonneg b, div_pos (by norm_num : (0:ℝ)<4) hδ]
+  have hgrowth : 0 ≤ 6 * b - δ := (pos_of_mul_pos_right hpos hC.le).le
+  have hterminal' : 3 * u ^ 2 / 2 + 4 / δ + (2033 / 1000) * δ ≤
+      6 * b * ((2033 / 1000) - b) := by
+    nlinarith only [hterminal, mul_nonneg (sub_nonneg.mpr hcap) hgrowth]
+  exact class_knot_threshold_exclusion (finiteKnotMaximum_atMost352_bound hk)
+    hu hδ hprivate hterminal'
 
 end Cogentic.Randomized
