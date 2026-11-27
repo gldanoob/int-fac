@@ -157,3 +157,52 @@ Size-biasing the uniform offset by \(A_i\) gives the continuous Gaussian \(Z\) o
 Indeed the expectation of the sum of the square roots of the other translates' density ratios to that of \(Z\) equals \(\sum_{v\ne0}\exp(-\pi\|v\|^2/(4\sigma^2))\). The least singular value of the kernel basis is \(\gg B\), so a product theta sum bounds this by \(o(1)\). The normalized squared length \(2\pi\|Z\|^2/\sigma^2\) is chi-squared with \(m\) degrees of freedom. Its central limit theorem gives missing mass \(\Phi(-a)+o(1)\), as required.
 
 One may replace \(\log\det K\) here by \(m\log B+O_{r,s}(1)\) if all normalized roots have modulus at most a fixed \(s<1\). Divide the multiplication matrix by its signed leading coefficient and use the last \(m\) rows as a square triangular block \(T\) with unit diagonal. Its inverse is a truncated convolution by the coefficients of \(\prod_{j=1}^r(1-z_j t)^{-1}\), whose absolute sum is bounded by \((1-s)^{-r}\). The remaining \(r\) rows \(R\) have bounded operator norm. The determinant correction is \(\det(I_r+R(T^*T)^{-1}R^*)^{1/2}\), between one and a constant depending only on \(r,s\).
+
+## Additive noise at different digit resolutions
+
+Take \(H=B X^r+1\) with \(B\) a positive integer tending to infinity, \(r\) fixed, and \(n\to\infty\). Let the coefficients be independent integer Gaussian variables of width \(\sigma\) with arbitrary centers \(c_i\). In the convention used above a continuous Gaussian of width \(s\) has density proportional to \(\exp(-\pi\|x\|^2/s^2)\). In the orthogonal image add an independent continuous Gaussian of width \(\tau>0\). The comparison law is the continuous Gaussian centered at \(Pc\) of width \((\sigma^2+\tau^2)^{1/2}\), where \(P\) is orthogonal projection to the image.
+
+The \(r\) image coordinates have disjoint chains. Indeed orthogonality to each multiplication column \(e_i+B e_{i+r}\) gives \(z_{i+r}=-z_i/B\). An orthonormal basis for the image therefore gives the \(j\)-th projected coordinate as
+\[
+ Y_j=a_j\sum_{\ell=0}^{L_j-1}(-B^{-1})^\ell Z_{j,\ell},
+ \qquad a_j=\left(\sum_{\ell=0}^{L_j-1}B^{-2\ell}\right)^{-1/2},
+\]
+where \(L_j\) is the number of ambient coefficients in that chain and \(Z_{j,\ell}\) denotes the corresponding coefficient. The chain lengths differ by at most one and \(a_j=1+O(B^{-2})\). The spacing of the exact \(j\)-th image lattice is \(a_j B^{-(L_j-1)}\). All assertions below are uniform in the coefficient centers.
+
+**Coarse noise.** Suppose \(\sigma\to\infty\) and \(B\tau\to\infty\). Then total variation tends to zero exactly when \(\tau^2+\sigma^2/B^2\to\infty\). If \(\tau^2+\sigma^2/B^2\to s_0^2\) with \(0<s_0<\infty\), the limit is
+\[
+ \frac12\int_{[0,1]^r}
+ \left|\prod_{j=1}^r\Theta_{s_0}(x_j)-1\right|\,dx,\qquad
+ \Theta_s(x)=\sum_{h\in\mathbb Z}e^{-\pi s^2 h^2} e^{2\pi i h x}.
+\]
+If \(s_0=0\), the limit is one.
+
+Here is the coupling used both here and below. An integer Gaussian of width \(\sigma\ge1\) and the corresponding continuous Gaussian can be coupled with expected absolute distance \(O(1)\), uniformly in the center. Round the continuous Gaussian to the nearest integer. The centered first absolute moment of the difference between the rounded weights and the sampled Gaussian weights is \(O(1/\sigma)\): integrate the second-derivative Taylor remainder on each rounding cell and sum with weight \(1+|k-c|\). Indeed the normalized second derivative is bounded on each cell by \(O(\sigma^{-3}(1+((k-c)/\sigma)^2)e^{-c_0((k-c)/\sigma)^2})\) for a positive absolute \(c_0\). The sampled Gaussian normalization differs from the continuous one by an exponentially small relative error by Poisson summation. Transport unmatched weights through the common center and add the rounding cost. For a coupling in the fixed-dimensional image, convolution by width-\(\tau\) Gaussian noise converts expected distance \(d\) to total variation at most \(O(d/\tau)\), by integrating the gradient of the noise density along the translation.
+
+In the coarse regime replace all digits with \(\ell\ge1\) by continuous Gaussians at total variation cost \(O((B\tau)^{-1})\). In coordinate \(j\) the resulting law is an integer Gaussian on spacing \(a_j\) convolved by a Gaussian of squared width \(b_j^2=\tau^2+\sigma^2 a_j^2\sum_{\ell\ge1}B^{-2\ell}\). Its continuous comparison is exactly the law stated above. Completing the square and using one-dimensional Poisson summation gives a density ratio equal to \(\Theta_{s_j}\) at an affine phase, divided by the sampled Gaussian normalizer relative to the continuous one, where
+\[
+ s_j^2=\frac{\sigma^2 b_j^2}{a_j^2\sigma^2+b_j^2}.
+\]
+The relative normalizer is \(1+o(1)\). If \(\tau^2+\sigma^2/B^2\to\infty\), also \(s_j\to\infty\), and the theta ratio converges uniformly to one. For a finite positive limit \(s_0\), \(s_j\to s_0\). In output units of \(a_j\) the phase slope is \(a_j^2\sigma^2/(a_j^2\sigma^2+b_j^2)\), which tends to one in this case. Under the broad continuous comparison, the phases modulo one converge jointly to independent uniform phases by the Gaussian Fourier formula, uniformly in their translations. This gives the integral. If \(s_0=0\), the replaced law concentrates in shrinking neighborhoods of the shifted lattice from its leading digits, while the broad continuous comparison assigns these neighborhoods vanishing mass. Every bounded subsequence of the squared widths has a further finite-limit subsequence, which proves the necessity in the coarse assertion.
+
+**Growing digit resolution.** Put \(L=\min_j L_j\) and, for \(0<\tau<1\), put \(K=\min(L,\log_B(1/\tau))\). Suppose
+\[
+ K\longrightarrow\infty,\qquad
+ B/\log K\longrightarrow\infty,\qquad
+ \sigma/\sqrt{\log n}\longrightarrow\infty .
+\]
+For every fixed \(\epsilon>0\) the total variation tends to zero above the width \((1+\epsilon)B\sqrt{\log K/(2\pi)}\) if \(\tau B^{L-1}\to\infty\). It tends to one below \((1-\epsilon)B\sqrt{\log K/(2\pi)}\). The terminal condition is necessary for total variation to tend to zero at any width in these hypotheses. A chain of length \(L\) has an exact lattice character of frequency \(B^{L-1}/a_j\). Its expectation after adding noise has magnitude \(\exp(-\pi\tau^2 B^{2(L-1)}/a_j^2)\), whereas the continuous comparison expectation tends to zero. Any subsequence on which \(\tau B^{L-1}\) stays bounded therefore has a positive total variation lower bound.
+
+For the upper bound keep the first \(\min(L_j,\lceil\log_B(1/\tau)\rceil+2)\) digits of each chain. Coupling replaces the rest by continuous Gaussians at total variation cost \(O(B^{-1})\) or less, by summing the discarded geometric coefficients and dividing by \(\tau\). The kept chain, rescaled to have a unit image vector, is the monomial-kernel law above with degree parameter one and chain length \(K+O(1)\). The no-noise total variation upper estimate puts it within \(o(1)\) of the ideal image-lattice Gaussian. Undoing the scalar normalization gives that Gaussian width \(\sigma\) times the norm of the kept coefficient list. Its spacing in the original output coordinate is \(a_j B^{-(\text{kept length}-1)}\). The added noise width divided by this spacing tends to infinity. For chains cut before their ends this follows from the two extra digits, and for chains kept in full it follows from the terminal condition. Completing the square as in the coarse calculation converts the ideal image-lattice Gaussian with this noise to its continuous comparison in \(o(1)\) total variation. The effective conditional width divided by the spacing tends to infinity since both the noise width and the kept Gaussian width do so after division by that spacing. The continuous widths of kept and discarded digits combine to \((\sigma^2+\tau^2)^{1/2}\) exactly since the chain coefficient list has norm one. There are only \(r\) chains.
+
+For the lower bound it suffices to use one chain, with at least \(K-O(1)\) frequencies of the form \(B^i/a_j\) for integers \(0\le i\le \min(L_j-2,\lfloor\log_B(1/\tau)\rfloor-2)\). The first \(i+1\) digit coefficients in that character are integers and vanish from the phase of the discrete sum. The fractional coefficient vector \(f_i\) starts at the next digit and has first magnitude \(1/B\) followed by a finite geometric tail. Thus
+\[
+ \|f_i\|^2=B^{-2}(1+O(B^{-2})),\qquad
+ |\langle f_i,f_{i'}\rangle|\ll B^{-3}\quad(i\ne i').
+\]
+Rotate each phase by the negative of its fractional center phase and take its real part \(T_i\). For any fractional frequency \(|f|\le1/4\), Poisson summation gives the expectation of the character of a single centered discrete digit as \(e^{-\pi\sigma^2 f^2}(1+O(e^{-c_1\sigma^2}))\), with a positive absolute \(c_1\), uniformly in the original center. The frequencies \(f_i\pm f_{i'}\) stay in that range for large \(B\). Multiplying the digit estimates has uniform relative error \(o(1)\) by \(\sigma/\sqrt{\log n}\to\infty\). For all the retained frequencies, \(\tau B^i/a_j\ll B^{-2}\), so the noise also multiplies both the one- and two-character expectations by \(1+o(1)\). Let \(t=e^{-\pi\sigma^2/B^2}\). Since \(\sigma^2/B^2=O(\log K)\) in the lower regime and \(B/\log K\to\infty\), these calculations give, uniformly in the retained indices,
+\[
+ \mathbb E T_i=t(1+o(1)),\qquad
+ \mathbb E(T_iT_{i'})=t^2(1+o(1))\quad(i\ne i').
+\]
+The second identity uses the two signed combinations of the phases and the inner product estimate. The sum of \(K-O(1)\) real parts has mean \((1+o(1))Kt\) and variance \(O(K)+o(K^2t^2)\). For the continuous comparison the same character combinations have nonzero frequencies of magnitude at least a fixed constant. Their expectations are \(O(e^{-c_2\sigma^2})\) for a positive absolute \(c_2\). Thus under the continuous law the mean is \(o(1)\) and the variance is \(O(K)\). Below the claimed width \(Kt^2\to\infty\), so the test at threshold \(Kt/2\) distinguishes the two laws with both error probabilities tending to zero. This proves the lower bound. These growing-resolution assertions leave the window with bounded terminal smoothing and the critical-width profile open.
