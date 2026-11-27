@@ -128,6 +128,24 @@ theorem sum_weighted_sq_sub_eq_of_centered (samples : Finset H) (w n : H → ℝ
       sum_congr rfl fun _ _ => by ring
     _ = _ := by simp only [sum_add_distrib, ← mul_sum, hcenter, mul_zero, zero_add]
 
+/-- A finite cover by sets of size at least two has total cardinality minus
+one per set at least half the number of covered vertices. -/
+theorem card_le_twice_sum_card_sub_one_of_cover [DecidableEq L]
+    (vertices : Finset L) (indices : Finset H) (edge : H → Finset L)
+    (hcover : vertices ⊆ indices.biUnion edge)
+    (hsize : ∀ i ∈ indices, 2 ≤ (edge i).card) :
+    vertices.card ≤ 2 * ∑ i ∈ indices, ((edge i).card - 1) := by
+  calc
+    vertices.card ≤ (indices.biUnion edge).card := card_le_card hcover
+    _ ≤ ∑ i ∈ indices, (edge i).card := card_biUnion_le
+    _ ≤ 2 * ∑ i ∈ indices, ((edge i).card - 1) := by
+      rw [mul_sum]
+      apply sum_le_sum
+      intro i hi
+      have h := hsize i hi
+      omega
+
+#print axioms card_le_twice_sum_card_sub_one_of_cover
 #print axioms mul_le_twice_center_mul_add_sq
 #print axioms sum_weighted_mul_le_twice_center_add_sq
 #print axioms sum_weighted_sq_sub_eq_of_centered
