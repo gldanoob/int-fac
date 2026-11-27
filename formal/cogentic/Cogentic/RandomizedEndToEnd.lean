@@ -7,6 +7,7 @@ import Cogentic.RandomizedConcreteStageCostS8
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
+import Cogentic.RandomizedC5HalfMass
 import Cogentic.RandomizedL18_4
 import Cogentic.RandomizedL18_4CellCount
 import Cogentic.RandomizedL18_4Numerator
@@ -157,6 +158,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedPaperL18_4.paperAssumptions_of_L18_4Inputs
 #print axioms Cogentic.RandomizedConcreteHitMassCount.C5abcInputs.compl_le
 #print axioms Cogentic.RandomizedConcreteHitMassCount.C5abcInputs.toHitMassInputs
+#print axioms Cogentic.RandomizedC5HalfMass.HalfMassInputs.half_mass
+#print axioms Cogentic.RandomizedC5HalfMass.half_mass_epochAccepted
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedConcreteHitMass.HitMassInputs.hitMass_of_inputs
 #print axioms Cogentic.RandomizedConcreteHitMass.toC5Inputs_of_hitMassInputs
