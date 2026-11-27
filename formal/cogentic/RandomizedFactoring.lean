@@ -10,8 +10,10 @@ import Cogentic.RandomizedFullTableFloor
 import Cogentic.RandomizedGramMinor
 import Cogentic.RandomizedGramRank
 import Cogentic.RandomizedHasseIncidence
+import Cogentic.RandomizedFullTableOptimum
 import Cogentic.RandomizedHiddenLabels
 import Cogentic.RandomizedKrylovProbe
+import Cogentic.RandomizedLimitedIndependence
 import Cogentic.RandomizedOddSplit
 import Cogentic.RandomizedOptimalCost
 import Cogentic.RandomizedPadeEuclid
@@ -33,6 +35,8 @@ import Cogentic.RandomizedSemisimpleZero
 import Cogentic.RandomizedSignCount
 import Cogentic.RandomizedSingularProbe
 import Cogentic.RandomizedSpanCoverage
+import Cogentic.RandomizedSharpSchedule
+import Cogentic.RandomizedSparseProducts
 import Cogentic.RandomizedSpanTransfer
 import Cogentic.RandomizedSparseDependency
 import Cogentic.RandomizedSparseSchedule
