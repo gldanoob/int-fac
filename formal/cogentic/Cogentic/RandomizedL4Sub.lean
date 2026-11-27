@@ -25,6 +25,8 @@ the local-splitting form produced by the CRT step.
   integer divisibility.
 * The CRT assembly `locallySplit_mul` / `locallySplit_finset_prod`: local roots
   modulo pairwise coprime moduli produce a root modulo their product.
+* Restriction of local roots to divisors (`locallySplit_of_dvd`) and the 2-adic
+  ramification obstruction `¬ LocallySplit N (2 ^ k)` for odd `N` and `k ≥ 2`.
 * The ramification/splitting implication
   `locallySplit_of_legendreSym` and its converse: for an odd prime `p ∤ N`,
   local splitting is equivalent to `legendreSym p (-2 * N) = 1`.  This is the
@@ -38,6 +40,9 @@ the local-splitting form produced by the CRT step.
   bound, and from the paper-shaped condition `∏ max(P i) ≤ √(2N)`.
 * `exists_reducedForm_of_locallySplit` and the `IsReducedForm` witness form of
   the reduced-form construction; reduced forms are primitive forms.
+* `L4SubInputs`, `L4SubInputs.toL4Inputs`, `L4SubInputs.toPrivateSupplyInputs`,
+  and `realized_of_l4SubInputs` build the L4 input record, the private-supply
+  record, and the supply bridge from these elementary facts.
 
 The Gauss composition and ideal-squaring laws of `RandomizedL4` are kept as the
 explicit `Prop`s `FormCompositionLaw` and `IdealSquaringLaw` (re-exported
@@ -435,7 +440,7 @@ theorem L4SubInputs.toL4Inputs {N m : ℕ} {P : Fin m → Finset ℕ}
 /-- **The private-supply record from the reduced L4 inputs.**  Every field is
 passed through unchanged; only the realized supply is rebuilt from `BandSplit`
 plus CRT. -/
-def toPrivateSupplyInputs {N : ℕ} (hNpos : 0 < N) (hN3 : 3 ≤ N)
+def L4SubInputs.toPrivateSupplyInputs {N : ℕ} (hNpos : 0 < N) (hN3 : 3 ≤ N)
     (m : ℕ) (hm : 0 < m) (P : Fin m → Finset ℕ)
     (hPprime : ∀ i, ∀ p ∈ P i, p.Prime)
     (hPcop : ∀ i, ∀ p ∈ P i, Nat.Coprime p (8 * N))
@@ -507,7 +512,7 @@ theorem realized_of_splitPrimeBin_bands {N m : ℕ} {P : Fin m → Finset ℕ}
 #print axioms exists_isReducedForm_of_locallySplit
 #print axioms isPrimitiveForm_of_isReducedForm
 #print axioms L4SubInputs.toL4Inputs
-#print axioms toPrivateSupplyInputs
+#print axioms L4SubInputs.toPrivateSupplyInputs
 #print axioms realized_of_l4SubInputs
 #print axioms realized_of_splitPrimeBin_bands
 

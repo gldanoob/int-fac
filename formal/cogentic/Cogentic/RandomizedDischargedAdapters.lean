@@ -84,13 +84,6 @@ noncomputable def c5ExpandedLoss {n : ℕ} (hN : 3 ≤ n) (C : ConcreteEpochData
     I.algebra.chebotarevLoss + I.algebra.oddDegreeLoss +
     I.algebra.valuationLoss + I.algebra.henselLoss + I.coupling.loss
 
-/-- The concrete C5 total loss in its original five-slot form. -/
-theorem c5TotalLoss_eq_five {n : ℕ} (hN : 3 ≤ n) (C : ConcreteEpochData n)
-    (I : @C5FullInputs n C (sampleFintype hN C)) :
-    c5TotalLoss hN C I =
-      I.abc.pool.loss + I.survivor.loss + I.descent.loss +
-        I.algebra.totalLoss + I.coupling.loss := rfl
-
 /-- The concrete C5 total loss is the expanded eight-term loss. -/
 theorem c5TotalLoss_eq_expanded {n : ℕ} (hN : 3 ≤ n) (C : ConcreteEpochData n)
     (I : @C5FullInputs n C (sampleFintype hN C)) :
@@ -315,7 +308,6 @@ theorem hitMass_of_concrete
 #print axioms concrete_eq_concreteHardFamily
 #print axioms concrete_eq_concreteCostFamily
 #print axioms c5ExpandedLoss
-#print axioms c5TotalLoss_eq_five
 #print axioms c5TotalLoss_eq_expanded
 #print axioms dischargedSlots_total_eq
 #print axioms loss_le_of_expanded
