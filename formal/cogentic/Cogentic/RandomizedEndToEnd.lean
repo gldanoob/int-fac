@@ -13,6 +13,7 @@ import Cogentic.RandomizedC5Coupling
 import Cogentic.RandomizedL19Poisson
 import Cogentic.RandomizedL19Energy
 import Cogentic.RandomizedL19EnergyMass
+import Cogentic.RandomizedL19EnergyMassFinite
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19ZeroModeFinite
 import Cogentic.RandomizedL19Thin
@@ -34,6 +35,7 @@ import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL27Analytic
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
+import Cogentic.RandomizedL30Analytic
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
@@ -196,6 +198,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL19ZeroModeFinite.FiniteZeroModeCertificate.toZeroModeCertificate
 #print axioms Cogentic.RandomizedL19EnergyMass.mellinEnvelope_le_exp_of_growth
 #print axioms Cogentic.RandomizedL19EnergyMass.gridPrefixEnvelope_le_exp_of_growth
+#print axioms Cogentic.RandomizedL19EnergyMassFinite.mellinEnergyScaleOfSmallCheck
+#print axioms Cogentic.RandomizedL19EnergyMassFinite.gridPrefixEnergyScaleOfSmallCheck
+#print axioms Cogentic.RandomizedL30Analytic.AnalyticInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL19Thin.LatticeThinInputs.slot_le
 #print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.toSubexpLeaf
 #print axioms Cogentic.RandomizedL19ThinFinite.LatticePaperThinFiniteInputs.slot_le
