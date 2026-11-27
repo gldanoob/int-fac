@@ -58,6 +58,8 @@ import Cogentic.RandomizedClassMajority
 import Cogentic.RandomizedWeightedIncidence
 import Cogentic.RandomizedCenteredBoxRatio
 import Cogentic.RandomizedWitnessSizeBias
+import Cogentic.RandomizedSignedCorrelation
+import Cogentic.RandomizedRationalChildRouting
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
