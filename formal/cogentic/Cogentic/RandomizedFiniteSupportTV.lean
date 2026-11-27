@@ -1,4 +1,5 @@
 import Cogentic.RandomizedSamplerTransfer
+import Mathlib.Probability.ProbabilityMassFunction.Constructions
 
 open Finset
 open scoped BigOperators
@@ -6,6 +7,8 @@ open scoped BigOperators
 namespace Cogentic.RandomizedFiniteSupportTV
 
 open RandomizedSamplerTransfer (totalVariation mean_difference_le_totalVariation)
+
+section FiniteTarget
 
 variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] [DecidableEq Ω]
 
@@ -77,5 +80,81 @@ theorem one_sub_card_div_le_totalVariation_fiberMass {A : Type*}
 #print axioms uniform_mass_outside_le_totalVariation
 #print axioms uniform_mass_off_image_ge
 #print axioms one_sub_card_div_le_totalVariation_fiberMass
+
+end FiniteTarget
+
+section PMFLaws
+
+variable {A B : Type*}
+
+/-- Half the sum of absolute atom differences between two discrete probability laws. -/
+noncomputable def pmfTotalVariation (p q : PMF B) : ℝ :=
+  (∑' z, |(p z).toReal - (q z).toReal|) / 2
+
+theorem pmfTotalVariation_eq_totalVariation [Fintype B] (p q : PMF B) :
+    pmfTotalVariation p q = totalVariation (fun z => (p z).toReal) (fun z => (q z).toReal) := by
+  rw [pmfTotalVariation, totalVariation, tsum_fintype]
+
+/-- The difference between the masses of a finite event is bounded by total variation. -/
+theorem pmf_finset_mass_sub_le_totalVariation (p q : PMF B) (T : Finset B) :
+    (∑ z ∈ T, (p z).toReal) - (∑ z ∈ T, (q z).toReal) ≤ pmfTotalVariation p q := by
+  let d (z : B) := (p z).toReal - (q z).toReal
+  have hp := ENNReal.summable_toReal p.tsum_coe_ne_top
+  have hq := ENNReal.summable_toReal q.tsum_coe_ne_top
+  have hd : Summable d := hp.sub hq
+  have hpsum : (∑' z, (p z).toReal) = 1 := by
+    rw [← ENNReal.tsum_toReal_eq p.apply_ne_top, p.tsum_coe, ENNReal.toReal_one]
+  have hqsum : (∑' z, (q z).toReal) = 1 := by
+    rw [← ENNReal.tsum_toReal_eq q.apply_ne_top, q.tsum_coe, ENNReal.toReal_one]
+  have hzero : (∑' z, d z) = 0 := by
+    unfold d
+    rw [hp.tsum_sub hq, hpsum, hqsum, sub_self]
+  have hsplit := hd.sum_add_tsum_subtype_compl T
+  rw [hzero] at hsplit
+  have hfinite : ∑ z ∈ T, d z ≤ ∑ z ∈ T, |d z| := sum_le_sum fun _ _ => le_abs_self _
+  have hcompl : -(∑' z : {z // z ∉ T}, d z) ≤ ∑' z : {z // z ∉ T}, |d z| := by
+    rw [← tsum_neg]
+    have hc : Summable (fun z : {z // z ∉ T} => d z) := hd.subtype (· ∉ T)
+    exact hc.neg.tsum_le_tsum (fun _ => neg_le_abs _) hc.abs
+  rw [← sum_sub_distrib]
+  change (∑ z ∈ T, d z) ≤ (∑' z, |d z|) / 2
+  rw [← hd.abs.sum_add_tsum_subtype_compl T]
+  linarith only [hsplit, hfinite, hcompl]
+
+/-- A high-mass finite input set limits the image law's proximity to any target
+law whose atoms are uniformly bounded. -/
+theorem pmf_map_totalVariation_ge (p : PMF A) (q : PMF B)
+    (f : A → B) (S : Finset A) (ε m : ℝ)
+    (hmass : 1 - ε ≤ ∑ x ∈ S, (p x).toReal)
+    (hatom : ∀ z, (q z).toReal ≤ m) :
+    1 - ε - (S.card : ℝ) * m ≤ pmfTotalVariation (p.map f) q := by
+  classical
+  have himage : (∑ x ∈ S, (p x).toReal) ≤ ∑ z ∈ S.image f, ((p.map f) z).toReal := by
+    have h := p.toOuterMeasure_mono
+      (s := (S : Set A)) (t := f ⁻¹' ((S.image f : Finset B) : Set B))
+      (fun x hx => mem_image_of_mem f hx.1)
+    rw [← PMF.toOuterMeasure_map_apply, PMF.toOuterMeasure_apply_finset,
+      PMF.toOuterMeasure_apply_finset] at h
+    have hre := ENNReal.toReal_mono (ENNReal.sum_ne_top.mpr fun z _ => (p.map f).apply_ne_top z) h
+    rw [ENNReal.toReal_sum (fun x _ => p.apply_ne_top x),
+      ENNReal.toReal_sum (fun z _ => (p.map f).apply_ne_top z)] at hre
+    exact hre
+  have hm : 0 ≤ m := by
+    obtain ⟨z, _⟩ := q.support_nonempty
+    exact (ENNReal.toReal_nonneg (a := q z)).trans (hatom z)
+  have htarget : (∑ z ∈ S.image f, (q z).toReal) ≤ (S.card : ℝ) * m := calc
+    _ ≤ ∑ _z ∈ S.image f, m := sum_le_sum fun z _ => hatom z
+    _ = ((S.image f).card : ℝ) * m := by simp [nsmul_eq_mul]
+    _ ≤ _ := mul_le_mul_of_nonneg_right (by exact_mod_cast card_image_le) hm
+  calc
+    _ ≤ (∑ z ∈ S.image f, ((p.map f) z).toReal) - ∑ z ∈ S.image f, (q z).toReal :=
+      sub_le_sub (hmass.trans himage) htarget
+    _ ≤ _ := pmf_finset_mass_sub_le_totalVariation (p.map f) q (S.image f)
+
+#print axioms pmfTotalVariation_eq_totalVariation
+#print axioms pmf_finset_mass_sub_le_totalVariation
+#print axioms pmf_map_totalVariation_ge
+
+end PMFLaws
 
 end Cogentic.RandomizedFiniteSupportTV
