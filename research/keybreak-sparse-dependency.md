@@ -84,3 +84,5 @@ $$
 \frac32\theta u^2+\frac{2(1+\rho)}\delta+\frac{1-\rho}{3b}+C\delta\le6b(C-b).
 $$
 With $(\theta,\rho)=(0,1)$, the private and terminal rows exclude $C=1.94548659$. With $(1,0)$ they exclude $C=1.95$. Consequently speeding up either operation alone within this model cannot reach 1.923. The terminal mean and the number of expensive rows charged here are both assumptions that a new relation collector could change. [Radix-only certificate](../formal/cogentic/Cogentic/RandomizedRadixFloor.lean) · [Free rational proposal certificate](../formal/cogentic/Cogentic/RandomizedFreeRationalFloor.lean)
+
+The [public-span calculation](keybreak-public-span-schedule.md) specifies the residual rank and preparation cost that would put a different one-input schedule below 1.923. Its public relation supply remains open.

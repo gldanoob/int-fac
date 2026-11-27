@@ -14,7 +14,7 @@ def check_schedule(
     period_bounds=".7089 .452",
     algebraic_exponent="2.0001", private_exponent="1.4143",
     stages=128, first_knot=".0662", first_floor=".0043", minimum_mean=".001",
-    matrix_exponent="2.4", rounded_exponents=(12_000, 16_000),
+    matrix_exponent="2.4", row_exponent=None, rounded_exponents=(12_000, 16_000),
 ):
     delta, kappa, beta, alpha, gamma = map(F, field.split())
     top_slope, high_ratio, low_ratio, height = map(F, descent.split())
@@ -25,6 +25,8 @@ def check_schedule(
     grid = [start + (1 - start) * i / (stages - 1) for i in range(stages)]
     scales = [z**2 for z in grid]
     b, radix = delta * beta, delta**-3
+    rows = b if row_exponent is None else F(row_exponent)
+    assert 0 < rows <= b
     y0 = 1 / (2 * kappa)
     v0 = alpha * y0
     y1 = v0 / top_ratio
@@ -70,10 +72,10 @@ def check_schedule(
     private = []
     for weight, knot in zip(reversed(weights), reversed(grid), strict=True):
         tail += weight
-        private.append(b + tail + h_private * knot + slack)
+        private.append(rows + tail + h_private * knot + slack)
     assert max(private) == min(private)
 
-    top, high, low = (b + delta * ratio / 3 + 2 * slack for ratio in (top_ratio, high_ratio, low_ratio))
+    top, high, low = (rows + delta * ratio / 3 + 2 * slack for ratio in (top_ratio, high_ratio, low_ratio))
     rational_scale = 3 * delta * b
     costs = {
         "private": max(private),
@@ -101,7 +103,7 @@ def check_schedule(
             2**exponent, delta=delta, kappa=kappa, beta=beta, alpha=alpha, gamma=gamma,
             top_ratio=top_ratio, high_ratio=high_ratio, low_ratio=low_ratio, height=height,
             h=h_algebraic, target=target, scales=scales, fractions=fractions, top_ratio_slope=top_slope,
-            factor_cap=2, first_scale=F(first_floor), cap_slack=slack,
+            factor_cap=2, first_scale=F(first_floor), cap_slack=slack, row_exponent=rows,
         )
 
 

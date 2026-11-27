@@ -3,6 +3,8 @@ import Cogentic.RandomizedCRTSigns
 import Cogentic.RandomizedCostBounds
 import Cogentic.RandomizedEndpointFloor
 import Cogentic.RandomizedKrylovProbe
+import Cogentic.RandomizedFullTableFloor
+import Cogentic.RandomizedGramMinor
 import Cogentic.RandomizedHasseIncidence
 import Cogentic.RandomizedHiddenLabels
 import Cogentic.RandomizedOptimalCost
@@ -11,8 +13,12 @@ import Cogentic.RandomizedRelaxedCosts
 import Cogentic.RandomizedRestartBudget
 import Cogentic.RandomizedPrivateFloor
 import Cogentic.RandomizedPrivateGates
+import Cogentic.RandomizedPublicSpan
+import Cogentic.RandomizedTaggedKernel
 import Cogentic.RandomizedProbeCount
 import Cogentic.RandomizedScheduleFloor
+import Cogentic.RandomizedSemisimpleZero
+import Cogentic.RandomizedSpanCoverage
 import Cogentic.RandomizedSingularProbe
 import Cogentic.RandomizedSignCount
 import Cogentic.RandomizedSparseSchedule
