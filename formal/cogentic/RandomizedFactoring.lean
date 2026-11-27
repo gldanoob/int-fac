@@ -2,6 +2,7 @@ import Cogentic.RandomizedAffineWindow
 import Cogentic.RandomizedBudgetLimit
 import Cogentic.RandomizedCRTSigns
 import Cogentic.RandomizedCostBounds
+import Cogentic.RandomizedSplitWork
 import Cogentic.RandomizedEndpointFloor
 import Cogentic.RandomizedEvaluationNorm
 import Cogentic.RandomizedEvaluationMaps
@@ -161,3 +162,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedClassMajority.card_goodChoices_ge
 #print axioms Cogentic.RandomizedWeightedIncidence.sum_incident_sq_le
 #print axioms Cogentic.RandomizedCenteredBoxRatio.card_centeredBox_dilate_le
+#print axioms Cogentic.RandomizedSplitWork.expected_work_le_log2
