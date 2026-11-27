@@ -28,6 +28,7 @@ import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
 import Cogentic.RandomizedC5Full
+import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
 import Cogentic.RandomizedL27_1
@@ -40,6 +41,7 @@ import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
 import Cogentic.RandomizedConcreteFormSpec
+import Cogentic.RandomizedConcreteC3Real
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedP1Sub
 import Cogentic.RandomizedConcreteTV
@@ -249,6 +251,10 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedP1Sub.P1SubInputs.toP1Leaf
 #print axioms Cogentic.RandomizedP1Sub.p1Sub_reduction
 #print axioms Cogentic.RandomizedConcreteFormSpec.concreteFormSpec
+#print axioms Cogentic.RandomizedConcreteC3Real.c3Inputs
+#print axioms Cogentic.RandomizedConcreteC3Real.hit_prob_ge
+#print axioms Cogentic.RandomizedC5GoodIff.ofToyEpoch_hitMass
+#print axioms Cogentic.RandomizedC5GoodIff.fullOfSolver_good_iff
 #print axioms Cogentic.RandomizedL19EnergyMass.mellinEnergyScaleOfGrowth
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
