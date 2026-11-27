@@ -31,3 +31,5 @@ Small public Möbius corrections can be handled by normalizing the generators fi
 ## Arithmetic check
 
 For $N=119$, evaluate $\sqrt 2\mapsto11$ and take $m=4$. Over $E=\mathbb Q(\sqrt2)$ use $X^2-(-6+2\sqrt2)$ and $X^2-(5+\sqrt2)$. Their absolute polynomials are $X^4+12X^2+28$ and $X^4-10X^2+23$. Each is irreducible because the radicand has nonsquare norm (28 and 23) and generates $E$. Their values at 4 are $4N$ and $N$, and both derivatives there are units modulo $N$. Their relative resultant is $(\sqrt2-11)^2$ of rational norm $N^2$. As a fractional-element check, $(\sqrt2-11)/2$ has norm $119/4$, evaluates to zero and has numerator ideal of norm 119. These examples illustrate the divisibility statements at bounded degree.
+
+For draws from the ordinary Gaussian law, reduction at auxiliary primes further shows that the Galois closure is typically symmetric and small batches of closures are linearly disjoint. [Sampling bound and finite checks](keybreak-native-splitting-fields.md)

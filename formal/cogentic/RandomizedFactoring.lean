@@ -36,6 +36,8 @@ import Cogentic.RandomizedSpanTransfer
 import Cogentic.RandomizedSparseDependency
 import Cogentic.RandomizedSparseSchedule
 import Cogentic.RandomizedTaggedDependency
+import Cogentic.RandomizedSubfieldDegree
+import Cogentic.RandomizedTaggedSolver
 import Cogentic.RandomizedTaggedKernel
 
 #print axioms Cogentic.Randomized.finite_grid_schedule_floor
