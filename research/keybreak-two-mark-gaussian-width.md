@@ -43,3 +43,58 @@ For the lattice \(K\) in its real span, let \(w\) be the orthogonal projection o
 \eta_\varepsilon(K)\ge B\sqrt{\log(2/\varepsilon)/\pi}.
 \]
 This lower bound does not require a wide image law or an angle condition. It gives a direct limit of the shifted-kernel Poisson comparison used in G.4. The total variation argument further shows that, in the stated large-mark regime, a different proof cannot supply (G.19) for the same narrow isotropic law. Neither argument prohibits changing the coefficient law or replacing the ideal two-value comparison.
+
+## The transition width for a stable polynomial
+
+Fix the degree \(r\). Let the primitive integral kernel polynomial \(H_n\), after division by its signed leading coefficient of magnitude \(B=B_n\to\infty\), converge coefficientwise to a monic polynomial \(h\) with all roots in a fixed disk of radius less than one. Let the number \(n\) of input coefficients tend to infinity. Set
+\[
+ e(h)=\min_{0\ne k\in\mathbb Z^{(\mathbb Z)}}\;
+ \int_0^1 \frac{|\sum_j k_j e^{2\pi ijt}|^2}{|h(e^{2\pi it})|^2}\,dt,
+ \qquad
+ \sigma_* = B\sqrt{\frac{\log n}{2\pi e(h)}} .
+\]
+Here \(k\) has finite support. Compare the orthogonal image of \(D_{\mathbb Z^n,\sigma,c}\) modulo the real kernel of multiplication witnesses with the discrete Gaussian of the same width on the projected lattice, centered at the projected \(c\). For every fixed \(0<\delta<1\), their total variation distance tends to one for \(1\le\sigma\le(1-\delta)\sigma_*\) and to zero for \(\sigma\ge(1+\delta)\sigma_*\). Both conclusions hold uniformly in \(c\). A fixed parity translate is covered by measuring the width in units of the coefficient spacing. These conclusions concern the entire exact evaluation vector. [Definition of the image laws and integral kernels](keybreak-quadratic-pair-reserve.md#a-necessary-width-for-the-full-two-value-gaussian-approximation)
+
+Let \(M\) be the \(n\)-by-\((n-r)\) matrix with columns the coefficient vectors of the untruncated products \(X^jH_n\). Write \(K=M\mathbb Z^{n-r}\), and let \(P,\pi\) project onto its real span and orthogonal complement, respectively. Write \(L=\pi\mathbb Z^n\). A vector of \(K^*\) has the form \(w_k=M(M^tM)^{-1}k\). Its squared length is \(B^{-2}k^tG_nk\) where \(G_n=(M^tM/B^2)^{-1}\). Parseval bounds the eigenvalues of \(G_n\) in a fixed compact interval \([\beta,\beta^{-1}]\subset(0,\infty)\), since the normalized polynomial is uniformly bounded above and away from zero on the unit circle. The bilateral inverse Gram \(G\) is the Fourier multiplier \(1/|h|^2\), with the same coercivity bound after shrinking \(\beta\). The entries of both inverses decay exponentially off the diagonal, uniformly in \(n\). Indeed a scaled Neumann series for the inverse of the banded positive Gram has a geometrically small operator-norm tail, and its degree-\(d\) partial sum has bandwidth \(rd\). In particular \(e(h)\ge\beta\). It is attained: a minimizing sequence has bounded integer amplitudes and support cardinality. After translating and taking a subsequence, every gap between consecutive sites is fixed or tends to infinity. A diverging gap splits the limiting energy into at least two nonempty fixed blocks of energy at least \(e(h)\) each, by decay. This contradicts minimality.
+
+**An averaged theta estimate.** For any lattice \(\Lambda\), write \(\Theta_\Lambda(t)=\sum_{z\in\Lambda}\exp(-\pi t^2\|z\|^2)\). For \(w\in K^*\), extend its integral linear functional on the saturated lattice \(K\) to \(\mathbb Z^n\). The representing \(z_w\in\mathbb Z^n\) satisfies \(Pz_w=w\). Put \(v_w=\pi z_w\), defined modulo \(L^*\). Fiber Poisson summation expresses the density relative to the target Gaussian \(Q\) as \(A/\mathbb E_Q A\), where \(A-1\) is a Fourier series on \(L\) with character frequencies \(v_w\) up to sign and coefficient magnitudes \(\exp(-\pi\sigma^2\|w\|^2)\), \(0\ne w\in K^*\). Orthogonal decomposition of \(\|x-c\|^2\) gives the common target weight before this fiber correction. The normalizing mass is positive.
+
+Assume \(\sigma\to\infty\). Under \(Q\), the correlation for \(w,w'\) has absolute value at most
+\[
+ (1+O_r(e^{-c_0\sigma^2}))\sum_{u\in L^*}
+ \exp(-\pi\sigma^2\|v_w-v_{w'}+u\|^2).
+\]
+This follows by Poisson summation in fixed rank, since \(L^*\subset\mathbb Z^n\) has minimum at least one. Grouping the squared error by the integral lift \(z\) with \(Pz=w-w'\) and \(\pi z=v_w-v_{w'}+u\) gives
+\[
+ \mathbb E_Q|A-1|^2 \le (1+O_r(e^{-c_0\sigma^2}))
+ \left\{\Theta_{K^*}(\sqrt2\,\sigma)-1+
+ \Theta_{K^*}(\sqrt2\,\sigma)
+ [\Theta_{\mathbb Z^n}(\sigma/\sqrt2)-1]\right\}.
+\]
+Indeed \(z=0\) gives precisely the first theta tail in the majorant. For fixed \(z\ne0\), the sum over \(w\) has exponent given by
+\(\|w\|^2+\|w-Pz\|^2+\|\pi z\|^2
+=2\|w-Pz/2\|^2+\|Pz\|^2/2+\|\pi z\|^2\).
+A shifted lattice Gaussian has total mass at most its unshifted mass, again by Poisson. This yields the second term. Vanishing of the bound implies \(d_{\rm TV}=o(1)\) by Cauchy–Schwarz and \(\mathbb E_Q A=1+o(1)\).
+
+**Summing short dual vectors.** Above \((1+\delta)\sigma_*\), the ambient integer theta tail vanishes by the one-dimensional product formula and \(B\to\infty\). For the kernel theta tail choose a small fixed \(\epsilon>0\) with \((1+\delta)^2(1-\epsilon)>1\). Use a fixed polynomial approximation to the inverse with operator error as small as needed compared to \(\epsilon\beta\), hence fixed bandwidth \(D\), for both the finite Gram and the bilateral Gram. The finite normalized Gram is exactly a finite Toeplitz section, as no output coefficients are truncated. Away from its two boundaries the polynomial therefore agrees with its bilateral counterpart for \(H_n/B\) up to leading sign. Coefficientwise convergence gives an additional \(o(1)\) operator error on replacing the bilateral symbol by \(h\).
+
+Group the nonzero entries of \(k\) into maximal clusters with successive gaps at most \(D\). The polynomial has no cross terms between clusters. A bulk cluster, lying more than \(D\) from both boundaries, has bilateral energy at least \(e(h)\). Every cluster, including ones meeting either boundary strip, has a positive quadratic energy floor by coercivity. Combining these facts and absorbing the polynomial approximation errors gives
+\[
+ k^tG_n k\ \ge\ (1-\epsilon)e(h)\,\#\{\text{bulk clusters}\}
+                 + c_\epsilon\sum_j k_j^2
+\]
+for all large \(n\), with \(c_\epsilon>0\). A cluster with \(t\) sites has at most \(D^{t-1}\) gap patterns after its first site is fixed. There are at most \(n\) bulk anchors, and \(O(D)\) anchors for clusters touching a boundary, counting from the right for the rightmost boundary. The amplitude weight per site sums to \(\sum_{a\ne0} e^{-2\pi(\sigma/B)^2 c_\epsilon a^2}=o(1)\). Summing over \(t\) is geometric. The bulk anchor factor is absorbed by \(n\exp(-2\pi(\sigma/B)^2(1-\epsilon)e(h))=o(1)\). The total weight of all individual clusters thus tends to zero. Overcounting their possible collections by the exponential of that sum bounds \(\Theta_{K^*}(\sqrt2\,\sigma)-1=o(1)\).
+
+**A test below the width.** Choose translates of one fixed minimizing integer pattern \(k\), spaced by \(C\log n\), all at least \(C\log n\) from the ends. The \(m\asymp n/\log n\) resulting dual vectors \(w_i\) satisfy \(\|B w_i\|^2=e(h)+o(1)\) uniformly by the same polynomial approximation. Their entries decay exponentially away from the translated support, with prefactor \(O(1/B)\), by the inverse Gram decay and the banded matrix \(M\). Consider the characters on \(L\) of frequencies \(v_i\), rotated by unit scalars so their pullbacks at an integer \(x\) are \(\exp(-2\pi i\langle w_i,x-c\rangle)\). Under the actual law their expectations have real part
+\[
+  e^{-\pi\sigma^2\|w_i\|^2}(1+o(1)).
+\]
+For \(\sigma\ge1\) the one-coordinate, centered characteristic function at \(|t|\le1/4\) is \(e^{-\pi\sigma^2t^2}(1+O(\sigma^2 |t|e^{-c_2\sigma^2}))\): in the Poisson sum subtract the untwisted series, use the mean value theorem on each nonzero dual term, and divide by the untwisted mass, uniformly bounded below after normalization. Multiplication over coordinates costs a relative \(o(1)\) since \(\|w_i\|_1=O(1/B)\). Therefore the real means are at least \(n^{-(1-\delta)^2/2+o(1)}\). For the actual law truncate each rotated character's coefficient vector to disjoint intervals around its support. Its expected change is at most \(O((\sigma/B)n^{-3})\) for large enough \(C\), using \(\mathbb E|x_j-c_j|\ll\sigma\). The truncated variables are independent and bounded by one, so their sum has variance \(O(m)\).
+
+For the ideal law the complex sum of the \(m\) rotated characters has second moment \(O_r(m)\) for \(\sigma\) greater than a sufficiently large fixed constant. To see this, for fixed \(i\) the union of the cosets \(v_i-v_j+L^*\) is uniformly separated. For distinct \(j,j'\), the corresponding difference lifts to a nonzero integral vector with kernel component \(w_j-w_{j'}\) of norm \(O(1/B)\); its orthogonal component has norm at least \(\sqrt{1-O(B^{-2})}\). Distinct points of one coset are at least one apart. Packing this union in fixed rank in the correlation bound gives \(O_r(1)\) for each row. The sum of the actual real means exceeds \(\sqrt m\) by a factor tending to infinity, so Chebyshev and the ideal second moment give a separating event of probabilities \(1-o(1)\) and \(o(1)\). For the remaining bounded range \(1\le\sigma\le\sigma_0(r)\), the finite-support estimate in the pair note gives the same conclusion directly, taking \(R=B^{1/4}\).
+
+For \(h=X^r\) the integral energy is \(\sum k_i^2\), giving \(e=1\). For example \(H_n=B X^r+1\) has the cutoff \(B\sqrt{\log n/(2\pi)}\). For \(h=X-a\), \(0\le a<1\), the Toeplitz entries are \(a^{|i-j|}/(1-a^2)\). The energy minimum is
+\[
+ e(X-a)=\min\{1/(1-a^2),\,2/(1+a)\}.
+\]
+One unit site and two adjacent sites with opposite signs realize the two candidates. If \(\sum k_i^2\ge4\), coercivity gives \(4/(1+a)^2\ge2/(1+a)\). At squared norm two the optimal separation is one. At squared norm three, write \(x,y\) for the powers of \(a\) across the successive gaps and \(u,v\in\{\pm1\}\) for adjacent sign products. The numerator of the energy is \(1+2(1+ux)(1+vy)\ge1\). In particular, for \(a>1/2\) the two-site pattern controls the transition.
