@@ -6,8 +6,10 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Data.ZMod.Basic
+import Mathlib.Algebra.Field.ZMod
 import Mathlib.Probability.ProbabilityMassFunction.Constructions
 import Mathlib.Probability.ProbabilityMassFunction.Monad
+import Mathlib.Probability.Distributions.Uniform
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Positivity
@@ -139,7 +141,8 @@ theorem sum_two_pow_omega_le {X : ℕ} (hX : 1 ≤ X) :
         simp only [Finset.mem_coe, Finset.mem_filter] at hm₁ hm₂
         have h1 := Nat.mul_div_cancel' hm₁.2
         have h2 := Nat.mul_div_cancel' hm₂.2
-        rw [← h1, ← h2, hEq]
+        rw [← h1, ← h2]
+        exact congrArg (d * ·) hEq
     simpa [Nat.card_Icc] using hbij
   have hreal : (∑ m ∈ Finset.Icc 1 X, (2 : ℝ) ^ m.primeFactors.card) ≤
       ∑ d ∈ Finset.Icc 1 X, ((X / d : ℕ) : ℝ) := by
@@ -191,8 +194,7 @@ theorem quarter_lt_log_log_two_mul {N : ℕ} (hN : 2 ≤ N) :
       rw [← Real.exp_nat_mul]
       norm_num
       linarith [Real.exp_one_lt_d9]
-    nlinarith [Real.exp_pos ((1 : ℝ) / 4), sq_nonneg (Real.exp ((1 : ℝ) / 4)),
-      sq_nonneg (1.38 : ℝ)]
+    exact lt_of_pow_lt_pow_left₀ 4 (by norm_num) hpow
   have hexpL : Real.exp ((1 : ℝ) / 4) < Real.log (2 * (N : ℝ)) :=
     hexpq.trans (hlog4.trans_le hL4)
   have := Real.log_lt_log (Real.exp_pos _) hexpL
@@ -259,6 +261,7 @@ theorem primeFactors_recip_sum_le {N : ℕ} (hN : 2 ≤ N) :
     rw [hIcc, Finset.sum_insert hnot1] at hharm
     have hIcc2 : (∑ d ∈ Finset.Icc 2 M, (1 : ℝ) / (d : ℝ)) ≤ Real.log (M : ℝ) := by
       norm_num at hharm
+      simp only [one_div]
       linarith
     have hM2L : (M : ℝ) ≤ 2 * L := by linarith
     have hlogM : Real.log (M : ℝ) ≤ Real.log L + Real.log 2 := by
@@ -434,6 +437,7 @@ theorem local_series_summable_and_le {p : ℕ} (hp : 2 ≤ p) (R : ℕ → ℕ)
       rw [geom_sum_eq hne1]
       have hneg : (p : ℝ)⁻¹ - 1 = -(((p : ℝ) - 1) / (p : ℝ)) := by
         field_simp [hppos.ne']
+        ring
       have hnum : ((p : ℝ)⁻¹) ^ M - 1 = -(1 - ((p : ℝ)⁻¹) ^ M) := by ring
       rw [hneg, hnum, neg_div_neg_eq]
       have hpow0 : 0 ≤ ((p : ℝ)⁻¹) ^ M := by positivity
@@ -504,7 +508,7 @@ theorem modNegSqRootCount_mul_coprime (m : ℕ) {a b : ℕ} (hab : Nat.Coprime a
     simp only [modNegSqRoots, Finset.mem_filter, Finset.mem_univ, true_and] at hx
     simp only [Finset.mem_product, modNegSqRoots, Finset.mem_filter, Finset.mem_univ, true_and]
     have hmap : e (x ^ 2) = e (-(m : ZMod (a * b))) := congrArg e hx
-    simp only [map_pow, map_neg, map_natCast, Prod.ext_iff, Prod.fst_pow, Prod.snd_pow,
+    simp only [map_pow, map_neg, map_natCast, Prod.ext_iff, Prod.pow_fst, Prod.pow_snd,
       Prod.fst_neg, Prod.snd_neg, Prod.fst_natCast, Prod.snd_natCast] at hmap
     exact hmap
   · intro x₁ _ x₂ _ hEq
@@ -514,8 +518,8 @@ theorem modNegSqRootCount_mul_coprime (m : ℕ) {a b : ℕ} (hab : Nat.Coprime a
     refine ⟨e.symm y, ?_, e.apply_symm_apply y⟩
     simp only [modNegSqRoots, Finset.mem_filter, Finset.mem_univ, true_and]
     apply e.injective
-    simp only [map_pow, map_neg, map_natCast, e.apply_symm_apply, Prod.ext_iff, Prod.fst_pow,
-      Prod.snd_pow, Prod.fst_neg, Prod.snd_neg, Prod.fst_natCast, Prod.snd_natCast]
+    simp only [map_pow, map_neg, map_natCast, e.apply_symm_apply, Prod.ext_iff, Prod.pow_fst,
+      Prod.pow_snd, Prod.fst_neg, Prod.snd_neg, Prod.fst_natCast, Prod.snd_natCast]
     exact hy
 
 private lemma zmod_eq_zero_iff_dvd_val {n : ℕ} [NeZero n] (x : ZMod n) :
@@ -543,6 +547,7 @@ theorem modNegSqRootCount_odd_prime_pow_coprime {m p : ℕ} (hp : Nat.Prime p) (
       by_cases hk : k = 0
       · subst hk
         left
+        haveI : Subsingleton (ZMod (p ^ 0)) := ZMod.subsingleton_iff.mpr (pow_zero p)
         exact Subsingleton.elim x x₀
       have hdiff : (x - x₀) * (x + x₀) = 0 := by
         have : (x - x₀) * (x + x₀) = x ^ 2 - x₀ ^ 2 := by ring
@@ -663,6 +668,9 @@ theorem modNegSqRootCount_two_pow_odd {m : ℕ} (hm : Odd m) (k : ℕ) :
           have hsq : ((f x).val ^ 2 : ℕ) % 4 = ((f x) ^ 2).val := by
             have := ZMod.val_natCast 4 ((f x).val ^ 2)
             simpa [ZMod.natCast_zmod_val] using this.symm
+          have h4sq : 4 ∣ (f x).val ^ 2 := by
+            obtain ⟨t, ht⟩ := h2dvd
+            exact ⟨t ^ 2, by rw [ht]; ring⟩
           omega
         have hfx2 : (f x) ^ 2 = -(m : ZMod 4) := by
           rw [← map_pow, hx, map_neg, map_natCast]
@@ -816,7 +824,8 @@ theorem modNegSqRootCount_le_two_pow_omega_succ_of_odd {m A : ℕ} (hm : Odd m)
         exact ((Nat.coprime_primes hp' hq').mpr hne).pow _ _
       rw [modNegSqRootCount_mul_coprime m hcop_ps,
         ih (fun q hq => hprimes q (Finset.mem_insert_of_mem hq))]
-  rw [hprod_eq, hmult A.primeFactors (fun p hp => Nat.prime_of_mem_primeFactors hp)]
+  conv_lhs => rw [hprod_eq]
+  rw [hmult A.primeFactors (fun p hp => Nat.prime_of_mem_primeFactors hp)]
   by_cases h2 : 2 ∈ A.primeFactors
   · rw [← Finset.mul_prod_erase A.primeFactors _ h2]
     have h2le : modNegSqRootCount m (2 ^ (A.factorization 2)) ≤ 4 :=
@@ -887,7 +896,8 @@ theorem modNegSqRootCount_le_two_pow_omega_succ_of_two_mul_odd {N A : ℕ} (hN :
         exact ((Nat.coprime_primes hp' hq').mpr hne).pow _ _
       rw [modNegSqRootCount_mul_coprime (2 * N) hcop_ps,
         ih (fun q hq => hprimes q (Finset.mem_insert_of_mem hq))]
-  rw [hprod_eq, hmult A.primeFactors (fun p hp => Nat.prime_of_mem_primeFactors hp)]
+  conv_lhs => rw [hprod_eq]
+  rw [hmult A.primeFactors (fun p hp => Nat.prime_of_mem_primeFactors hp)]
   have hall : (∏ p ∈ A.primeFactors, modNegSqRootCount (2 * N) (p ^ (A.factorization p))) ≤
       ∏ _p ∈ A.primeFactors, (2 : ℕ) := by
     apply Finset.prod_le_prod'
@@ -953,7 +963,8 @@ theorem modNegSqRootCount_odd_prime_pow_le {m p : ℕ} (hm : m ≠ 0) (hp : Nat.
         have h1 := Nat.mul_div_cancel' (hdvd_half x₁ hx₁)
         have h2 := Nat.mul_div_cancel' (hdvd_half x₂ hx₂)
         apply ZMod.val_injective (p ^ k)
-        rw [← h1, ← h2, hEq]
+        rw [← h1, ← h2]
+        exact congrArg (p ^ ((k + 1) / 2) * ·) hEq
     simpa [Finset.card_range] using hcard_le.trans (Nat.le_mul_of_pos_left _ (by norm_num))
   · -- When `w < k`, write `m = p^w * m'` with `¬ p ∣ m'`.
     have hwk : w < k := Nat.lt_of_not_ge hkw
@@ -1048,7 +1059,8 @@ theorem modNegSqRootCount_odd_prime_pow_le {m p : ℕ} (hm : m ≠ 0) (hp : Nat.
               ← Nat.div_add_mod (x₂.val / p ^ t) (p ^ (k - w)), hdiv, hmod]
           apply ZMod.val_injective (p ^ k)
           rw [← Nat.mul_div_cancel' h1, ← Nat.mul_div_cancel' h2, hu]
-      rw [Finset.card_product, Finset.card_range, ← modNegSqRootCount_of_ne_zero] at hcard_le
+      rw [Finset.card_product, Finset.card_range,
+        ← modNegSqRootCount_of_ne_zero m' (p ^ (k - w))] at hcard_le
       have hunit := modNegSqRootCount_odd_prime_pow_coprime hp hp2 hpm' (k - w)
       calc
         (modNegSqRoots m (p ^ k)).card
@@ -1170,15 +1182,17 @@ theorem dyadicProposalPMF_apply_some {J U A : ℕ} (hA1 : 1 ≤ A) (hAU : A ≤ 
         rw [if_pos he, hcard2]
         by_cases hc : Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d * e = A
         · have hleU : d * e ≤ U := hc.2.2.2 ▸ hAU
-          rw [if_pos hc, if_pos ⟨hc.1, hc.2.1, hc.2.2.1, hleU⟩, if_pos (congrArg some hc.2.2.2.symm)]
+          have hc' : Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d * e ≤ U :=
+            ⟨hc.1, hc.2.1, hc.2.2.1, hleU⟩
+          rw [if_pos hc, if_pos hc', if_pos (congrArg some hc.2.2.2.symm)]
         · rw [if_neg hc]
-          split_ifs with h1 h2
-          · exfalso
-            have hde : d * e = A := (Option.some.inj h2).symm
-            exact hc ⟨h1.1, h1.2.1, h1.2.2.1, hde⟩
-          · rfl
-          · exfalso; exact Option.noConfusion h2
-          · rfl
+          by_cases h1 : Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d * e ≤ U
+          · rw [if_pos h1]
+            have hne : ¬ (some A = some (d * e)) := fun h2 =>
+              hc ⟨h1.1, h1.2.1, h1.2.2.1, (Option.some.inj h2).symm⟩
+            rw [if_neg hne]
+          · rw [if_neg h1]
+            exact if_neg (Option.some_ne_none A)
       rw [he_eq]
       by_cases hcond : Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d ∣ A
       · rw [if_pos hcond]
@@ -1191,9 +1205,9 @@ theorem dyadicProposalPMF_apply_some {J U A : ℕ} (hA1 : 1 ≤ A) (hAU : A ≤ 
           have hqle : A / d ≤ 2 ^ (J - j.val) := by
             rw [Nat.div_le_iff_le_mul_add_pred hdpos]
             have h1 : A ≤ 2 ^ J := hAU.trans hUJ
-            have h2 : 2 ^ J ≤ 2 ^ (J - j.val) * d := by
-              rw [← hpow, mul_comm]
-              exact Nat.mul_le_mul_left _ hcond.2.1
+            have h2 : 2 ^ J ≤ d * 2 ^ (J - j.val) := by
+              rw [← hpow]
+              exact Nat.mul_le_mul_right _ hcond.2.1
             omega
           exact ⟨Nat.div_pos hdleA hdpos, hqle⟩
         rw [Finset.sum_eq_single (A / d)]
@@ -1240,7 +1254,13 @@ theorem dyadicProposalPMF_apply_some {J U A : ℕ} (hA1 : 1 ≤ A) (hAU : A ≤ 
           · simp
       _ = _ := by
           rw [Finset.sum_const, nsmul_eq_mul, div_eq_mul_inv]
-  rw [Finset.sum_congr rfl (fun j _ => hterm j), ← Finset.sum_div]
+  refine (Finset.sum_congr (g := fun j : Fin (J + 1) =>
+      (((Finset.Icc 1 (2 ^ (j.val + 1))).filter
+        (fun d => Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d ∣ A)).card : ENNReal) /
+        ((2 * 2 ^ J * (J + 1) : ℕ) : ENNReal)) rfl fun j _ => ?_).trans ?_
+  · convert hterm j
+  simp only [div_eq_mul_inv]
+  rw [← Finset.sum_mul]
   congr 1
   -- The filtered sets across `j : Fin (J + 1)` partition `A.divisors.filter Squarefree`.
   have hpart : (∑ j : Fin (J + 1),
@@ -1265,6 +1285,7 @@ theorem dyadicProposalPMF_apply_some {J U A : ℕ} (hA1 : 1 ≤ A) (hAU : A ≤ 
         have hdpos : 1 ≤ d := Nat.pos_of_dvd_of_pos hdA (by omega)
         exact ⟨⟨j, Nat.lt_succ_of_le hjle⟩, ⟨hdpos, hjhi.le⟩, hsq, hjlo, hjhi, hdA⟩
     · intro j₁ _ j₂ _ hne
+      simp only [Function.onFun]
       rw [Finset.disjoint_left]
       intro d hd₁ hd₂
       simp only [Finset.mem_filter] at hd₁ hd₂
@@ -1285,42 +1306,6 @@ theorem dyadicProposalPMF_apply_some_toReal {J U A : ℕ} (hA1 : 1 ≤ A) (hAU :
   push_cast
   rfl
 
-theorem dyadicProposalPMF_apply_some_eq_zero_of_not_mem {J U A : ℕ}
-    (hA : A = 0 ∨ U < A) :
-    dyadicProposalPMF J U (some A) = 0 := by
-  classical
-  unfold dyadicProposalPMF
-  simp only [PMF.bind_apply, PMF.map_apply]
-  apply ENNReal.tsum_eq_zero.mpr
-  intro j
-  apply mul_eq_zero_of_right
-  apply ENNReal.tsum_eq_zero.mpr
-  intro d
-  by_cases hd : d ∈ Finset.Icc 1 (2 ^ (j.val + 1))
-  · apply mul_eq_zero_of_right
-    apply ENNReal.tsum_eq_zero.mpr
-    intro e
-    split_ifs with h1 h2
-    · exfalso
-      have hde : d * e = A := (Option.some.inj h2).symm
-      rcases hA with rfl | hUA
-      · have hd1 : 1 ≤ d := (Finset.mem_Icc.mp hd).1
-        have he0 : e = 0 := by
-          rcases mul_eq_zero.mp hde with h | h
-          · omega
-          · exact h
-        have hnot : e ∉ Finset.Icc 1 (2 ^ (J - j.val)) := by simp [he0]
-        -- handled below
-        exact (by
-          -- Actually `h2` is true when `e = 0`, we handle the `uniformOfFinset` factor = 0 instead!
-          omega : False)
-      · omega
-    · rfl
-    · exfalso; exact Option.noConfusion h2
-    · rfl
-  · simp [PMF.uniformOfFinset_apply, hd]
-
--- Clean proof for `A = 0 ∨ U < A` handling `e = 0` via the `uniformOfFinset` support.
 theorem dyadicProposalPMF_apply_some_zero_of_not_Icc {J U A : ℕ}
     (hA : A ∉ Finset.Icc 1 U) :
     dyadicProposalPMF J U (some A) = 0 := by
@@ -1337,18 +1322,25 @@ theorem dyadicProposalPMF_apply_some_zero_of_not_Icc {J U A : ℕ}
     apply ENNReal.tsum_eq_zero.mpr
     intro e
     by_cases he : e ∈ Finset.Icc 1 (2 ^ (J - j.val))
-    · split_ifs with h1 h2
-      · exfalso
+    · by_cases h1 : Squarefree d ∧ 2 ^ j.val ≤ d ∧ d < 2 ^ (j.val + 1) ∧ d * e ≤ U
+      · rw [if_pos h1, if_neg]
+        intro h2
         have hde : d * e = A := (Option.some.inj h2).symm
         have hd1 : 1 ≤ d := (Finset.mem_Icc.mp hd).1
         have he1 : 1 ≤ e := (Finset.mem_Icc.mp he).1
         have hA1 : 1 ≤ A := hde ▸ Nat.one_le_iff_ne_zero.mpr (mul_ne_zero (by omega) (by omega))
         exact hA (Finset.mem_Icc.mpr ⟨hA1, hde ▸ h1.2.2.2⟩)
-      · rfl
-      · exfalso; exact Option.noConfusion h2
-      · rfl
+      · rw [if_neg h1, if_neg (Option.some_ne_none A)]
     · simp [PMF.uniformOfFinset_apply, he]
   · simp [PMF.uniformOfFinset_apply, hd]
+
+theorem dyadicProposalPMF_apply_some_eq_zero_of_not_mem {J U A : ℕ}
+    (hA : A = 0 ∨ U < A) :
+    dyadicProposalPMF J U (some A) = 0 := by
+  apply dyadicProposalPMF_apply_some_zero_of_not_Icc
+  intro hmem
+  rcases Finset.mem_Icc.mp hmem with ⟨h1, h2⟩
+  omega
 
 end DyadicProposal
 
@@ -1499,7 +1491,7 @@ theorem directProposalOutcomePMF_gcdExit_proper_divisor {Form : Type*} [Decidabl
           | false => simp [PMF.pure_apply]
           | true =>
             apply mul_eq_zero_of_right
-            rw [PMF.map_apply]
+            rw [if_pos rfl, PMF.map_apply]
             apply ENNReal.tsum_eq_zero.mpr
             intro b
             cases spec.buildForm A b <;> simp
@@ -1529,21 +1521,16 @@ theorem rootStepPMF_accepted {Form : Type*} [DecidableEq Form]
       else 0 := by
   classical
   unfold rootStepPMF
-  split_ifs with hR hcond
+  split_ifs with hR hcond hcond
   · rw [PMF.bind_apply, tsum_bool]
     simp only [PMF.bernoulli_apply, cond_true, cond_false, PMF.pure_apply,
-      reduceCtorEq, ↓reduceIte, mul_zero, add_zero]
+      reduceCtorEq, ↓reduceIte, mul_zero, add_zero, zero_add]
     rw [PMF.map_apply]
     have hb_mem : spec.midCoeff f ∈ spec.roots A := by
       rw [← hcond.2]
       exact spec.midCoeff_mem_roots f hcond.1
-    have htsum : (∑' b : ℤ,
-        if DirectProposalOutcome.accepted f =
-            (match spec.buildForm A b with
-              | some f' => DirectProposalOutcome.accepted f'
-              | none => DirectProposalOutcome.rejected)
-        then PMF.uniformOfFinset (spec.roots A) hR b else 0) =
-        ((spec.roots A).card : ENNReal)⁻¹ := by
+    rw [show (∑' b : ℤ, _) = ((spec.roots A).card : ENNReal)⁻¹ from ?htsum]
+    case htsum =>
       rw [tsum_eq_single (spec.midCoeff f)]
       · have hbuild : spec.buildForm A (spec.midCoeff f) = some f :=
           (spec.buildForm_eq_some_iff A (spec.midCoeff f) f hA1 hAU hcop hb_mem).mpr
@@ -1554,7 +1541,7 @@ theorem rootStepPMF_accepted {Form : Type*} [DecidableEq Form]
         · split_ifs with hEq
           · exfalso
             cases hbf : spec.buildForm A b with
-            | none => rw [hbf] at hEq; exact DirectProposalOutcome.noConfusion hEq
+            | none => rw [hbf] at hEq; simp at hEq
             | some f' =>
               rw [hbf] at hEq
               have hff' : f = f' := DirectProposalOutcome.accepted.inj hEq
@@ -1563,7 +1550,6 @@ theorem rootStepPMF_accepted {Form : Type*} [DecidableEq Form]
               exact hne hspec.2.2.symm
           · rfl
         · simp [PMF.uniformOfFinset_apply, hb]
-    rw [htsum]
     have hMne : ((2 ^ (A.primeFactors.card + 1) : ℕ) : NNReal) ≠ 0 := by positivity
     have hRne : ((spec.roots A).card : ENNReal) ≠ 0 :=
       Nat.cast_ne_zero.mpr (Finset.card_pos.mpr hR).ne'
@@ -1571,7 +1557,7 @@ theorem rootStepPMF_accepted {Form : Type*} [DecidableEq Form]
     rw [ENNReal.coe_div hMne, ENNReal.coe_natCast, ENNReal.coe_natCast,
       div_eq_mul_inv, mul_right_comm, ENNReal.mul_inv_cancel hRne hRtop, one_mul]
   · rw [PMF.bind_apply, tsum_bool]
-    simp only [PMF.pure_apply, reduceCtorEq, ↓reduceIte, mul_zero, add_zero]
+    simp only [PMF.pure_apply, reduceCtorEq, ↓reduceIte, mul_zero, add_zero, zero_add]
     apply mul_eq_zero_of_right
     rw [PMF.map_apply]
     apply ENNReal.tsum_eq_zero.mpr
@@ -1580,7 +1566,7 @@ theorem rootStepPMF_accepted {Form : Type*} [DecidableEq Form]
     · split_ifs with hEq
       · exfalso
         cases hbf : spec.buildForm A b with
-        | none => rw [hbf] at hEq; exact DirectProposalOutcome.noConfusion hEq
+        | none => rw [hbf] at hEq; simp at hEq
         | some f' =>
           rw [hbf] at hEq
           have hff' : f = f' := DirectProposalOutcome.accepted.inj hEq
@@ -1625,15 +1611,20 @@ theorem directProposalOutcomePMF_accepted {Form : Type*} [DecidableEq Form]
         rw [pow_succ']
         push_cast
         rfl
-      rw [hpow, ENNReal.mul_inv (Or.inl (by positivity)) (Or.inr h2k_top),
-        div_eq_mul_inv, mul_assoc, mul_left_comm ((2 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹,
-        ← mul_assoc ((2 ^ k : ℕ) : ENNReal), mul_comm ((2 : ENNReal)⁻¹),
-        ← mul_assoc ((2 ^ k : ℕ) : ENNReal),
-        ENNReal.mul_inv_cancel h2k_ne h2k_top, one_mul,
-        ← ENNReal.mul_inv (Or.inl (by positivity)) (Or.inr (by simp))]
-      congr 1
-      norm_cast
-      ring
+      rw [hpow, ENNReal.mul_inv (Or.inl (by positivity)) (Or.inr h2k_ne), div_eq_mul_inv]
+      have hcancel : ((2 ^ k : ℕ) : ENNReal) * ((2 ^ k : ℕ) : ENNReal)⁻¹ = 1 :=
+        ENNReal.mul_inv_cancel h2k_ne h2k_top
+      have hY : ((4 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹ =
+          (2 : ENNReal)⁻¹ * ((2 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹ := by
+        rw [← ENNReal.mul_inv (Or.inl (by norm_num)) (Or.inl (by norm_num))]
+        congr 1
+        push_cast
+        ring
+      rw [hY]
+      calc
+        _ = (((2 ^ k : ℕ) : ENNReal) * ((2 ^ k : ℕ) : ENNReal)⁻¹) *
+            ((2 : ENNReal)⁻¹ * ((2 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹) := by ring
+        _ = _ := by rw [hcancel, one_mul]
     · intro oA hne
       cases oA with
       | none => simp [PMF.pure_apply]
@@ -1668,7 +1659,7 @@ theorem directProposalPMF_some {Form : Type*} [DecidableEq Form]
       else 0 := by
   unfold directProposalPMF
   rw [PMF.map_apply, tsum_eq_single (DirectProposalOutcome.accepted f)]
-  · rw [if_pos rfl]
+  · rw [if_pos (show some f = (DirectProposalOutcome.accepted f).toOption from rfl)]
     exact directProposalOutcomePMF_accepted spec hUJ f
   · intro o hne
     cases o with
@@ -1739,15 +1730,10 @@ theorem retryOutcomePMF_accepted {Form : Type*} [DecidableEq Form]
         | gcdExit g => simp [PMF.pure_apply]
         | rejected => exact (ho.2 rfl).elim
       rw [tsum_eq_sum hfin]
-      rw [Finset.sum_pair (by decide)]
+      rw [Finset.sum_pair (by simp)]
       simp [PMF.pure_apply]
     rw [hsplit, ih, Finset.sum_range_succ']
-    simp only [pow_zero, mul_add, mul_one, Finset.mul_sum]
-    congr 1
-    rw [Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro k _
-    rw [pow_succ']
+    simp only [pow_succ, ← Finset.sum_mul]
     ring
 
 /-- Repeat independent attempts of an `Option Form` proposal up to `J₀` times, stopping on the
@@ -1784,14 +1770,10 @@ theorem retryOptionPMF_some {Form : Type*} [DecidableEq Form]
       | some f' =>
         have hne : f ≠ f' := fun h => ho.1 (congrArg some h.symm)
         simp [PMF.pure_apply, hne]
-    rw [tsum_eq_sum hfin, Finset.sum_pair (by decide)]
-    simp only [PMF.pure_apply, ↓reduceIte, mul_one, ih, Finset.sum_range_succ', pow_zero,
-      mul_add, Finset.mul_sum]
-    congr 1
-    rw [Finset.mul_sum]
-    apply Finset.sum_congr rfl
-    intro k _
-    rw [pow_succ']
+    rw [tsum_eq_sum hfin, Finset.sum_pair (Option.some_ne_none f)]
+    simp only [PMF.pure_apply, ↓reduceIte, mul_one, ih]
+    rw [Finset.sum_range_succ']
+    simp only [pow_succ, ← Finset.sum_mul]
     ring
 
 /-- **EQUAL-WEIGHT RETRY PROBABILITY**: for any deterministic cap `J₀`, every coprime canonical
@@ -1850,7 +1832,7 @@ noncomputable def directRetryConditionalPMF {Form : Type*} [DecidableEq Form]
           calc
             (1 : ENNReal) = (directProposalOutcomePMF spec J .rejected) ^ 0 := (pow_zero _).symm
             _ ≤ ∑ k ∈ Finset.range J₀, (directProposalOutcomePMF spec J .rejected) ^ k :=
-                Finset.single_le_sum (fun _ _ => zero_le _) h0mem
+                Finset.single_le_sum (fun _ _ => zero_le) h0mem
         exact (lt_of_lt_of_le zero_lt_one hge).ne'
     have hfactor_top :
         (((4 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹ *
@@ -1870,18 +1852,17 @@ noncomputable def directRetryConditionalPMF {Form : Type*} [DecidableEq Form]
       intro f hf
       rw [retryOutcomePMF_accepted, directProposalOutcomePMF_accepted spec hUJ f, if_neg hf,
         zero_mul, ENNReal.zero_div]
-    rw [hasSum_iff_tendsto_nat_of_nonneg (fun _ => zero_le _)]
-    -- Use `hasSum_sum_of_ne_finset_zero` instead!
     have hs : HasSum (fun f => retryOutcomePMF (directProposalOutcomePMF spec J) J₀ (.accepted f) /
         retryAcceptedMass spec J J₀) 1 := by
       have hsum_eq : (∑ f ∈ spec.coprimeForms,
           retryOutcomePMF (directProposalOutcomePMF spec J) J₀ (.accepted f) /
             retryAcceptedMass spec J J₀) = 1 := by
-        rw [← Finset.sum_div]
+        simp only [div_eq_mul_inv, ← Finset.sum_mul]
+        rw [← div_eq_mul_inv]
         exact ENNReal.div_self hmass_ne0 hmass_top
       rw [← hsum_eq]
       exact hasSum_sum_of_ne_finset_zero hsupp
-    exact hs.tendsto_sum_nat⟩
+    exact hs⟩
 
 /-- **SEQUENTIAL RETRY INVARIANCE**: conditional on returning a form, `J₀ ≥ 1` independent
 attempts of the direct sampler (stopping on the first accepted form or gcd exit) have the
@@ -1905,13 +1886,13 @@ theorem directRetryConditionalPMF_eq_uniform {Form : Type*} [DecidableEq Form]
       have h0mem : 0 ∈ Finset.range J₀ := Finset.mem_range.mpr (by omega)
       have hge : (1 : ENNReal) ≤ ∑ k ∈ Finset.range J₀,
           (directProposalOutcomePMF spec J .rejected) ^ k :=
-        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le _) h0mem)
+        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le) h0mem)
       exact (lt_of_lt_of_le zero_lt_one hge).ne'
     have hctop : c ≠ ⊤ :=
       ENNReal.mul_ne_top (ENNReal.inv_ne_top.mpr (by positivity))
         (ENNReal.sum_ne_top.mpr (fun _ _ => ENNReal.pow_ne_top (PMF.apply_ne_top _ _)))
     rw [div_eq_mul_inv, ENNReal.mul_inv (Or.inl (Nat.cast_ne_zero.mpr (Finset.card_pos.mpr hcop).ne'))
-      (Or.inr hctop), mul_comm ((spec.coprimeForms.card : ENNReal)⁻¹), ← mul_assoc,
+      (Or.inr hc0), mul_comm ((spec.coprimeForms.card : ENNReal)⁻¹), ← mul_assoc,
       ENNReal.mul_inv_cancel hc0 hctop, one_mul]
   · rw [if_neg hf, if_neg hf, zero_mul, ENNReal.zero_div]
 
@@ -1940,7 +1921,7 @@ noncomputable def directRetryOptionConditionalPMF {Form : Type*} [DecidableEq Fo
       have h0mem : 0 ∈ Finset.range J₀ := Finset.mem_range.mpr (by omega)
       have hge : (1 : ENNReal) ≤ ∑ k ∈ Finset.range J₀,
           (directProposalPMF spec J none) ^ k :=
-        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le _) h0mem)
+        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le) h0mem)
       exact (lt_of_lt_of_le zero_lt_one hge).ne'
     have hctop : (((4 * 2 ^ J * (J + 1) : ℕ) : ENNReal)⁻¹ *
         ∑ k ∈ Finset.range J₀, (directProposalPMF spec J none) ^ k) ≠ ⊤ :=
@@ -1954,7 +1935,8 @@ noncomputable def directRetryOptionConditionalPMF {Form : Type*} [DecidableEq Fo
       exact ENNReal.mul_ne_top (ENNReal.natCast_ne_top _) hctop
     have hsum_eq : (∑ f ∈ spec.coprimeForms,
         retryOptionPMF (directProposalPMF spec J) J₀ (some f) / total) = 1 := by
-      rw [← Finset.sum_div]
+      simp only [div_eq_mul_inv, ← Finset.sum_mul]
+      rw [← div_eq_mul_inv]
       exact ENNReal.div_self hmass_ne0 hmass_top
     rw [← hsum_eq]
     exact hasSum_sum_of_ne_finset_zero (fun f hf => by
@@ -1967,7 +1949,9 @@ theorem directRetryOptionConditionalPMF_eq_uniform {Form : Type*} [DecidableEq F
     directRetryOptionConditionalPMF spec hUJ hJ₀ hcop =
       PMF.uniformOfFinset spec.coprimeForms hcop := by
   ext f
-  dsimp only [directRetryOptionConditionalPMF, PMF.coe_mk]
+  change retryOptionPMF (directProposalPMF spec J) J₀ (some f) /
+      (∑ g ∈ spec.coprimeForms, retryOptionPMF (directProposalPMF spec J) J₀ (some g)) =
+    PMF.uniformOfFinset spec.coprimeForms hcop f
   rw [PMF.uniformOfFinset_apply]
   have htotal : (∑ g ∈ spec.coprimeForms,
       retryOptionPMF (directProposalPMF spec J) J₀ (some g)) =
@@ -1991,13 +1975,13 @@ theorem directRetryOptionConditionalPMF_eq_uniform {Form : Type*} [DecidableEq F
       have h0mem : 0 ∈ Finset.range J₀ := Finset.mem_range.mpr (by omega)
       have hge : (1 : ENNReal) ≤ ∑ k ∈ Finset.range J₀,
           (directProposalPMF spec J none) ^ k :=
-        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le _) h0mem)
+        (pow_zero _).symm.trans_le (Finset.single_le_sum (fun _ _ => zero_le) h0mem)
       exact (lt_of_lt_of_le zero_lt_one hge).ne'
     have hctop : c ≠ ⊤ :=
       ENNReal.mul_ne_top (ENNReal.inv_ne_top.mpr (by positivity))
         (ENNReal.sum_ne_top.mpr (fun _ _ => ENNReal.pow_ne_top (PMF.apply_ne_top _ _)))
     rw [div_eq_mul_inv, ENNReal.mul_inv (Or.inl (Nat.cast_ne_zero.mpr (Finset.card_pos.mpr hcop).ne'))
-      (Or.inr hctop), mul_comm ((spec.coprimeForms.card : ENNReal)⁻¹), ← mul_assoc,
+      (Or.inr hc0), mul_comm ((spec.coprimeForms.card : ENNReal)⁻¹), ← mul_assoc,
       ENNReal.mul_inv_cancel hc0 hctop, one_mul]
   · rw [if_neg hf, if_neg hf, zero_mul, ENNReal.zero_div]
 
@@ -2006,6 +1990,21 @@ end SequentialRetry
 /-! ## Total Variation Distance and Missing-Class Count Bounds -/
 
 section MissingClassTV
+
+private lemma sum_biUnion_le_of_nonneg {ι α : Type*} [DecidableEq ι] [DecidableEq α]
+    {s : Finset ι} {t : ι → Finset α} {f : α → ℝ}
+    (hf : ∀ x ∈ s.biUnion t, 0 ≤ f x) :
+    ∑ x ∈ s.biUnion t, f x ≤ ∑ i ∈ s, ∑ x ∈ t i, f x := by
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert a s ha ih =>
+    rw [Finset.biUnion_insert, Finset.sum_insert ha]
+    rw [Finset.biUnion_insert] at hf
+    have hf' : ∀ x ∈ s.biUnion t, 0 ≤ f x := fun x hx => hf x (Finset.mem_union_right _ hx)
+    have hinter := Finset.sum_union_inter (s₁ := t a) (s₂ := s.biUnion t) (f := f)
+    have hnn : 0 ≤ ∑ x ∈ t a ∩ s.biUnion t, f x :=
+      Finset.sum_nonneg fun x hx => hf' x (Finset.mem_inter.mp hx).2
+    linarith [ih hf']
 
 /-- **EXACT TOTAL VARIATION DISTANCE** between the uniform law on a finite nonempty type `Ω`
 and the uniform law on a nonempty subset `S ⊆ Ω`, proved via `RandomizedDeficientWeights`
@@ -2038,7 +2037,7 @@ theorem pmfTotalVariation_uniformOfFinset_uniformOfFintype
       (fun _ => 1 / (Fintype.card Ω : ℝ)) ≤
       ((Fintype.card Ω - S.card : ℕ) : ℝ) / (Fintype.card Ω : ℝ) := by
     have hEcard : (Finset.univ \ S).card = Fintype.card Ω - S.card := by
-      rw [Finset.card_sdiff (Finset.subset_univ S), Finset.card_univ]
+      rw [Finset.card_sdiff_of_subset (Finset.subset_univ S), Finset.card_univ]
     rw [← hEcard]
     refine deficient_weights_totalVariation_le
       (fun z => if z ∈ S then (1 : ℝ) else 0) 1 (Finset.univ \ S)
@@ -2069,7 +2068,7 @@ theorem pmfTotalVariation_uniformOfFinset_uniformOfFintype
       hsum1 (fun z hz => by rw [if_neg hz, zero_div])
     have heq : (∑ _z ∈ Finset.univ \ S, (1 : ℝ) / (Fintype.card Ω : ℝ)) =
         ((Fintype.card Ω - S.card : ℕ) : ℝ) / (Fintype.card Ω : ℝ) := by
-      rw [Finset.sum_const, Finset.card_sdiff (Finset.subset_univ S), Finset.card_univ,
+      rw [Finset.sum_const, Finset.card_sdiff_of_subset (Finset.subset_univ S), Finset.card_univ,
         nsmul_eq_mul, mul_one_div]
     rwa [heq] at hout
   exact le_antisymm hupper hlower
@@ -2110,7 +2109,7 @@ theorem pmfTotalVariation_uniformOfFinset_subset {Form : Type*} [DecidableEq For
       rw [PMF.uniformOfFinset_apply, PMF.uniformOfFinset_apply, if_neg hzC, if_pos hzA,
         ENNReal.toReal_zero, ENNReal.toReal_inv, ENNReal.toReal_natCast, zero_sub, abs_neg,
         abs_of_nonneg (by positivity), one_div]
-    rw [Finset.sum_congr rfl hcongr, Finset.sum_const, Finset.card_sdiff hsub, nsmul_eq_mul,
+    rw [Finset.sum_congr rfl hcongr, Finset.sum_const, Finset.card_sdiff_of_subset hsub, nsmul_eq_mul,
       mul_one_div]
   have hpart2 : (∑ z ∈ CoprimeForms,
       |(PMF.uniformOfFinset CoprimeForms hC z).toReal -
@@ -2126,7 +2125,7 @@ theorem pmfTotalVariation_uniformOfFinset_subset {Form : Type*} [DecidableEq For
         ENNReal.toReal_inv, ENNReal.toReal_inv, ENNReal.toReal_natCast, ENNReal.toReal_natCast,
         one_div, one_div]
       apply abs_of_nonneg
-      exact sub_nonneg.mpr (one_div_le_one_div_of_le hCpos hCleA)
+      exact sub_nonneg.mpr (inv_anti₀ hCpos hCleA)
     rw [Finset.sum_congr rfl hcongr, Finset.sum_const, nsmul_eq_mul,
       Nat.cast_sub (Finset.card_le_card hsub)]
     field_simp [hCpos.ne', hApos.ne']
@@ -2191,7 +2190,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
         ≤ ∑ A ∈ N.primeFactors.biUnion (fun p => (Finset.Icc 1 U).filter (fun A => p ∣ A)),
             (R A : ℝ) := Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => by positivity)
       _ ≤ ∑ p ∈ N.primeFactors, ∑ A ∈ (Finset.Icc 1 U).filter (fun A => p ∣ A), (R A : ℝ) :=
-          Finset.sum_biUnion_le (f := fun A => (R A : ℝ)) (by intro _ _; positivity)
+          sum_biUnion_le_of_nonneg (f := fun A => (R A : ℝ)) (by intro _ _; positivity)
   -- Step 2: Bound each prime `p ∈ N.primeFactors` by factoring `A = a * m`.
   have hper_prime : ∀ p ∈ N.primeFactors,
       (∑ A ∈ (Finset.Icc 1 U).filter (fun A => p ∣ A), (R A : ℝ)) ≤
@@ -2214,7 +2213,8 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
       have hsplitA : A = (∏ q ∈ A.primeFactors ∩ N.primeFactors, q ^ (A.factorization q)) *
           (∏ q ∈ A.primeFactors \ N.primeFactors, q ^ (A.factorization q)) := by
         conv_lhs => rw [hAprod]
-        rw [← Finset.prod_union (Finset.disjoint_inter_sdiff _ _), Finset.inter_union_sdiff]
+        rw [← Finset.prod_union (Finset.disjoint_sdiff_inter _ _).symm, Finset.union_comm,
+          Finset.sdiff_union_inter]
       have hsmooth_eq : smoothPart A =
           ∏ q ∈ A.primeFactors ∩ N.primeFactors, q ^ (A.factorization q) := by
         dsimp only [smoothPart]
@@ -2247,7 +2247,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
         have hr_prime := Nat.prime_of_mem_primeFactors hr
         have hr_dvd : r ∣ ∏ q ∈ N.primeFactors, q ^ (A.factorization q) :=
           Nat.dvd_of_mem_primeFactors hr
-        obtain ⟨q, hq, hrq⟩ := hr_prime.prime.dvd_finset_prod_iff.mp hr_dvd
+        obtain ⟨q, hq, hrq⟩ := (hr_prime.prime.dvd_finsetProd_iff _).mp hr_dvd
         have hrq' := hr_prime.dvd_of_dvd_pow hrq
         have hq_prime := Nat.prime_of_mem_primeFactors hq
         have heq : r = q := (Nat.prime_dvd_prime_iff_eq hr_prime hq_prime).mp hrq'
@@ -2255,8 +2255,9 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
       have hquot_eq : A / smoothPart A =
           ∏ q ∈ A.primeFactors \ N.primeFactors, q ^ (A.factorization q) := by
         have hpos : 0 < smoothPart A := hsmooth_pos
-        rw [← Nat.mul_div_cancel_left (∏ q ∈ A.primeFactors \ N.primeFactors,
-          q ^ (A.factorization q)) hpos, ← hsmooth_eq, ← hsplitA]
+        have h := hsplitA
+        rw [← hsmooth_eq] at h
+        exact Nat.div_eq_of_eq_mul_right hpos h
       have hcop_mN : Nat.Coprime (A / smoothPart A) N := by
         rw [hquot_eq]
         refine Nat.Coprime.prod_left fun q hq => ?_
@@ -2267,7 +2268,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
           hqnotN (Nat.mem_primeFactors.mpr ⟨hq_prime, hd, hN⟩)
         exact (hq_prime.coprime_iff_not_dvd.mpr hqnotdvd).pow_left _
       have hcop_am : Nat.Coprime (smoothPart A) (A / smoothPart A) := by
-        rw [hsmooth_eq, hquot_eq]
+        rw [hquot_eq, hsmooth_eq]
         refine Nat.Coprime.prod_left fun q₁ hq₁ => Nat.Coprime.prod_right fun q₂ hq₂ => ?_
         have hq₁_p := Nat.prime_of_mem_primeFactors (Finset.mem_inter.mp hq₁).1
         have hq₂_p := Nat.prime_of_mem_primeFactors (Finset.mem_sdiff.mp hq₂).1
@@ -2286,8 +2287,6 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
           (∑ A ∈ (Finset.Icc 1 U).filter (fun A => p ∣ A), (R A : ℝ)) ≤
             ∑ x ∈ SmoothDiv.sigma (fun a => (Finset.Icc 1 (U / a)).filter (fun m => Nat.Coprime m N)),
               (R x.1 : ℝ) * (R x.2 : ℝ) := by
-        refine Finset.sum_le_sum_of_ne_zero ?_ |> fun _ => ?_
-        · intro _ _ _; trivial
         · have hinj : Set.InjOn (fun A => (⟨smoothPart A, A / smoothPart A⟩ : Σ _ : ℕ, ℕ))
               (((Finset.Icc 1 U).filter (fun A => p ∣ A) : Finset ℕ) : Set ℕ) := by
             intro A₁ hA₁ A₂ hA₂ hEq
@@ -2296,7 +2295,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
             have h1 : smoothPart A₁ = smoothPart A₂ := congrArg Sigma.fst hEq
             have h2 : A₁ / smoothPart A₁ = A₂ / smoothPart A₂ := by
               simpa using congrArg Sigma.snd hEq
-            rw [← Nat.mul_div_cancel' hd1, ← Nat.mul_div_cancel' hd2, h1, h2]
+            rw [← Nat.mul_div_cancel' hd1, ← Nat.mul_div_cancel' hd2, h2, h1]
           have hmaps : ∀ A ∈ (Finset.Icc 1 U).filter (fun A => p ∣ A),
               (⟨smoothPart A, A / smoothPart A⟩ : Σ _ : ℕ, ℕ) ∈
                 SmoothDiv.sigma (fun a => (Finset.Icc 1 (U / a)).filter (fun m => Nat.Coprime m N)) := by
@@ -2330,7 +2329,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
       rw [Finset.sum_sigma]
       apply Finset.sum_congr rfl
       intro a _
-      rw [← Finset.mul_sum]
+      rw [Finset.mul_sum]
     -- Bound the inner `m`-sum using `sum_two_pow_omega_le`.
     have hinner : ∀ a ∈ SmoothDiv,
         (∑ m ∈ (Finset.Icc 1 (U / a)).filter (fun m => Nat.Coprime m N), (R m : ℝ)) ≤
@@ -2424,7 +2423,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
             have h1 : a = ∏ q ∈ a.primeFactors, q ^ (a.factorization q) := by
               simpa [Finsupp.prod, Nat.support_factorization] using
                 (Nat.factorization_prod_pow_eq_self ha0).symm
-            rw [h1]
+            conv_lhs => rw [h1]
             apply Finset.prod_subset hpf
             intro q _ hqnot
             have hzero : a.factorization q = 0 := by
@@ -2446,7 +2445,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
             have h1 : a = ∏ q ∈ a.primeFactors, q ^ (a.factorization q) := by
               simpa [Finsupp.prod, Nat.support_factorization] using
                 (Nat.factorization_prod_pow_eq_self ha0).symm
-            rw [h1]
+            conv_lhs => rw [h1]
             apply Finset.prod_subset ha.2.2
             intro q _ hqnot
             have hzero : a.factorization q = 0 := by
@@ -2458,7 +2457,7 @@ theorem missing_root_sum_le_local_series {N U : ℕ} (hN : N ≠ 0) (hU : 1 ≤ 
             exact multiplicative_prod_prime_pow hR1 hRmul N.primeFactors
               (fun q hq => Nat.prime_of_mem_primeFactors hq) (fun q => a.factorization q)
           rw [hRa]
-          conv_lhs => rw [ha_eq]
+          conv_lhs => arg 2; rw [ha_eq]
           rw [Nat.cast_prod, Nat.cast_prod, ← Finset.prod_div_distrib]
           rw [← Finset.prod_attach N.primeFactors (fun q => (R (q ^ (a.factorization q)) : ℝ) /
             ((q ^ (a.factorization q) : ℕ) : ℝ))]
@@ -2618,8 +2617,8 @@ theorem missing_root_sum_le_log_pow {N U : ℕ} (hN : 2 ≤ N) (hU : 1 ≤ U)
   have hsum_nn : 0 ≤ ∑ p ∈ N.primeFactors, localPrimeSeries R p :=
     Finset.sum_nonneg (fun _ _ => tsum_nonneg (fun _ => by positivity))
   have hprod_nn : 0 ≤ ∏ q ∈ N.primeFactors, (1 + localPrimeSeries R q) :=
-    Finset.prod_nonneg (fun _ _ => by
-      have : 0 ≤ localPrimeSeries R _ := tsum_nonneg (fun _ => by positivity)
+    Finset.prod_nonneg (fun q _ => by
+      have : 0 ≤ localPrimeSeries R q := tsum_nonneg (fun _ => by positivity)
       linarith)
   have h4sum_nn : 0 ≤ ∑ p ∈ N.primeFactors, 4 / ((p : ℝ) - 1) := by
     apply Finset.sum_nonneg
@@ -2681,10 +2680,11 @@ theorem directRetryConditionalPMF_tv_le {Form : Type*} [DecidableEq Form]
         (∑ p ∈ spec.N.primeFactors, 4 / ((p : ℝ) - 1)) *
         (Real.log (2 * (spec.N : ℝ))) ^ (80 : ℕ)) / (spec.allForms.card : ℝ) := by
   rw [directRetryConditionalPMF_eq_uniform spec hUJ hJ₀ hcop,
-    pmfTotalVariation_uniformOfFinset_subset (Finset.filter_subset _ _) hcop hall]
+    pmfTotalVariation_uniformOfFinset_subset
+      (show spec.coprimeForms ⊆ spec.allForms from Finset.filter_subset _ _) hcop hall]
   apply div_le_div_of_nonneg_right _ (Nat.cast_nonneg _)
   have hdiff_eq : spec.allForms.card - spec.coprimeForms.card = spec.omittedForms.card := by
-    have hpart := Finset.filter_card_add_filter_neg_card_eq_card
+    have hpart := Finset.card_filter_add_card_filter_not
       (s := spec.allForms) (p := fun f => Nat.Coprime (spec.leadCoeff f) spec.N)
     change spec.coprimeForms.card + spec.omittedForms.card = spec.allForms.card at hpart
     omega
@@ -2745,37 +2745,41 @@ theorem gcdExitProb_eq_dyadic_noncoprime {Form : Type*} [DecidableEq Form]
       simp [PMF.pure_apply]
     | some A =>
       dsimp only
-      split_ifs with hrange hcop
-      · have hzero : ∀ g, rootStepPMF spec A hrange.1 hrange.2 hcop (.gcdExit g) = 0 := by
-          intro g
-          unfold rootStepPMF
-          split_ifs with hR
-          · rw [PMF.bind_apply]
-            apply ENNReal.tsum_eq_zero.mpr
-            intro ok
-            cases ok with
-            | false => simp [PMF.pure_apply]
-            | true =>
-              apply mul_eq_zero_of_right
-              rw [PMF.map_apply]
+      by_cases hrange : 1 ≤ A ∧ A ≤ spec.U
+      · rw [dif_pos hrange]
+        by_cases hcop : Nat.Coprime A spec.N
+        · rw [dif_pos hcop]
+          have hzero : ∀ g, rootStepPMF spec A hrange.1 hrange.2 hcop (.gcdExit g) = 0 := by
+            intro g
+            unfold rootStepPMF
+            split_ifs with hR
+            · rw [PMF.bind_apply]
               apply ENNReal.tsum_eq_zero.mpr
-              intro b
-              cases spec.buildForm A b <;> simp
+              intro ok
+              cases ok with
+              | false => simp [PMF.pure_apply]
+              | true =>
+                apply mul_eq_zero_of_right
+                rw [if_pos rfl, PMF.map_apply]
+                apply ENNReal.tsum_eq_zero.mpr
+                intro b
+                cases spec.buildForm A b <;> simp
+            · simp [PMF.pure_apply]
+          have hnotmem : A ∉ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) := by
+            simp [hcop]
+          rw [if_neg hnotmem]
+          simp [hzero]
+        · rw [dif_neg hcop]
+          have hmem : A ∈ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) :=
+            Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr hrange, hcop⟩
+          rw [if_pos hmem, tsum_eq_single (Nat.gcd A spec.N)]
           · simp [PMF.pure_apply]
+          · intro g hne
+            simp [PMF.pure_apply, hne]
+      · rw [dif_neg hrange]
         have hnotmem : A ∉ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) := by
-          simp [hcop]
-        rw [if_neg hnotmem]
-        simp [hzero]
-      · have hmem : A ∈ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) :=
-          Finset.mem_filter.mpr ⟨Finset.mem_Icc.mpr hrange, hcop⟩
-        rw [if_pos hmem, tsum_eq_single (Nat.gcd A spec.N)]
-        · simp [PMF.pure_apply]
-        · intro g hne
-          simp [PMF.pure_apply, hne]
-      · have hnotmem : A ∉ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) := by
-          simp only [Finset.mem_filter, Finset.mem_Icc, not_and]
           intro h
-          exact (hrange h).elim
+          exact hrange (Finset.mem_Icc.mp (Finset.mem_filter.mp h).1)
         rw [if_neg hnotmem]
         simp [PMF.pure_apply]
   rw [tsum_congr hterm]
@@ -2785,6 +2789,7 @@ theorem gcdExitProb_eq_dyadic_noncoprime {Form : Type*} [DecidableEq Form]
   · rw [Finset.sum_image (fun _ _ _ _ h => Option.some.inj h)]
     apply Finset.sum_congr rfl
     intro A hA
+    dsimp only
     rw [if_pos hA]
   · intro oA hoA
     cases oA with
@@ -2793,6 +2798,7 @@ theorem gcdExitProb_eq_dyadic_noncoprime {Form : Type*} [DecidableEq Form]
       have hnot : A ∉ (Finset.Icc 1 spec.U).filter (fun A => ¬ Nat.Coprime A spec.N) := by
         intro h
         exact hoA (Finset.mem_image_of_mem some h)
+      dsimp only
       rw [if_neg hnot]
 
 /-- Scaled one-attempt gcd exit bound:
@@ -2837,7 +2843,7 @@ theorem gcdExitProb_toReal_le_scaled {Form : Type*} [DecidableEq Form]
       _ ≤ ∑ A ∈ spec.N.primeFactors.biUnion (fun p => (Finset.Icc 1 spec.U).filter (fun A => p ∣ A)),
             (2 : ℝ) ^ A.primeFactors.card / (2 * (2 : ℝ) ^ J * ((J : ℝ) + 1)) :=
           Finset.sum_le_sum_of_subset_of_nonneg hsub (fun _ _ _ => by positivity)
-      _ ≤ _ := Finset.sum_biUnion_le (by intro _ _; positivity)
+      _ ≤ _ := sum_biUnion_le_of_nonneg (by intro _ _; positivity)
   have hper_prime : ∀ p ∈ spec.N.primeFactors,
       (∑ A ∈ (Finset.Icc 1 spec.U).filter (fun A => p ∣ A),
           (2 : ℝ) ^ A.primeFactors.card / (2 * (2 : ℝ) ^ J * ((J : ℝ) + 1))) ≤

@@ -691,11 +691,14 @@ theorem two_pow_primeFactors_le_card_divisors {m : ℕ} (hm : m ≠ 0) :
   · intro S hS
     have hsub : S ⊆ m.primeFactors := Finset.mem_powerset.mp hS
     refine Nat.mem_divisors.mpr ⟨?_, hm⟩
-    have hcop : (S : Set ℕ).Pairwise (Function.onFun IsCoprime (fun p : ℕ => p)) := by
+    have hcop : (S : Set ℕ).Pairwise (Function.onFun IsCoprime (fun p : ℕ => (p : ℤ))) := by
       intro p hp q hq hpq
       exact ((Nat.coprime_primes (Nat.prime_of_mem_primeFactors (hsub hp))
         (Nat.prime_of_mem_primeFactors (hsub hq))).mpr hpq).isCoprime
-    exact Finset.prod_dvd_of_coprime hcop fun p hp => Nat.dvd_of_mem_primeFactors (hsub hp)
+    have hdvdZ := Finset.prod_dvd_of_coprime hcop fun p hp =>
+      Int.natCast_dvd_natCast.mpr (Nat.dvd_of_mem_primeFactors (hsub hp))
+    rw [← Nat.cast_prod] at hdvdZ
+    exact Int.natCast_dvd_natCast.mp hdvdZ
   · intro S₁ hS₁ S₂ hS₂ heq
     have h1 := Nat.primeFactors_prod (fun p hp =>
       Nat.prime_of_mem_primeFactors (Finset.mem_powerset.mp hS₁ hp))
@@ -760,11 +763,14 @@ theorem reducedForms_card_le_product {N : ℕ} (hN : Odd N) :
   have hsmooth_dvd (A : ℕ) : smoothPart A ∣ A := by
     dsimp only [smoothPart]
     have hcop : (N.primeFactors : Set ℕ).Pairwise
-        (Function.onFun IsCoprime fun p => p ^ A.factorization p) := by
+        (Function.onFun IsCoprime fun p => ((p ^ A.factorization p : ℕ) : ℤ)) := by
       intro p hp q hq hpq
       exact (((Nat.coprime_primes (Nat.prime_of_mem_primeFactors hp)
         (Nat.prime_of_mem_primeFactors hq)).mpr hpq).pow _ _).isCoprime
-    exact Finset.prod_dvd_of_coprime hcop fun p _ => Nat.ordProj_dvd A p
+    have hdvdZ := Finset.prod_dvd_of_coprime hcop fun p _ =>
+      Int.natCast_dvd_natCast.mpr (Nat.ordProj_dvd A p)
+    rw [← Nat.cast_prod] at hdvdZ
+    exact Int.natCast_dvd_natCast.mp hdvdZ
   have hsmooth_pos (A : ℕ) : 0 < smoothPart A := by
     apply Finset.prod_pos
     intro p hp
@@ -953,7 +959,7 @@ theorem reducedForms_card_le_product {N : ℕ} (hN : Odd N) :
       rw [mul_pow, Real.sq_sqrt (Nat.cast_nonneg N)]
       have h3R : (3 : ℝ) * (U : ℝ) ^ 2 ≤ 8 * (N : ℝ) := by exact_mod_cast hU_sq
       linarith
-    nlinarith [Nat.cast_nonneg U, Real.sqrt_nonneg N]
+    nlinarith [Nat.cast_nonneg (α := ℝ) U, Real.sqrt_nonneg N]
   have hU_le_2N : (U : ℝ) ≤ 2 * (N : ℝ) := by
     have hU2N : U ≤ 2 * N := by nlinarith
     exact_mod_cast hU2N
@@ -1180,12 +1186,15 @@ def twoChar (N : ℕ) : DirichletCharacter ℂ 8 where
   map_nonunit' a ha := by
     split_ifs <;> simp [MulChar.map_nonunit _ ha]
 
+theorem twoChar_apply (N : ℕ) (a : ZMod 8) :
+    twoChar N a = if N % 4 = 1 then (ZMod.χ₈' a : ℂ) else (ZMod.χ₈ a : ℂ) := rfl
+
 /-- The odd-part Jacobi Dirichlet character modulo `N`. -/
 def jacobiChar (N : ℕ) [NeZero N] : DirichletCharacter ℂ N where
   toFun a := (jacobiSym (a.val : ℤ) N : ℂ)
   map_one' := by
     have hmod : ((1 : ZMod N).val : ℤ) % (N : ℤ) = (1 : ℤ) % (N : ℤ) := by
-      have h1 : (1 : ZMod N).val = 1 % N := ZMod.val_one''
+      have h1 : (1 : ZMod N).val = 1 % N := ZMod.val_one_eq_one_mod N
       rw [h1, ← Int.natCast_one, ← Int.natCast_emod, ← Int.natCast_emod, Nat.mod_mod]
     rw [jacobiSym.mod_left' hmod, jacobiSym.one_left]
     simp
@@ -1203,6 +1212,9 @@ def jacobiChar (N : ℕ) [NeZero N] : DirichletCharacter ℂ N where
     have hgcd : (a.val : ℤ).gcd N ≠ 1 := by
       rwa [Int.gcd_natCast_natCast]
     rw [jacobiSym.eq_zero_iff.mpr ⟨NeZero.ne N, hgcd⟩, Int.cast_zero]
+
+theorem jacobiChar_apply_def (N : ℕ) [NeZero N] (a : ZMod N) :
+    jacobiChar N a = (jacobiSym (a.val : ℤ) N : ℂ) := rfl
 
 /-- The quadratic Dirichlet character modulo `8 * N` giving the splitting of `-2 * N`. -/
 noncomputable def splitChar (N : ℕ) [NeZero N] : DirichletCharacter ℂ (8 * N) :=
@@ -1260,7 +1272,7 @@ theorem splitChar_apply_prime {N p : ℕ} [NeZero N] (hN : Odd N)
     simp only [splitChar, MulChar.mul_apply, h1, h2]
   rw [hsc]
   have hjac_eval : jacobiChar N (p : ZMod N) = (jacobiSym (p : ℤ) N : ℂ) := by
-    dsimp only [jacobiChar]
+    rw [jacobiChar_apply_def]
     congr 1
     rw [ZMod.val_natCast, jacobiSym.mod_left (p : ℤ) N]
     simp [Int.natCast_emod]
@@ -1279,8 +1291,7 @@ theorem splitChar_apply_prime {N p : ℕ} [NeZero N] (hN : Odd N)
       rw [hqr', pow_mul]
       have hN2 : (-1 : ℤ) ^ (N / 2) = -1 := ZMod.neg_one_pow_div_two_of_three_mod_four h3
       rw [hN2, ← ZMod.χ₄_eq_neg_one_pow (Nat.odd_iff.mp hp_odd)]
-  rw [hqr]
-  dsimp only [twoChar]
+  rw [hqr, twoChar_apply]
   have hχ4_sq : (ZMod.χ₄ (p : ZMod 4)) ^ 2 = 1 := by
     have h4 : p % 4 = 1 ∨ p % 4 = 3 := by rcases hp_odd with ⟨k, rfl⟩; omega
     rcases h4 with h | h
@@ -1370,8 +1381,8 @@ private theorem two_mul_reducedForms_ge_primeBin_sub {N A B : ℕ} [NeZero N] (h
               (hpPrime.coprime_iff_not_dvd.mpr hdiv)
           simpa [Int.gcd, Nat.Coprime, Int.natAbs_mul] using hcop2N
         rcases jacobiSym.eq_one_or_neg_one hgcd with h1 | hm1
-        · simp [hdiv, h1]
-        · simp [hdiv, hm1]
+        · rw [h1]; norm_num [hdiv]
+        · rw [hm1]; norm_num [hdiv]
     calc
       ∑ p ∈ P, (1 + (splitChar N (p : ZMod (8 * N))).re)
         ≤ ∑ p ∈ P, ((if ¬ p ∣ N ∧ jacobiSym (-2 * (N : ℤ)) p = 1 then (2 : ℝ) else 0) +
@@ -1509,7 +1520,10 @@ theorem reducedForms_card_lower_from_critical_line (line : DirichletLZerosOnLine
   have hlog24NB : 1 + Real.log (3 * ((8 * N : ℕ) : ℝ) * B) ≤ 7 * Real.log N := by
     have hle : 3 * ((8 * N : ℕ) : ℝ) * B ≤ (N : ℝ) ^ 3 := by
       push_cast
-      nlinarith only [hB_le_N, hNR]
+      have hBN : (B : ℝ) * N ≤ (N : ℝ) * N := mul_le_mul_of_nonneg_right hB_le_N hNRpos.le
+      have hN24 : ((N : ℝ) * N) * 24 ≤ ((N : ℝ) * N) * N :=
+        mul_le_mul_of_nonneg_left (by linarith only [hNR] : (24 : ℝ) ≤ N) (by positivity)
+      nlinarith only [hBN, hN24]
     have hpos24 : 0 < 3 * ((8 * N : ℕ) : ℝ) * B := by
       push_cast; positivity
     have h1 : Real.log (3 * ((8 * N : ℕ) : ℝ) * B) ≤ 3 * Real.log N := by

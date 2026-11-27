@@ -145,6 +145,12 @@ import Cogentic.RandomizedSubfieldDegree
 import Cogentic.RandomizedTaggedProbability
 import Cogentic.RandomizedTaggedSolver
 import Cogentic.RandomizedTaggedKernel
+import Cogentic.RandomizedEpochAssembly
+import Cogentic.RandomizedSmallPrimePrepass
+import Cogentic.RandomizedWholeTreeTape
+import Cogentic.RandomizedFieldPoolDescent
+import Cogentic.RandomizedTopStripMoments
+import Cogentic.RandomizedEpochVacuity
 
 #print axioms Cogentic.Randomized.finite_grid_schedule_floor
 #print axioms Cogentic.Randomized.elliptic_recognition_cost_floor
@@ -217,3 +223,16 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedInputDriver.serialized_epoch_from_critical_line
 #print axioms Cogentic.RandomizedEpochSuccess.epoch_verified_split_probability_half
 #print axioms Cogentic.Randomized.primeBinProducts_gridPrefix_from_critical_line
+
+#print axioms Cogentic.RandomizedEpochAssembly.serialized_assembled_epoch_from_critical_line
+#print axioms Cogentic.RandomizedEpochAssembly.serialized_assembled_balancedEnvelopeInfimum_from_critical_line
+#print axioms Cogentic.RandomizedUniversalSchedule.serialized_balancedEnvelopeInfimum_from_critical_line
+#print axioms Cogentic.RandomizedFieldExtraction.multiField_epoch_verified_split_probability_half
+#print axioms Cogentic.RandomizedWholeTreeTape.fairSerializedFactorTree_law
+#print axioms Cogentic.RandomizedWholeTreeTape.fair_whole_tree_from_critical_line
+#print axioms Cogentic.RandomizedFieldPoolDescent.pmf_descentTree_from_elliptic_opportunities
+#print axioms Cogentic.Randomized.pruned_prime_pair_restoration_coprime
+#print axioms Cogentic.RandomizedSmallPrimePrepass.trialPrepass_mean_work_le_exp
+
+#print axioms Cogentic.RandomizedEpochAssembly.Vacuity.oracleEpoch_bound
+#print axioms Cogentic.RandomizedEpochAssembly.Vacuity.oracle_end_to_end

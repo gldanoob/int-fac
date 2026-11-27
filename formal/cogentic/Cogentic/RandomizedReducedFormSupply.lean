@@ -248,7 +248,6 @@ private lemma twoPartCharInt_eq_jacobi_sign {N p : ℕ} (hN : Odd N) (hp : Odd p
     rw [neg_one_pow_eq_mod_two, neg_one_pow_eq_mod_two ((N % 4 / 2) * ((p % 8) / 2 % 2))]
     congr 1
     rw [Nat.mul_mod, hN2, hp2, Nat.mul_mod]
-    simp
   rw [hcast, hpow, twoPartCharInt]
   rcases hN4 with hN1 | hN3
   · rw [if_pos hN1]
@@ -326,7 +325,7 @@ private lemma coprime_of_modEq_coprime {u a m : ℕ} (hmod : u ≡ a [MOD m]) (h
     rw [Nat.gcd_comm u m, Nat.gcd_rec m u, Nat.gcd_comm]
   have h2 : a.gcd m = (a % m).gcd m := by
     rw [Nat.gcd_comm a m, Nat.gcd_rec m a, Nat.gcd_comm]
-  rw [Nat.Coprime, h1, hmod.eq, ← h2]
+  rw [Nat.Coprime, h1, show u % m = a % m from hmod, ← h2]
   exact ha.gcd_eq_one
 
 /-- For every subset `S : Finset ℕ` (including `S = ∅`), `χ_S * χ_{-8N}` is nontrivial
@@ -376,8 +375,9 @@ theorem genusChar_mul_splittingChar_ne_one {N : ℕ} (hN : Odd N) (S : Finset �
       refine Finset.prod_eq_one fun ℓ _ => ?_
       rw [mulChar_pow_apply _ _ hu_unit, hprime_one ℓ, one_pow]
     have hu5 : (u : ZMod 8) = (5 : ZMod 8) := by
-      rw [← Nat.cast_ofNat, ZMod.natCast_eq_natCast_iff]
-      exact hu8
+      have h5 : ((u : ℕ) : ZMod 8) = ((5 : ℕ) : ZMod 8) :=
+        (ZMod.natCast_eq_natCast_iff _ _ _).mpr hu8
+      simpa using h5
     rw [hprod1, mul_one, hu5, twoPartCharInt_five]
   intro heq
   have hval := congrArg (fun χ : DirichletCharacter ℂ (8 * N) => χ (u : ZMod (8 * N))) heq
@@ -786,7 +786,7 @@ theorem splitPrimeBin_card_approx_from_critical_line (line : DirichletLZerosOnLi
               splittingChar N (p : ZMod (8 * N))).re| +
             |((Cogentic.Randomized.primeBin P (2 * P) \ coprimePrimeBin N P (2 * P)).card : ℝ)| :=
         abs_sub _ _
-      _ = _ := by rw [abs_of_nonneg (Nat.cast_nonneg _)]
+      _ = _ := by rw [Nat.abs_cast]
   calc
     (1 / 2 : ℝ) * _ ≤ (1 / 2 : ℝ) * (K * Real.sqrt P * (1 + Real.log ((N : ℝ) * P)) ^ 2 +
         (Real.log 2)⁻¹ * Real.sqrt P * (1 + Real.log ((N : ℝ) * P)) ^ 2) := by
@@ -1197,7 +1197,11 @@ theorem genusMap_eq_one_iff_all_genusChar {N a : ℕ} (ha : Nat.Coprime a (8 * N
       ext x
       simp only [S', Finset.mem_image, Finset.mem_attach, true_and, Subtype.exists]
       constructor
-      · rintro ⟨_, _, ⟨y, hy, rfl⟩, rfl⟩
+      · rintro ⟨a, _, ⟨y, hy, hya⟩, hax⟩
+        subst hax
+        have hya' := congrArg Subtype.val hya
+        simp only at hya'
+        subst hya'
         exact hy
       · intro hx
         exact ⟨x, hS hx, ⟨x, hx, rfl⟩, rfl⟩
@@ -1630,7 +1634,7 @@ theorem certified_prefix_weighted_count_le {ι : Type*} [Fintype ι] [DecidableE
             (2 : ℝ) ^ M * (2 : ℝ) ^ m₀.primeFactors.card) =
           ∑ x ∈ BigTuples, (2 : ℝ) ^ M * (2 : ℝ) ^ x.2.primeFactors.card :=
       (Finset.sum_sigma' Dset (fun d => Finset.Icc 1 (U / ∏ i, d i))
-        (fun _ m₀ => (2 : ℝ) ^ M * (2 : ℝ) ^ m₀.primeFactors.card)).symm
+        (fun _ m₀ => (2 : ℝ) ^ M * (2 : ℝ) ^ m₀.primeFactors.card))
     rw [hsigma]
     let embed : ℕ × (ι → ℕ) → Σ _d : ι → ℕ, ℕ := fun p => ⟨p.2, p.1⟩
     have hinj : Function.Injective embed := fun ⟨a₁, b₁⟩ ⟨a₂, b₂⟩ h => by
@@ -1673,7 +1677,7 @@ theorem certified_prefix_weighted_count_le {ι : Type*} [Fintype ι] [DecidableE
       by_cases hq : 1 ≤ U / ∏ i, d i
       · have hqleU : U / ∏ i, d i ≤ U := Nat.div_le_self U _
         have hqleR : ((U / ∏ i, d i : ℕ) : ℝ) ≤ (U : ℝ) / ((∏ i, d i : ℕ) : ℝ) :=
-          (le_div_iff₀ hDposR).mpr (by exact_mod_cast (mul_comm _ _ ▸ Nat.mul_div_le U (∏ i, d i)))
+          (le_div_iff₀ hDposR).mpr (by exact_mod_cast Nat.div_mul_le_self U (∏ i, d i))
         have hlog_le : Real.log ((U / ∏ i, d i : ℕ) : ℝ) ≤ Real.log U :=
           Real.log_le_log (Nat.cast_pos.mpr hq) (Nat.cast_le.mpr hqleU)
         have h1log : 0 ≤ 1 + Real.log U := by
@@ -1791,7 +1795,7 @@ private lemma smooth_rpow_sum_le_euler_prod {Y : ℕ} {β : ℝ} (hβ0 : 0 < β)
         = ∑ d ∈ S, ∏ p : P, ((p.1 : ℝ) ^ (-β)) ^ (toExp d p) :=
       Finset.sum_congr rfl hrpow_eq
     _ = ∑ e ∈ S.image toExp, ∏ p : P, ((p.1 : ℝ) ^ (-β)) ^ (e p) :=
-      (Finset.sum_image hinj).symm
+      (Finset.sum_image (f := fun e : P → ℕ => ∏ p : P, ((p.1 : ℝ) ^ (-β)) ^ (e p)) hinj).symm
     _ ≤ ∑ e ∈ Box, ∏ p : P, ((p.1 : ℝ) ^ (-β)) ^ (e p) :=
       Finset.sum_le_sum_of_subset_of_nonneg hmaps fun _ _ _ =>
         Finset.prod_nonneg fun _ _ => by positivity
@@ -1804,7 +1808,8 @@ private lemma smooth_rpow_sum_le_euler_prod {Y : ℕ} {β : ℝ} (hβ0 : 0 < β)
         rw [Real.rpow_neg (by linarith)]
         exact inv_lt_one_of_one_lt₀ (Real.one_lt_rpow (by linarith) hβ0)
       exact geom_sum_le_inv_one_sub hr0 hr1 K
-    _ = ∏ p ∈ P, (1 - (p : ℝ) ^ (-β))⁻¹ := Finset.prod_coe_sort P _
+    _ = ∏ p ∈ P, (1 - (p : ℝ) ^ (-β))⁻¹ :=
+      Finset.prod_coe_sort P (fun p : ℕ => (1 - (p : ℝ) ^ (-β))⁻¹)
 
 /-- Rankin's inequality for any finite set `S` of `Y`-smooth integers `≥ T`:
     for any `β ∈ (0, 1)`, `∑_{d ∈ S} 1/d ≤ T^(β - 1) * ∏_{p ≤ Y, p.Prime} (1 - p^(-β))⁻¹`. -/
