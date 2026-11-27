@@ -30,6 +30,31 @@ def stationary_limit():
     assert (QQ(64)/9)**(QQ(1)/3) < ceiling < QQ(215463)/100000
     cap = AA(QQ(2034)/1000)
     assert cap**2 - 8*cap.sqrt()/3 < QQ(36)/100
+    delta = 2 / ceiling.sqrt()
+    beta = b / delta
+    radix = delta**-3
+    y0 = 3 * u**2 * delta / 4
+    v0 = y0 / 2
+    height = radix * (1 + 2*v0)
+    low = (beta + 2*height + radix/(3*beta)) / (2*beta - QQ(1)/3)
+    slope = low - height/beta
+    top, high = QQ(163)/100, QQ(172)/100
+    y1, y2 = v0/top, v0/(2*top*high)
+    assert 2*beta > QQ(1)/3 and low > high > top > QQ(3)/2
+    assert 0 < 2*v0 < 1 and 3*y1 < 2*v0 and slope > 1
+    assert (low-1)*slope*beta > height
+    assert (2*slope-1)*beta == low/3 + radix/(3*beta)
+    assert b + delta*low/3 + 1/(3*delta*b) == ceiling
+    assert 101*y1 - 49*(1 + v0 - y0) < -10
+    assert 49*(height+slope*beta) - 101*radix > 4
+    mass = 2/(9*u**2)
+    assert mass > u/3 and public/mass < 2
+    for cost in (b + delta*top/3 + 1/(3*delta*b),
+                 b + delta*high/3 + (1+y1/2)/(3*delta*b),
+                 b + delta*top/3 + u*(y1/y0).sqrt(),
+                 b + delta*high/3 + u*(y2/y0).sqrt(),
+                 b + delta*low/3, b + 2*delta/3, 2*b):
+        assert cost < ceiling
     print("2.03288100822533195 < relaxed budget < 2.03288100822533196")
 
 

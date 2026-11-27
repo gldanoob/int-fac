@@ -23,6 +23,8 @@ import Cogentic.RandomizedScaledSchedule
 import Cogentic.RandomizedQuadraticShear
 import Cogentic.RandomizedCutoffCrossing
 import Cogentic.RandomizedTwoMarkResidue
+import Cogentic.RandomizedUnitaryDivisorSign
+import Cogentic.RandomizedClassSchedule
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
 import Cogentic.RandomizedKrylovProbe
@@ -77,3 +79,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedSamplerTransfer.mapped_transcript_indicator_transfer
 #print axioms Cogentic.RandomizedSamplerTransfer.deficient_weights_totalVariation_le
 #print axioms Cogentic.Randomized.cutoff_crossing_cost_floor
+#print axioms Cogentic.Randomized.sharp_classSchedule_infimum
