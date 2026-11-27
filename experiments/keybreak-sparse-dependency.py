@@ -1,5 +1,6 @@
 """Find verified binary dependencies using exact sparse Wiedemann probes."""
 
+from math import gcd, isqrt, prod
 from itertools import product
 from operator import index
 from random import Random
@@ -200,6 +201,32 @@ def marked_dependency(rows, tags, columns, *, rng=None, attempts=8, field_degree
     return None
 
 
+
+def check_hidden_root_split(modulus, a, b, fiber_size, rng):
+    # The first six public columns have four independent duplicate relations.
+    # The last column is the only hidden label. Each row enforces one parity.
+    values = (a, a, a, b, b, b, a*b)
+    selected = marked_dependency(((0, 1, 2, 6), (3, 4, 5, 6)), ((6,),), len(values), rng=rng)
+    assert selected and 6 in selected
+    product = prod(values[i] for i in selected)
+    rational_root = isqrt(product)
+    assert rational_root**2 == product
+
+    def roots(value):
+        return [x for x in range(1, modulus) if x*x % modulus == value]
+
+    root_a, root_b = min(roots(a)), min(roots(b))
+    public = prod(root_a if i < 3 else root_b for i in selected if i < 6)
+    hidden = roots(a*b)
+    assert len(hidden) == fiber_size
+    splits = 0
+    for root in hidden:
+        assert (public*root)**2 % modulus == product % modulus
+        divisor = gcd(public*root-rational_root, modulus)
+        splits += 1 < divisor < modulus
+    assert splits == fiber_size - 2
+
+
 def replay():
     rng = Random(2625)
     assert berlekamp_massey([0, 0, 1, 0, 0, 0], irreducible(4)) == [0, 0, 0, 1]
@@ -221,6 +248,9 @@ def replay():
     assert marked_dependency(rows, ((0, 1),), 42, rng=rng) is None
     assert 3 in marked_dependency((), ((3,),), 5, rng=rng)
     print("Verified marked extraction with 20 unmarked dimensions, zero tags, and zero constraints.")
+    for modulus, a, b, size in ((143, 3, 14, 4), (1573, 3, 14, 4), (2431, 38, 42, 8)):
+        check_hidden_root_split(modulus, a, b, size, rng)
+    print("Verified proper integer gcds for 2/4, 2/4 and 6/8 hidden roots.")
 
 
 if __name__ == "__main__":
