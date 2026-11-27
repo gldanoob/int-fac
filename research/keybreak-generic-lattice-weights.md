@@ -42,3 +42,54 @@ If \(\lambda\ge N^\eta/V\) for fixed \(\eta>0\) and \(V=N^{O(1)}\), then
 Here \(\lambda=O(V^{-1/2})\) by the two-dimensional lattice bound, and \(\omega(N)\le \log_2 N\). A nonempty generic class has \(V\gg N^{2\eta}\) by the same shortest-length bound. On a rough branch where \(\min_{p\mid N}\log p/H\to\infty\), one has \(\sum_{p\mid N}1/p=\exp(-\omega(H))\), by multiplying the largest reciprocal by at most \(\log_2 N\). The [existing rough-input prepass](keybreak-private-shape-work.md#ensuring-the-count-suffices-on-every-input) has this separation on its rough branch.
 
 As a direct integer check, for \(N=1000003\) and \(T=X=300000\), enumeration gives counts \(4576\) and \(4597\) for \(z=314159\) and \(271828\). The leading term is \(4559.44\). This fixture enumerates \(t\) in the box, uses the unique \(h\) in \([0,N)\), and tests the two edges and ordinary gcd directly.
+
+## Exact density for all odd moduli
+
+The shared-prime correction can be included in the main term. For every odd $N$ and unit $z$, write $j=(h-zt)/N$ in the lattice coordinates above. The condition $\gcd(t,h)=1$ is equivalent to the pair of conditions
+
+\[
+ (t,N)=1,\qquad (t,j)=1.
+\]
+
+In one direction, a prime dividing $t$ and $N$ would also divide $h$, and a prime dividing $t$ and $j$ would divide $h$. In the other direction, a prime dividing $t$ and $h$ must divide $Nj$ by the lattice identity. When $t$ is odd and a unit modulo $N$, the lattice Möbius variable $d\mid(t,j)$ is automatically prime to $2N$. After scaling by $d$, both oddness and the unit condition apply to $t'=t/d$ as before. Expand the latter condition as a Möbius sum over $e\mid\operatorname{rad}(N)$. Requiring $e\mid t'$ with $t'$ odd gives the coset $t'\equiv e\pmod{2e}$, of lattice index $2e$. Its shortest lattice length is at least $\lambda$. Thus the contribution for each $(d,e)$ before applying its Möbius sign is
+
+\[
+ \frac{V}{16ed^2}+O\left(1+\frac{1}{d\lambda}\right).
+\]
+
+As before $d\le C/\lambda$ for every contributing point. Extend the main sum in $d$ to infinity, at a cost $O(V\lambda)$ per $e$. Summing the errors gives the following bound, with an absolute implied constant:
+
+\[
+ C_z=\kappa_N V+O\left(\tau(N)\left[V\lambda+1+
+                   \frac{\log(2+\lambda^{-1})}{\lambda}\right]\right),
+ \qquad
+ \kappa_N=\frac{1}{16}\frac{\varphi(N)}N\prod_{p\nmid 2N}(1-p^{-2})
+          =\frac{1}{2\pi^2}\prod_{p\mid N}\frac{p}{p+1}.
+\]
+
+The factor $1/e$ in the first main term is essential. The identity $\sum_{e\mid N}\mu(e)/e=\varphi(N)/N$ gives the displayed product. Also $\varphi(N)/N\ge 1/(1+\omega(N))$, by ordering the prime divisors and using $p_i\ge i+1$. In particular $\kappa_N\gg1/\log(2N)$. This proof uses the factorization of $N$ only in its analysis.
+
+## Total variation without the shortest-vector filter
+
+Take $X=N^{a+o(1)}$ and $T=N^{s+o(1)}$ with fixed $2/3<a<1$ and $1-a<s<a/2$. Let $\mathcal Z$ be the unit residues whose positive square residue is at most $X$. The complete Gauss-sum argument for the unit population gives $|\mathcal Z|=X\varphi(N)/N+O(N^{1/2+o(1)})$ for this range. That part of the argument only needs $a>1/2$. Choose $\eta>0$ with
+
+\[
+ 2\eta<\min\{a+s-1,3a/2-1,s\}.
+\]
+
+For $\lambda>N^\eta/V$, the preceding pointwise bound yields $C_z=\kappa_N V(1+O(N^{-\eta+o(1)}))$. Here $\lambda\ll V^{-1/2}$ by the shortest-vector bound, $a+s-1>2\eta$, and $\tau(N)=N^{o(1)}$. On the other hand, the short-vector exception estimate bounds the number of $z\in\mathcal Z$ with $\lambda\le N^\eta/V$ by $O(N^{a-\gamma})$ for any fixed positive
+
+\[
+ \gamma<\min\{a/2,a+s-1-2\eta,3a/2-1-2\eta,s-2\eta\}.
+\]
+
+Its argument allows factors of $N$ in the short lattice vector. [Unit short-square population](keybreak-primitive-denominator-discrepancy.md#large-divisors-and-the-unit-population) · [Short-vector exceptions](keybreak-short-vector-exception.md)
+
+For every $z$, including those exceptions, one has $C_z\ll V$. Indeed any two distinct counted ordinary primitive pairs are noncollinear as positive integer vectors. Their normalized determinant is a nonzero multiple of $N/(TX)=1/V$. The normalized vectors have bounded lengths and lie in a fixed angular interval, so their angular separation is $\gg 1/V$. The number of such directions is $O(V)$ for $V\ge1$. Consequently the exceptional residues contribute at most $O(VN^{a-\gamma})$ to the sum of $|C_z-\kappa_NV|$. Dividing the total error by $\kappa_NV|\mathcal Z|$ gives
+
+\[
+ \frac{\sum_{z\in\mathcal Z}|C_z-\kappa_NV|}{\kappa_NV|\mathcal Z|}
+ \ll N^{-\min(\eta,\gamma)+o(1)}.
+\]
+
+Thus the output from an equal-weight primitive pair conditional on success has polynomially small total variation distance to uniform on $\mathcal Z$, even if the sampler keeps every exceptional lattice. The equal-weight denominator proposal has pair mass of order $1/(V X\log N)$ in this range. Since the total number of pairs is asymptotic to $\kappa_NV|\mathcal Z|$, its acceptance probability is at least a reciprocal polynomial in $\log N$. It can therefore be repeated with a polynomial cap. Its bounded-to-ideal coupling can be taken smaller than any prescribed inverse polynomial in $N$, so conditioning on acceptance preserves the stated power saving. This controls repeated draws as well. Over $\exp(O(H))=N^{o(1)}$ independent samples with $H=(\log N)^{1/3}(\log\log N)^{2/3}$, the sum of the per-sample errors still saves a power of $N$. Subsequent public computations can be coupled through the reported squares if the auxiliary pair data are kept private. [Equal-weight proposal and its coupling](keybreak-factored-denominator-proposal.md)
