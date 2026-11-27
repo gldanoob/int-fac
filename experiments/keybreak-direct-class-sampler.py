@@ -173,6 +173,67 @@ def check_proposal_weights(n, canonical_forms):
     return weights
 
 
+def parity_dependency(masks):
+    """Return a dependency using only the public parity masks."""
+    basis = {}
+    for index, mask in enumerate(masks):
+        selected = 1 << index
+        while mask:
+            pivot = mask.bit_length() - 1
+            if pivot not in basis:
+                basis[pivot] = mask, selected
+                break
+            known_mask, known_selected = basis[pivot]
+            mask ^= known_mask
+            selected ^= known_selected
+        else:
+            return [i for i in range(index + 1) if (selected >> i) & 1]
+    return None
+
+
+def check_composed_split(n, oriented_square, seed):
+    """Trial division stands in for analytic field descent in this finite check."""
+    factor_base = (2, 3, 5, 7, 11, 13)
+    rng, signs = Random(seed), Random(seed + 1)
+    for _ in range(12):
+        public_factors, public_masks, private_roots = [], [], []
+        for _ in range(1000):
+            form, _ = sample_reduced_class(n, rng)
+            (leading, _, _), root = oriented_square(form, n)
+            if gcd(leading, n) != 1:
+                continue
+            cofactor = leading
+            exponents = [0] * len(factor_base)
+            for index, prime in enumerate(factor_base):
+                while cofactor % prime == 0:
+                    exponents[index] += 1
+                    cofactor //= prime
+            mask = sum((exponent % 2) << i for i, exponent in enumerate(exponents))
+            if cofactor != 1 or mask == 0 or mask in public_masks:
+                continue
+            public_factors.append(exponents)
+            public_masks.append(mask)
+            private_roots.append((-root if signs.randrange(2) else root) % n)
+            selected = parity_dependency(public_masks)
+            if selected is None:
+                continue
+
+            # Open the private root records only after the public solver chooses.
+            assert len(selected) >= 3
+            totals = [sum(public_factors[i][j] for i in selected) for j in range(len(factor_base))]
+            assert all(exponent % 2 == 0 for exponent in totals)
+            public_root = prod(prime**(exponent // 2) for prime, exponent in zip(factor_base, totals))
+            private_root = prod(private_roots[i] for i in selected) % n
+            assert (private_root**2 - public_root**2) % n == 0
+            for candidate in (private_root - public_root, private_root + public_root):
+                divisor = gcd(candidate, n)
+                if 1 < divisor < n:
+                    assert n % divisor == 0
+                    return divisor, [public_masks[i] for i in selected]
+            break
+    raise AssertionError("the composed regression did not find a proper divisor")
+
+
 if __name__ == "__main__":
     reference = run_path(str(Path(__file__).with_name("keybreak-quadratic-class-roots.py")))
     for limit in range(1, 51):
@@ -204,3 +265,7 @@ if __name__ == "__main__":
     print(f"{8 * len(fixtures)} seeded draws checked; last draw for each fixture:")
     for example in examples:
         print(example)
+
+    for n in (241 * 269, 43**2 * 47):
+        divisor, masks = check_composed_split(n, reference["oriented_square"], seed=20261127)
+        print(f"composed split of {n}: divisor {divisor}, public dependency {masks}")
