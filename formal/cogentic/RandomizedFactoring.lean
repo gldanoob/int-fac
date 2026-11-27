@@ -15,6 +15,7 @@ import Cogentic.RandomizedKrylovProbe
 import Cogentic.RandomizedOddSplit
 import Cogentic.RandomizedOptimalCost
 import Cogentic.RandomizedPadeEuclid
+import Cogentic.RandomizedPadeArithmetic
 import Cogentic.RandomizedPadeCost
 import Cogentic.RandomizedPadeKrylov
 import Cogentic.RandomizedPadeMinimal
@@ -37,6 +38,7 @@ import Cogentic.RandomizedSparseDependency
 import Cogentic.RandomizedSparseSchedule
 import Cogentic.RandomizedTaggedDependency
 import Cogentic.RandomizedSubfieldDegree
+import Cogentic.RandomizedTaggedProbability
 import Cogentic.RandomizedTaggedSolver
 import Cogentic.RandomizedTaggedKernel
 
