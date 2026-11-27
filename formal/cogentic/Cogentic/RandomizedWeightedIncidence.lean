@@ -1,5 +1,7 @@
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Basic
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 
 open Finset
 open scoped BigOperators
@@ -82,6 +84,53 @@ theorem sum_incident_sq_le (objects : Finset H) (labels : Finset L)
         intro x hx
         simp only [sum_ite_eq, hx, if_true]
 
+theorem mul_le_twice_center_mul_add_sq {a b n μ : ℝ}
+    (ha : 0 ≤ a) (han : a ≤ n) (hbn : b ≤ n) :
+    a * b ≤ 2 * μ * a + (n - μ) ^ 2 := by
+  have h : a * (b - 2 * μ) ≤ (n - μ) ^ 2 := by
+    by_cases hn : n ≤ 2 * μ
+    · exact (mul_nonpos_of_nonneg_of_nonpos ha (sub_nonpos.mpr (hbn.trans hn))).trans
+        (sq_nonneg _)
+    · calc
+        _ ≤ a * (n - 2 * μ) := mul_le_mul_of_nonneg_left (sub_le_sub_right hbn _) ha
+        _ ≤ n * (n - 2 * μ) :=
+          mul_le_mul_of_nonneg_right han (sub_nonneg.mpr (le_of_not_ge hn))
+        _ ≤ _ := by nlinarith only [sq_nonneg μ]
+  nlinarith only [h]
+
+/-- A common pointwise envelope controls a weighted product by one first
+moment and the squared deviation of the envelope from the center. -/
+theorem sum_weighted_mul_le_twice_center_add_sq (samples : Finset H)
+    (w a b n : H → ℝ) (μ : ℝ) (hw : ∀ x ∈ samples, 0 ≤ w x)
+    (ha : ∀ x ∈ samples, 0 ≤ a x)
+    (han : ∀ x ∈ samples, a x ≤ n x) (hbn : ∀ x ∈ samples, b x ≤ n x) :
+    (∑ x ∈ samples, w x * (a x * b x)) ≤
+      2 * μ * (∑ x ∈ samples, w x * a x) + ∑ x ∈ samples, w x * (n x - μ) ^ 2 := by
+  calc
+    _ ≤ ∑ x ∈ samples, w x * (2 * μ * a x + (n x - μ) ^ 2) :=
+      sum_le_sum fun x hx => mul_le_mul_of_nonneg_left
+        (mul_le_twice_center_mul_add_sq (ha x hx) (han x hx) (hbn x hx)) (hw x hx)
+    _ = _ := by
+      simp only [mul_add, sum_add_distrib, mul_sum]
+      congr 1
+      exact sum_congr rfl fun _ _ => by ring
+
+/-- Re-centering a weighted squared deviation at a zero-mean center
+adds the squared shift times the total weight. -/
+theorem sum_weighted_sq_sub_eq_of_centered (samples : Finset H) (w n : H → ℝ)
+    (μ ν : ℝ) (hcenter : ∑ x ∈ samples, w x * (n x - ν) = 0) :
+    (∑ x ∈ samples, w x * (n x - μ) ^ 2) =
+      (∑ x ∈ samples, w x * (n x - ν) ^ 2) +
+        (ν - μ) ^ 2 * (∑ x ∈ samples, w x) := by
+  calc
+    _ = ∑ x ∈ samples, (w x * (n x - ν) ^ 2 +
+        (2 * (ν - μ) * (w x * (n x - ν)) + (ν - μ) ^ 2 * w x)) :=
+      sum_congr rfl fun _ _ => by ring
+    _ = _ := by simp only [sum_add_distrib, ← mul_sum, hcenter, mul_zero, zero_add]
+
+#print axioms mul_le_twice_center_mul_add_sq
+#print axioms sum_weighted_mul_le_twice_center_add_sq
+#print axioms sum_weighted_sq_sub_eq_of_centered
 #print axioms sum_incident_sq_eq
 #print axioms sum_incident_sq_le
 
