@@ -35,8 +35,10 @@ import Cogentic.RandomizedGenusMixing
 import Cogentic.RandomizedEvenDiscriminantGenus
 import Cogentic.RandomizedTargetGenus
 import Cogentic.RandomizedFormReduction
+import Cogentic.RandomizedFormReductionSize
 import Cogentic.RandomizedReductionSteps
 import Cogentic.RandomizedConductorCount
+import Cogentic.RandomizedNarrowEnvelope
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -108,3 +110,5 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedQuadraticTargetRoot.targeted_first_column_root_mod
 #print axioms Cogentic.RandomizedGenusMixing.equal_label_pair_count_after_deleting
 #print axioms Cogentic.RandomizedConductorCount.unsaturated_prefix
+#print axioms Cogentic.Randomized.narrow_envelope_37_20_lower
+#print axioms Cogentic.RandomizedFormReductionSize.reduce_size_bounds
