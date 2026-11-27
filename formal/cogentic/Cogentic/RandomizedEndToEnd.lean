@@ -24,26 +24,32 @@ import Cogentic.RandomizedL20_2Sub
 import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_2SmoothLower
+import Cogentic.RandomizedL20_2CoordinateEnergy
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
+import Cogentic.RandomizedL20_4Interior
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
 import Cogentic.RandomizedL34Dedekind
+import Cogentic.RandomizedL34ZeroFree
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
 import Cogentic.RandomizedL21_2Perron
+import Cogentic.RandomizedL21_2Density
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
 import Cogentic.RandomizedL27Analytic
 import Cogentic.RandomizedL27Deuring
+import Cogentic.RandomizedL27Stratification
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
 import Cogentic.RandomizedL30Younis
+import Cogentic.RandomizedL30Raw
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
@@ -260,6 +266,12 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2Saddle.L20_2SaddleInputs.toConcentrationLeaf
 #print axioms Cogentic.RandomizedL20_2SmoothLower.smoothNumberCountLower_twoPow
 #print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
+#print axioms Cogentic.RandomizedL20_2CoordinateEnergy.coordinateEnergyBudget_of_mellinEnvelope
+#print axioms Cogentic.RandomizedL20_4Interior.TopInteriorData.toTopConditionedData
+#print axioms Cogentic.RandomizedL21_2Density.L21_2DensityInputs.toRatedLeaf
+#print axioms Cogentic.RandomizedL27Stratification.jInvariantStratification_of_fiberInput
+#print axioms Cogentic.RandomizedL30Raw.RawInputs.toYounisLPPInputs
+#print axioms Cogentic.RandomizedL34ZeroFree.ZeroFreeAnalyticInputs.toDedekindAnalyticInputs
 #print axioms Cogentic.RandomizedL21_2Perron.L21_2PerronInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedP1Analytic.P1AnalyticInputs.toP1Leaf
 #print axioms Cogentic.RandomizedL27Analytic.L27AnalyticCertificate.ledger
