@@ -6,6 +6,7 @@ import Cogentic.RandomizedEndpointFloor
 import Cogentic.RandomizedEvaluationNorm
 import Cogentic.RandomizedEvaluationMaps
 import Cogentic.RandomizedFiniteObstruction
+import Cogentic.RandomizedFiniteSupportTV
 import Cogentic.RandomizedFullTableFloor
 import Cogentic.RandomizedGramMinor
 import Cogentic.RandomizedGramRank
