@@ -6,9 +6,9 @@ Under the standard rectangular smoothness ledger with the existing private field
 
 Put \(D=(\log N/\log\log N)^{1/3}\) and \(H=D\log\log N\). Use a field polynomial \(F\) of degree \(d\sim\delta D\) with coefficient height \(\exp((A+o(1))DH)\). The private construction charges \(A\ge1/\delta+3u^2/4\) and a work coefficient of at least \(b+p(u)\), where \(p(u)=4/(9u^2)+2u/3\) and \(b\) is the larger terminal factor-base exponent in \(H\) units.
 
-Write the radix as \(m=r_0/Q\), with \(\log Q=o(DH)\) and \(\log|m|\sim DH/\delta\). Let \(P(X)=\sum_{i=0}^k c_iX^i\) be primitive of exact degree \(k\), with \(|c_i|\le W=\exp((v+o(1))H)\). The integral rational value is \(G_k(P)=Q^kP(r_0/Q)\). At a degree-one label \((q,s_0)\) the algebraic condition is \(P(s_0)=0\bmod q\). For a rational incoming prime \(q\nmid Q\), use \(P(r_0/Q)=0\bmod q\). The ordinary identity is \(1=(Q^k/G_k(P))\psi(P(\theta))\bmod N\), subject to the unit checks for evaluation.
+Write the radix as \(m=r_0/Q\), with \(r_0,Q\asymp M\), \(\log M\sim DH/\delta\), and \(m\) bounded. Let \(P(X)=\sum_{i=0}^k c_iX^i\) be primitive of exact degree \(k\), with \(|c_i|\le W=\exp((v+o(1))H)\). The integral rational value is \(G_k(P)=Q^kP(r_0/Q)\). At a degree-one label \((q,s_0)\) the algebraic condition is \(P(s_0)=0\bmod q\). For a rational incoming prime \(q\nmid Q\), use \(P(r_0/Q)=0\bmod q\). The ordinary identity is \(1=(Q^k/G_k(P))\psi(P(\theta))\bmod N\), subject to the unit checks for evaluation.
 
-Since \(W\ll |m|\), the leading term of \(P\) dominates at \(m\) uniformly and \(\log |G_k(P)|=(k/\delta+o(1))DH\). The Mahler measures, bounded by the Euclidean coefficient norms, give
+The rational height is at most \((k/\delta+o(1))DH\). The source sampling of \(r_0\) gives the matching leading height with high probability, simultaneously on the full mark box. [Uniform height estimate](keybreak-higher-degree-terminal-height.md) The Mahler measures, bounded by the Euclidean coefficient norms, give
 \[
 |\operatorname{Res}(F,P)|\le M(F)^k M(P)^d
  \le \exp((kA+\delta v+o(1))DH).
