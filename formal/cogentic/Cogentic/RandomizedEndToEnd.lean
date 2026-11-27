@@ -29,6 +29,7 @@ import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
 import Cogentic.RandomizedL20_4Interior
+import Cogentic.RandomizedL20_4TwoPoint
 import Cogentic.RandomizedL34
 import Cogentic.RandomizedL34Sub
 import Cogentic.RandomizedL34Analytic
@@ -77,6 +78,7 @@ import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL18_4LargeSieveInputs
 import Cogentic.RandomizedL18_4LargeSieveResidual
 import Cogentic.RandomizedL18_4EnergyBudget
+import Cogentic.RandomizedL18_4ConvolutionEnergy
 import Cogentic.RandomizedL18_4LatticeCount
 import Cogentic.RandomizedL19SecondMoment
 import Cogentic.RandomizedL19Muq
@@ -268,6 +270,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2CoordinateEnergy.coordinateEnergyBudget_of_mellinEnvelope
 #print axioms Cogentic.RandomizedL20_4Interior.TopInteriorData.toTopConditionedData
+#print axioms Cogentic.RandomizedL20_4TwoPoint.TwoPointReducedData.toPairConditionedData
+#print axioms Cogentic.RandomizedL18_4.LargeSieveConvolutionData.toSpectralData
+#print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceLargeSieveConvolutionData
 #print axioms Cogentic.RandomizedL21_2Density.L21_2DensityInputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL27Stratification.jInvariantStratification_of_fiberInput
 #print axioms Cogentic.RandomizedL30Raw.RawInputs.toYounisLPPInputs
