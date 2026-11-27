@@ -31,7 +31,8 @@ strip around the line `Re s = 2/3` (`ZetaStripLowerBound`).  This is the minimal
 quantitative form of the classical non-vanishing/zero-free input at `2/3`: it
 implies both non-vanishing on the strip and the ratio `M` needed above.
 Everything else -- the upper bound for `ζ` in the strip -- is proved from the
-approximate functional equation `norm_zeta_sub_sum_le`.
+Euler--Maclaurin/partial-summation estimate
+`GlobalTheory.ZetaLeft.norm_sub_one_mul_riemannZeta_le`.
 
 We also record the even more primitive `ZetaLineEstimate`, a pointwise lower
 bound for `ζ` and a pointwise upper bound for `ζ'` on the line, which gives
@@ -546,6 +547,398 @@ lemma zetaUpperConstant_log_nonneg :
     0 ≤ Real.log (Classical.choose exists_zeta_upper_bound_strip) :=
   Real.log_nonneg zetaUpperConstant_one_le
 
+/-- The explicit constant produced by the strip route is strictly positive: the
+reduction never replaces a loss by zero. -/
+lemma stripConstant_pos {C R : ℝ} {b : ℕ → ℝ}
+    (hR0 : 0 < R) (hC1 : 1 ≤ C) (hb0 : ∀ n, 0 < b n)
+    (hb1 : ∀ n, b n ≤ 1) (n : ℕ) :
+    0 < 24 * (Real.log C + 15 + Real.log (1 / b n)) / R := by
+  have hlogC : 0 ≤ Real.log C := Real.log_nonneg hC1
+  have hlog1b : 0 ≤ Real.log (1 / b n) := by
+    apply Real.log_nonneg
+    rw [le_div_iff₀ (hb0 n)]
+    linarith [hb1 n]
+  have hpos : 0 < Real.log C + 15 + Real.log (1 / b n) := by linarith
+  positivity
+
+/-! ## The minimal split zeta input
+
+`ZetaStripLowerBound` asks for a quantitative lower bound at *every* point of
+the strip.  The classical ball log-derivative bound only uses two consequences
+of that hypothesis: the strip is zero-free, and `ζ` is bounded below on the
+centre line.  We isolate those two hypotheses.  This is strictly weaker than
+`ZetaStripLowerBound` and is the exact zeta input consumed by the reduction. -/
+
+/-- The strip `|Re s - 2/3| ≤ R`, `|Im s| ≤ 2 X³`, is zero-free. -/
+def ZetaStripNonvanishing (X : ℕ → ℝ) (R : ℝ) : Prop :=
+  ∀ᶠ n : ℕ in atTop, ∀ u : ℝ, |u| ≤ 2 * X n ^ 3 →
+    ∀ z : ℂ, ‖z - perronLine perronRe u‖ ≤ R → riemannZeta z ≠ 0
+
+/-- The quantitative lower bound is only required on the centre line
+`Re s = 2/3`. -/
+def ZetaLineLower (X : ℕ → ℝ) (b : ℕ → ℝ) : Prop :=
+  ∀ᶠ n : ℕ in atTop, ∀ u : ℝ, |u| ≤ 2 * X n ^ 3 →
+    b n ≤ ‖riemannZeta (perronLine perronRe u)‖
+
+/-- The exact zeta input of the reduction: a zero-free strip plus a lower bound
+on its centre line. -/
+def ZetaStripInput (X : ℕ → ℝ) (R : ℝ) (b : ℕ → ℝ) : Prop :=
+  ZetaStripNonvanishing X R ∧ ZetaLineLower X b
+
+theorem zetaStripInput_of_zetaStripLower {X : ℕ → ℝ} {R : ℝ} {b : ℕ → ℝ}
+    (hR0 : 0 ≤ R) (hb0 : ∀ n, 0 < b n) (h : ZetaStripLowerBound X R b) :
+    ZetaStripInput X R b := by
+  constructor
+  · filter_upwards [h] with n hn
+    intro u hu z hz hz0
+    have hb := hn u hu z hz
+    rw [hz0, norm_zero] at hb
+    exact (not_le_of_gt (hb0 n)) hb
+  · filter_upwards [h] with n hn
+    intro u hu
+    exact hn u hu _ (by rw [sub_self, norm_zero]; exact hR0)
+
+theorem zetaLineLower_of_zetaLineEstimate {X : ℕ → ℝ} {b B : ℕ → ℝ}
+    (h : ZetaLineEstimate X b B) : ZetaLineLower X b := by
+  filter_upwards [h] with n hn
+  intro u hu
+  exact (hn u hu).1
+
+/-- The reduction from the split input.  This is the same ball
+log-derivative argument as `verticalLineBound_of_zetaStripLower`, but it only
+uses non-vanishing in the strip and the lower bound on the centre line. -/
+private theorem verticalLineBound_of_zetaData {X : ℕ → ℝ} {R C : ℝ} {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hR0 : 0 < R) (hR8 : R ≤ 1 / 8) (hC1 : 1 ≤ C)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (hC : ∀ (Y u : ℝ) (z : ℂ), 1 ≤ Y → |u| ≤ 2 * Y ^ 3 →
+      ‖z - perronLine perronRe u‖ ≤ 1 / 8 → ‖riemannZeta z‖ ≤ C * Y ^ 15)
+    (hne : ∀ᶠ n : ℕ in atTop, ∀ u : ℝ, |u| ≤ 2 * X n ^ 3 →
+      ∀ z : ℂ, ‖z - perronLine perronRe u‖ ≤ R → riemannZeta z ≠ 0)
+    (hlow : ∀ᶠ n : ℕ in atTop, ∀ u : ℝ, |u| ≤ 2 * X n ^ 3 →
+      b n ≤ ‖riemannZeta (perronLine perronRe u)‖) :
+    VerticalLineBound X
+      (fun n => 24 * (Real.log C + 15 + Real.log (1 / b n)) / R) 2 := by
+  have hC0 : 0 < C := lt_of_lt_of_le zero_lt_one hC1
+  unfold VerticalLineBound
+  filter_upwards [hne, hlow] with n hnen hlown
+  intro u hu
+  set L := bandLog X n with hLdef
+  have hL3 : 3 ≤ L := hU n
+  have hL1 : 1 ≤ L := by linarith
+  have hX1 : 1 < X n := hX n
+  have hXpos : 0 < X n := by linarith
+  have hX3 : (1 : ℝ) ≤ X n ^ 3 := by
+    simpa using one_le_pow₀ hX1.le (n := 3)
+  set s0 : ℂ := perronLine perronRe u with hs0
+  have hR8' : R ≤ 1 / 8 := hR8
+  -- Pointwise geometry on the closed ball
+  have hzre_ge : ∀ z ∈ closedBall s0 R, (13 / 24 : ℝ) ≤ z.re := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ R := by
+      simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+    have h := (abs_le.mp (strip_re_abs hz')).1
+    linarith
+  have hzre_upper : ∀ z ∈ closedBall s0 R, z.re ≤ 19 / 24 := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ R := by
+      simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+    have h := (abs_le.mp (strip_re_abs hz')).2
+    linarith
+  have hzne_one : ∀ z ∈ closedBall s0 R, z ≠ 1 := by
+    intro z hz
+    have hle := hzre_upper z hz
+    intro h
+    rw [h] at hle
+    norm_num at hle
+  have hdist1 : ∀ z ∈ closedBall s0 R, (5 / 24 : ℝ) ≤ ‖z - 1‖ := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ R := by
+      simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+    exact strip_dist_one_ge hz' hR8'
+  have hnormz : ∀ z ∈ closedBall s0 R, ‖z‖ ≤ 2 * X n ^ 3 + 1 := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ R := by
+      simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+    exact strip_norm_le hu hz' hR8'
+  -- Non-vanishing and the ratio bound
+  have hne' : ∀ z ∈ closedBall s0 R, riemannZeta z ≠ 0 := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ R := by
+      simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+    exact hnen u hu z (by simpa [hs0] using hz')
+  have hupper : ∀ z ∈ closedBall s0 R, ‖riemannZeta z‖ ≤ C * X n ^ 15 := by
+    intro z hz
+    have hz' : ‖z - s0‖ ≤ 1 / 8 := by
+      have h1 : ‖z - s0‖ ≤ R := by
+        simpa [Metric.mem_closedBall, dist_eq_norm] using hz
+      exact le_trans h1 hR8'
+    exact hC (X n) u z hX1.le hu (by simpa [hs0] using hz')
+  have hlow0 : b n ≤ ‖riemannZeta s0‖ := by
+    simpa [hs0] using hlown u hu
+  set M : ℝ := C * X n ^ 15 / b n with hMdef
+  have hX15 : (1 : ℝ) ≤ X n ^ 15 := by
+    calc (1 : ℝ) ≤ (X n ^ 3) ^ 5 := one_le_pow₀ hX3 (n := 5)
+      _ = X n ^ 15 := by
+          rw [← pow_mul]
+  have hM1 : 1 ≤ M := by
+    rw [hMdef, le_div_iff₀ (hb0 n)]
+    nlinarith [hC1, hX15, hb1 n]
+  have hbd : ∀ z ∈ closedBall s0 R, ‖riemannZeta z‖ ≤ M * ‖riemannZeta s0‖ := by
+    intro z hz
+    calc
+      ‖riemannZeta z‖ ≤ C * X n ^ 15 := hupper z hz
+      _ = M * b n := by
+          rw [hMdef]
+          exact (div_mul_cancel₀ (C * X n ^ 15) (hb0 n).ne').symm
+      _ ≤ M * ‖riemannZeta s0‖ := by
+          exact mul_le_mul_of_nonneg_left hlow0 (by linarith)
+  have hdiff : DifferentiableOn ℂ riemannZeta (closedBall s0 R) := by
+    intro z hz
+    exact (differentiableAt_riemannZeta (hzne_one z hz)).differentiableWithinAt
+  have hbound := logDeriv_bound_on_ball (f := riemannZeta) (z₀ := s0) (R := R) (M := M)
+    hR0 hM1 hdiff hne' hbd (z := s0) (by
+      rw [Metric.mem_closedBall, dist_eq_norm, sub_self, norm_zero]
+      positivity)
+  -- Bound `log M`.
+  have hlogM_eq : Real.log M = Real.log C + 15 * L + Real.log (1 / b n) := by
+    rw [hMdef, Real.log_div (by positivity) (hb0 n).ne']
+    rw [Real.log_mul hC0.ne' (pow_ne_zero 15 hXpos.ne')]
+    rw [Real.log_pow]
+    rw [Real.log_div one_ne_zero (hb0 n).ne', Real.log_one]
+    simp only [L, bandLog]
+    ring
+  have hlogM_le : Real.log M ≤
+      (Real.log C + 15 + Real.log (1 / b n)) * L := by
+    have hlog1b : 0 ≤ Real.log (1 / b n) := by
+      apply Real.log_nonneg
+      rw [le_div_iff₀ (hb0 n)]
+      linarith [hb1 n]
+    have hA : 0 ≤ Real.log C + Real.log (1 / b n) := by
+      have : 0 ≤ Real.log C := Real.log_nonneg hC1
+      linarith
+    rw [hlogM_eq]
+    have hALE : Real.log C + Real.log (1 / b n) ≤
+        (Real.log C + Real.log (1 / b n)) * L := by
+      have := mul_le_mul_of_nonneg_left hL1 hA
+      simpa using this
+    nlinarith
+  -- Final arithmetic.
+  have hCnonneg : 0 ≤ Real.log C + 15 + Real.log (1 / b n) := by
+    have hlog1b : 0 ≤ Real.log (1 / b n) := by
+      apply Real.log_nonneg
+      rw [le_div_iff₀ (hb0 n)]
+      linarith [hb1 n]
+    have hlogC : 0 ≤ Real.log C := by
+      apply Real.log_nonneg
+      exact hC1
+    linarith
+  rw [logDeriv_apply]
+  rw [Real.rpow_two]
+  calc
+    ‖deriv riemannZeta s0 / riemannZeta s0‖ ≤ 24 * Real.log M / R := hbound
+    _ ≤ 24 * ((Real.log C + 15 + Real.log (1 / b n)) * L) / R := by
+        gcongr
+    _ = (24 * (Real.log C + 15 + Real.log (1 / b n)) / R) * L := by
+        ring
+    _ ≤ (24 * (Real.log C + 15 + Real.log (1 / b n)) / R) * L ^ 2 := by
+        gcongr
+        nlinarith [hL1]
+
+/-- **`VerticalLineBound` from the minimal split zeta input.**  Only a
+zero-free strip and a lower bound on the centre line are assumed; the upper
+bound in the strip is the unconditional `exists_zeta_upper_bound_strip`. -/
+theorem verticalLineBound_of_zetaStripInput {X : ℕ → ℝ} {R : ℝ} {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hR0 : 0 < R) (hR8 : R ≤ 1 / 8)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (h : ZetaStripInput X R b) :
+    VerticalLineBound X
+      (fun n => 24 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+          15 + Real.log (1 / b n)) / R) 2 :=
+  verticalLineBound_of_zetaData hX hU hR0 hR8 zetaUpperConstant_one_le hb0 hb1
+    (fun Y u z hY hu hz =>
+      (Classical.choose_spec exists_zeta_upper_bound_strip).2 Y u z hY hu hz)
+    h.1 h.2
+
+/-! ## The smallest classical line input
+
+The classical `O (log²)` estimate is only needed on the paper's height range
+`|u| ≤ 2 X³`, not for every real `u`.  This is the smallest classical
+log-derivative input that feeds the Perron contour. -/
+
+/-- The classical log-derivative line estimate restricted to the height range
+`|u| ≤ 2 X³` actually used by the truncated Perron contour. -/
+def ClassicalLogDerivLineBoundOn (X : ℕ → ℝ) : Prop :=
+  ∃ C : ℝ, 0 < C ∧ ∀ᶠ n : ℕ in atTop, ∀ u : ℝ, |u| ≤ 2 * X n ^ 3 →
+    ‖logDeriv riemannZeta (perronLine perronRe u)‖ ≤
+      C * (Real.log (|u| + 2)) ^ 2
+
+theorem classicalLogDerivLineBoundOn_of_global {X : ℕ → ℝ}
+    (h : ClassicalLogDerivLineBound) : ClassicalLogDerivLineBoundOn X := by
+  obtain ⟨C, hC0, hC⟩ := h
+  exact ⟨C, hC0, Filter.Eventually.of_forall fun _ _ _ => hC _⟩
+
+/-- The range-restricted classical line estimate implies `VerticalLineBound`
+with a polylogarithmic constant. -/
+theorem verticalLineBound_of_classicalLogDerivOn {X : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (h : ClassicalLogDerivLineBoundOn X) :
+    ∃ K : ℝ, 0 < K ∧ VerticalLineBound X (fun _ => K) 2 := by
+  obtain ⟨C, hC0, hC⟩ := h
+  refine ⟨16 * C, by positivity, ?_⟩
+  unfold VerticalLineBound
+  filter_upwards [hC] with n hn
+  intro u hu
+  set L := bandLog X n with hLdef
+  have hL3 : 3 ≤ L := hU n
+  have hL1 : 1 ≤ L := by linarith
+  have hX1 : 1 < X n := hX n
+  have hXpos : 0 < X n := by linarith
+  have hX3 : (1 : ℝ) ≤ X n ^ 3 := by
+    simpa using one_le_pow₀ hX1.le (n := 3)
+  rw [Real.rpow_two]
+  have hupper : |u| + 2 ≤ X n ^ 4 := by
+    have h1 : |u| + 2 ≤ 2 * X n ^ 3 + 2 := by linarith [abs_nonneg u]
+    have h2 : 2 * X n ^ 3 + 2 ≤ 4 * X n ^ 3 := by linarith
+    have h3 : (4 : ℝ) ≤ X n := by
+      have h4exp : (4 : ℝ) ≤ Real.exp 3 := by
+        have := Real.add_one_le_exp (3 : ℝ)
+        norm_num at this ⊢
+        exact this
+      have hexp : Real.exp 3 ≤ X n := by
+        have := Real.exp_le_exp.mpr (show (3 : ℝ) ≤ L by linarith)
+        simpa [L, bandLog, Real.exp_log hXpos] using this
+      linarith
+    have h4 : 4 * X n ^ 3 ≤ X n * X n ^ 3 :=
+      mul_le_mul_of_nonneg_right h3 (by positivity)
+    have h5 : X n * X n ^ 3 = X n ^ 4 := by ring
+    linarith
+  have hlogpos : 0 ≤ Real.log (|u| + 2) := by
+    apply Real.log_nonneg
+    linarith [abs_nonneg u]
+  have hlog_le : Real.log (|u| + 2) ≤ 4 * L := by
+    have h1 : Real.log (|u| + 2) ≤ Real.log (X n ^ 4) :=
+      Real.log_le_log (by linarith [abs_nonneg u]) hupper
+    have h2 : Real.log (X n ^ 4) = 4 * L := by
+      rw [Real.log_pow]
+      simp [L, bandLog]
+    linarith
+  have hsq : (Real.log (|u| + 2)) ^ 2 ≤ (4 * L) ^ 2 :=
+    pow_le_pow_left₀ hlogpos hlog_le 2
+  calc
+    ‖logDeriv riemannZeta (perronLine perronRe u)‖
+        ≤ C * (Real.log (|u| + 2)) ^ 2 := hn u hu
+    _ ≤ C * (4 * L) ^ 2 := by gcongr
+    _ = (16 * C) * L ^ 2 := by ring
+
+/-! ## The explicit radius `1/8` -/
+
+/-- At the optimal strip radius `R = 1/8` the constant is `192` times the
+logarithmic factor.  This is the smallest explicit instance of the strip route:
+the ball radius is exactly the width of the unconditional upper-bound strip. -/
+theorem verticalLineBound_of_zetaStripLower_eighth {X : ℕ → ℝ} {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (hL : ZetaStripLowerBound X (1 / 8) b) :
+    VerticalLineBound X
+      (fun n => 192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+        15 + Real.log (1 / b n))) 2 := by
+  have h := verticalLineBound_of_zetaStripLower hX hU (by norm_num) (by norm_num)
+    hb0 hb1 hL
+  unfold VerticalLineBound at h ⊢
+  filter_upwards [h] with n hn
+  intro u hu
+  have h1 := hn u hu
+  rw [Real.rpow_two] at h1 ⊢
+  calc
+    ‖logDeriv riemannZeta (perronLine perronRe u)‖
+        ≤ (24 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+              Real.log (1 / b n)) / (1 / 8)) * (bandLog X n) ^ 2 := h1
+    _ = (192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+              Real.log (1 / b n))) * (bandLog X n) ^ 2 := by
+          field_simp
+          ring_nf
+
+/-- The same radius-`1/8` estimate from the minimal split input. -/
+theorem verticalLineBound_of_zetaStripInput_eighth {X : ℕ → ℝ} {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (h : ZetaStripInput X (1 / 8) b) :
+    VerticalLineBound X
+      (fun n => 192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+        15 + Real.log (1 / b n))) 2 := by
+  have h' := verticalLineBound_of_zetaStripInput hX hU (by norm_num) (by norm_num)
+    hb0 hb1 h
+  unfold VerticalLineBound at h' ⊢
+  filter_upwards [h'] with n hn
+  intro u hu
+  have h1 := hn u hu
+  rw [Real.rpow_two] at h1 ⊢
+  calc
+    ‖logDeriv riemannZeta (perronLine perronRe u)‖
+        ≤ (24 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+              Real.log (1 / b n)) / (1 / 8)) * (bandLog X n) ^ 2 := h1
+    _ = (192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+              Real.log (1 / b n))) * (bandLog X n) ^ 2 := by
+          field_simp
+          ring_nf
+
+/-- The radius-`1/8` line bound composed with the vertical Perron contour. -/
+theorem verticalZetaStripBound_of_zetaStripInput_eighth {X : ℕ → ℝ} {c : ℝ}
+    {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (h : ZetaStripInput X (1 / 8) b) :
+    VerticalZetaStripBound X c
+      (fun n => ((192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+          15 + Real.log (1 / b n))) / Real.pi) *
+        (1 + Real.log (X n ^ 3 / perronRe))) 2 := by
+  have hK : ∀ n, 0 ≤ 192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+      15 + Real.log (1 / b n)) := by
+    intro n
+    have hlog1b : 0 ≤ Real.log (1 / b n) := by
+      apply Real.log_nonneg
+      rw [le_div_iff₀ (hb0 n)]
+      linarith [hb1 n]
+    have hpos : 0 ≤ Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+        Real.log (1 / b n) := by
+      linarith [zetaUpperConstant_log_nonneg]
+    positivity
+  exact verticalZetaStripBound_of_lineBound hX hK
+    (verticalLineBound_of_zetaStripInput_eighth hX hU hb0 hb1 h)
+
+/-- The radius-`1/8` line bound gives the full three-term vertical shift once
+the Perron remainder is supplied. -/
+theorem verticalShiftBound_of_zetaStripInput_eighth {X : ℕ → ℝ} {c : ℝ}
+    {b : ℕ → ℝ}
+    (hX : ∀ n, 1 < X n) (hU : ∀ n, 3 ≤ bandLog X n)
+    (hb0 : ∀ n, 0 < b n) (hb1 : ∀ n, b n ≤ 1)
+    (hsmall : ∀ᶠ n : ℕ in atTop,
+      smoothCutoff c X n ≤ Real.exp (bandLog X n / 3))
+    (h : ZetaStripInput X (1 / 8) b)
+    (hR : PerronShiftRemainder X c
+      (fun n => ((192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+          15 + Real.log (1 / b n))) / Real.pi) *
+        (1 + Real.log (X n ^ 3 / perronRe))) 2) :
+    VerticalShiftBound X c
+      (fun n => 3 * (((192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+          15 + Real.log (1 / b n))) / Real.pi) *
+        (1 + Real.log (X n ^ 3 / perronRe)))) 2 := by
+  have hK : ∀ n, 0 ≤ 192 * (Real.log (Classical.choose exists_zeta_upper_bound_strip) +
+      15 + Real.log (1 / b n)) := by
+    intro n
+    have hlog1b : 0 ≤ Real.log (1 / b n) := by
+      apply Real.log_nonneg
+      rw [le_div_iff₀ (hb0 n)]
+      linarith [hb1 n]
+    have hpos : 0 ≤ Real.log (Classical.choose exists_zeta_upper_bound_strip) + 15 +
+        Real.log (1 / b n) := by
+      linarith [zetaUpperConstant_log_nonneg]
+    positivity
+  exact verticalShiftBound_of_lineBound hX hK hU (le_refl 2) hsmall
+    (verticalLineBound_of_zetaStripInput_eighth hX hU hb0 hb1 h) hR
+
 /-! ## Composing with the vertical Perron contour -/
 
 /-- The strip lower bound produces the vertical-strip zeta bound of
@@ -615,14 +1008,26 @@ theorem verticalShiftBound_of_zetaStripLower {X : ℕ → ℝ} {c R : ℝ} {b : 
 #print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripLower
 #print axioms Cogentic.RandomizedL21_2LineBound.verticalZetaStripBound_of_zetaStripLower
 #print axioms Cogentic.RandomizedL21_2LineBound.verticalShiftBound_of_zetaStripLower
+#print axioms Cogentic.RandomizedL21_2LineBound.stripConstant_pos
+#print axioms Cogentic.RandomizedL21_2LineBound.zetaStripInput_of_zetaStripLower
+#print axioms Cogentic.RandomizedL21_2LineBound.zetaLineLower_of_zetaLineEstimate
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput
+#print axioms Cogentic.RandomizedL21_2LineBound.classicalLogDerivLineBoundOn_of_global
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_classicalLogDerivOn
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripLower_eighth
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput_eighth
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalZetaStripBound_of_zetaStripInput_eighth
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalShiftBound_of_zetaStripInput_eighth
 
 end Cogentic.RandomizedL21_2LineBound
 
-#check Cogentic.RandomizedL21_2LineBound.ZetaStripLowerBound
-#check Cogentic.RandomizedL21_2LineBound.ZetaLineEstimate
-#check Cogentic.RandomizedL21_2LineBound.ClassicalLogDerivLineBound
-#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_classicalLogDeriv
-#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaLineEstimate
-#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripLower
-#check Cogentic.RandomizedL21_2LineBound.verticalZetaStripBound_of_zetaStripLower
-#check Cogentic.RandomizedL21_2LineBound.verticalShiftBound_of_zetaStripLower
+#check Cogentic.RandomizedL21_2LineBound.ZetaStripInput
+#check Cogentic.RandomizedL21_2LineBound.ZetaStripNonvanishing
+#check Cogentic.RandomizedL21_2LineBound.ZetaLineLower
+#check Cogentic.RandomizedL21_2LineBound.ClassicalLogDerivLineBoundOn
+#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput
+#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_classicalLogDerivOn
+#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripLower_eighth
+#check Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput_eighth
+#check Cogentic.RandomizedL21_2LineBound.verticalZetaStripBound_of_zetaStripInput_eighth
+#check Cogentic.RandomizedL21_2LineBound.verticalShiftBound_of_zetaStripInput_eighth

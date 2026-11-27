@@ -482,7 +482,7 @@ has the endpoint and cutoff regularity, a positive Rankin exponent below one,
 the saddle-scale count lower bound, and the saddle-mean mass lower bound. -/
 theorem paperMassInputFields :
     (∀ n, 1 ≤ paperMassX n) ∧ (∀ n, 2 ≤ paperMassY n) ∧
-      (∀ _n, 0 < paperMassAlpha) ∧ (∀ _n, paperMassAlpha < 1) ∧
+      (∀ _n : ℕ, 0 < paperMassAlpha) ∧ (∀ _n : ℕ, paperMassAlpha < 1) ∧
       SmoothNumberCountLower paperMassX paperMassY paperMassCount ∧
       SmoothNumberMassLogLower paperMassX paperMassY (fun _ => paperMassAlpha)
         (smoothSaddleScale paperMassX paperMassY) paperMassEta :=

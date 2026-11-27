@@ -37,6 +37,7 @@ import Cogentic.RandomizedL20_4Conditioned
 import Cogentic.RandomizedL20_4Interior
 import Cogentic.RandomizedL20_4TwoPoint
 import Cogentic.RandomizedL20_4EventMass
+import Cogentic.RandomizedL20_4ChildLower
 import Cogentic.RandomizedL20_4Mean
 import Cogentic.RandomizedL20_4InteriorBase
 import Cogentic.RandomizedL20_4BaseSource
@@ -342,6 +343,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4Interior.TopInteriorData.toTopConditionedData
 #print axioms Cogentic.RandomizedL20_4TwoPoint.TwoPointReducedData.toPairConditionedData
 #print axioms Cogentic.RandomizedL20_4EventMass.PairEventMassData.toTwoPointReducedData
+#print axioms Cogentic.RandomizedL20_4ChildLower.eventMassLower_pairEvent_of_childRootMassLower
 #print axioms Cogentic.RandomizedL20_4InteriorBase.InteriorBaseSources.toInteriorSourceData
 #print axioms Cogentic.RandomizedL20_4Top.TopG12ThreeData.toG12TopInputs
 #print axioms Cogentic.RandomizedL20_4Additive.G54G55ThreeTermComparisonData.toG12TopInputs
