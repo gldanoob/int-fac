@@ -43,6 +43,29 @@ theorem det_topProjection_mul {d : ℕ} {p : R[X]} (hp : p.natDegree ≤ d)
     (topProjection d p * basis).det = p.coeff d ^ r * basis.det := by
   rw [Matrix.det_mul, det_topProjection hp]
 
+/-- Scaling the projected coefficient rows multiplies the minor by the
+product of the corresponding scales. -/
+theorem det_topProjection_rowScale {d : ℕ} {p : R[X]} (hp : p.natDegree ≤ d)
+    (scale : Fin r → R) :
+    (Matrix.of (fun i j => scale i * topProjection d p i j)).det =
+      p.coeff d ^ r * ∏ i, scale i := by
+  rw [Matrix.det_mul_column, det_topProjection hp, mul_comm]
+
+theorem det_topProjection_rowScale_mul {d : ℕ} {p : R[X]} (hp : p.natDegree ≤ d)
+    (scale : Fin r → R) (basis : Matrix (Fin r) (Fin r) R) :
+    (Matrix.of (fun i j => scale i * topProjection d p i j) * basis).det =
+      (p.coeff d ^ r * ∏ i, scale i) * basis.det := by
+  rw [Matrix.det_mul, det_topProjection_rowScale hp]
+
+/-- When the scales are indexed by coefficient degree, the product ranges
+over the degrees starting at the multiplier's leading coefficient. -/
+theorem det_topProjection_natDegree_rowScale (p : R[X]) (scale : ℕ → R) :
+    (Matrix.of (fun i j : Fin r => scale (p.natDegree + (i : ℕ)) *
+      topProjection p.natDegree p i j)).det =
+      p.leadingCoeff ^ r * ∏ i : Fin r, scale (p.natDegree + (i : ℕ)) := by
+  simpa only [coeff_natDegree] using
+    det_topProjection_rowScale (p := p) le_rfl (fun i : Fin r => scale (p.natDegree + (i : ℕ)))
+
 noncomputable def quadratic (c₀ c₁ c₂ : R) : R[X] :=
   monomial 0 c₀ + monomial 1 c₁ + monomial 2 c₂
 
@@ -66,6 +89,9 @@ theorem det_quadratic_topProjection_mul (c₀ c₁ c₂ : R)
   rw [Matrix.det_mul, det_quadratic_topProjection]
 
 #print axioms topProjection_mulVec
+#print axioms det_topProjection_rowScale
+#print axioms det_topProjection_rowScale_mul
+#print axioms det_topProjection_natDegree_rowScale
 #print axioms det_quadratic_topProjection
 #print axioms det_quadratic_topProjection_mul
 
