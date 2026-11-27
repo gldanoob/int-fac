@@ -88,7 +88,7 @@ theorem factorLaw_support_perm (split : SplitKernel) (leafWork : ℕ → ℕ)
 noncomputable def mean {α : Type*} (p : PMF α) (cost : α → ℝ≥0∞) : ℝ≥0∞ :=
   ∑' a, p a * cost a
 
-private theorem mean_pure {α : Type*} (a : α) (cost : α → ℝ≥0∞) :
+theorem mean_pure {α : Type*} (a : α) (cost : α → ℝ≥0∞) :
     mean (PMF.pure a) cost = cost a := by
   unfold mean
   rw [tsum_eq_single a]
@@ -96,23 +96,23 @@ private theorem mean_pure {α : Type*} (a : α) (cost : α → ℝ≥0∞) :
   · intro b hb
     simp [PMF.pure_apply, hb]
 
-private theorem mean_bind {α β : Type*} (p : PMF α) (q : α → PMF β)
+theorem mean_bind {α β : Type*} (p : PMF α) (q : α → PMF β)
     (cost : β → ℝ≥0∞) :
     mean (p.bind q) cost = mean p (fun a => mean (q a) cost) := by
   simp only [mean, PMF.bind_apply, ← ENNReal.tsum_mul_right, mul_assoc]
   rw [ENNReal.tsum_comm]
   simp only [ENNReal.tsum_mul_left]
 
-private theorem mean_map {α β : Type*} (p : PMF α) (f : α → β) (cost : β → ℝ≥0∞) :
+theorem mean_map {α β : Type*} (p : PMF α) (f : α → β) (cost : β → ℝ≥0∞) :
     mean (p.map f) cost = mean p (fun a => cost (f a)) := by
   rw [← PMF.bind_pure_comp, mean_bind]
   simp only [Function.comp_apply, mean_pure]
 
-private theorem mean_const {α : Type*} (p : PMF α) (c : ℝ≥0∞) :
+theorem mean_const {α : Type*} (p : PMF α) (c : ℝ≥0∞) :
     mean p (fun _ => c) = c := by
   rw [mean, ENNReal.tsum_mul_right, PMF.tsum_coe, one_mul]
 
-private theorem mean_add {α : Type*} (p : PMF α) (f g : α → ℝ≥0∞) :
+theorem mean_add {α : Type*} (p : PMF α) (f g : α → ℝ≥0∞) :
     mean p (fun a => f a + g a) = mean p f + mean p g := by
   simp only [mean, mul_add, ENNReal.tsum_add]
 
