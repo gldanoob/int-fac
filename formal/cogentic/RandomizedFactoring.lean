@@ -7,6 +7,7 @@ import Cogentic.RandomizedEvaluationNorm
 import Cogentic.RandomizedEvaluationMaps
 import Cogentic.RandomizedFiniteObstruction
 import Cogentic.RandomizedFiniteSupportTV
+import Cogentic.RandomizedStableEnergy
 import Cogentic.RandomizedFullTableFloor
 import Cogentic.RandomizedGramMinor
 import Cogentic.RandomizedGramRank
