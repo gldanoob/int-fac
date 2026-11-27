@@ -92,3 +92,19 @@ The lattice cutoff captures \(\log(M^2/P)\) of the two cofactor logs, whose sum 
  =\frac{\log(M^2/P)+2\log V}{\log B}\log d.
 \]
 At the parents covered by the first-moment lower bound, (6) and Cauchy–Schwarz applied to \(Z\) on \(\{Z\ge \mathbb E Z/2\}\) give a lower bound on the probability of that event of the form \(\exp(-[2\log X_R-\log(M^2/P)]\log d/\log B+o(H))\). The gap in this estimate comes from the absolute lattice level. The resultant primes and the raw factorial moment contribute only \(\exp(o(H))\) factors.
+
+## What ratio averaging discards at a prime denominator
+
+For an odd prime \(Q\asymp M\), consider two different marks having the same parent root. Write their coefficient pairs as \((a_i,b_i)\). The integer \(a_1b_2-a_2b_1\) is nonzero. If it vanished, the parent-root equations would imply \(p\mid a_1c_2-a_2c_1\), hence equality over the integers since the minors are \(O(V'^2)<p\). Primitivity and positive leading coefficients would then make the marks equal. The same strict height bound makes this nonzero minor a unit modulo \(Q\).
+
+For a nonzero base residue \(r_0\) define the unit phases \(f_i(r)=p^{-1}(a_i r^2+b_i rQ)\bmod Q^2\). Their ratio is
+\[
+ u(r)=\frac{a_1}{a_2}\left(1+Q\left(\frac{b_1}{a_1}-\frac{b_2}{a_2}\right)r^{-1}\right)\pmod{Q^2}.
+\]
+It depends only on \(r\bmod Q\). As \(r=r_0+Qj\) ranges over all lifts, \(f_1(r)\) ranges bijectively over the first-digit fiber \(z\equiv f_1(r_0)\bmod Q\), since its increment is \(2p^{-1}a_1r_0 Qj\). For a cofactor indicator \(A\), the full lift average is therefore \(Q^{-1}\sum_z A(z)A(z/u(r_0))\) over that fiber. The physical numerator interval of length at most \(Q\) sees at most one specified summand for each \(r_0\). An upper bound on the fiber average by itself incurs a factor \(Q\) for this summand by nonnegativity. For arbitrary supports this loss can occur, for instance by restricting support to the selected pair when their first digits are distinct. The unrestricted ratio correlation further sums over all first digits.
+
+There is a second obstruction to a direct bound from the total square-modulus character energy. For a common cofactor set of \(S\) units in an interval of length \(O(X_R)=o(Q^2)\), its occupancy on units modulo \(Q^2\) is zero or one. If \(S_x\) is its occupancy in a fixed first digit modulo \(Q\), then \(S_x\ll 1+X_R/Q\). Multiplicative Parseval shows that the total energy with the characters of conductor exactly \(Q^2\), normalized by \(\phi(Q^2)\), equals
+\[
+ S-\frac1Q\sum_{x\bmod Q}S_x^2=(1-o(1))S .
+\]
+This estimate holds at each such prime \(Q\). In particular an average of these individual total energies cannot itself certify cancellation on the physical one-lift graph. A joint estimate exploiting how the *same* cofactor set meets the selected traces at different denominators is a separate possibility.
