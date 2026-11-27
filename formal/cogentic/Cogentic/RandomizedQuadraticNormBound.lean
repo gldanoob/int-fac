@@ -95,6 +95,55 @@ theorem exists_odd_value_le_abs_discriminant_add {a b c D : ℤ}
   rw [complete_square hD, one_pow, mul_one, abs_of_neg hneg]
   nlinarith only [hsq]
 
+/-- Clearing the positive denominator gives the window estimate over
+ordered rings, including the integers. -/
+theorem discriminant_window_mul {R : Type*} [CommRing R] [LinearOrder R]
+    [IsStrictOrderedRing R] {t D v Z : R}
+    (ht : 0 ≤ t) (hD : 0 ≤ D) (hZ : 0 ≤ Z) (hnorm : t ^ 2 + D * v ^ 2 = 4 * Z ^ 2) :
+    0 ≤ 2 * Z - t ∧ (2 * Z - t) * (2 * Z) ≤ D * v ^ 2 := by
+  have h2Z : 0 ≤ 2 * Z := by linarith only [hZ]
+  have hsq : t ^ 2 ≤ (2 * Z) ^ 2 := by
+    nlinarith only [hnorm, mul_nonneg hD (sq_nonneg v)]
+  have hgap : 0 ≤ 2 * Z - t := sub_nonneg.mpr (le_of_sq_le_sq hsq h2Z)
+  refine ⟨hgap, ?_⟩
+  calc
+    _ ≤ (2 * Z - t) * (2 * Z + t) :=
+      mul_le_mul_of_nonneg_left (le_add_of_nonneg_right ht) hgap
+    _ = D * v ^ 2 := by nlinarith only [hnorm]
+
+theorem discriminant_window {R : Type*} [Field R] [LinearOrder R]
+    [IsStrictOrderedRing R] {t D v Z : R}
+    (ht : 0 ≤ t) (hD : 0 ≤ D) (hZ : 0 < Z) (hnorm : t ^ 2 + D * v ^ 2 = 4 * Z ^ 2) :
+    0 ≤ 2 * Z - t ∧ 2 * Z - t ≤ D * v ^ 2 / (2 * Z) := by
+  obtain ⟨hgap, hmul⟩ := discriminant_window_mul ht hD hZ.le hnorm
+  have h2Z : 0 < 2 * Z := by linarith only [hZ]
+  exact ⟨hgap, (le_div_iff₀ h2Z).mpr hmul⟩
+
+theorem discriminant_window_of_discriminant_le {R : Type*} [Field R] [LinearOrder R]
+    [IsStrictOrderedRing R] {t D c V v Z : R}
+    (ht : 0 ≤ t) (hD : 0 ≤ D) (hZ : 0 < Z) (hupper : D ≤ c * V ^ 2)
+    (hnorm : t ^ 2 + D * v ^ 2 = 4 * Z ^ 2) :
+    0 ≤ 2 * Z - t ∧ 2 * Z - t ≤ c * (v * V) ^ 2 / (2 * Z) := by
+  obtain ⟨hgap, hw⟩ := discriminant_window ht hD hZ hnorm
+  refine ⟨hgap, hw.trans ?_⟩
+  apply div_le_div_of_nonneg_right _ (by linarith only [hZ])
+  have h := mul_le_mul_of_nonneg_right hupper (sq_nonneg v)
+  exact h.trans_eq (by ring)
+
+/-- A lower bound for the discriminant coefficient bounds the height
+coordinate. The absolute value also covers signed coordinates. -/
+theorem abs_mul_le_two_of_sq_le_discriminant {R : Type*} [CommRing R] [LinearOrder R]
+    [IsStrictOrderedRing R] {t D V v Z : R}
+    (hZ : 0 ≤ Z) (hD : V ^ 2 ≤ D) (hnorm : t ^ 2 + D * v ^ 2 = 4 * Z ^ 2) :
+    |v * V| ≤ 2 * Z := by
+  apply abs_le_of_sq_le_sq _ (by linarith only [hZ])
+  have hmul := mul_le_mul_of_nonneg_right hD (sq_nonneg v)
+  nlinarith only [hnorm, hmul, sq_nonneg t]
+
+#print axioms discriminant_window_mul
+#print axioms discriminant_window
+#print axioms discriminant_window_of_discriminant_le
+#print axioms abs_mul_le_two_of_sq_le_discriminant
 #print axioms abs_discriminant_le_scaled_value_of_y_ne_zero
 #print axioms primitive_value_or_discriminant_bound
 #print axioms abs_discriminant_le_scaled_value_of_coprime
