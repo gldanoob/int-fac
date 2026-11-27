@@ -3,6 +3,7 @@ import Cogentic.RandomizedConcreteEpochChecks
 import Cogentic.RandomizedConcreteEpochCost
 import Cogentic.RandomizedConcreteStageCost
 import Cogentic.RandomizedConcreteStageCostS3
+import Cogentic.RandomizedConcreteStageCostS8
 import Cogentic.RandomizedConcreteTV
 import Cogentic.RandomizedConcreteHitMass
 import Cogentic.RandomizedConcreteHitMassCount
@@ -138,6 +139,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteStageCost.ConcreteC4Hypotheses.ofS0S7
 #print axioms Cogentic.RandomizedConcreteStageCostS3.s3Cost_le_poly
 #print axioms Cogentic.RandomizedConcreteStageCostS3.ConcreteC4Hypotheses.ofS0S7_withS3
+#print axioms Cogentic.RandomizedConcreteStageCostS8.s8Cost_le_poly
+#print axioms Cogentic.RandomizedConcreteStageCostS8.ConcreteC4Hypotheses.withS8
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_of_cellData
 #print axioms Cogentic.RandomizedL18_4.cell_prime_count_from_critical_line
 #print axioms Cogentic.RandomizedL18_4.L18_4Inputs.replaceCellNumeratorCount
