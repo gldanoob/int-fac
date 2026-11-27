@@ -1,7 +1,9 @@
 import Mathlib.Algebra.BigOperators.GroupWithZero.Action
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
+import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Algebra.Order.Ring.Abs
+import Mathlib.Data.Fintype.BigOperators
 import Mathlib.Data.Real.Basic
 import Mathlib.Tactic.Ring
 
@@ -98,5 +100,36 @@ theorem identity_mass_bias [DecidableEq G] (point : ∀ i, Ω i → G)
     _ = _ := by
       rw [Finset.sum_const, nsmul_eq_mul, Finset.card_erase_of_mem (Finset.mem_univ trivial),
         Finset.card_univ, Nat.cast_sub (Fintype.card_pos_iff.mpr ⟨trivial⟩), Nat.cast_one]
+
+/-- Independent samples from the same finite source have equal labels on at least
+`card S ^ 2 / card V` ordered pairs, expressed by cross-multiplication. -/
+theorem equal_label_pair_count {S V : Type*} [Fintype S] [Fintype V] [DecidableEq V]
+    (label : S → V) :
+    Fintype.card S ^ 2 ≤ Fintype.card V * Fintype.card
+      {p : S × S // label p.1 = label p.2} := by
+  let Fiber (v : V) := {s : S // label s = v}
+  have hsize : Fintype.card S = ∑ v : V, Fintype.card (Fiber v) := by
+    rw [← Fintype.card_sigma]
+    exact Fintype.card_congr (Equiv.sigmaFiberEquiv label).symm
+  let e : {p : S × S // label p.1 = label p.2} ≃ Σ v, Fiber v × Fiber v :=
+    { toFun := fun ⟨⟨x, y⟩, h⟩ => ⟨label x, ⟨⟨x, rfl⟩, ⟨y, h.symm⟩⟩⟩
+      invFun := fun ⟨_, ⟨⟨x, hx⟩, ⟨y, hy⟩⟩⟩ => ⟨(x, y), hx.trans hy.symm⟩
+      left_inv := by rintro ⟨⟨x, y⟩, h⟩; rfl
+      right_inv := by rintro ⟨v, ⟨⟨x, hx⟩, ⟨y, hy⟩⟩⟩; subst v; rfl }
+  rw [hsize, Fintype.card_congr e, Fintype.card_sigma]
+  simp only [Fintype.card_prod, ← pow_two]
+  simpa using sq_sum_le_card_mul_sum_sq (s := Finset.univ)
+    (f := fun v : V => Fintype.card (Fiber v))
+
+/-- Discarding at most `B` equal-label pairs leaves the same lower bound less `B`. -/
+theorem equal_label_pair_count_after_deleting {S V : Type*}
+    [Fintype S] [Fintype V] [DecidableEq V] [DecidableEq S] (label : S → V)
+    (bad : Finset {p : S × S // label p.1 = label p.2}) {B : ℕ} (hbad : bad.card ≤ B) :
+    Fintype.card S ^ 2 ≤ Fintype.card V * ((Finset.univ \ bad).card + B) := by
+  apply (equal_label_pair_count label).trans
+  apply Nat.mul_le_mul_left
+  rw [← Finset.card_univ (α := {p : S × S // label p.1 = label p.2}),
+    ← Finset.card_sdiff_add_card_eq_card (Finset.subset_univ bad)]
+  exact Nat.add_le_add_left hbad _
 
 end Cogentic.RandomizedGenusMixing
