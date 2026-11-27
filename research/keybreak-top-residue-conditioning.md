@@ -41,3 +41,26 @@ This is also relative accuracy whenever the unconditioned probability dominates 
 A model that changes **only** the mixture weights of these ideal conditional laws therefore loses only the weight of the bad $q$ classes, up to the unit normalization and the displayed additive error. A one-dimensional discrete Gaussian leading coefficient of parameter $\sigma_*\ge1$ assigns at most $O(1/b_i+1/\sigma_*)$ to any given residue modulo $b_i$. The bound follows by summing the monotone Gaussian tails on a progression of spacing $b_i$ and dividing by the full Gaussian mass, which is $\gg\sigma_*$. Thus these exceptional residues have small total weight even in a much narrower leading-coordinate prior if $\sigma_*\to\infty$.
 
 The result does not assert that the actual law conditional on $q$ has the ideal within-residue distribution. Other kernel obstructions, including restrictions that couple several coefficient residues, may remain after the leading residue is fixed. It also does not handle shared denominators or a band in which a denominator itself is an allowed factor.
+
+## A fixed prefix up to nearly half the degree
+
+Keep the same two marks and let $X=L_*$. Write $R(X_0,Y_0)=\sum_{j=0}^{d-1} c_jX_0^{d-1-j}Y_0^j$. Fix $1\le k\le d-2$ and the initial coefficients $c_0,\ldots,c_{k-1}$. Put $p_i=\sum_{j<k}c_ja_i^{d-1-j}b_i^j$. The evaluation image of the polynomials with this prefix is exactly the subset of the original affine lattice satisfying
+$$
+z_i\equiv F_0(P_i)+2G(P_i)p_i\pmod{b_i^k},\qquad i=1,2.
+$$
+For sufficiency set $r_i=(z_i-F_0(P_i))/(2G(P_i))$. Then $r_i-p_i$ is divisible by $b_i^k$. Choose a unit $u$ modulo $\Delta$ with $P_2\equiv uP_1\pmod\Delta$, as in the source lattice calculation. Both $(r_1,r_2)$ and $(p_1,p_2)$ obey the degree-$d-1$ relation modulo $\Delta$. Dividing the difference in each coordinate by $b_i^k$ changes that relation to the degree-$d-1-k$ relation, because $b_2\equiv ub_1\pmod\Delta$ and each $b_i$ is a unit modulo $\Delta$. Since $d-1-k\ge1$, this is the full tail evaluation lattice by the same unimodular argument. Every pair of residues modulo $b_i^k$ is possible even by varying $c_0$ alone with the other prefix coefficients fixed, since the $c_0$ multipliers are units and the two moduli are coprime.
+
+Inside each original Cartesian phase, the two congruences leave one refined progression with separate periods $m_i'=m_i b_i^k$ and covolume ratio $B^k$. For a good pair of residues the new principal numerator in (G.8) is unchanged, and the denominator acquires the factor $\phi(b_i^k)$. Thus the multiplier on the one-coordinate density is $b_i^k/\phi(b_i^k)=b_i/(b_i-1)$. The same calculation applies to band-semismooth tests normalized to take values in $[0,1]$, with every exceptional prime below both denominators and band bound $X^{o(1)}$. A bad pair still gives zero and is detected by $c_0$ alone. [KeyBreak, (G.8)–(G.10)](https://crypto.sjtu.edu.cn/factoring.pdf#page=106) · [Evaluation lattice calculation](https://crypto.sjtu.edu.cn/factoring.pdf#page=110)
+
+Fix $0<\eta<1/2$ and assume $m_i'\le X^{1/2-\eta+o(1)}$, with marginal widths, centers and angle loss as above. In fixed top bands this period hypothesis follows from $k/d\le 1/2-\eta$. Partition the capped box into rectangles of side lengths $T_iX^{-\eta/2}$ and use (G.8) with $\epsilon=\eta/16$. The one-coordinate density error has exponent at most
+$$
+-\eta/2+(3/2-\eta)\eta/16+o(1),
+$$
+using the endpoint bound $X^{1+o(1)}$. The semismooth band costs another $X^{o(1)}$. The relative variation of the Gaussian within a rectangle is $X^{-\eta/2+o(1)}$ and the endpoint errors for the unweighted normalizers are smaller. Summing with the phase and rectangle weights as before gives, uniformly over good prefix residue pairs $s$,
+$$
+\mathbb E_{\rm ideal}[f_1(z_1)f_2(z_2)\mid s]
+=\frac{B}{\phi(B)}\mathbb E_{\rm ideal}[f_1(z_1)f_2(z_2)]+O_\eta(X^{-\eta/3}).
+$$
+When the unconditioned probability is $X^{-o(1)}$, the error relative to it is $O_\eta(X^{-\eta/4})$. Any probability mixture over the residue-restricted ideal laws has the same main term multiplied by the total good residue weight, with the same additive error. The estimates use a fixed gap $\eta$. At the square-root period scale the error from (G.8) no longer gives a power saving by this argument.
+
+The restriction above determines the support of an exact-prefix coefficient law. Its law inside that support still needs comparison to the refined ideal Gaussian to infer a smoothness probability for the coefficients. After factoring out $b_i^k$ from each remaining coordinate of the $R$-evaluation, the remaining kernel is the evaluation kernel of a degree-$d-1-k$ form at the same two marks. When this degree is at least two, its leading coefficient is divisible by $B$, and the projection of the leading unit vector divided by $B$ again gives the short nonzero dual vector. The residue count alone supplies no improvement to that smoothing bound. [Short dual vector in the two-mark coefficient kernel](keybreak-two-mark-gaussian-width.md#direct-smoothing-parameter-obstruction)
