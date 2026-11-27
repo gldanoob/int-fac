@@ -4,23 +4,28 @@ A bounded smoothness predicate can attain the usual leading smoothness density a
 
 ## A disjoint union with ordinary leading density
 
-Let \(x\) be the target product size, \(u=\log x/\log y\to\infty\), and \(y=V^{c+o(1)}\) for a fixed \(c>0\). In the top range \(\log x/\log V\asymp d\) and \(d\log\log x=o(\log V)\). Put \(k=\lceil u(1+1/\log u)\rceil\), \(P=x^{1/k}\), \(H=\log(y/P)\asymp\log y/\log u\), and \(\delta=\log 2/(2k)\). Take \(J=\lfloor H/(4\delta)\rfloor\) possible bin indices \(0,\ldots,J-1\). Some integer \(A\) is the sum of at least \(\binom Jk/(kJ)\) distinct \(k\)-subsets of indices. Set
+Let \(x\) be the target product size, \(u=\log x/\log y\to\infty\), and \(y=V^{c+o(1)}\) for a fixed \(c>0\). In the top range \(\log x/\log V\asymp d\) and \(d\log\log x=o(\log V)\). Matching the leading smoothness density below also requires \(\log\log x=o(u\log u)\). In particular this holds when \(\log V=d^{O(1)}\). Put \(k=\lceil u(1+1/\log u)\rceil\), \(P=x^{1/k}\), \(H=\log(y/P)\asymp\log y/\log u\), and \(\delta=\log(1+\lambda)/(2k)\), where \(0<\lambda\le1\) and \(k\log(1/\lambda)=o(\log V)\). Take \(J=\lfloor H/(4\delta)\rfloor\) possible bin indices \(0,\ldots,J-1\). Some integer \(A\) is the sum of at least \(\binom Jk/(kJ)\) distinct \(k\)-subsets of indices. Set
 
 \[
 I_j=[P e^{\delta(j-A/k)},P e^{\delta(j+1-A/k)}),
 \qquad 0\le j<J.
 \]
 
-Every bin is below \(y\) and its lower endpoint \(a_j\) is \(y^{1-o(1)}\). For each selected subset take one prime in each bin. The product of the lower endpoints is exactly \(x\); the actual products lie in \([x,\sqrt2 x]\). The bins are disjoint, so each variable prime occurs once and prime factorization recovers the subset and every choice. The function recognizing the union of all such products \(\mathcal A\) is a \(0,1\) predicate. A fixed modulus \(M\le x^C\) can be excluded from the prime choices by omitting its prime divisors from each bin. At these bin widths the prime number theorem under RH gives \(\gg\delta a_j/\log y\) available primes, uniformly after the exclusions.
+Every bin is below \(y\) and its lower endpoint \(a_j\) is \(y^{1-o(1)}\). For each selected subset take one prime in each bin. The product of the lower endpoints is exactly \(x\) and the actual products lie in \([x,x\sqrt{1+\lambda}]\). The bins are disjoint, so each variable prime occurs once and prime factorization recovers the subset and every choice. The function recognizing the union of all such products \(\mathcal A\) is a \(0,1\) predicate. A fixed modulus \(M\le x^C\) can be excluded from the prime choices by omitting its prime divisors from each bin. The prime number theorem under RH gives \(\asymp\delta a_j/\log y\) available primes, uniformly after the exclusions. Each bin has length \(a_j V^{-o(1)}\) and contains at most \(O_C(d)\) prime divisors of \(M\).
 
 Writing \(S=|\mathcal A|\), the number of patterns and the product of the prime counts give
 
 \[
-S\ \ge\ \frac{x}{kJ}\left(\frac{c_1}{k\log u}\right)^k
-\ \ge\ x\exp\bigl(-(1+o(1))u\log u\bigr)
+\frac{S}{\lambda x}\ \ge\ \frac{1}{\lambda kJ}\left(\frac{c_1}{k\log u}\right)^k
+\ \gg\ \frac{1}{k^2H}\left(\frac{c_1}{k\log u}\right)^k
+\ \ge\ \exp\bigl(-(1+o(1))u\log u\bigr)
 \]
 
-for a fixed \(c_1>0\). Here \(J\delta\asymp\log y/\log u\) and \(J\gg k\). The ordinary smooth count gives the matching leading upper bound. A single pattern loses a leading prime-count factor, which the disjoint family of patterns recovers. The construction also works in \([x,x(1+\lambda)]\) by taking \(\delta=\log(1+\lambda)/(2k)\), for \(0<\lambda\le1\) with \(k\log(1/\lambda)=o(\log V)\). In that case \(1/(kJ)\) has the factor \(\lambda\), and the same leading density holds per unit of interval length. The cutoff from RH for prime counts is satisfied with slack since each bin has length \(a_j V^{-o(1)}\). [The ordinary smooth density](https://arxiv.org/pdf/1408.1662#page=12)
+for a fixed \(c_1>0\). Here \(J\delta\asymp H\), \(\delta\asymp\lambda/k\), and \(J\gg k\). The last inequality uses \(\log(k^2H)=o(u\log u)\). A single pattern loses a leading prime-count factor, which the disjoint family of patterns recovers.
+
+The ordinary smooth count gives the matching leading upper bound per unit of interval length. Harper's Smooth Numbers Result 3 with modulus 1 and interval length \(\lambda x\ge y\) bounds that density by \(\ll (\Psi(x,y)/x)\lambda^{-(1-\alpha)}\log x\). The saddle point satisfies \(1-\alpha\ll\log u/\log y\), so \((1-\alpha)\log(1/\lambda)=o(1)\). The extra factor \(\log x\) is \(\exp(o(u\log u))\) by the density hypothesis. Thus \(S=\lambda x\exp(-(1+o(1))u\log u)\) throughout the stated interval range. [Hildebrand's ordinary smooth density](https://www.sciencedirect.com/science/article/pii/0022314X86900132) · [Harper, §2.1](https://arxiv.org/pdf/1408.1662#page=13)
+
+The growth condition accounts for the cost of retaining just one index sum. Every \((k-1)\)-subset extends to at most one \(k\)-subset of sum \(A\), and each valid \(k\)-subset has \(k\) deletions. Hence the number of patterns is at most \(\binom J{k-1}/k\le J^{k-1}/k!\). The upper prime-count bound in each bin then gives \(S/x\ll J^{-1}(C_1/\log u)^k/k!\) for a fixed \(C_1>0\). For example, take \(d=u\to\infty\), \(\log V=e^{u^2}\), \(y=V\), \(x=y^u\), and \(\lambda=1\). These scales satisfy \(d\log\log x=o(\log V)\) but give \(\log J=u^2+O(\log u)\). The shape density is at most \(\exp(-u^2-u\log u+O(u\log\log u))\), whereas the ordinary smooth density is \(\exp(-(1+o(1))u\log u)\). The character and variance bounds below are relative to the actual shape mass and need only \(d\log\log x=o(\log V)\) and the bound on \(\lambda\).
 
 ## Character bounds with value cutoffs
 
@@ -30,7 +35,7 @@ For any nonprincipal \(\chi\bmod M\), \(M\le x^C\), the Dirichlet GRH estimate
 \sum_{p\le z}\chi(p)p^{it}\ll \sqrt z\,(\log x)^{C_2}
 \]
 
-holds at the bin endpoints and throughout the bins for every \(|t|\le x^{C_3}\), with fixed exponents. To see the uniformity in \(t\), apply truncated Perron to \(-L'/L(s-it,\chi)\) first for the coefficients \(\Lambda(n)\chi(n)n^{it}\). Use half-integer endpoints, polynomial truncation height larger than \(|t|+x^2\), and shift to \(\Re s=1/2+1/\log z\). The partial-fraction formula and the bound \(O(\log(M(2+|\Im s-t|)))\) for the number of nearby zeros give a polylogarithmic logarithmic-derivative bound uniformly on the contour, since the distance to every nontrivial zero is at least \(1/\log z\). There is no pole for nonprincipal \(\chi\). The horizontal and truncation errors are smaller, prime powers cost \(O(\sqrt z(\log x)^2)\), and the Euler factors removed for imprimitive characters are harmless. Partial summation by \(1/\log p\) gives the claimed prime sum with the oscillatory weight already included. [Logarithmic derivative and zero counts](https://ndl.ethernet.edu.et/bitstream/123456789/23715/1/Hugh%20L.%20Montgomery.pdf) · [Truncated Dirichlet explicit formula](https://doi.org/10.1007/s00208-026-03383-y)
+holds at the bin endpoints and throughout the bins for every \(|t|\le x^{C_3}\), with the modulus and height exponents fixed. To see the uniformity in \(t\), apply truncated Perron to \(-L'/L(s-it,\chi)\) first for the coefficients \(\Lambda(n)\chi(n)n^{it}\). Use half-integer endpoints, polynomial truncation height \(T_1>|t|+x^2\), and shift to \(\Re s=1/2+1/\log z\). The partial-fraction formula and the bound \(O(\log(M(2+|\Im s-t|)))\) for the number of nearby zeros give an \(O((\log x)^2)\) bound on the logarithmic derivative along the shifted contour, since the distance to every nontrivial zero is at least \(1/\log z\). A primitive nonprincipal character has no pole in the shifted region. The horizontal and truncation errors are \(O(z(\log x)^2/T_1)\). Prime powers cost \(O(\sqrt z(\log x)^2)\), and passing from an imprimitive character to its primitive inducer costs at most \(O(\omega(M)\log z)\) in the Mangoldt sum. Partial summation by \(1/\log p\) gives the claimed prime sum with the oscillatory weight already included. [Logarithmic derivative and zero counts](https://ndl.ethernet.edu.et/bitstream/123456789/23715/1/Hugh%20L.%20Montgomery.pdf) · [Truncated Dirichlet explicit formula](https://doi.org/10.1007/s00208-026-03383-y)
 
 Consequently for \(s=1/\log x+it\), \(|t|\le x^3\), each pattern has
 
@@ -44,7 +49,7 @@ The real weight \(p^{-1/\log x}\) is inserted by partial summation with bounded 
 
 ## Averaged and prescribed progression phases
 
-Write \(M=mB\) with \(B=b^h\) and \((b,m)=1\). Count shape integers in unit classes \((r,a)\bmod (m,B)\) and let \(S_{r,a}(I)\) be the count in a value interval \(I\), with \(S_r(I)=\sum_a S_{r,a}(I)\). Orthogonality on the unit group of \(M\) gives
+Write \(M=mB\) with \(B=b^h\) for a prime \(b\) coprime to \(m\). Count shape integers in unit classes \((r,a)\bmod (m,B)\) and let \(S_{r,a}(I)\) be the count in a value interval \(I\), with \(S_r(I)=\sum_a S_{r,a}(I)\). Orthogonality on the unit group of \(M\) gives
 
 \[
 \sum_{r,a}^{*}\left|S_{r,a}(I)-\frac{|\mathcal A\cap I|}{\phi(mB)}\right|^2
@@ -53,7 +58,7 @@ Write \(M=mB\) with \(B=b^h\) and \((b,m)=1\). Count shape integers in unit clas
 
 Centering each row by \(S_r(I)/\phi(B)\) is an orthogonal projection and reduces the left side. The same estimate for the full value interval modulo \(m\), using the pointwise character bound or character orthogonality, gives \(S_r=S/\phi(m)+O(Sx^{-1/2}V^{o(1)})\) uniformly. Thus the full shape density is uniform on these unit phases at leading order for \(m=V^{O(1)}\).
 
-Index phase \(r\bmod m\) by \(n=r+mv\). The map \(v\bmod B\mapsto n\bmod B\) is a bijection. The additive transform of the within-row-centered residue counts has squared norm \(B\) times their squared residue norm. This square bound holds even with a supremum over intervals inside each nonzero additive coefficient. To see this, apply the within-row projection and additive transform first to the Mellin-weighted residue vector. Its \(\ell^2(r,\text{frequency})\) norm is at most \(\sqrt B Sx^{-1/2}V^{o(1)}\) for every \(s\) on the product Perron contour. Take the prefix supremum inside \(\int |ds/s|\), then use Minkowski in \(\ell^2\). The truncation error in the same \(\ell^2\) norm is \(O(\sqrt B S x^{-2})\) by first bounding it in residue coordinates. Differences recover all interval endpoints.
+Index phase \(r\bmod m\) by \(n=r+mv\). The map \(v\bmod B\mapsto n\bmod B\) is a bijection. The additive transform of the within-row-centered residue counts has squared norm \(B\) times their squared residue norm. This square bound holds even with a supremum over intervals inside each nonzero additive coefficient. To see this, apply the within-row projection and additive transform first to the Mellin-weighted residue vector. Its \(\ell^2(r,\text{frequency})\) norm is at most \(\sqrt B Sx^{-1/2}V^{o(1)}\) for every \(s\) on the product Perron contour. Take the prefix supremum inside \(\int |ds/s|\), then use Minkowski in \(\ell^2\). The error in entry \((r,a)\) before projection is at most \(O(x^{-2}S_{r,a})\) pointwise in the cutoff, with \(S_{r,a}\) counted over the full band. The row sum of absolute errors, including the centering, is \(O(x^{-2}S_r)\). This bound holds for each additive coefficient in the row and gives \(O(\sqrt B S x^{-2})\) in \(\ell^2\) after taking coordinatewise suprema. Differences recover all interval endpoints.
 
 Put \(K=x/m\) and use the deterministic phase-density reference \(\rho_m=S/(\phi(m)K)\). After normalizing additive sums by \(K\), the mean over all \(\phi(m)\) unit phases of their centered squared Fourier sums, relative to \(\rho_m^2\), is therefore
 
