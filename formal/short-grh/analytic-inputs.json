@@ -176,6 +176,14 @@
     "lines": [[2, 404]]
   },
   {
+    "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronOfLeTwoVonMangoldt",
+    "sha256": "5b0744bf3fbdcd97414c1c0f82ee2045bedd9396732b15af4c7af6f8d5627ff1",
+    "imports": [
+      "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronPsi"
+    ],
+    "lines": [[3, 159]]
+  },
+  {
     "module": "Development.AbelianVarietyTheory.Proofs.GlobalInterpolation.TruncatedPerronPsi",
     "sha256": "f8b6a9b506f27c549e5a0db6dfd6ac43f31af95fc58704973e63e8f108e4bd44",
     "imports": [
