@@ -1,5 +1,6 @@
 import Cogentic.RandomizedConcreteEpoch
 import Cogentic.RandomizedConcreteEpochChecks
+import Cogentic.RandomizedConcreteEpochCost
 import Cogentic.RandomizedPaperLeafStatements
 import Cogentic.RandomizedEpochAnalyticInputs
 import Cogentic.RandomizedEpochWork
@@ -112,5 +113,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedPaperLeafStatements.epochAnalyticInputs_of_paperAssumptions
 #print axioms Cogentic.RandomizedPaperLeafStatements.hardEpochAsymptoticBound_of_paperAssumptions
 #print axioms Cogentic.RandomizedConcreteEpoch.ConcreteEpochChecks.c1_and_c2_inputs_concreteEpoch
+#print axioms Cogentic.RandomizedConcreteEpochCost.c3_and_c4_inputs_concreteEpoch
+#print axioms Cogentic.RandomizedConcreteEpochCost.hardEpochAsymptoticBound_of_concreteCost
 
 end Cogentic.RandomizedEndToEnd
