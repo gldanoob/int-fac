@@ -9,6 +9,7 @@ import Cogentic.RandomizedFiniteObstruction
 import Cogentic.RandomizedFiniteSupportTV
 import Cogentic.RandomizedStableEnergy
 import Cogentic.RandomizedLinearPairCount
+import Cogentic.RandomizedSquareDivisorSum
 import Cogentic.RandomizedFullTableFloor
 import Cogentic.RandomizedGramMinor
 import Cogentic.RandomizedGramRank
