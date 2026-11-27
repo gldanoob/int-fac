@@ -49,6 +49,7 @@ import Cogentic.RandomizedTopCoefficientDet
 import Cogentic.RandomizedPrimeDetNullity
 import Cogentic.RandomizedCubicBoxChart
 import Cogentic.RandomizedSubsetFiber
+import Cogentic.RandomizedFixedMoebius
 import Cogentic.RandomizedQuadraticTargetRoot
 import Cogentic.RandomizedAffineHitCount
 import Cogentic.RandomizedDeficientWeights
@@ -135,3 +136,4 @@ import Cogentic.RandomizedTaggedKernel
 #print axioms Cogentic.RandomizedPrimeDetNullity.finrank_ker_eq_one_of_dvd_not_sq
 #print axioms Cogentic.RandomizedCubicBoxChart.card_box
 #print axioms Cogentic.RandomizedSubsetFiber.card_le_choose_mul_card_image
+#print axioms Cogentic.RandomizedFixedMoebius.transform_norm_sub_le
