@@ -1,4 +1,4 @@
-"""Find one verified F2 dependency using an exact sparse Wiedemann probe."""
+"""Find verified binary dependencies using exact sparse Wiedemann probes."""
 
 from itertools import product
 from operator import index
@@ -84,14 +84,54 @@ def dot(left, right, modulus):
     return value
 
 
-def apply(rows, vector):
+def apply_rows(rows, vector):
     output = []
     for row in rows:
         value = 0
         for column in row:
             value ^= vector[column]
         output.append(value)
-    return output + [0]
+    return output
+
+
+def apply(rows, vector):
+    return apply_rows(rows, vector) + [0]
+
+
+def krylov_null_vector(operator, n, modulus, rng):
+    degree = modulus.bit_length() - 1
+    u = [rng.getrandbits(degree) for _ in range(n)]
+    v = [rng.getrandbits(degree) for _ in range(n)]
+    term, sequence = v, []
+    for _ in range(2 * n):
+        sequence.append(dot(u, term, modulus))
+        term = operator(term)
+    polynomial = berlekamp_massey(sequence, modulus)
+    if polynomial[0]:
+        return None
+
+    # Horner evaluation of (polynomial / t)(M) v.
+    vector = [0] * n
+    for coefficient in reversed(polynomial[1:]):
+        vector = [
+            entry ^ multiply(coefficient, start, modulus)
+            for entry, start in zip(operator(vector), v)
+        ]
+    return vector if any(vector) and not any(operator(vector)) else None
+
+
+def binary_component(rows, vector, tags=None):
+    if vector is None or any(apply_rows(rows, vector)):
+        return None
+    tagged = vector if tags is None else apply_rows(tags, vector)
+    word = next((entry for entry in tagged if entry), 0)
+    if not word:
+        return None
+    bit = word & -word
+    binary = [int(bool(entry & bit)) for entry in vector]
+    if any(apply_rows(rows, binary)) or (tags is not None and not any(apply_rows(tags, binary))):
+        return None
+    return tuple(j for j, entry in enumerate(binary) if entry)
 
 
 def dependency(rows, *, rng=None, attempts=8, field_degree=None):
@@ -113,30 +153,49 @@ def dependency(rows, *, rng=None, attempts=8, field_degree=None):
     rng = Random() if rng is None else rng
 
     for _ in range(attempts):
-        u = [rng.getrandbits(degree) for _ in range(n)]
-        v = [rng.getrandbits(degree) for _ in range(n)]
-        term, sequence = v, []
-        for _ in range(2 * n):
-            sequence.append(dot(u, term, modulus))
-            term = apply(rows, term)
-        polynomial = berlekamp_massey(sequence, modulus)
-        if polynomial[0]:
-            continue
+        vector = krylov_null_vector(lambda term: apply(rows, term), n, modulus, rng)
+        selected = binary_component(rows, vector)
+        if selected:
+            return selected
+    return None
 
-        # Horner evaluation of (polynomial / t)(M) v.
-        vector = [0] * n
-        for coefficient in reversed(polynomial[1:]):
-            vector = [
-                entry ^ multiply(coefficient, start, modulus)
-                for entry, start in zip(apply(rows, vector), v)
-            ]
-        if not any(vector) or any(apply(rows, vector)):
-            continue
-        word = next(entry for entry in vector if entry)
-        bit = word & -word
-        selected = tuple(j for j, entry in enumerate(vector) if entry & bit)
-        selected_set = set(selected)
-        if selected and all(sum(j in selected_set for j in row) % 2 == 0 for row in rows):
+
+def marked_dependency(rows, tags, columns, *, rng=None, attempts=8, field_degree=None):
+    """Return columns killed by rows but having a nonzero tag, or None.
+
+    Both binary matrices use sparse rows with column indices in range(columns).
+    Each attempt uses fresh random diagonals and scalar probes.
+    """
+    columns = index(columns)
+    rows = tuple(tuple(map(index, row)) for row in rows)
+    tags = tuple(tuple(map(index, row)) for row in tags)
+    if columns < 1 or any(j < 0 or j >= columns for row in rows + tags for j in row):
+        raise ValueError("expected positive column count and in-range column indices")
+    degree = (8 * columns).bit_length() if field_degree is None else index(field_degree)
+    attempts = index(attempts)
+    if attempts < 1 or degree < 1:
+        raise ValueError("expected positive probe budget and field degree")
+    if not any(tags):
+        return None
+    modulus = irreducible(degree)
+    rng = Random() if rng is None else rng
+
+    for _ in range(attempts):
+        row_weights = [rng.getrandbits(degree) for _ in rows]
+        column_weights = [rng.getrandbits(degree) for _ in range(columns)]
+
+        def operator(vector):
+            # Apply E Mᵀ D M with two sparse passes through M.
+            output = [0] * columns
+            for row, value, weight in zip(rows, apply_rows(rows, vector), row_weights):
+                weighted = multiply(value, weight, modulus)
+                for j in row:
+                    output[j] ^= weighted
+            return [multiply(entry, weight, modulus) for entry, weight in zip(output, column_weights)]
+
+        vector = krylov_null_vector(operator, columns, modulus, rng)
+        selected = binary_component(rows, vector, tags)
+        if selected:
             return selected
     return None
 
@@ -153,6 +212,15 @@ def replay():
         chosen = dependency(rows, rng=rng, field_degree=4)
         assert chosen and all(sum(j in chosen for j in row) % 2 == 0 for row in rows)
     print("Verified sparse dependencies for 64 binary matrices and four structural fixtures.")
+
+    rows = tuple((2 * j, 2 * j + 1) for j in range(21))
+    chosen = marked_dependency(rows, ((0, 2),), 42, rng=rng)
+    assert chosen and (0 in chosen) != (2 in chosen)
+    assert all(sum(j in chosen for j in row) % 2 == 0 for row in rows)
+    assert marked_dependency(rows, ((), ()), 42, rng=rng) is None
+    assert marked_dependency(rows, ((0, 1),), 42, rng=rng) is None
+    assert 3 in marked_dependency((), ((3,),), 5, rng=rng)
+    print("Verified marked extraction with 20 unmarked dimensions, zero tags, and zero constraints.")
 
 
 if __name__ == "__main__":
