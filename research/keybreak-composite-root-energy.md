@@ -77,7 +77,8 @@ Suppose $H=\lfloor r^{1/3}\rfloor\le M_i\le r$. Partition each radicand interval
 For the weighted step set $A_0=\|\alpha\|_\infty$ and $B_0=\|\beta\|_\infty$. Cauchy in the second root and across the first blocks bounds $|S|^2$ by $q^{o(1)} M_2 B_0^2 K_1$ times
 
 \[
- \sum_{x,x'\ {m same\ block}}\alpha_x\overline{\alpha_{x'}}
+ \sum_{x,x'\ {
+m same\ block}}\alpha_x\overline{\alpha_{x'}}
  \sum_y e_r((a/g)(x-x')y).
 \]
 
@@ -95,3 +96,63 @@ The Fourier matrix in this last expression has operator norm $\sqrt r$, since $a
 \]
 
 This estimates cancellation relative to the full radicand interval lengths. A sparsity-sensitive bound relative to the actual support is not asserted. If $q\ge N^{.97}$, $q\le N^{1+o(1)}$, and $g\le N^{.031}$, then $r\ge N^{.939}$ and the saving is $N^{-.039125+o(1)}$. The block length fits the intervals of sizes $N^{.437+o(1)}$ through $N^{.533+o(1)}$, and more generally the range $N^{.35}$ to $N^{.64}$. For a multiplier equal to $\ell$ times a unit modulo $q$, one has $g\le |\ell|$. Multipliers with no bound on $g$ cannot give a uniform saving, as $a\equiv0\pmod q$ makes the phase constant.
+
+## Separating the two equal-radicand terms
+
+One can choose different block lengths $1\le H_i\le M_i$ if the two equal-radicand terms are separated from the restricted energies. Let $R_i^{\ne}(d)$ count only the within-block ordered pairs with different radicands on side $i$. For $H_i=1$ there are no such pairs. The second-energy bound above gives
+
+\[
+ \sum_d R_i^{\ne}(d)^2\ll q^{o(1)}\left(H_iM_i+\frac{H_i^3M_i^2}{r}\right).
+\]
+
+In the first two Cauchy steps above, separate the equal-radicand part of the inner expression before squaring and before Cauchy over first-side pairs. It has at most $q^{o(1)}M_1$ ordered first-side pairs and is bounded in absolute value by $q^{o(1)}M_1M_2 A_0^2$. With the prefactor $q^{o(1)}M_2B_0^2K_1$ and squaring, this gives a term $q^{o(1)}(M_1M_2 A_0B_0)^4/H_1^2$. On the remaining first-side pairs, take Cauchy and then partition the second side. After expanding the second block squares, the common prefactor is $q^{o(1)} A_0^4B_0^4 M_1^3M_2^3/(H_1H_2)$. The equal-radicand part on the second side has at most $q^{o(1)}M_2$ ordered pairs, so its inner contribution in absolute value is at most $q^{o(1)}M_1H_1M_2$. This gives a normalized term $q^{o(1)}/H_2$. The remaining term uses the Fourier pairing of $R_1^{\ne}$ and $R_2^{\ne}$ with its norm bound $\sqrt r$. Altogether,
+
+\[
+ \frac{|S|^4}{(M_1M_2 A_0B_0)^4}
+ \ll q^{o(1)}\left[
+ \frac{1}{H_1^2}+\frac{1}{H_2}+\sqrt r\prod_{i=1}^2
+ \left(\frac{1}{H_iM_i}+\frac{H_i}{r}\right)^{1/2}\right].
+\]
+
+Zero weights give a vanishing sum and can be omitted in this normalization. The separation is by radicand, including distinct chosen roots of the same radicand in the equal part. The first and second pieces are bounded in absolute value independently, so the proof also covers arbitrary complex weights.
+
+For $r^{1/3}\le M_i\le r$, take $H_i=\lfloor\sqrt{r/M_i}\rfloor$. Each such integer lies between one and $M_i$ and is comparable to its unrounded value. It balances the two pieces of the corresponding energy factor. Taking fourth roots gives
+
+\[
+ |S|\ll q^{o(1)}M_1M_2 A_0B_0
+ \left[\left(\frac{M_1}{r}\right)^{1/4}
+       +\left(\frac{M_2}{r}\right)^{1/8}
+       +(M_1M_2)^{-1/16}\right].
+\]
+
+This estimate retains the orientation of the two Cauchy steps. At the exponent scale, put the larger aperture on the first side, where its diagonal costs the fourth root.
+
+### Harmonic frequency sums and intermediate windows
+
+Suppose $q^{1/3}\le M_2\le M_1\le q$, and use frequencies $a=\ell c$ with $c$ a unit modulo $q$. For $r=q/(\ell,q)\ge M_1$ the preceding estimate applies. For either exponent $\rho\in\{1/4,1/8\}$, the harmonic sum of the gcd factors satisfies
+
+\[
+ \sum_{1\le\ell\le L}\frac{(\ell,q)^\rho}{\ell}
+ \le (1+\log L)\sum_{d\mid q}d^{\rho-1}
+ \ll q^{o(1)}\log(2L).
+\]
+
+For the frequencies with $r<M_1$, use the trivial bound $q^{o(1)}M_1M_2 A_0B_0$. Their harmonic weight is at most $\log(2L)\sum_{d\mid q,d>q/M_1} d^{-1}\ll q^{o(1)}(M_1/q)\log(2L)$. This extra term is bounded by the first diagonal term with $r$ replaced by $q$. For $L\le q^{O(1)}$, the resulting bound is
+
+\[
+ \sum_{\ell\le L}\frac{|S(\ell c)|}{\ell}
+ \ll q^{o(1)} M_1M_2 A_0B_0
+ \left[\left(\frac{M_1}{q}\right)^{1/4}
+       +\left(\frac{M_2}{q}\right)^{1/8}
+       +(M_1M_2)^{-1/16}\right].
+\]
+
+The frequency bound does not require computing the individual gcds for the discrepancy argument. If a fixed nonunit multiplier occurs before $\ell$, first reduce by its gcd and apply this statement with the remaining modulus, provided its aperture guards still hold.
+
+For the intermediate quadratic window put $M_1M_2=N^{\alpha+o(1)}$, with $0<\alpha\le1$, both aperture exponents greater than $1/3$, and $\alpha-o(1)\le\log q/\log N\le1+o(1)$. If $M_i=N^{m_i+o(1)}$ with $m_1\ge m_2$, then the diagonal savings relative to the full product are at least $m_2/4$ and $m_1/8$, respectively. Each is at least $\alpha/16$ under these guards. Thus fractional discrepancy for an interval of relative length $N^{\alpha-1+o(1)}$ is power-saving compared with its main scale whenever
+
+\[
+ 1-\alpha<\eta<\alpha/16
+\]
+
+and the cutoff is $L=\lfloor N^\eta\rfloor$. Such a cutoff exists for $\alpha>16/17$. This is the size threshold from the stronger Fourier estimate. For example, the late-prefix argument can split its certified divisors as soon as their partial product reaches $N^{.36}$ and keep a Gauss-only case through the cap $N^{.37}$. The one-sided Gauss errors cost $N^{.87+o(1)}<N^{2\alpha-1}$, and the two block apertures in the other case can have exponents $.36$ and $\alpha-.36$. Both exceed $1/3$. The conclusion concerns the Fourier and prefix-size margins. A complete factoring schedule still requires its signed-extraction argument and the other charged terms. [Intermediate quadratic window](keybreak-intermediate-quadratic-window.md)
