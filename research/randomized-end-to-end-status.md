@@ -454,6 +454,24 @@ The remaining sub-lemma modules are:
 These files keep the genuinely paper-level estimates as explicit `Prop`s; no
 loss, mass, count, or error is set to zero.
 
+### Wave 9: real-form C3, good-event composition, and the fully discharged endpoint
+
+- `RandomizedConcreteC3Real.lean` instantiates the C3 interface with the real
+  `concreteFormSpec` over `ReducedForms N` (discriminant `-8N`). Its
+  `ConcreteC3RealInputs` reduces the TV hypotheses to explicit `eta`/`gcdMass`/
+  `hideal`/`hgcd`/`hactual`/`heps_le` fields; `c3Inputs` and `hit_prob_ge` are
+  proved. This replaces the toy prime modulus of `bigConcreteC3`.
+- `RandomizedC5GoodIff.lean` removes the structural `good_iff` hypothesis for
+  the concrete epoch: `ConcreteEpochData.good` is definitionally the solver
+  success set, and the C5 events are defined as its projections. It also
+  provides a concrete `C5FullInputs` instance (`ofToyEpoch`) with positive loss.
+- `RandomizedPaperEndpointFullyDischarged.lean` replaces the remaining
+  `L18_4Inputs`/`L19Inputs` fields by `L18_4Certificate`/`L19FullCertificate`
+  and composes the full C5 certificate. The endpoint
+  `serialized_assembled_balancedEnvelopeInfimum_from_fullyDischargedInputs` has
+  only the eight unreduced paper leaves, C1-C4, the full certificates, and the
+  concrete adapters left.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
