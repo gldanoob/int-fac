@@ -302,20 +302,102 @@ The paper-level endpoint assumes, for the epoch family and schedule:
 
 No item on this list is proved in Lean.
 
+## Wave 3: discharging sub-lemmas
+
+Wave 3 attacks the first concrete sub-lemmas behind `PaperEndpointInputs`. It
+does **not** prove the twelve leaves; it replaces several opaque leaves or
+bridges by smaller explicit inputs and proves the reductions.
+
+| Module | Content |
+|---|---|
+| `RandomizedL18_4.lean` | L18.4 split into `large_sieve`, `cell_prime_count`, `cell_numerator_count`, `thin_pair_fraction`; the numeric `SubexpLoss`/`SubexpLeaf` chain is proved |
+| `RandomizedL18_4LargeSieve.lean` | single-modulus Parseval/Bessel lemmas; `large_sieve` reduced to `multiModulusSum` + `rationalCellPartition` |
+| `RandomizedL18_4CellCount.lean` | `cell_prime_count` from integer `CellData` + the existing critical-line prime-bin supply; real-to-integer rounding proved |
+| `RandomizedL18_4Numerator.lean` | `cell_numerator_count` from an actual root-progression count and the existing `PrimePatternProgressionBound`; two numeric residuals isolated |
+| `RandomizedL18_4Thin.lean` | determinant-level lattice count and `thin_pair_fraction` from `ThinPairInputs`; `loss` unchanged |
+| `RandomizedPaperL18_4.lean` | reassembles `PaperAnalyticAssumptions` from the eleven remaining leaves plus `L18_4Inputs` |
+| `RandomizedConcreteStageCost.lean` | concrete S0 and S7 costs, with `≤ 4·(log₂N+1)²` and `≤ 12·(log₂N+1)⁴`; `ConcreteC4Hypotheses.ofS0S7` |
+| `RandomizedConcreteTV.lean` | explicit `DirectFormSpec`, exact-zero toy TV instance, and a full `ConcreteC3Hypotheses` instance `bigConcreteC3` with `heps_le` proved |
+| `RandomizedConcreteHitMass.lean` | C5 `hitMass` decomposed into pool coverage, survivor recurrence, descent tree, algebra, and coupling |
+| `RandomizedConcreteHitMassCount.lean` | `c5abc_compl_le` proved from `C5abcInputs`; the remaining H.8 counting field is `half_mass` |
+
+### L18.4 status
+
+The L18.4 leaf is no longer opaque. `L18_4Inputs` defines the scales and the
+deficit, and the file proves
+
+```lean
+theorem L18_4Inputs.subexpLoss : SubexpLoss I.loss
+theorem L18_4Inputs.slot_le : ∀ᶠ n, slots .rationalGoodEnvironments n ≤ exp (-(2:ℝ) * scale n)
+```
+
+from four inputs. Each input now has a separate reduction:
+
+- `large_sieve` ← `LargeSieveInputs.multiModulusSum` and
+  `rationalCellPartition`; the single-modulus Parseval and Bessel lemmas are
+  proved (`zmod_parseval`, `zmod_unit_bessel`, `multiModulus_residueEnergy_le`).
+- `cell_prime_count` ← `CellData` plus the existing
+  `cell_card_lower_from_critical_line`; the real-to-integer cell rounding and
+  the supply/width compatibility are proved.
+- `cell_numerator_count` ← `NumeratorCountInputs`, tied to an actual
+  `progressionCount` and the existing `PrimePatternProgressionBound`; the
+  remaining residuals are `mass_lower` and `error_le`.
+- `thin_pair_fraction` ← `ThinPairInputs`; the per-level determinant lattice
+  count (`card_modEq_le`, `det_level_card_le`) is proved, and the aggregated
+  strip sum is the remaining input.
+
+The only factor-level caveat is recorded in `RandomizedL18_4CellCount`: the
+paper's equal subdivision gives width `2V/(3dK)`, while the literal field asks
+for `V/(2dK(1+W))`. The module isolates this in `CellData.width` and
+`cell_prime_count_of_paper_cell_width`.
+
+### C5 hitMass status
+
+`HitMassInputs` decomposes the good-event mass:
+
+```text
+totalLoss = preLoss + algebra.loss + coupling.loss
+preLoss   = pool.loss + survivor.loss + descent.loss
+```
+
+and proves `HitMassInputs.hitMass_of_inputs` and
+`toC5Inputs_of_hitMassInputs`. The C5.a pool coverage is the actual L17
+`PoolCoverageBudget`; C5.b/C5.c are the existing survivor/descent recurrences.
+`RandomizedConcreteHitMassCount` proves `c5abc_compl_le` from `C5abcInputs`,
+leaving the single H.8 counting field `half_mass` (the paper's "at least half
+the ideal mass reaches an immediate factor or an accepted dense field").
+
+### C3 and C4 status
+
+`RandomizedConcreteTV.bigConcreteC3` is a genuine full
+`ConcreteC3Hypotheses` instance: the structural `DirectFormSpec` fields are
+explicit, the sample type's `DecidableEq` obstruction is resolved with a
+one-point `BigCoins` type, and `heps_le` is proved as the numeric inequality
+`big_heps_le` (not assumed). The modulus is a huge opaque prime, not the paper's
+class group, so this is a concrete instance of the interface rather than the
+paper's sampler.
+
+For C4, `s0Cost ≤ 4·(log₂N+1)²` and `s7Cost ≤ 12·(log₂N+1)⁴` are proved, and
+`ConcreteC4Hypotheses.ofS0S7` discharges those two stages. The other eight stage
+costs remain explicit.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Wave 2 supplies the
-   construction-level S0–S9 epoch (`ConcreteEpochData`) and a C3/C4 bridge, but
-   `HardEpochData` still exposes no field-pool object, moment functionals, or
-   recognizer events. The concrete stage cost functions, the C3 TV estimate, the
-   C4 per-stage mean bounds, and the C5 `hitMass` bridge remain explicit
-   hypotheses rather than instances.
+   construction-level S0–S9 epoch (`ConcreteEpochData`) and a C3/C4 bridge. Wave
+   3 supplies a full concrete `ConcreteC3Hypotheses` instance
+   (`bigConcreteC3`), concrete S0/S7 stage costs, and a C5 `HitMassInputs`
+   decomposition, but `HardEpochData` still exposes no field-pool object, moment
+   functionals, or recognizer events. The other eight stage costs and the paper's
+   actual class-group sampler remain explicit; the `bigConcreteC3` modulus is a
+   huge opaque prime, not the paper's form class group.
 2. **The analytic leaves.** L19.4–L19.6 (narrow-width second moment), L20.2
    (interior concentration), L20.4 (child-root-conditioned two-point bound),
    L21.2 (RH smooth numbers near integer centres), L27.1 (Lenstra–Pomerance
-   ECM), L30 (genus-two partial factorer), L34 (effective Chebotarev), L18.4
-   (large sieve / G.3), and L4/L25/L36 (non-maximal-order form composition)
-   remain paper-level.
+   ECM), L30 (genus-two partial factorer), L34 (effective Chebotarev), and
+   L4/L25/L36 (non-maximal-order form composition) remain paper-level. L18.4 is
+   now decomposed into explicit large-sieve, cell-count, numerator-count, and
+   thin-pair inputs; those inputs are themselves not yet fully proved.
 3. **P1.** Trial division to `roughThreshold n = exp((log n)^{2/3})` has the
    correct splitting behaviour but cost `exp((log n)^{2/3})`, not
    `exp(o(scale n))`. The rough endpoint keeps this as an explicit hypothesis.
@@ -345,3 +427,12 @@ No item on this list is proved in Lean.
 9. `Cogentic/RandomizedConcreteEpochCost.lean` — C3/C4 bridge.
 10. `Cogentic/RandomizedPaperLeafStatements.lean` — the twelve paper leaves.
 11. `Cogentic/RandomizedPaperEndpoint.lean` — the paper-assumption endpoint.
+12. `Cogentic/RandomizedL18_4.lean` — the L18.4 decomposition and the
+    `SubexpLeaf` numeric chain.
+13. `Cogentic/RandomizedL18_4{CellCount,Numerator,Thin,LargeSieve}.lean` — the
+    four L18.4 sub-lemma reductions.
+14. `Cogentic/RandomizedConcreteHitMass{,Count}.lean` — the C5 `hitMass`
+    decomposition and the C5.a–c counting reduction.
+15. `Cogentic/RandomizedConcreteTV.lean` and
+    `Cogentic/RandomizedConcreteStageCost.lean` — the full concrete C3 instance
+    and the S0/S7 cost bounds.
