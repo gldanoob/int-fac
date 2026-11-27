@@ -432,3 +432,51 @@ For this proof it would suffice to bound the centered ray-collision mass average
                  \ll (T/U)V^{o(1)}
 \]
 for each pattern and first discriminant, or with a suitably weighted average of the same strength. Cauchy–Schwarz in \(t\) gives the displayed Fourier error after summation. There is a short-packet injectivity range. If two primitive ideals in a projective ray have norms \(n_1,n_2<Vt/2\), with \(V\) here equal to the square root of the field discriminant magnitude, their common-factor cancellation yields \(x^2+|D|v^2=4n_1n_2/g^2\) and \(t\mid v\). Hence \(v=0\), and the primitive scalar generator is a unit, so the ideals coincide. At the actual norm \(U\), a distinct ordinary-class pair has a nonzero \(v\ll U/V\). Summing over \(t\mid v\) bounds its multiplicity by \(V^{o(1)}\). The ordinary class cap \(O(1+U/V)\) for primitive vectors in a normalized planar ideal lattice then bounds the uncentered summed collision probability by \(V^{o(1)}(1/V+\#\{t\}/U)\). Here the normalized packet has maximum atom \(U^{-1}V^{o(1)}\). The \(1/V\) term exceeds the required centered scale on the thin bands. [Checked arithmetic of the short-packet cutoff](../formal/cogentic/Cogentic/RandomizedQuadraticNormBound.lean)
+
+## A symmetric-square bound for the parabola windows at every height
+
+The \(V^6\) cutoff above comes from the \(Q^2\) term in the additive large sieve. The two windows themselves have a lattice description giving a trimmed second-moment upper bound for all \(U\ge V\) and arbitrary denominator supports of fixed positive density. It also gives an asymptotic for full and periodic supports. The sign-restricted window with \(us-r^2>0\) admits an untrimmed upper bound.
+
+Let \(S\subset[U,2U]\cap\mathbb Z\), \(p_S=|S|/U\), and let \(w_1,w_2\) be fixed nonnegative smooth compactly supported weights. Write
+\[
+  F_S(\alpha)=\sum_{u\in S}\sum_{r,s\in\mathbb Z}
+     w_1\!\left(\frac{r-u\alpha}{V}\right)
+     w_2\!\left(\frac{s-2\alpha r+u\alpha^2}{V^2/U}\right),
+  \qquad
+  C_w=\left(\int_{\mathbb R}w_1\right)\left(\int_{\mathbb R}w_2\right).
+\]
+The zero Poisson mode is \(\mu_S=C_w V^3|S|/U\). We take the weights to be nonzero when quoting a relative bound. Set \(R=U/V\ge1\) and
+\[
+  A_\alpha=
+       \begin{pmatrix}R^{-1/2}&0\\ -\alpha R^{1/2}&R^{1/2}\end{pmatrix},
+  \qquad
+  A_\alpha\begin{pmatrix}u&r\\r&s\end{pmatrix}A_\alpha^{\mathsf T}
+       =\begin{pmatrix}
+          u/R&r-\alpha u\\
+          r-\alpha u&R(s-2\alpha r+u\alpha^2)
+        \end{pmatrix}.
+\]
+Congruence by \(A_\alpha\) on symmetric matrices is a determinant-one linear map in the three entry coordinates. The image of the integral symmetric matrices is a unimodular lattice with window \(x\in[V,2V]\), weighted by \(w_1(y/V)w_2(z/V)\). Replacing a basis of \(A_\alpha\mathbb Z^2\) by another integral basis preserves the three-dimensional image lattice, since congruence by a unimodular integer matrix permutes the integral symmetric matrices.
+
+Write \(\lambda(\alpha)\) for the Euclidean shortest-vector length in \(A_\alpha\mathbb Z^2\). A shortest vector \(v\) is primitive. Extend it to a basis of determinant one and choose its second vector \(w\) with horizontal projection along \(v\) of magnitude at most \(\lambda/2\). The perpendicular component of \(w\) has length \(1/\lambda\). The inequality \(|v|\le |w|\) gives \(\lambda^4\le 4/3\), and both basis lengths are \(O(\lambda^{-1})\). The integral symmetric-square basis has columns \(vv^{\mathsf T}\), \(vw^{\mathsf T}+wv^{\mathsf T}\), and \(ww^{\mathsf T}\). Its fundamental parallelepiped has diameter \(D=O(\lambda^{-2})\).
+
+For \(0<\epsilon<1\) put \(E_\epsilon=\{\alpha\bmod1:\lambda(\alpha)<\epsilon\}\). A short vector has the form \((q/\sqrt R,\sqrt R(a-\alpha q))\), where \(1\le |q|\le\epsilon\sqrt R\). For positive \(q\) there are \(q\) rational centers modulo one, each with radius at most \(\epsilon/(q\sqrt R)\). Thickening all the intervals by \(\ell\) gives
+\[
+     |E_\epsilon^{(\ell)}|\ll \epsilon^2(1+R\ell).
+\]
+The set is empty when \(\epsilon\sqrt R<1\). With \(\epsilon=V^{-c}\), \(0<c<1/2\), and \(\ell\le R^{-1}(\log V)^K\) for fixed \(K\), the thickened exceptional set has power-small measure uniformly in \(U\). This is the elementary two-dimensional short-vector estimate underlying this application of the Diophantine lattice correspondence. [Kleinbock and Margulis, Theorem 5.4](https://arxiv.org/pdf/math/9810036#page=15)
+
+For \(\alpha\notin E_\epsilon\), \(D\ll V^{2c}=o(V)\). Approximate the weighted count by integration over translates of the fundamental cell. Cells meeting a first-coordinate boundary occupy total volume \(O(DV^2)\). Elsewhere the weight varies by \(O(D/V)\) across a cell and the relevant total volume is \(O(V^3)\). This gives \(C_w V^3+O_w(V^{2+2c})\) for the full support. The exact zero mode \(C_w V^3|[U,2U]\cap\mathbb Z|/U\) differs from \(C_w V^3\) by \(O_w(V^3/U)\). In particular the squared difference from the zero mode integrated off the exceptional set is \(O_w(V^{4+4c})\).
+
+The same comparison retains the exact density for periodic restrictions. Let \(S\) be the denominators in \([U,2U]\) with \(u\bmod m\) in a nonempty class set \(\mathcal C\), and let \(\theta=|\mathcal C|/m\). Each single class is a union of \(m^2\) translates of the lattice scaled by \(m\), since the map from the original integer triples to \(u\bmod m\) is onto. Each translate has covolume \(m^3\) and cell diameter \(O(mV^{2c})\). The same cell comparison, now with this diameter, gives
+\[
+      F_S(\alpha)=C_w\theta V^3+O_w(\theta m V^{2+2c})
+                 =\mu_S+O_w(p_S m V^{2+2c})
+\]
+if \(mV^{2c}=o(V)\). The endpoint difference satisfies \(|p_S-\theta|\ll\theta m/U\) and is absorbed. This is uniform even for vanishing periodic densities. For example \(m\le V^{1-2c-\eta}\) gives a relative \(O_w(V^{-\eta})\) pointwise error for each fixed \(\eta>0\).
+
+For arbitrary \(S\), positivity bounds \(F_S\) by the full count. Thus its squared integral off the thickened set is \(O_w(V^6)\). This is \(O_{w,p_0}(\mu_S^2)\) when \(p_S\ge p_0>0\), and \(O_w(p_S^{-2}\mu_S^2)\) at a general nonzero density. In particular \(p_S=V^{-o(1)}\) gives a \(V^{o(1)}\) relative bound. A uniform relative constant at vanishing, unrestricted density requires a density-sensitive estimate. Enlarging the original two windows by fixed log powers changes the bounds by fixed log factors. Global rational-point counts near curves give related first-moment information. The argument here uses the local lattice special to the parabola. [Huang, Theorem 3 and §5](https://arxiv.org/pdf/1403.7388#page=6) · [Vaughan and Velani](https://arxiv.org/abs/math/0602225)
+
+The absolute windows can have a large untrimmed second moment. For weights at least one on a fixed neighborhood of zero, a sufficiently small fixed \(c_1>0\) allows \(s=0\) and every \(|r|\le c_1V\) for every \(u\in S\) when \(|\alpha|\le c_1V/U\). Their contribution is \(\gg |S|^2V^3/U\), or \(\gg (U/V^3)\mu_S^2\). This is an actual failure of the untrimmed absolute-window bound when \(U/V^3\) grows. All these points have \(us-r^2\le0\).
+
+For the raw count restricted to \(us-r^2>0\), the same lattice gives \(O_w(V^3)\) pointwise on the entire circle for every \(U\ge V\) and every \(S\). Any contributing matrix is positive definite, with all entries \(O_w(V)\) and invariant determinant \(us-r^2\). Rotate the reduced basis so that \(v\) is horizontal. In the image of an integral symmetric matrix \(T\) under this basis its vertical diagonal is \(T_{22}/\lambda^2\). Positive definiteness forces the integer \(T_{22}\ge1\). Since the rotated image still has entries \(O_w(V)\), existence of even one contributing term forces \(\lambda^{-2}=O_w(V)\). Its three-dimensional fundamental cell then has diameter \(O_w(V)\). The number of lattice points in the window is at most the volume of the enlarged window because the attached cells are disjoint and have volume one. This proves the cap, including after further restrictions on the positive determinant. It is an upper bound on the raw geometric population, with the same unrestricted-density loss as above.
