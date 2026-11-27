@@ -548,6 +548,46 @@ modules (smooth-number saddle/concentration, Perron/Fourier/tent estimates,
 Hurwitz/Deuring curve counts, Younis/LPP short-interval counts, Dedekind
 zero-free/Stark/Chebotarev, Cox correction, prepass success/cost).
 
+### Wave 12: obstruction audit
+
+The deeper reductions exposed several places where the current formal
+interfaces are not just unproved but **inconsistent with the paper regime**:
+
+- **L20.4 incoming-root complement.** `RandomizedL20_4Incoming` proves that
+  `IncomingRootComplement` cannot hold when the child modulus satisfies
+  `4 ≤ q n` eventually. The Gaussian root-residue estimate gives only
+  `Pr(R) ≤ (1+q/σ)/q`, hence
+  `Pr(g ∧ R) ≤ 3/(2q)`; a co-large `Pr(g ∧ R)` then forces `q ≤ 3`. Thus the
+  `PairEventMassData` field `incoming_complement` is false in the paper’s
+  large-modulus regime. The L20.4 event decomposition needs the paper’s actual
+  child-root lower law (or a different mass split), not this complement.
+- **L20.2 empty bins.** `PrimeBinCharacterDecay` is false for empty prime bins
+  (`primeBinCharacterDecay_false_of_emptyBin`). The nonempty-bin hypothesis is
+  explicit in `RandomizedL20_2DecayNonempty`. The paper-band width is reduced
+  to the scalar `PaperBandScaleInequality` in `RandomizedL20_2ScalarWidth`.
+- **L21.2 powers of two.** `RandomizedL21_2PaperLocal` proves that a `√p`
+  window contains at most `O(log p)` powers of two, so `PowTwoCountLower` is
+  false in the growing paper regime. The residual is the full short-interval
+  smooth count `ShortIntervalSmoothCountLower`.
+- **L27 discriminant scale.** `HasseBound` does not imply
+  `HurwitzDiscriminantScale`; near the Hasse endpoints the Hurwitz class number
+  can be much smaller than `κ√p`. `RandomizedL27Scale` proves the countermodel
+  and identifies the scale with the central-trace window.
+- **L27 raw Deuring–Waterhouse.** The classical identity is weighted by
+  `1/#Aut(E)`, not the raw curve count. `RandomizedL27Waterhouse` proves the
+  weighted form and shows the raw exact identity is false over odd
+  characteristic (`two_le_classAutOrder`).
+- **L4 faithful composition.** `FaithfulFormComposition` is false for odd `N`
+  (the form `[2,0,N]` has no form of leading coefficient `4`). The correct
+  Cox-corrected law is proved in `RandomizedL4Cox`.
+- **C3 general `N`.** The literal real C3 budget is false for large `N`
+  divisible by 3; the rough branch is proved in
+  `RandomizedConcreteC3Rough`.
+
+These are formalization/interface corrections, not claims that the manuscript’s
+sharper estimates are false. They are the main reasons the remaining endpoint is
+still conditional.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
