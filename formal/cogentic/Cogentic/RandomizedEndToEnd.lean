@@ -62,6 +62,7 @@ import Cogentic.RandomizedL34Stark
 import Cogentic.RandomizedL34ClassicalStark
 import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
+import Cogentic.RandomizedL34ChebotarevSides
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
@@ -353,6 +354,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL21_2Tent.L21_2TentInputs.toFourierInputs
 #print axioms Cogentic.RandomizedL21_2Abel.L21_2AbelInputs.toFourierInputs
 #print axioms Cogentic.RandomizedL34Sides.L34SidesCore.ratedLeaf
+#print axioms Cogentic.RandomizedL34ChebotarevSides.L34ChebotarevSidesInputs.ratedLeaf_slot
 #print axioms Cogentic.RandomizedL4SquaringSelection.squaringPrimitiveSelection_of_odd
 #print axioms Cogentic.RandomizedL4Cox.faithfulCompositionCox
 #print axioms Cogentic.RandomizedL4Bands.realized_fullSplitBand
