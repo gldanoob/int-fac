@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave37.serialized_assembled_balancedEnvelopeInfimum_from_wave37Inputs`:
+`RandomizedPaperEndpointWave39.serialized_assembled_balancedEnvelopeInfimum_from_wave39Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor37 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor39 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1292,6 +1292,21 @@ and `l18_4` are all absent.
 fields forced it), derives `half_le_beta0`/`beta0_le_half` as theorems and
 deletes both. The residual list drops to **22**; only `paperBeta0_ge_half`
 remains as the arithmetic side condition for Stark.
+
+
+### Wave 39: fixed `β₀`, derived range
+
+`RandomizedPaperEndpointWave39` combines Wave 37 (`β₀ = 1/2`, both half-line
+fields deleted) and Wave 38 (`range` derived from an explicit arithmetic
+bundle). The endpoint is
+`serialized_assembled_balancedEnvelopeInfimum_from_wave39Inputs` with **22**
+residual names:
+`zetaRH, localCount, hbuchstab, hparity, hurwitzClassNumber, siegelLower,
+hasse, waterhouseTrace, killMass, curveBudget, factorization, cheb,
+rangeArithmetic, l19, l20_2, l20_4, c1, c2, c3, c4, concrete, p1`.
+The range bundle carries the seven genuinely independent arithmetic atoms
+(`K_pos`, `K_le_one`, `C_ge_one`, `degree_pos`, `degree_le_discLog`,
+`discLog_ge_exp_one`, `T_eq`).
 
 ## What is not proved
 
