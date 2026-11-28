@@ -729,6 +729,14 @@ The still-unproved statements are therefore concentrated in:
   by construction and no field is structurally impossible. The remaining inputs
   are exactly the ten analytic leaf records plus C1–C4.
 
+- **Central bin obstruction.** `RandomizedL21_2CentralBin` constructs the honest
+  central schedule (`P^m = p`, additive width `√p/4`) and proves the products lie
+  in the literal window `(p−√p, p+√p)`. It then proves the L30 prime-supply
+  guard is **false** for every `K ≥ 0` in the `√p` window: the GRH prime-count
+  error is larger than the window width. Thus the central short-interval smooth
+  count cannot be obtained from the L30 insertion argument; it is the genuine
+  paper-level estimate that remains in L21.2.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
