@@ -1112,6 +1112,26 @@ is now exactly the Buchstab short-interval estimate plus the parity fraction.
   Euler product, its all-`s` meromorphic continuation, and the Abel/Dirichlet
   bridge for the beta value.
 
+
+- `RandomizedL30BuchstabProof` proves the exact Buchstab split and the
+  containment of the small-prime part in the `√y`-smooth central set, but also
+  proves the **negative** result that the Rankin upper bound is eventually
+  larger than `C p^{3/2} ρ(u)`, so it cannot control the small-prime part.
+  The residual is now exactly a short-interval upper bound
+  (`CentralSqrtSmoothUpper`) or directly the large-prime short-interval lower
+  bound; a positive-proportion sub-interval version is also reduced.
+- `RandomizedL34RangeArithmetic` derives `ChebotarevT6RangeInput` from the paper
+  choice `T = exp(C (log|Δ|)^2)`, and reduces the raw Wave-18/29 range fields to
+  explicit growth conditions (`degree ≤ log|Δ|`, `log|Δ| ≥ e`, constant margin).
+- `RandomizedL34EffectiveInhabitant` constructs an explicit
+  `L34EffectiveChebotarevInputs` with loss `(1/2)^{(n+2)^10}`; it shows the
+  faithful `Li` bracket fails at `cbr = 128` and is available at the proved
+  Stark constant `cbr = 1/16`.
+- `RandomizedL21BaseInhabitant` constructs a concrete `L21_2Inputs` (finite
+  measure Fourier gap, real smooth/bad cardinalities) and inhabits the L20.4
+  source leaf modulo `perronShift` (provable unconditionally from the reference
+  and strip bounds) and the central `ShortIntervalSmoothCountLower`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
