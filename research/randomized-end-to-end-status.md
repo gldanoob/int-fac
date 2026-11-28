@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave29.serialized_assembled_balancedEnvelopeInfimum_from_wave29Inputs`:
+`RandomizedPaperEndpointWave31.serialized_assembled_balancedEnvelopeInfimum_from_wave31Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor29 (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor31 (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1091,6 +1091,17 @@ c1, c2, c3, c4, concrete, p1
   it isolates `QuadraticFieldGap` (the integral basis/discriminant computation
   for `AdjoinRoot (X² + D)`) and proves the reduction to
   `FundamentalOrderFieldRealization`.
+
+
+### Wave 31: Buchstab and parity fields in the endpoint
+
+`RandomizedPaperEndpointWave31` replaces the single L30 analytic field
+`YounisOddPaperSharpIntervalCount c` by the two explicit fields derived from
+the Dickman/Buchstab decomposition: `BuchstabLargePrimeShortIntervalLower c`
+and `CentralOddHalfParity θ` (with `θ = 1/2` or `3/8`). The effective sharp
+count constant is `θ*c`, `AC_le` is adjusted accordingly, and the H.3 failure
+loss is unchanged. The record has 24 residual names; the L30 analytic content
+is now exactly the Buchstab short-interval estimate plus the parity fraction.
 
 ## What is not proved
 
