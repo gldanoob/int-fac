@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave32.serialized_assembled_balancedEnvelopeInfimum_from_wave32Inputs`:
+`RandomizedPaperEndpointWave33.serialized_assembled_balancedEnvelopeInfimum_from_wave33Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor32 K (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor33 K (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1220,6 +1220,17 @@ field, placeholder `liX`/`liBetaY`) is recorded.
 names; in particular there is no `zeroFree` and no generic `short_interval`.
 The endpoint is
 `serialized_assembled_balancedEnvelopeInfimum_from_wave32Inputs`.
+
+
+### Wave 33: Stark and zero-free derived
+
+`RandomizedPaperEndpointWave33` extends the Wave-32 record over
+`Wave33L34Inputs`, which carries the faithful all-zeros strip, a genuine zero
+sequence with `Re < 1`, and the Wave-28 arithmetic fields, while `Stark` and
+the sequence-indexed `zeroFree` are **derived** rather than stored. The
+endpoint remains `K`- and `E`-generic. `D = 3` and `D = 4` class-number
+formulas are now unconditional (only the isolated Kronecker values
+`π/(3√3)` and `π/4` remain).
 
 ## What is not proved
 
