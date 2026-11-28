@@ -1132,6 +1132,42 @@ is now exactly the Buchstab short-interval estimate plus the parity fraction.
   source leaf modulo `perronShift` (provable unconditionally from the reference
   and strip bounds) and the central `ShortIntervalSmoothCountLower`.
 
+
+### Wave 32: parallel reductions (Gaussian, quadratic fields, Buchstab, range, inhabitants)
+
+- `RandomizedL27GaussianFactor`: `χ_{-4}`, local factors, `ζ_{ℚ(i)} = ζ·L(χ_{-4})`
+  on `Re s > 1`, residue `π/4`; residuals are the Dedekind Euler product,
+  continuation and beta value.
+- `RandomizedL27QuadraticField`: for squarefree `D>0`, the full ring of
+  integers (both mod-4 cases), discriminant `-4D`/`-D`, signature `(0,1)`,
+  regulator `1`; `QuadraticFieldGap ↔ QuadraticArithmeticInput` (only the
+  class-number/torsion-order identifications remain).
+- `RandomizedL27HurwitzArithmetic`: `OrderConductorCover` proved
+  unconditionally, plus the conductor-product normalization/geometric bound,
+  Euler's `φ(f)/f` product, the Hurwitz splitting, and the assembly of
+  `HurwitzClassNumberFormula`.
+- `RandomizedL27WaterhouseSmall`: the weighted Deuring/Waterhouse identity is
+  verified for `p=3` with explicit weighted/Hurwitz values.
+- `RandomizedL30BuchstabProof`: exact Buchstab split and small-prime
+  containment; proves the Rankin upper bound is eventually *larger* than
+  `C p^{3/2} ρ(u)`, so it cannot control the small-prime part. The residual is
+  now a short-interval upper bound (`CentralSqrtSmoothUpper`) or the large-prime
+  lower bound.
+- `RandomizedL34RangeArithmetic`: `ChebotarevT6RangeInput` from
+  `T = exp(C(log|Δ|)^2)`.
+- `RandomizedL34EffectiveInhabitant`: explicit L34 inhabitant; faithful `Li`
+  bracket fails at `cbr=128`, available at `cbr=1/16`.
+- `RandomizedL21BaseInhabitant`: concrete `L21_2Inputs`; L20.4 source leaf
+  inhabited modulo the Perron shift (provable) and the central count.
+- `RandomizedC3C4Concrete`: C3 holds for both concrete epochs; C4 fails for the
+  C1-correct root-search epoch at every fixed ceiling, so C1+C4 cannot be
+  satisfied by a free/cheap epoch.
+- `RandomizedWave29Inhabitation`: the non-analytic part of
+  `PaperResidualFor29` is explicitly inhabited at the repaired epoch; the exact
+  residual is eight leaves (`l18_4, l21, l27_data, l27_finish, l30, l34, p1,
+  c4`), and the fake `p=4` L30 witness is proved not to satisfy
+  `PaperDensityGrowth`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
