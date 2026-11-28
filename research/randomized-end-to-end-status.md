@@ -623,6 +623,41 @@ The still-unproved statements are therefore concentrated in:
 5. the subexponential prepass success/cost (ECM/genus-two);
 6. the L4 band bit budget.
 
+### Wave 15-16: further discharges and two interface corrections
+
+- **Wave 15 endpoint** (`RandomizedPaperEndpointWave15`): the L4 leaf is the
+  proved bit-budget realization, the L27 leaf is `L27StageOneFinishInputs`, the
+  L34 leaf is `L34ChebotarevSidesInputs`, C5 is built by `c5FullOfCount`, and
+  the L19.6 thin slot comes from `ThinLatticeData`.
+- **L21.2 reference Perron bound is unconditional**
+  (`RandomizedL21_2ReferenceBound.referencePerronBound`): the library kernel
+  bound `GlobalTheory.PerronPsi.kernel_bound` is uniform in `T`, so the
+  `T ≤ u` side condition is removable. This closes one previously listed input.
+- **`StripZetaBound` was false as stated** (`RandomizedL21_2StripBound`): it
+  quantifies over `Re s = 1 + ε`, where `ζ'/ζ` has the pole. The correct
+  pole-free statement `StripZetaBoundOffPole` is proved unconditionally under
+  `RiemannZetaZerosOnLine` with an explicit constant `stripK`, and recomposed
+  into `ContourRemainderBound`/`PerronShiftRemainder`.
+- **Wave 14 L30 vacuity repair**: the fixed-density form
+  `c p^{3/2} ≤ centralOddSmoothCount` together with `A B ≥ 4` and `A C ≤ c`
+  (and the global lower/upper sandwich `B ≤ C`) is contradictory. The Wave 14/15
+  records now use the paper-scale `YounisOddPaperShortCount` with the
+  `exp (-(1+ε) t_p)` factor, which is the actual manuscript statement.
+- **L4 bit budget** (`RandomizedL4BitBudget`): the paper private budget
+  `⌊(n-1)/2⌋ - 2` is positive, `(2^bits)^2 ≤ 2N`, the full split band is
+  realized under the budget, and `unrealizedTuples` has cardinality zero.
+- **L18.4 cell/numerator and thin lattice counts**
+  (`RandomizedL18_4CellFinish`, `RandomizedL18_4ThinFinish`): the cell prime
+  supply and pattern progression error are reduced to explicit finite sums; the
+  thin/small-determinant fractions are genuine normalized counts.
+- **C3 composite-`N` prepass accounting** (`RandomizedConcreteC3Prepass`): the
+  rough branch uses `realBudget`, the small-prime branch a nonzero prepass TV
+  charge, giving an all-`N` filtered `C3Inputs` and `exists_prepassC3Inputs`.
+- **L19.4 Poisson/energy and L19.6 thin** (`RandomizedL19PoissonEnergy`,
+  `RandomizedL19ThinWiring`): explicit finite mode/mass data with Cauchy–Schwarz
+  energy identities and genuine nonzero losses; the thin certificate is wired
+  into `L19FullCertificate.withThin`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
