@@ -173,6 +173,7 @@ import Cogentic.RandomizedL18_4LargeSieveInputs
 import Cogentic.RandomizedL18_4LargeSieveResidual
 import Cogentic.RandomizedL18_4SieveFinish
 import Cogentic.RandomizedL18_4MassGRH
+import Cogentic.RandomizedL18_4EnergyGRH
 import Cogentic.RandomizedL18_4EnergyBudget
 import Cogentic.RandomizedL18_4ConvolutionEnergy
 import Cogentic.RandomizedL18_4LatticeCount
@@ -435,6 +436,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL18_4.L18_4Certificate.toSubexpLeafWithLargeSieve
 #print axioms Cogentic.RandomizedL18_4.primePatternProgressionBound_of_criticalLine
 #print axioms Cogentic.RandomizedL18_4.MassGRHData.error_le
+#print axioms Cogentic.RandomizedL18_4.energyResidualBudget_of_primeBinMellinEnvelope
+#print axioms Cogentic.RandomizedL18_4.EnergyResidualGRHData.large_sieve_with_nonzero_error
 #print axioms Cogentic.RandomizedL27Hurwitz.L27HurwitzInputs.hurwitzClassLower
 #print axioms Cogentic.RandomizedL27Scale.hurwitzDiscriminantScale_iff_centralTraceWindow
 #print axioms Cogentic.RandomizedL27Window.centralTraceWindow_paperSmooth

@@ -896,6 +896,12 @@ structural L21/L19/L20.2/P1/Cantor data already discharged.
   the equivalent squared inequality `(κ/c)² ≤ θ`. `CurveBudget` alone does not
   bound `κ`.
 
+- **L18.4 energy residual from GRH.** `RandomizedL18_4EnergyGRH` proves the
+  energy residual from the nonprincipal prime-bin Mellin estimate of
+  `DirichletLZerosOnLine` and the numerator support from the cell count, with
+  strict positivity and a genuine nonzero error witness; it assembles
+  `LargeSieveFinishData`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
