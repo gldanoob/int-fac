@@ -117,6 +117,7 @@ import Cogentic.RandomizedL27GcdModel
 import Cogentic.RandomizedL27KillLaw
 import Cogentic.RandomizedL27StageOneFinish
 import Cogentic.RandomizedL27HurwitzAssembly
+import Cogentic.RandomizedL27BudgetArithmetic
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
@@ -387,6 +388,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27KillLaw.L27KillLawInputs.toStageOneInputs
 #print axioms Cogentic.RandomizedL27StageOneFinish.L27StageOneFinishInputs.reduction
 #print axioms Cogentic.RandomizedL27HurwitzAssembly.L27HurwitzAssemblyInputs.reduction_of_assembly
+#print axioms Cogentic.RandomizedL27BudgetArithmetic.paperCurveBudget
+#print axioms Cogentic.RandomizedL27BudgetArithmetic.L27BudgetArithmeticInputs.reduction
 #print axioms Cogentic.RandomizedL34ClassicalStark.StarkExceptionalZeroInput.toStarkClassicalInput
 #print axioms Cogentic.RandomizedL27StageOne.L27StageOneInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL27GcdModel.L27GCDModelInputs.toStageOneInputs
