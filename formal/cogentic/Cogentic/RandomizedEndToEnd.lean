@@ -84,7 +84,10 @@ import Cogentic.RandomizedL21_2Vertical
 import Cogentic.RandomizedL21_2LineBound
 import Cogentic.RandomizedL21_2Remainder
 import Cogentic.RandomizedL21_2PaperLocal
+import Cogentic.RandomizedL21_2ShortIntervalTransfer
 import Cogentic.RandomizedL21_2LeafAssembly
+import Cogentic.RandomizedL21_2StripBound
+import Cogentic.RandomizedL21_2ReferenceBound
 import Cogentic.RandomizedL21_2Tent
 import Cogentic.RandomizedL21_2Abel
 import Cogentic.RandomizedL27_1
