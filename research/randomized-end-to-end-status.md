@@ -1330,6 +1330,16 @@ instance at `p = 13` together with `¬ CentralOddHalfParity (1/2)` there.
 A Wave-41 agent is replacing the remaining `hasse` field by `HasseSupport` in
 the record.
 
+
+- `RandomizedL34ChebReduction` exposes that the Wave-39 `cheb` field lives over
+  free `count`/`liX`/`liBeta0`: at the canonical `count = mainOf liX liBeta0`
+  it is exactly `0 < C ∧ 0 < cZ` and carries no counting content. The
+  `Wave39L34CanonicalInputs`/`Wave39L34EffectiveInputs` variants remove
+  `count`/`cheb` and derive the residual; the genuine effective Chebotarev
+  estimate on the real cumulative count remains the missing analytic input.
+  The error/degree log budgets are proved independent of the canonical choice
+  (counterexamples with `F = exp 1000`).
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
