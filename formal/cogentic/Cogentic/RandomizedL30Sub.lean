@@ -267,8 +267,8 @@ theorem factorTreeNodes_of_leafBudget {trees : ℕ → FactorTree}
     (hleaves : LeavesWithin trees leaves)
     (hbudget : ∀ n, leaves n ≤ n) :
     Cogentic.RandomizedL30.FactorTreeNodes nodes := by
-  change ∀ n, nodes n ≤ 2 * n
-  intro n
+  change ∀ n, 1 ≤ n → nodes n ≤ 2 * n
+  intro n _
   rw [hnodes n]
   exact (FactorTree.nodeCount_le_two_mul_leafCount (trees n)).trans
     (Nat.mul_le_mul_left 2 ((hleaves n).trans (hbudget n)))
@@ -355,7 +355,7 @@ theorem curve_trial_budget (n : ℕ) :
 
 /-- **KB H.3's failure bound.**  The union bound, the Chernoff step, the trial
 cap, and the `2 n` node bound give `Pr [FAIL] ≤ 2 n exp (-64 L_c)`. -/
-theorem failure_le_two_n_exp (n : ℕ) :
+theorem failure_le_two_n_exp (n : ℕ) (hn : 1 ≤ n) :
     F.failure n ≤ 2 * (n : ℝ) * exp (-(64 * F.Lc n)) := by
   have hcher := F.failure_le_chernoff n
   have hpR := F.curve_trial_budget n
@@ -363,7 +363,7 @@ theorem failure_le_two_n_exp (n : ℕ) :
       exp (-(F.pTrial n * (F.Rcurve n : ℝ))) ≤ exp (-(64 * F.Lc n)) :=
     exp_le_exp.mpr (by linarith only [hpR])
   have hnodes : (F.nodes n : ℝ) ≤ 2 * (n : ℝ) := by
-    exact_mod_cast F.factor_tree_nodes n
+    exact_mod_cast F.factor_tree_nodes n hn
   calc
     F.failure n ≤
         (F.nodes n : ℝ) * exp (-(F.pTrial n * (F.Rcurve n : ℝ))) := hcher
@@ -386,7 +386,7 @@ theorem loss_le_exp_neg (B : ℝ) (hB : 0 < B) :
     ∀ᶠ n : ℕ in atTop, F.loss n ≤ exp (-B * scale n) := by
   filter_upwards [F.confidence_dominates B hB, eventually_ge_atTop (1 : ℕ)]
     with n hconf hn
-  exact (F.failure_le_two_n_exp n).trans
+  exact (F.failure_le_two_n_exp n hn).trans
     (two_n_mul_exp_le_exp hB hn hconf)
 
 /-- The manuscript's `D^{-B}` statement for the L30 failure. -/

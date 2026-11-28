@@ -116,7 +116,7 @@ def FailureUnionBound
 
 /-- **KB H.3, factor-tree size.**  A compressed factor tree has fewer than
 `2 n` nodes. -/
-def FactorTreeNodes (nodes : ℕ → ℕ) : Prop := ∀ n, nodes n ≤ 2 * n
+def FactorTreeNodes (nodes : ℕ → ℕ) : Prop := ∀ n, 1 ≤ n → nodes n ≤ 2 * n
 
 /-! ## The decomposed L30 inputs -/
 
@@ -310,7 +310,7 @@ theorem pTrial_mul_Rcurve_ge (n : ℕ) :
 
 /-- **H.3's failure bound.**  The union bound, the Chernoff step, the trial cap,
 and the `2 n` node bound give `Pr [FAIL] ≤ 2 n exp (-64 L_c)`. -/
-theorem failure_le_two_n_exp (n : ℕ) :
+theorem failure_le_two_n_exp (n : ℕ) (hn : 1 ≤ n) :
     I.failure n ≤ 2 * (n : ℝ) * exp (-(64 * I.Lc n)) := by
   have hcher := I.failure_le_chernoff n
   have hpR := I.pTrial_mul_Rcurve_ge n
@@ -318,7 +318,7 @@ theorem failure_le_two_n_exp (n : ℕ) :
       exp (-(I.pTrial n * (I.Rcurve n : ℝ))) ≤ exp (-(64 * I.Lc n)) :=
     exp_le_exp.mpr (by linarith only [hpR])
   have hnodes : (I.nodes n : ℝ) ≤ 2 * (n : ℝ) := by
-    exact_mod_cast I.factor_tree_nodes n
+    exact_mod_cast I.factor_tree_nodes n hn
   calc
     I.failure n ≤
         (I.nodes n : ℝ) * exp (-(I.pTrial n * (I.Rcurve n : ℝ))) := hcher
@@ -327,9 +327,9 @@ theorem failure_le_two_n_exp (n : ℕ) :
     _ = 2 * (n : ℝ) * exp (-(64 * I.Lc n)) := by ring
 
 /-- **KB Proposition H.3, FAIL bound** (the form used by the ledger). -/
-theorem h3_failure_bound (n : ℕ) :
+theorem h3_failure_bound (n : ℕ) (hn : 1 ≤ n) :
     I.failure n ≤ 2 * (n : ℝ) * exp (-(64 * I.Lc n)) :=
-  I.failure_le_two_n_exp n
+  I.failure_le_two_n_exp n hn
 
 /-- **KB Proposition H.3, H.5 cost bound** on one bounded call. -/
 theorem h3_cost_bound (n : ℕ) :
@@ -356,7 +356,7 @@ theorem loss_le_exp_neg (B : ℝ) (hB : 0 < B) :
     ∀ᶠ n : ℕ in atTop, I.loss n ≤ exp (-B * scale n) := by
   filter_upwards [I.confidence_dominates B hB,
     eventually_ge_atTop (1 : ℕ)] with n hconf hn
-  have hmain := I.failure_le_two_n_exp n
+  have hmain := I.failure_le_two_n_exp n hn
   have hn1 : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
   have hnpos : (0 : ℝ) < 2 * (n : ℝ) := by nlinarith only [hn1]
   calc

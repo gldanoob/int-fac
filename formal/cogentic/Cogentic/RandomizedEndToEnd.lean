@@ -32,6 +32,7 @@ import Cogentic.RandomizedL20_2PaperMass
 import Cogentic.RandomizedL20_2PaperSmooth
 import Cogentic.RandomizedL20_2ScalarWidth
 import Cogentic.RandomizedL20_2ConcentrationLeaf
+import Cogentic.RandomizedL20_2SourceWitness
 import Cogentic.RandomizedL20_2CoordinateEnergy
 import Cogentic.RandomizedL20_2Decay
 import Cogentic.RandomizedL20_2DecayNonempty
@@ -92,6 +93,7 @@ import Cogentic.RandomizedL21_2LeafAssembly
 import Cogentic.RandomizedL21_2StripBound
 import Cogentic.RandomizedL21_2ReferenceBound
 import Cogentic.RandomizedL21_2Tent
+import Cogentic.RandomizedL21_2TentWitness
 import Cogentic.RandomizedL21_2Abel
 import Cogentic.RandomizedL27_1
 import Cogentic.RandomizedL27_1Sub
@@ -363,6 +365,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27Fiber.curveJ_image_card_le
 #print axioms Cogentic.RandomizedL20_2PaperSmooth.paperSmoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2ConcentrationLeaf.SaddleConcentrationSource.toPaperLeaf
+#print axioms Cogentic.RandomizedL20_2SourceWitness.source_loss_pos
+#print axioms Cogentic.RandomizedL20_2SourceWitness.source_paper
 #print axioms Cogentic.RandomizedL20_4LeafAssembly.top_subexp_of_paperComparison
 #print axioms Cogentic.RandomizedL20_4TopComparison.subexpLoss_via_paperTopComparison
 #print axioms Cogentic.RandomizedL27Weighted.reduction_of_weighted
