@@ -143,6 +143,7 @@ import Cogentic.RandomizedC5HalfMass
 import Cogentic.RandomizedL18_4
 import Cogentic.RandomizedL18_4CellCount
 import Cogentic.RandomizedL18_4CellData
+import Cogentic.RandomizedL18_4CellFinish
 import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4Mass
 import Cogentic.RandomizedL18_4ThinFinish
@@ -391,6 +392,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL4Bands.realized_fullSplitBand
 #print axioms Cogentic.RandomizedL4BitBudget.realized_fullSplitBand_of_bitBudget
 #print axioms Cogentic.RandomizedL18_4ThinFinish.ThinLatticeData.toLatticeThinInputs
+#print axioms Cogentic.RandomizedL18_4.L18_4CellFinish.cell_numerator_count
+#print axioms Cogentic.RandomizedL18_4.L18_4CellFinish.toCertificate
 #print axioms Cogentic.RandomizedL27Hurwitz.L27HurwitzInputs.hurwitzClassLower
 #print axioms Cogentic.RandomizedL27Scale.hurwitzDiscriminantScale_iff_centralTraceWindow
 #print axioms Cogentic.RandomizedL27Window.centralTraceWindow_paperSmooth
