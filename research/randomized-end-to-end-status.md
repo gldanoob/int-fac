@@ -871,10 +871,15 @@ insensitive at zeros (`logDeriv_eq_zero_of_zeta_eq_zero`), so `ZetaLineZeroFree`
 is genuinely separate from the line estimate.
 
 Finally, `RandomizedL30SharpRankin` reduces the sharp upper density to the
-Euler-product saddle input `RankinEulerSaddleUpper` and proves the sharp
-estimate with constant `C = 1` at the exact exponent `-u log u`; the
-`(1+o(1))` saddle error is absorbed by the `-u log log u + u` slack. The
-`(1-δ)` lossy variant is also isolated, with the exact matching relative chain.
+Euler-product saddle and proves the sharp estimate with constant `C = 1` at the
+exact exponent `-u log u`; the `(1+o(1))` saddle error is absorbed by the
+`-u log log u + u` slack. `RandomizedL30RankinEuler` notes that the all-tilt
+form `RankinEulerSaddleUpper` is **false** (the `α = 1 - 1/log Y` tilt leaves
+the Euler product at `e^A` while `log log Y → ∞`), and replaces it by the true
+optimal-saddle input `PrimeReciprocalSaddleUpper`
+(`∑_{q≤Y} q^{-α} ≤ C e^s/s`), from which the `C = 1` sharp upper bound follows
+with explicit constants `rankinPrimeConstant = 32`,
+`rankinEulerConstant = 128`.
 
 The audit also provides a smaller final interface:
 `PaperResidualModulo` and
