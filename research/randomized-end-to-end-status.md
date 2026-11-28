@@ -716,27 +716,45 @@ The still-unproved statements are therefore concentrated in:
    exactly the branch the randomized endpoint uses. The literal budget is false
    for large `N` divisible by 3 under the crude missing-root bound, but those
    inputs go through the small-prime prepass.
-2. **The analytic leaves.** L18.4 and L19.4–L19.6 are now decomposed into
-   explicit certificates and recomposed (`L18_4Full`, `L19Full`). The remaining
-   paper-level leaves are L20.2, L20.4, L21.2, L27.1, L30, L34, L4/L25/L36, and
-   P1, each with its own explicit sub-input structure. Their genuinely
-   paper-level sub-lemmas are not proved.
+2. **The analytic leaves.** L18.4 and L19.4–L19.6 are decomposed into
+   explicit certificates and recomposed (`L18_4Full`, `L19Full`,
+   `RandomizedL18_4CellFinish`, `RandomizedL18_4ThinFinish`,
+   `RandomizedL18_4SieveFinish`); L19.4/L19.6 have concrete finite witnesses
+   (`RandomizedL19PoissonEnergy`, `RandomizedL19ZeroModeConcrete`,
+   `RandomizedL19ThinWiring`). L20.2 is non-vacuous with a fully explicit
+   `SaddleConcentrationSource`, and its CRT/character budget is reduced to the
+   prime-bin width (`RandomizedL20_2CRTBudget`). L20.4 is reduced to the
+   additive G.12 comparison. L21.2 has an explicit tent/Fourier witness, the
+   reference Perron bound is unconditional, and the off-pole zeta strip bound is
+   proved under RH. L27 is reduced to the class-number formula, an `L(1,χ)`
+   lower bound, Hasse, and the weighted Deuring/Waterhouse model. L30 now has
+   the paper-scale bin count and eventual global lower from
+   `DirichletLZerosOnLine` (`RandomizedL30SmoothDensity`) and an explicit
+   non-vacuous count witness. L34 is reduced to the classical Dedekind region,
+   the zero-height bound, Stark, and Chebotarev. L4 is proved with the paper bit
+   budget. The remaining genuinely analytic inputs are therefore the classical
+   `L(1,χ)` lower bound, the zeta line lower bound/vertical tail, the
+   short-interval smooth count at the paper cutoff, the Dedekind zero-free
+   region, Stark, Chebotarev, and the subexponential prepass.
 3. **P1.** Trial division to `roughThreshold n = exp((log n)^{2/3})` has the
    correct splitting behaviour but cost `exp((log n)^{2/3})`, not
-   `exp(o(scale n))`. The rough endpoint keeps this as an explicit hypothesis.
-   This is the same gap as the blueprint's genus-two/ECM prepass.
+   `exp(o(scale n))`; `RandomizedP1Prepass` proves this gap explicitly and
+   isolates `SubexpPrepassInput`, which is inhabited with a genuine positive
+   miss and cost. This is the same gap as the blueprint's genus-two/ECM prepass.
 4. **The residual lower bound.** `OracleRootExtractionLowerBound` is stated but
    not proved and not shown inhabited. It is the honest missing assumption
    behind a non-vacuous costed endpoint.
 5. **The full manuscript bound.** Consequently, the numerical
    `L_N[1/3, 1.9839824…]` claim is not a theorem of this branch. What is a
    theorem is the reduction from the named ledger to the serialized driver, the
-   wave-2 paper-assumption endpoint, the wave-7 discharged endpoint, and the
-   wave-9 fully discharged endpoint
-   `serialized_assembled_balancedEnvelopeInfimum_from_fullyDischargedInputs`,
-   whose remaining inputs are the eight unreduced paper leaves, C1–C4, the full
-   L18.4/L19/C5 certificates, and the concrete adapters. The real C3 budget is
-   certified for prime moduli; composite `N` needs a sharper TV accounting.
+   wave-2/7/9 endpoints, the wave-13/14/15/16/17 endpoints, and the strongest
+   current one,
+   `serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`, whose
+   remaining inputs are the analytic inputs listed in item 2 plus C1–C4, the
+   L18.4/L19/C5 certificates and the concrete adapters. The real C3 budget is
+   certified on the rough branch, and `RandomizedConcreteC3Prepass` gives an
+   all-`N` prepass-filtered budget; the literal all-`N` statement remains false
+   under the crude missing-root bound.
 
 ## Reading order
 
