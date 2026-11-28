@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave31.serialized_assembled_balancedEnvelopeInfimum_from_wave31Inputs`:
+`RandomizedPaperEndpointWave32.serialized_assembled_balancedEnvelopeInfimum_from_wave32Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor31 (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor32 K (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1210,6 +1210,16 @@ large-sieve and thin data are constructed by `RandomizedL18_4Inhabitant`.
 `1 ≤ n`) and `SubexpPrepassInput` are all inhabited; no further `n = 0`
 structural repair is needed. The L34 witness quality caveat (vacuous zero-free
 field, placeholder `liX`/`liBetaY`) is recorded.
+
+
+### Wave 32: faithful L34 + Buchstab + RH-only L21
+
+`RandomizedPaperEndpointWave32` combines Wave 31 (Buchstab + parity), Wave 30
+(faithful Dedekind strip with a nontrivial-zero sequence), and Wave 27
+(RH-only L21) in one `K`- and `E`-generic record. The residual list is 26
+names; in particular there is no `zeroFree` and no generic `short_interval`.
+The endpoint is
+`serialized_assembled_balancedEnvelopeInfimum_from_wave32Inputs`.
 
 ## What is not proved
 
