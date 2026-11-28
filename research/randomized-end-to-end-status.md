@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave33.serialized_assembled_balancedEnvelopeInfimum_from_wave33Inputs`:
+`RandomizedPaperEndpointWave34.serialized_assembled_balancedEnvelopeInfimum_from_wave34Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor33 K (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor34 line K (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1252,6 +1252,16 @@ formulas are now unconditional (only the isolated Kronecker values
   endpoint `serialized_assembled_balancedEnvelopeInfimum_from_grhCertificate`
   removes the `l18_4` hypothesis from the Wave-31 record. A Wave-34 agent is
   combining this with Wave 33.
+
+
+### Wave 34: the L18.4 hypothesis is gone
+
+`RandomizedPaperEndpointWave34` combines the Wave-33 record with the
+unconditional GRH certificate `paperCertificate line`: the `l18_4` field is
+removed and the ledger uses the constructed certificate (loss `thin = 1/R > 0`).
+The endpoint is `serialized_assembled_balancedEnvelopeInfimum_from_wave34Inputs`
+(K- and E-generic). The residual list drops to **25** names; `l18_4`,
+`zeroFree`, `stark`, and the generic `short_interval` are all absent.
 
 ## What is not proved
 
