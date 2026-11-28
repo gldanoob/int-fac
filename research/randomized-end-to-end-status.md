@@ -737,6 +737,26 @@ The still-unproved statements are therefore concentrated in:
   count cannot be obtained from the L30 insertion argument; it is the genuine
   paper-level estimate that remains in L21.2.
 
+- **Zeta line input.** `RandomizedL21_2LineMinimal` identifies the exact
+  residual hypothesis: `ZetaLineZeroFree X` (no zero of `ζ` on
+  `Re s = 2/3`, `|Im s| ≤ 2X³`). It proves this is equivalent to the existence
+  of a positive lower bound `b n ≤ ‖ζ(2/3+iu)‖`, relates it to the range-local
+  `O(log²)` log-derivative bound and to `ZetaLineEstimate`, and shows it follows
+  from `RiemannZetaZerosOnLine`. A zero on `Re s = 2/3` is not excluded by the
+  classical region, so this is a genuine input.
+- **Siegel `L(1,χ)`.** `RandomizedL27LOneSiegel` proves that the classical
+  Siegel `ε`-loss bound and the Brauer–Siegel `c√D/log D` bound are *strictly
+  insufficient* for the constant `κ` (explicit countermodels), and isolates the
+  smallest sufficient input `SiegelLOneLower`, equivalent to
+  `NoExceptionalLOneSequence` under class-number positivity and implied by the
+  Landau–Page alternative. It rebuilds `L27HurwitzAssemblyInputs` from it.
+- **L30 upper density.** `RandomizedL30UpperDensity` isolates
+  `PaperScaleSmoothUpper` and proves the odd-density reduction from it, plus a
+  Rankin-based sufficient condition. It also proves a sharp negative result: the
+  genuine Dickman bound `ρ(u) ≤ exp(-(1-δ)u log u)` is *weaker* than the
+  paper-scale upper density at this cutoff, because `u log u ≤ t_p/(1+ε)`, so
+  the paper-scale upper bound is an additional estimate, not a consequence.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
