@@ -1048,6 +1048,25 @@ l18_4, l19, l20_2, l20_4,
 c1, c2, c3, c4, concrete, p1
 ```
 
+### Wave 30: the central density and class-number residuals
+
+- `RandomizedL30CentralCount` proves the L30 insertion guard is **false for
+  every `K`** at the central scale (the per-bin width is `< 1` while the guard's
+  left side is `≥ 1`), so the GRH prime-bin route cannot produce the central
+  count. It reduces `YounisOddPaperSharpIntervalCount` exactly (up to the forced
+  factor `4`) to the sharp local smooth-density count
+  `SharpCentralOddSmoothCount`. The residual is therefore a Dickman/Buchstab
+  short-interval density theorem, not a prime-supply estimate.
+- `RandomizedL27ClassNumberFormula` derives the Dirichlet class-number formula
+  for maximal imaginary quadratic orders from Mathlib's Dedekind-zeta residue
+  (leaving `FundamentalOrderFieldRealization` and
+  `DedekindZetaResidueIsQuadraticL` as the exact geometric/analytic residuals)
+  and isolates the non-maximal order-conductor formula and the Hurwitz
+  decomposition `H(D) = Σ_{g|f} 2h(D₀g²)/w(D₀g²)`. It proves the unweighted
+  `DirichletClassNumberFormula` is the wrong statement on non-maximal orders
+  (it would force the conductor product to be `1`) and keeps Siegel's
+  `L(1,χ)` input strictly separate.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
