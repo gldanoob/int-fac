@@ -67,6 +67,7 @@ import Cogentic.RandomizedL34ClassicalStark
 import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
+import Cogentic.RandomizedL34LogIntegral
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5HitMassFinish
 import Cogentic.RandomizedC5GoodIff
@@ -120,6 +121,7 @@ import Cogentic.RandomizedL4Faithful
 import Cogentic.RandomizedL4SquaringSelection
 import Cogentic.RandomizedL4Cox
 import Cogentic.RandomizedL4Bands
+import Cogentic.RandomizedL4BitBudget
 import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedConcreteC3Real
 import Cogentic.RandomizedConcreteC3Budget
@@ -137,6 +139,7 @@ import Cogentic.RandomizedL18_4CellCount
 import Cogentic.RandomizedL18_4CellData
 import Cogentic.RandomizedL18_4Numerator
 import Cogentic.RandomizedL18_4Mass
+import Cogentic.RandomizedL18_4ThinFinish
 import Cogentic.RandomizedL18_4Thin
 import Cogentic.RandomizedL18_4ThinAggregate
 import Cogentic.RandomizedL18_4Full
@@ -374,9 +377,12 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL21_2Abel.L21_2AbelInputs.toFourierInputs
 #print axioms Cogentic.RandomizedL34Sides.L34SidesCore.ratedLeaf
 #print axioms Cogentic.RandomizedL34ChebotarevSides.L34ChebotarevSidesInputs.ratedLeaf_slot
+#print axioms Cogentic.RandomizedL34LogIntegral.logIntegralBracket_paper
 #print axioms Cogentic.RandomizedL4SquaringSelection.squaringPrimitiveSelection_of_odd
 #print axioms Cogentic.RandomizedL4Cox.faithfulCompositionCox
 #print axioms Cogentic.RandomizedL4Bands.realized_fullSplitBand
+#print axioms Cogentic.RandomizedL4BitBudget.realized_fullSplitBand_of_bitBudget
+#print axioms Cogentic.RandomizedL18_4ThinFinish.ThinLatticeData.toLatticeThinInputs
 #print axioms Cogentic.RandomizedL27Hurwitz.L27HurwitzInputs.hurwitzClassLower
 #print axioms Cogentic.RandomizedL27Scale.hurwitzDiscriminantScale_iff_centralTraceWindow
 #print axioms Cogentic.RandomizedL27Window.centralTraceWindow_paperSmooth
