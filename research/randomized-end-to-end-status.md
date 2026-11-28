@@ -704,6 +704,26 @@ The still-unproved statements are therefore concentrated in:
   made the Wave 15/16/17 `loss_le` adapter unsatisfiable (a constant `3` versus
   a ledger total that is eventually `≤ 1`).
 
+- **Perron and L21.2.** `RandomizedL21_2ReferenceBound` proves the truncated
+  Perron reference bound with an **absolute** constant `2C+2`;
+  `RandomizedL21_2TailBound` proves the vertical contour shift
+  `X³ → X³+1` unconditionally under RH with `tailK = 28 wideC + 3`;
+  `RandomizedL21_2StripBound` proves the pole-free strip bound; and
+  `RandomizedL21_2LocalFromGRH` shows the L30 global bin strip is centred at
+  `p²/4` and therefore **cannot** supply the L21.2 central window `(p−√p,p+√p)`.
+  The L21.2 local count is therefore genuinely the paper's central-density
+  construction, not the global smooth count.
+- **L19 common scale.** `RandomizedL19ConcreteAssembly` inhabits the full
+  `Wave15L19Inputs` at `commonW n = concreteW n + 2`. It proves that no
+  `PoissonQuotientInputs` can live at `concreteW` (at `n = 0`, `e^{W 0} < 3`
+  admits only one prime mark), so the zero-mode certificate is re-presented at
+  the common scale with the same ellipse geometry.
+- **Wave 17 non-vacuity.** `RandomizedWave17Audit` proves
+  `nonempty_wave17Inputs_of_remaining`: the `Wave17Inputs` record is inhabited
+  by the good one-point epoch and small C5 budgets, so `loss_le` is discharged
+  by construction and no field is structurally impossible. The remaining inputs
+  are exactly the ten analytic leaf records plus C1–C4.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
