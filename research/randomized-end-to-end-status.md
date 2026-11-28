@@ -1103,6 +1103,15 @@ count constant is `θ*c`, `AC_le` is adjusted accordingly, and the H.3 failure
 loss is unchanged. The record has 24 residual names; the L30 analytic content
 is now exactly the Buchstab short-interval estimate plus the parity fraction.
 
+
+- `RandomizedL27GaussianFactor` constructs the character `χ_{-4}` mod 4, proves
+  the local-factor identity `gaussianLocal = zetaLocal · chiLocal` at every
+  prime (ramified/split/inert), derives `ζ_{ℚ(i)}(s) = ζ(s)L(s,χ_{-4})` for
+  `Re s > 1` from the Dedekind-zeta Euler product, and computes the residue
+  `π/4` from `L(1,χ_{-4}) = π/4`. The exact residuals are the Dedekind-zeta
+  Euler product, its all-`s` meromorphic continuation, and the Abel/Dirichlet
+  bridge for the beta value.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
