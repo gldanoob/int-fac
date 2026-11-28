@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave39.serialized_assembled_balancedEnvelopeInfimum_from_wave39Inputs`:
+`RandomizedPaperEndpointWave40.serialized_assembled_balancedEnvelopeInfimum_from_wave40Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor39 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor40 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1307,6 +1307,28 @@ rangeArithmetic, l19, l20_2, l20_4, c1, c2, c3, c4, concrete, p1`.
 The range bundle carries the seven genuinely independent arithmetic atoms
 (`K_pos`, `K_le_one`, `C_ge_one`, `degree_pos`, `degree_le_discLog`,
 `discLog_ge_exp_one`, `T_eq`).
+
+
+### Wave 40: kill law and budget decomposed; full target green again
+
+The shared dependency cache was fully rebuilt and
+`make check-randomized-end-to-end` is green again: exit 0, 0 `sorryAx`,
+**9479 jobs**.
+
+`RandomizedL27KillBudgetFinish` replaces the `killMass` and `curveBudget`
+residuals: the kill law is derived from the scalar gcd cover
+(`scalarCovers_killMassLaw`) with pointKill `j ↦ gcd j M`, and the stage-one
+budgets come from the explicit budget arithmetic. `RandomizedL27Hasse` shows
+Mathlib has no Hasse bound, isolates `PointCountHasse`/`CurveOrderHasse`, and
+proves the L27.1 conclusions follow from the weaker `HasseSupport`
+(nonzero orders positive and bounded by `orderTop`), which the actual fiber
+model supplies without Hasse; the weakening is strict.
+`RandomizedL30Parity` proves the exact dilation identities
+(`centralOddSmoothCount = halfSmoothCount − quarterSmoothCount`), shows the
+global density route cannot give a fixed `θ`, and proves a genuine `θ = 1/4`
+instance at `p = 13` together with `¬ CentralOddHalfParity (1/2)` there.
+A Wave-41 agent is replacing the remaining `hasse` field by `HasseSupport` in
+the record.
 
 ## What is not proved
 
