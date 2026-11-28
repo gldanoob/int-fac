@@ -907,6 +907,27 @@ structural L21/L19/L20.2/P1/Cantor data already discharged.
   strict positivity and a genuine nonzero error witness; it assembles
   `LargeSieveFinishData`.
 
+### Wave 20: the L34-budget-refined endpoint
+
+`RandomizedPaperEndpointWave18L34` replaces the bundled `l34 :
+L34EffectiveChebotarevInputs` field by the raw Chebotarev parameters
+(`degree`, `discLog`, `T`, count/inert data, `cZ`, `cbr = 1/16`, the effective
+statement, zero-free/Stark/range data, the log-integral bracket, probe/class
+budgets). It derives
+
+- `F = absoluteFactorialFactor degree = (2·degree)!`,
+- both factorial log budgets from
+  `RandomizedL34FactorialBudgets.chebotarevErrorLogBudget_of_threshold` and
+  `degreeLossLogBudget_of_threshold`,
+- `T → ∞` from the scale-cubic condition,
+
+and proves `PaperResidualInputsL34 → PaperResidualInputs` plus
+`serialized_assembled_balancedEnvelopeInfimum_from_wave18L34Inputs`. The only
+added scalar condition is the uniform threshold
+`max (errorLogBudgetThreshold …) (degreeLossLogBudgetThreshold …) ≤ T n`, which
+is a growth condition on `T`, not the budgets themselves (the Stirling proof
+only gives them eventually).
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
