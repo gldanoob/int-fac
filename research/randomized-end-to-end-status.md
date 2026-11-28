@@ -798,9 +798,10 @@ groups are:
 - **L21.2**: the profile and its elementary parameters, the Fourier band bounds,
   the vertical tail, `ZetaLineZeroFree` plus the range-local log-derivative
   bound, and the central `ShortIntervalSmoothCountLower`;
-- **L30**: `PaperDensityGrowth`, the paper-scale smooth upper density, the
-  central short count, the eventual binomial lower bound, the Cantor cost data
-  and the failure data;
+- **L30**: `PaperDensityGrowth`, the *sharp* global upper density
+  `global/p² ≤ C exp(-u log u)` and the *sharp* central interval count at
+  `exp(-u log u)`, the eventual binomial lower bound, the Cantor cost data and
+  the failure data;
 - **L27**: class-number formula, `SiegelLOneLower`, Hasse, the weighted
   Deuring/Waterhouse model, the `j`-line fiber count, the central trace window,
   the kill-mass law and the budget arithmetic;
@@ -808,6 +809,41 @@ groups are:
   zero-height bound, and Stark;
 - **L18.4/L19/L20.2/L20.4**: the recomposed certificates and sources;
 - **prepass and control**: `SubexpPrepassInput` and C1–C4.
+
+### Wave 19: the L30 density normalization repair
+
+`RandomizedL30Normalization` proves that the previously used
+`GlobalOddUpperDensity C p (paperT p) (paperError ε)` (same `ε` on both the
+local and global side) is **false for every `C`**. The exact identity is
+
+```
+(1+ε)(u log u) = t_p - (log p / t_p)(log log log p + 2 log(1+ε) - 2 log 2),
+```
+
+so `u log u = t_p/(1+ε)(1-o(1))`, and `exp(-u log u)` is *larger* than
+`exp(-(1+ε)t_p)`. The file proves the falsity from the already-proved global
+lower bound at `ε/2`, and hence `PaperResidualInputs → False` for the old
+record.
+
+The repair (`RandomizedL30Sharp`, `RandomizedL30SharpWitness`,
+`RandomizedL30Normalization`, and edits to the Wave 13/14/18 records):
+
+- introduces `GlobalOddUpperDensitySharp` and
+  `PaperScaleSmoothUpperSharp` at the true exponent `u log u`, plus
+  `YounisOddPaperSharpIntervalCount`/`YounisOddPaperSharpCount`;
+- derives relative density through `paperRelative_of_sharpUpper` and the
+  central count through `paperCentralCount_of_sharpUpper(_grh)`, never through
+  the old `short count + same-ε upper` pair;
+- proves the corrected sharp fields are **not refuted** and constructs an
+  explicit nonempty `Wave14L30Counts` (`p = 4`, central count `1`, global
+  count `4`, all constants positive);
+- also proves `GlobalOddUpperDensityEps` (the `(1-ε)` weakening) is safe, and
+  `not_relative_of_epsUpper_and_paperLocal` shows it cannot be combined with the
+  paper local count at `(1+ε)t_p` — the sharp exponent must be used on both
+  sides.
+
+`PaperResidualInputs` now carries `l30SharpUpper` and `l30SharpCentral`; the
+old `l30PaperScaleUpper`/`l30CentralCount` fields are gone.
 
 ## What is not proved
 
