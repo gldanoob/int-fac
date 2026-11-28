@@ -845,6 +845,42 @@ The repair (`RandomizedL30Sharp`, `RandomizedL30SharpWitness`,
 `PaperResidualInputs` now carries `l30SharpUpper` and `l30SharpCentral`; the
 old `l30PaperScaleUpper`/`l30CentralCount` fields are gone.
 
+`RandomizedWave18Audit` gives the final field-by-field status of the 73-field
+record:
+
+| block | proved/inhabited | reduced | refutable |
+|---|---:|---:|---:|
+| GRH | 0 | 2 | 0 |
+| L21 structural | 19 | 0 | 0 |
+| L21 analytic | 0 | 4 | 0 |
+| L30 arithmetic/data | 17 | 0 | 0 |
+| L30 analytic (sharp) | 0 | 3 | 0 |
+| L27 | 2 | 16 | 0 |
+| L34 | 0 | 1 | 0 |
+| L18.4 / L19 / L20.2 / L20.4 | 2 | 2 | 0 |
+| P1 | 1 | 0 | 0 |
+| C1–C4 | 0 | 4 | 0 |
+| **total** | **41** | **32** | **0** |
+
+The audit proves the sharp L30 fields are not refutable (`l30SharpUpper_not_refutable`,
+`l30SharpCentral_not_refutable`), re-proves the old positive-error upper density
+refutable, and checks every unguarded positivity field at `n = 0`. It also
+proves the L30 central interval is disjoint from the L21.2 window
+(`centralOrderInterval_disjoint_shortInterval`) and that a `logDeriv` bound is
+insensitive at zeros (`logDeriv_eq_zero_of_zeta_eq_zero`), so `ZetaLineZeroFree`
+is genuinely separate from the line estimate.
+
+Finally, `RandomizedL30SharpRankin` reduces the sharp upper density to the
+Euler-product saddle input `RankinEulerSaddleUpper` and proves the sharp
+estimate with constant `C = 1` at the exact exponent `-u log u`; the
+`(1+o(1))` saddle error is absorbed by the `-u log log u + u` slack. The
+`(1-δ)` lossy variant is also isolated, with the exact matching relative chain.
+
+The audit also provides a smaller final interface:
+`PaperResidualModulo` and
+`serialized_assembled_balancedEnvelopeInfimum_from_moduloInputs`, with the
+structural L21/L19/L20.2/P1/Cantor data already discharged.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
