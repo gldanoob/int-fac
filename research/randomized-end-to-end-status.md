@@ -757,6 +757,15 @@ The still-unproved statements are therefore concentrated in:
   paper-scale upper density at this cutoff, because `u log u ≤ t_p/(1+ε)`, so
   the paper-scale upper bound is an additional estimate, not a consequence.
 
+- **Effective Chebotarev.** `RandomizedL34EffectiveChebotarev` states the
+  effective Chebotarev estimate as `EffectiveChebotarevStatement` with the
+  standard range condition `x ≥ exp(K (log|Δ|)²)`, proves it implies the L34
+  residual count slack, and reduces the error-negligibility conditions to two
+  explicit log budgets. It also proves those budgets are *not* consequences of
+  the standard statement: a factorial factor `F = e^{1000}` satisfies the
+  statement but violates both. The missing content is exactly an upper bound on
+  the factorial factor against the exponential gain.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
