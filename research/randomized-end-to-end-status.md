@@ -588,6 +588,41 @@ These are formalization/interface corrections, not claims that the manuscript’
 sharper estimates are false. They are the main reasons the remaining endpoint is
 still conditional.
 
+### Waves 13-14: leaf assembly and the remaining honest inputs
+
+Wave 13 replaces the opaque paper leaves with named, reduced certificates:
+
+| Module | What is now reduced |
+|---|---|
+| `RandomizedL20_2PaperSmooth`, `...PaperMass` | paper-regime smooth count/mass from the fixed-power saddle estimates; only `log 2 ≤ D log D` remains |
+| `RandomizedL20_2ConcentrationLeaf` | a real `ConcentrationLeaf` built from `SaddleConcentrationSource`, with the manuscript `a = 1/48` exponent |
+| `RandomizedL20_2ScalarWidth`, `...BandScale` | band width to the floor-free scalar `PaperBandFloorFreeCore` |
+| `RandomizedL20_4ChildLower`, `...PairAlt` | the false `IncomingRootComplement` is replaced by `ChildRootMassLower` and the disjunction event `g ∨ R`; both pair-event masses follow |
+| `RandomizedL20_4{EtaSource,BaseSource,RationalSource,Additive,Top}` | G.11 base/rational/eta sources and the additive G.12 comparison |
+| `RandomizedL20_4LeafAssembly` | a real `SubexpLeaf` from `L20_4SourcedLeafInputs`; the single remaining estimate is `PaperTopComparison` |
+| `RandomizedL21_2LineBound` | `VerticalLineBound` from the explicit `ZetaStripInput` (strip non-vanishing + line lower bound) via Borel-Carathéodory |
+| `RandomizedL21_2Remainder` | the exact `-ζ'/ζ` contour identity is proved from the rectangle residue theorem; `PerronShiftRemainder` follows from `ReferencePerronBound`/`ContourRemainderBound`/`VerticalTailBound` |
+| `RandomizedL21_2PaperLocal` | powers of two are proved insufficient in the growing regime; the residual is `ShortIntervalSmoothCountLower` |
+| `RandomizedL27Siegel`, `...ClassNumber` | Hurwitz/Siegel lower trace from the Dirichlet class-number formula plus the absence of an exceptional `L(1,χ)` sequence |
+| `RandomizedL27Waterhouse`, `...Weighted` | the classical weighted Deuring/Waterhouse identity as an explicit finite model count; orbit-stabiliser double count proved |
+| `RandomizedL27Fiber`, `...Window`, `...KillLaw` | the `j`-line fiber count, central trace window, and the exact weighted kill-mass law |
+| `RandomizedL30Interval`, `...ShortInterval`, `...GlobalLower` | the paper-scale short-interval/global counts from explicit prime-bin and binomial data, with a genuine positive witness count |
+| `RandomizedL34DedekindStrip`, `...ClassicalRegion` | Dedekind strip input from the classical height-dependent region plus the explicit height bound `log(|Im ρ|+2) ≤ log|Δ_E|` |
+| `RandomizedL34ClassicalStark`, `...Stark`, `...Range` | classical Stark exceptional zero at `1 - 1/(4F log Δ)` and the range/Chebotarev side arithmetic |
+| `RandomizedL4Cox`, `...Bands` | the non-coprime Cox composition and the split-prime band assembly |
+| `RandomizedP1Prepass` | subexponential prepass interface; trial division is proved *not* subexponential, making the ECM/genus-two gap explicit |
+| `RandomizedPaperEndpointWave13` | `Wave13Inputs → FullyDischargedInputs` and the serialized endpoint |
+
+The still-unproved statements are therefore concentrated in:
+
+1. a uniform lower bound `L(1,χ_D) ≥ l > 0` (Siegel's theorem), equivalently no
+   exceptional sequence;
+2. the classical zero-free region for Dedekind zeta plus the zero-height bound;
+3. smooth-number saddle/concentration and the paper short-interval counts;
+4. the truncated Perron reference bound in the `T ≫ u` regime;
+5. the subexponential prepass success/cost (ECM/genus-two);
+6. the L4 band bit budget.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
