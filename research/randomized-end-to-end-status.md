@@ -3,12 +3,17 @@
 Branch `explore/randomized-one-third`, base commit `0bcb1db`, Lean
 `leanprover/lean4:v4.33.1`. This note records what the end-to-end pass actually
 proved. The short version: the conditional assembly is kernel-checked and is now
-composed with an explicit analytic-input ledger and a paper-assumption endpoint,
-but the manuscript bound itself is **not** proved. The current
-`HardEpochAsymptoticBound` interface is vacuous as stated; wave 2 supplies a
-construction-level concrete S0–S9 epoch and restates the endpoint directly in
-terms of the paper's twelve analytic leaves, but those leaves, the concrete
-C3/C4 estimates, and the manuscript bound remain unproved.
+composed with an explicit analytic-input ledger, a paper-assumption endpoint,
+and a chain of strengthened endpoints `Wave13`–`Wave17`. The strongest current
+theorem is
+`RandomizedPaperEndpointWave17.serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`.
+Its hypothesis record is *inhabited* (`RandomizedWave17Audit`) modulo exactly the
+ten analytic leaf records and C1–C4, so it is not vacuous. The manuscript bound
+itself is still **not** proved unconditionally: the remaining inputs are the
+classical `L(1,χ)` lower bound, the zeta line lower bound, the central
+short-interval smooth count, the Dedekind zero-free region plus zero-height
+bound, Stark, Chebotarev, and the subexponential prepass. The interface history
+below records the vacuity repairs that were needed to reach this state.
 
 ## Reproduction
 
