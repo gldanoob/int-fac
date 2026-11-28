@@ -127,6 +127,7 @@ import Cogentic.RandomizedL27BudgetArithmetic
 import Cogentic.RandomizedL27LOneSiegel
 import Cogentic.RandomizedL27ClassNumberFormula
 import Cogentic.RandomizedL27ResidueFactorization
+import Cogentic.RandomizedL27MaximalOrder
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
@@ -142,6 +143,7 @@ import Cogentic.RandomizedL30SplitBound
 import Cogentic.RandomizedL30SmoothDensity
 import Cogentic.RandomizedL30Sharp
 import Cogentic.RandomizedL30CentralCount
+import Cogentic.RandomizedL30Dickman
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
@@ -349,6 +351,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL30Sharp.paperRelative_of_sharpUpper
 #print axioms Cogentic.RandomizedL30CentralCount.not_centralWindowPrimeSupply
 #print axioms Cogentic.RandomizedL30CentralCount.sharpCentralOddSmoothCount_iff_interval
+#print axioms Cogentic.RandomizedL30Dickman.sharpCentralOddSmoothIntervalCount_of_buchstabLargePrime_parity
+#print axioms Cogentic.RandomizedL30Dickman.buchstabOnePairs_card_eq_smoothCount
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
@@ -415,6 +419,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27ClassNumberFormula.hurwitzClassNumberFormulaLower_of_orderConductor
 #print axioms Cogentic.RandomizedL27ResidueFactorization.dedekindZetaResidueIsQuadraticL_iff_factorization
 #print axioms Cogentic.RandomizedL27ResidueFactorization.fundamentalDirichletClassNumberFormula_of_factorization
+#print axioms Cogentic.RandomizedL27ClassNumberFormula.fieldRealizationAt_four
+#print axioms Cogentic.RandomizedL27ClassNumberFormula.fieldRealizationAt_three
+#print axioms Cogentic.RandomizedL27ClassNumberFormula.regulator_eq_one_of_imaginary_quadratic
 #print axioms Cogentic.RandomizedL34ClassicalStark.StarkExceptionalZeroInput.toStarkClassicalInput
 #print axioms Cogentic.RandomizedL27StageOne.L27StageOneInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL27GcdModel.L27GCDModelInputs.toStageOneInputs
