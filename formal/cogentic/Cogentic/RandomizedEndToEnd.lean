@@ -93,6 +93,8 @@ import Cogentic.RandomizedL21_2ShortIntervalTransfer
 import Cogentic.RandomizedL21_2LeafAssembly
 import Cogentic.RandomizedL21_2StripBound
 import Cogentic.RandomizedL21_2ReferenceBound
+import Cogentic.RandomizedL21_2TailBound
+import Cogentic.RandomizedL21_2LocalFromGRH
 import Cogentic.RandomizedL21_2Tent
 import Cogentic.RandomizedL21_2TentWitness
 import Cogentic.RandomizedL21_2Abel
