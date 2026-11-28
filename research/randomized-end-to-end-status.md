@@ -1242,6 +1242,17 @@ formulas are now unconditional (only the isolated Kronecker values
   pair `WindowSmoothLower` + `WindowSqrtSmoothUpper` with `c + D ≤ C` is proved
   to imply the target, and the sub-interval form is inhabited at `p = 9`.
 
+
+- `RandomizedL18_4CertificateGRH` constructs the literal `L18_4Certificate`
+  from `line : DirichletLZerosOnLine`: paper-regime `W = max (t_p) (scale²)`
+  for `W_dominates`, the actual integer cell `(2, ⌊V⌋]`, a concrete one-cell
+  modulus-3 large-sieve certificate, the actual prime-bin mass/error data, and
+  explicit thin marks. `cellSupply` comes from
+  `cellSupply_of_critical_line`, and the loss `thin = 1/R > 0` is genuine. The
+  endpoint `serialized_assembled_balancedEnvelopeInfimum_from_grhCertificate`
+  removes the `l18_4` hypothesis from the Wave-31 record. A Wave-34 agent is
+  combining this with Wave 33.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
