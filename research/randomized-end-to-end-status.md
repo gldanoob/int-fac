@@ -4,21 +4,25 @@ Branch `explore/randomized-one-third`, base commit `0bcb1db`, Lean
 `leanprover/lean4:v4.33.1`. This note records what the end-to-end pass actually
 proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
-and a chain of strengthened endpoints `Wave13`–`Wave24`. The strongest
-*meaningful* theorem is
-`RandomizedPaperEndpointWave17.serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`:
-it quantifies over the actual epoch family `E`, and its hypothesis
-`Wave17Inputs (E s) D` includes the genuine `C1Inputs (E s)`, `C2Inputs (E s)`,
-concrete adapters and C5 data. The later `Wave18`/`Wave22` endpoints specialize
-to a placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
-(`RandomizedC1C2FromConcrete`: `2² ≠ 1` in `ZMod 15`), so those records are
-empty and those endpoints are vacuous; they are retained only as reduction
-scaffolding. `RandomizedPaperEndpointWave24` rebuilds the reduced record in the
-`E`-generic Wave-17 shape. The manuscript bound itself is still **not** proved
-unconditionally: the remaining inputs are the classical `L(1,χ)` lower bound,
-the zeta line zero-free/lower bound, the central short-interval smooth count,
-the sharp smooth upper density (Rankin saddle), the faithful Dedekind strip,
-Stark, effective Chebotarev, and the subexponential prepass. The interface history below records the vacuity
+and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
+meaningful theorem is
+`RandomizedPaperEndpointWave24.serialized_assembled_balancedEnvelopeInfimum_from_wave24Inputs`:
+it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
+its record `PaperResidualFor (E s) D` contains the genuine `C1Inputs (E s)`,
+`C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
+analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
+placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
+(`RandomizedC1C2FromConcrete`: `2² ≠ 1` in `ZMod 15`); those records are empty
+and those endpoints are vacuous, retained only as reduction scaffolding.
+`Wave25` removes the sharp L30 upper-density field, because
+`RandomizedL30PrimeReciprocal.paperScaleSmoothUpperSharp_one_unconditional`
+proves it unconditionally from `PaperDensityGrowth` and `ε > 0`.
+
+The manuscript bound is still **not** proved unconditionally: the remaining
+inputs are the classical `L(1,χ)` lower bound, the zeta line zero-free/lower
+bound, the central short-interval smooth count, the eventual binomial lower
+bound, the faithful Dedekind strip, Stark, effective Chebotarev, the concrete
+product identity for the actual epoch, and the subexponential prepass. The interface history below records the vacuity
 repairs that were needed to reach this state.
 
 ## Reproduction
@@ -963,6 +967,23 @@ Two interface defects were found and are being repaired:
   `DedekindZetaStripInput`. The packet is restricted to `Re < 1`, which also
   excludes Mathlib's junk zero at `s = 1` (`LSeries` is a `tsum` and its value
   at `1` is the junk value `0` when the defining series diverges).
+
+### Wave 25: the sharp L30 upper bound is unconditional
+
+`RandomizedL30PrimeReciprocal` proves the prime-reciprocal saddle estimate
+unconditionally from Mathlib's explicit Chebyshev bound
+`π(x) ≤ 2(log 4)x/log x + √x`, Abel summation and one integration by parts:
+
+```
+primeReciprocalSaddleUpper_rankinPrimeConstant :
+  PaperDensityGrowth p → 0 < ε → PrimeReciprocalSaddleUpper 32 p ε
+paperScaleSmoothUpperSharp_one_unconditional :
+  PaperDensityGrowth p → 0 < ε → PaperScaleSmoothUpperSharp 1 p ε
+```
+
+so the entire Rankin/Euler-product chain now has no hypotheses beyond the
+paper density growth and `ε > 0`. `Wave25` removes the `l30SharpUpper` field and
+derives it from the arithmetic condition `1 ≤ l30C` by monotonicity.
 
 ## What is not proved
 
