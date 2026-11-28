@@ -17,6 +17,8 @@ import Cogentic.RandomizedL19EnergyMassFinite
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19ZeroModeFinite
 import Cogentic.RandomizedL19Thin
+import Cogentic.RandomizedL19PoissonEnergy
+import Cogentic.RandomizedL19ThinWiring
 import Cogentic.RandomizedL19ThinFinite
 import Cogentic.RandomizedL19Full
 import Cogentic.RandomizedL20_2
@@ -126,6 +128,7 @@ import Cogentic.RandomizedConcreteFormSpec
 import Cogentic.RandomizedConcreteC3Real
 import Cogentic.RandomizedConcreteC3Budget
 import Cogentic.RandomizedConcreteC3Rough
+import Cogentic.RandomizedConcreteC3Prepass
 import Cogentic.RandomizedP1
 import Cogentic.RandomizedP1Sub
 import Cogentic.RandomizedP1Analytic
@@ -323,6 +326,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2.L20_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL34.EffectiveChebotarevInputs.ratedLeaf
 #print axioms Cogentic.RandomizedL19Full.L19FullCertificate.toL19Inputs
+#print axioms Cogentic.RandomizedL19PoissonEnergy.FinitePoissonData.AnalyticInputs.slot_le
+#print axioms Cogentic.RandomizedL19Full.L19FullCertificate.withThin_thinInputs_loss_pos
 #print axioms Cogentic.RandomizedL19Full.L19FullCertificate.slots_bounds
 #print axioms Cogentic.RandomizedC5Full.C5FullInputs.toHitMassInputs
 #print axioms Cogentic.RandomizedC5Full.C5FullInputs.hitMass_of_inputs
@@ -434,6 +439,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedConcreteC3Budget.eventually_heps_le_of_prime
 #print axioms Cogentic.RandomizedConcreteC3Budget.exists_concreteC3RealInputs_of_prime
 #print axioms Cogentic.RandomizedConcreteC3Rough.eventually_heps_le_of_rough
+#print axioms Cogentic.RandomizedConcreteC3Prepass.exists_prepassC3Inputs
+#print axioms Cogentic.RandomizedConcreteC3Prepass.eventually_prepass_c3_split
 #print axioms Cogentic.RandomizedConcreteC3Rough.eventually_concreteC3RealInputs_of_rough
 #print axioms Cogentic.RandomizedC5GoodIff.ofToyEpoch_hitMass
 #print axioms Cogentic.RandomizedC5GoodIff.fullOfSolver_good_iff

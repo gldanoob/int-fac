@@ -267,8 +267,11 @@ structure Wave14L30Counts where
   AB_ge_four : 4 ≤ A * B
   /-- The paper count dominates the relative density constant. -/
   AC_le : A * C ≤ c
-  /-- **The explicit fixed-density short-interval count.** -/
-  short_interval : YounisOddShortIntervalCount c p (paperT p) err
+  /-- **The paper-scale short-interval count**, carrying the local density
+  factor `exp (-(1+ε) t_p)`.  (The fixed-density form `c p^{3/2} ≤ count` would
+  force `c ≤ 1` and is incompatible with `A B ≥ 4` and `A C ≤ c` whenever
+  `B ≤ C`; the paper statement is the density form used here.) -/
+  short_interval : YounisOddPaperShortCount c p (paperT p) err
   /-- The global odd smooth upper density. -/
   global_upper : GlobalOddUpperDensity C p (paperT p) err
   /-- **The explicit global odd binomial lower bound.** -/
@@ -289,11 +292,10 @@ theorem one_add_err_mul_nonneg (n : ℕ) :
     0 ≤ (1 + S.err n) * paperT S.p n :=
   mul_nonneg (by linarith [S.err_ge_neg_one n]) (S.paperT_nonneg n)
 
-/-- **The paper-scale short count from the explicit fixed-density count.** -/
+/-- **The paper-scale short count.** -/
 theorem paperShortCount :
     YounisOddPaperShortCount S.c S.p (paperT S.p) S.err :=
-  paperShortCount_of_shortIntervalCount S.p_ge_two S.short_interval
-    S.one_add_err_mul_nonneg
+  S.short_interval
 
 /-- **The global odd lower bound from the explicit binomial count.** -/
 theorem younisOddGlobalLower :
