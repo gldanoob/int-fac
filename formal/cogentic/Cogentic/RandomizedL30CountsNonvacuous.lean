@@ -1,4 +1,5 @@
 import Cogentic.RandomizedPaperEndpointWave14
+import Cogentic.RandomizedL30SharpWitness
 
 /-!
 # L30 non-vacuity after the density repair
@@ -37,16 +38,17 @@ normalised to `Y = 768`:
 
 ```
 p n = 4,      t = t_p,      (1 + ε_n) t_p = log 768,
-A = 1/8,  B = 48,  c = 24,  C = 192 .
+A = 1/4,  B = 16,  c = 1/16,  C = 1/4 .
 ```
 
 At this scale the central interval is `(12, 16]`, whose only odd-half order is
 `14`, and the global odd-half smooth range below `p^2 = 16` is
 `{2, 6, 10, 14}`.  Thus the two count fields are the genuine nonzero numbers
-`1` and `4`, the short-count lower side is `1/4`, and the global upper side is
-the equality `4/16 = 192/768`.  The global binomial count is supplied by the
-single odd prime `3` with exponent `0`: its binomial coefficient is `1`, and
-the target is `48 · 16 / 768 = 1`.
+`1` and `4`.  The sharp local bound is `(1/16) · 5 · exp (-(u log u)) ≤ 1`
+(using `u log u ≥ -3/4`), and the sharp global upper bound is
+`4/16 ≤ (1/4) exp (-(u log u))` (using `exp (-(u log u)) ≥ 1`).  The global
+binomial count is supplied by the single odd prime `3` with exponent `0`: its
+binomial coefficient is `1`, and the target is `16 · 16 / 768 = 1/3`.
 
 ## 2. `FailureData` and the L30 inputs are inhabited
 
@@ -229,47 +231,11 @@ theorem cns_err_ge_neg_one (n : ℕ) : -1 ≤ cnsErr n := by
 
 /-! ## 2. The explicit `Wave14L30Counts` inhabitant -/
 
-/-- **The repaired `Wave14L30Counts` is inhabited.**
-The short-interval count is the paper-scale count, and all four constants are
-genuine nonzero numbers.  The witness has `c = 24`, `B = 48`, `C = 192`, and the
-count values are `1` (central) and `4` (global). -/
-def witnessL30Counts : Wave14L30Counts where
-  p := cnsP
-  err := cnsErr
-  p_ge_two := cns_p_ge_two
-  err_ge_neg_one := cns_err_ge_neg_one
-  fibreModels := lppModelMultiples cnsP
-  A := 1 / 8
-  B := 48
-  c := 24
-  C := 192
-  A_pos := by norm_num
-  B_pos := by norm_num
-  AB_ge_four := by norm_num
-  AC_le := by norm_num
-  short_interval := by
-    intro n
-    rw [cns_centralOddCount, cns_exp_neg]
-    norm_num [cnsP]
-  global_upper := by
-    intro n
-    rw [cns_globalOddCount, cns_exp_neg]
-    norm_num [cnsP]
-  global_binomial := by
-    intro n
-    have hcut : smoothCutoff (paperT cnsP) cnsErr n = 768 := cns_cutoff n
-    refine ⟨?_, {3}, 0, ?_, ?_, ?_⟩
-    · rw [hcut]
-      norm_num
-    · intro q hq
-      rw [Finset.mem_singleton] at hq
-      subst q
-      exact ⟨Nat.prime_three, by norm_num, by rw [hcut]; norm_num⟩
-    · rw [hcut]
-      norm_num [cnsP]
-    · rw [cns_exp_neg]
-      norm_num [cnsP]
-  lpp_superset := lppModelSuperset_multiples cnsP (paperT cnsP) cnsErr
+/-- **The repaired `Wave14L30Counts` is inhabited** by the sharp witness of
+`RandomizedL30SharpWitness`, whose central odd count is `1` and whose global
+odd count is `4`. -/
+noncomputable def witnessL30Counts : Wave14L30Counts :=
+  Cogentic.RandomizedL30SharpWitness.witnessL30Counts
 
 /-- **Non-vacuity of the repaired counts.** -/
 theorem nonempty_wave14L30Counts : Nonempty Wave14L30Counts :=

@@ -4,6 +4,7 @@ import Cogentic.RandomizedL20_4LeafAssembly
 import Cogentic.RandomizedL21_2LeafAssembly
 import Cogentic.RandomizedP1Prepass
 import Cogentic.RandomizedL30ShortInterval
+import Cogentic.RandomizedL30Sharp
 import Cogentic.RandomizedL30GlobalLower
 
 /-!
@@ -40,8 +41,10 @@ already proved to imply the corresponding leaf:
 * **L30 counts** — `RandomizedL30ShortInterval` supplies the explicit
   fixed-density short-interval count, `RandomizedL30GlobalLower` supplies the
   explicit global odd binomial count and the canonical LPP raw/normalization
-  data.  Their composition gives the paper short count, the global lower bound
-  and the LPP per-order fibre count with no analytic input left in the bundle.
+  data, and `RandomizedL30Sharp` supplies the sharp density normalisation at
+  the true exponent `u log u`.  Their composition gives the sharp central
+  interval count, the global lower bound and the LPP per-order fibre count with
+  no analytic input left in the bundle.
 
 The new record `Wave14Inputs` therefore replaces those five fields by
 
@@ -95,6 +98,8 @@ open Cogentic.RandomizedL30GlobalLower
 open Cogentic.RandomizedL30Interval
 open Cogentic.RandomizedL30Raw
 open Cogentic.RandomizedL30ShortInterval
+open Cogentic.RandomizedL30Sharp
+open Cogentic.RandomizedL30SmoothDensity
 open Cogentic.RandomizedL30Sub
 open Cogentic.RandomizedL30Younis
 open Cogentic.RandomizedL4
@@ -245,6 +250,10 @@ structure Wave14L30Counts where
   p : ℕ → ℝ
   /-- The explicit `1 + o(1)` relative error. -/
   err : ℕ → ℝ
+  /-- The constant paper error underlying the sharp density statements. -/
+  ε : ℝ
+  /-- The relative error is the constant paper error. -/
+  err_eq : err = paperError ε
   /-- The prime is at least two. -/
   p_ge_two : ∀ n, 2 ≤ p n
   /-- The relative error is at least `-1`, as in the paper's `1 + o(1)` regime. -/
@@ -267,13 +276,13 @@ structure Wave14L30Counts where
   AB_ge_four : 4 ≤ A * B
   /-- The paper count dominates the relative density constant. -/
   AC_le : A * C ≤ c
-  /-- **The paper-scale short-interval count**, carrying the local density
-  factor `exp (-(1+ε) t_p)`.  (The fixed-density form `c p^{3/2} ≤ count` would
-  force `c ≤ 1` and is incompatible with `A B ≥ 4` and `A C ≤ c` whenever
-  `B ≤ C`; the paper statement is the density form used here.) -/
-  short_interval : YounisOddPaperShortCount c p (paperT p) err
-  /-- The global odd smooth upper density. -/
-  global_upper : GlobalOddUpperDensity C p (paperT p) err
+  /-- **Younis's sharp paper interval count** at `t = t_p`, with the true
+  exponent `u log u`.  (The fixed-density form `c p^{3/2} ≤ count` would force
+  `c ≤ 1` and is incompatible with `A B ≥ 4` and `A C ≤ c` whenever `B ≤ C`;
+  the interval form is the sharp local count used here.) -/
+  short_interval : YounisOddPaperSharpIntervalCount c p ε
+  /-- **The sharp global odd smooth upper density** at `u log u`. -/
+  global_upper : GlobalOddUpperDensitySharp C p ε
   /-- **The explicit global odd binomial lower bound.** -/
   global_binomial : GlobalOddBinomialCount B p (paperT p) err
   /-- **The explicit raw LPP model superset.** -/
@@ -292,9 +301,9 @@ theorem one_add_err_mul_nonneg (n : ℕ) :
     0 ≤ (1 + S.err n) * paperT S.p n :=
   mul_nonneg (by linarith [S.err_ge_neg_one n]) (S.paperT_nonneg n)
 
-/-- **The paper-scale short count.** -/
-theorem paperShortCount :
-    YounisOddPaperShortCount S.c S.p (paperT S.p) S.err :=
+/-- **The sharp paper-scale interval count.** -/
+theorem paperSharpIntervalCount :
+    YounisOddPaperSharpIntervalCount S.c S.p S.ε :=
   S.short_interval
 
 /-- **The global odd lower bound from the explicit binomial count.** -/
@@ -313,18 +322,20 @@ theorem lppNormalization :
   lpp_normalization_logLoss S.p_ge_two (fun n => S.paperT_nonneg n)
     S.err_ge_neg_one
 
-/-- The relative short-interval density, derived from the paper short count and
-the global odd upper density. -/
+/-- The relative short-interval density, derived from the sharp interval count
+and the sharp global odd upper density by `paperRelative_of_sharpUpper`. -/
 theorem younisRelative :
-    YounisOddRelativeShortInterval S.A S.p (paperT S.p) S.err :=
-  paperRelative_of_paperShortCount S.A_pos.le S.p_ge_two S.AC_le
-    S.paperShortCount S.global_upper
+    EventuallyYounisOddSharpRelativeShortInterval S.A S.p S.ε :=
+  paperRelative_of_sharpUpper S.A_pos.le S.AC_le
+    S.paperSharpIntervalCount S.global_upper
 
-/-- **The wave-13 counts from the explicit short-interval and global-lower
+/-- **The wave-13 counts from the sharp short-interval and global-lower
 data.**  The canonical loss is `lppLogLoss`; no count is set to zero. -/
 noncomputable def toWave13Counts : Wave13L30Counts where
   p := S.p
   err := S.err
+  ε := S.ε
+  err_eq := S.err_eq
   p_ge_two := S.p_ge_two
   fibreModels := S.fibreModels
   Q := lppLogLoss S.p
@@ -336,20 +347,27 @@ noncomputable def toWave13Counts : Wave13L30Counts where
   B_pos := S.B_pos
   AB_ge_four := S.AB_ge_four
   AC_le := S.AC_le
-  short_interval := S.paperShortCount
+  short_interval := S.paperSharpIntervalCount
   global_upper := S.global_upper
   global_lower := S.younisOddGlobalLower
   lpp_normalization := S.lppNormalization
   lpp_raw := S.lppRawLogModelCount
 
-/-- The derived Younis short-interval count carried by the record. -/
+/-- The derived Younis short-interval count carried by the record (at the
+common shifted index). -/
 theorem younisShortIntervalCount :
-    YounisShortIntervalCount S.p (paperT S.p) S.err :=
+    YounisShortIntervalCount S.toWave13Counts.toYounisLPPInputs.p
+      S.toWave13Counts.toYounisLPPInputs.t
+      S.toWave13Counts.toYounisLPPInputs.err :=
   S.toWave13Counts.younisShortIntervalCount
 
-/-- The derived LPP per-order fibre count carried by the record. -/
+/-- The derived LPP per-order fibre count carried by the record (at the common
+shifted index). -/
 theorem lppOrderFibreCount :
-    LPPOrderFibreCount S.p (paperT S.p) S.err S.fibreModels :=
+    LPPOrderFibreCount S.toWave13Counts.toYounisLPPInputs.p
+      S.toWave13Counts.toYounisLPPInputs.t
+      S.toWave13Counts.toYounisLPPInputs.err
+      S.toWave13Counts.toYounisLPPInputs.fibreModels :=
   S.toWave13Counts.lppOrderFibreCount
 
 end Wave14L30Counts
@@ -391,15 +409,21 @@ noncomputable def toSubexpLeaf : SubexpLeaf :=
 theorem loss_eq (n : ℕ) : I.toSubexpLeaf.loss n = I.failure.failure n :=
   rfl
 
-/-- The Younis short-interval count carried by the record. -/
+/-- The Younis short-interval count carried by the record (at the common
+shifted index). -/
 theorem younisShortIntervalCount :
-    YounisShortIntervalCount I.counts.p (paperT I.counts.p) I.counts.err :=
+    YounisShortIntervalCount I.counts.toWave13Counts.toYounisLPPInputs.p
+      I.counts.toWave13Counts.toYounisLPPInputs.t
+      I.counts.toWave13Counts.toYounisLPPInputs.err :=
   I.counts.younisShortIntervalCount
 
-/-- The LPP per-order fibre count carried by the record. -/
+/-- The LPP per-order fibre count carried by the record (at the common shifted
+index). -/
 theorem lppOrderFibreCount :
-    LPPOrderFibreCount I.counts.p (paperT I.counts.p) I.counts.err
-      I.counts.fibreModels :=
+    LPPOrderFibreCount I.counts.toWave13Counts.toYounisLPPInputs.p
+      I.counts.toWave13Counts.toYounisLPPInputs.t
+      I.counts.toWave13Counts.toYounisLPPInputs.err
+      I.counts.toWave13Counts.toYounisLPPInputs.fibreModels :=
   I.counts.lppOrderFibreCount
 
 end Wave14L30Inputs
@@ -627,7 +651,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_wave14Inputs
 #print axioms wave14P1Leaf_cost_sublinear
 #print axioms Wave14L30Counts.paperT_nonneg
 #print axioms Wave14L30Counts.one_add_err_mul_nonneg
-#print axioms Wave14L30Counts.paperShortCount
+#print axioms Wave14L30Counts.paperSharpIntervalCount
 #print axioms Wave14L30Counts.younisOddGlobalLower
 #print axioms Wave14L30Counts.lppRawLogModelCount
 #print axioms Wave14L30Counts.lppNormalization

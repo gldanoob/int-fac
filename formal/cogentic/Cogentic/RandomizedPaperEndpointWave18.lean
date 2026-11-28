@@ -3,6 +3,7 @@ import Cogentic.RandomizedWave17Audit
 import Cogentic.RandomizedL21_2LineMinimal
 import Cogentic.RandomizedL21_2CentralBin
 import Cogentic.RandomizedL30LeafFromGRH
+import Cogentic.RandomizedL30Sharp
 import Cogentic.RandomizedL30UpperDensity
 import Cogentic.RandomizedL27LOneSiegel
 import Cogentic.RandomizedL34EffectiveChebotarev
@@ -31,9 +32,11 @@ This file exposes the remaining paper/classical content in **named form**:
   `O (log²)` line bound, the literal central short-interval smooth count, the
   vertical-tail estimate, the two paper parameter relations and the full
   Fourier/two-scale profile;
-* the L30 residual: `PaperScaleSmoothUpper`, the central Younis short count,
-  the eventual explicit binomial lower bound, the Cantor data and the actual
-  H.3 failure data;
+* the L30 residual: the sharp global odd upper density
+  `GlobalOddUpperDensitySharp` and the sharp central interval count
+  `YounisOddPaperSharpIntervalCount`, both at the true Dickman exponent
+  `u log u`, together with the eventual explicit binomial lower bound, the
+  Cantor data and the actual H.3 failure data;
 * the L27 residual: `SiegelLOneLower` with the class-number formula, Hasse,
   the Waterhouse weighted model, the finite-sum kill law and the curve-budget
   arithmetic;
@@ -95,6 +98,7 @@ open Cogentic.RandomizedL30Interval
 open Cogentic.RandomizedL30LeafFromGRH
 open Cogentic.RandomizedL30ShortInterval
 open Cogentic.RandomizedL30SmoothDensity
+open Cogentic.RandomizedL30Sharp
 open Cogentic.RandomizedL30Sub
 open Cogentic.RandomizedL30UpperDensity
 open Cogentic.RandomizedL30Younis
@@ -226,11 +230,13 @@ structure PaperResidualInputs (D : ℝ) where
   l30AC_le : l30A * l30C ≤ l30c
   /-- `C > 0`. -/
   l30C_pos : 0 < l30C
-  /-- **The paper-scale smooth upper estimate.** -/
-  l30PaperScaleUpper : PaperScaleSmoothUpper l30C l30p l30ε
-  /-- **The central Younis short count.** -/
-  l30CentralCount : EventuallyYounisOddPaperShortCount l30c l30p
-    (paperT l30p) (paperError l30ε)
+  /-- **The sharp paper-scale global odd upper density.**  The exponential
+  factor is the true Dickman exponent `u log u`, not the unsound
+  `exp (-(1+ε)t_p)`. -/
+  l30SharpUpper : GlobalOddUpperDensitySharp l30C l30p l30ε
+  /-- **The sharp central Younis interval count**, with the same exponent
+  `u log u` on the local lower-bound side. -/
+  l30SharpCentral : YounisOddPaperSharpIntervalCount l30c l30p l30ε
   /-- **The eventual explicit binomial lower bound.** -/
   l30Binomial : EventuallyGlobalOddBinomialCount l30B l30p
     (paperT l30p) (paperError l30ε)
@@ -332,13 +338,15 @@ theorem l21_zeroFree_of_zetaRH (R : PaperResidualInputs D) :
     ZetaLineZeroFree R.l21Profile.X :=
   zetaLineZeroFree_of_RH R.zetaRH
 
-/-- The paper-scale smooth upper estimate gives the global odd upper density
-used by the L30 leaf. -/
+/-- The sharp global odd upper density carried by the residual record. -/
 theorem l30_globalUpper (R : PaperResidualInputs D) :
-    EventuallyGlobalOddUpperDensity R.l30C R.l30p (paperT R.l30p)
-      (paperError R.l30ε) :=
-  eventuallyGlobalOddUpperDensity_of_paperScaleSmoothUpper R.l30C_pos
-    R.l30Growth R.l30ε_pos R.l30PaperScaleUpper
+    GlobalOddUpperDensitySharp R.l30C R.l30p R.l30ε :=
+  R.l30SharpUpper
+
+/-- The sharp central interval count carried by the residual record. -/
+theorem l30_sharpCentral (R : PaperResidualInputs D) :
+    YounisOddPaperSharpIntervalCount R.l30c R.l30p R.l30ε :=
+  R.l30SharpCentral
 
 /-- **The L21.2 leaf from the named residual data.**  The line bound is the
 classical `O (log²)` estimate upgraded to the paper exponent `Cper - 1`; the
@@ -387,7 +395,7 @@ noncomputable def toL30 (R : PaperResidualInputs D) : Wave14L30Inputs := by
   let counts : EventuallyL30Counts :=
     EventuallyL30Counts.ofPaperGRHWithB R.line R.l30p R.l30Growth R.l30ε_pos
       R.l30B_pos R.l30B_le_eighth R.l30A R.l30A_pos R.l30AB_ge_four
-      R.l30c R.l30C R.l30AC_le R.l30CentralCount R.l30_globalUpper
+      R.l30c R.l30C R.l30AC_le R.l30SharpCentral R.l30SharpUpper
   let inputs : EventuallyL30Inputs :=
     { counts := counts, cantor := R.l30Cantor, failure := R.l30Failure }
   exact inputs.toWave14L30Inputs R.l30Binomial
@@ -524,6 +532,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_wave18Inputs
 #print axioms PaperResidualInputs.toL21_2
 #print axioms PaperResidualInputs.l21_zeroFree_of_zetaRH
 #print axioms PaperResidualInputs.l30_globalUpper
+#print axioms PaperResidualInputs.l30_sharpCentral
 #print axioms PaperResidualInputs.toL30
 #print axioms PaperResidualInputs.toL27Finish
 #print axioms PaperResidualInputs.toL34

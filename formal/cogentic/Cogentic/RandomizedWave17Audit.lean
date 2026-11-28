@@ -2,6 +2,7 @@ import Cogentic.RandomizedPaperEndpointWave17
 import Cogentic.RandomizedL20_2
 import Cogentic.RandomizedL30GlobalLower
 import Cogentic.RandomizedL30LPP
+import Cogentic.RandomizedL30SharpWitness
 import Cogentic.RandomizedL30Younis
 
 set_option linter.style.haveILetI false
@@ -856,49 +857,11 @@ theorem cns_err_ge_neg_one (n : ℕ) : -1 ≤ cnsErr n := by
 
 /-! ## 5b. The explicit `Wave14L30Counts` inhabitant -/
 
-/-- **The repaired `Wave14L30Counts` is inhabited.**
-The short-interval count is the paper-scale count, and all four constants are
-genuine nonzero numbers.  The witness has `c = 24`, `B = 48`, `C = 192`, and the
-count values are `1` (central) and `4` (global). -/
-noncomputable def witnessL30Counts : Wave14L30Counts where
-  p := cnsP
-  err := cnsErr
-  p_ge_two := cns_p_ge_two
-  err_ge_neg_one := cns_err_ge_neg_one
-  fibreModels := lppModelMultiples cnsP
-  A := 1 / 8
-  B := 48
-  c := 24
-  C := 192
-  A_pos := by norm_num
-  B_pos := by norm_num
-  AB_ge_four := by norm_num
-  AC_le := by norm_num
-  short_interval := by
-    intro n
-    rw [cns_centralOddCount, cns_exp_neg]
-    norm_num [cnsP]
-  global_upper := by
-    intro n
-    rw [cns_globalOddCount, cns_exp_neg]
-    norm_num [cnsP]
-  global_binomial := by
-    intro n
-    have hcut : Cogentic.RandomizedL30Analytic.smoothCutoff (paperT cnsP) cnsErr n = 768 := cns_cutoff n
-    refine ⟨?_, {3}, 0, ?_, ?_, ?_⟩
-    · rw [hcut]
-      norm_num
-    · intro q hq
-      rw [Finset.mem_singleton] at hq
-      subst q
-      exact ⟨Nat.prime_three, by norm_num, by rw [hcut]; norm_num⟩
-    · rw [hcut]
-      norm_num [cnsP]
-    · rw [cns_exp_neg]
-      norm_num [cnsP]
-  lpp_superset := lppModelSuperset_multiples cnsP (paperT cnsP) cnsErr
-
-
+/-- **The repaired `Wave14L30Counts` is inhabited** by the sharp witness of
+`RandomizedL30SharpWitness`: the central odd count is `1`, the global odd count
+is `4`, and the four constants are `1/4`, `16`, `1/16`, `1/4`. -/
+noncomputable def witnessL30Counts : Wave14L30Counts :=
+  Cogentic.RandomizedL30SharpWitness.witnessL30Counts
 
 /-- The repaired L30 record is inhabited (with the genuine count witness). -/
 theorem nonempty_wave14L30Counts : Nonempty Wave14L30Counts :=

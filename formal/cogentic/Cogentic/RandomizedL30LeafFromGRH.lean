@@ -58,6 +58,7 @@ open Cogentic.RandomizedL30GlobalLower
 open Cogentic.RandomizedL30LPP
 open Cogentic.RandomizedL30Raw
 open Cogentic.RandomizedL30ShortInterval
+open Cogentic.RandomizedL30Sharp
 open Cogentic.RandomizedL30SmoothDensity
 open Cogentic.Randomized
 open Cogentic.RandomizedPaperEndpointWave13
@@ -649,6 +650,10 @@ structure EventuallyL30Counts where
   p : ℕ → ℝ
   /-- The explicit `1 + o(1)` relative error. -/
   err : ℕ → ℝ
+  /-- The constant paper error underlying the sharp density statements. -/
+  ε : ℝ
+  /-- The relative error is the constant paper error. -/
+  err_eq : err = paperError ε
   /-- The prime is eventually at least two. -/
   p_ge_two : ∀ᶠ n in atTop, 2 ≤ p n
   /-- The relative error is eventually at least `-1`. -/
@@ -669,10 +674,10 @@ structure EventuallyL30Counts where
   AB_ge_four : 4 ≤ A * B
   /-- The paper count dominates the relative density constant. -/
   AC_le : A * C ≤ c
-  /-- **The paper-scale central short count**, eventual. -/
-  short_interval : EventuallyYounisOddPaperShortCount c p (paperT p) err
-  /-- **The global odd smooth upper density**, eventual. -/
-  global_upper : EventuallyGlobalOddUpperDensity C p (paperT p) err
+  /-- **The sharp paper-scale central interval count**, eventual. -/
+  short_interval : YounisOddPaperSharpIntervalCount c p ε
+  /-- **The sharp global odd smooth upper density**, eventual. -/
+  global_upper : GlobalOddUpperDensitySharp C p ε
   /-- **The global odd smooth lower bound**, eventual.  This is unconditional
   under `DirichletLZerosOnLine` and `PaperDensityGrowth`. -/
   global_lower : EventuallyYounisOddGlobalLower B p (paperT p) err
@@ -681,63 +686,14 @@ namespace EventuallyL30Counts
 
 variable (S : EventuallyL30Counts)
 
-/-- The consistency `B ≤ C` forced by the two eventual density bounds. -/
-theorem B_le_C : S.B ≤ S.C := by
-  obtain ⟨N, hN⟩ := Filter.eventually_atTop.1
-    (S.p_ge_two.and (S.global_lower.and S.global_upper))
-  have hpN : 2 ≤ S.p N := (hN N le_rfl).1
-  have hl : S.B * S.p N ^ 2 *
-      Real.exp (-(1 + S.err N) * paperT S.p N) ≤
-        globalOddSmoothCount S.p (paperT S.p) S.err N := (hN N le_rfl).2.1
-  have hu : globalOddSmoothCount S.p (paperT S.p) S.err N / S.p N ^ 2 ≤
-      S.C * Real.exp (-(1 + S.err N) * paperT S.p N) := (hN N le_rfl).2.2
-  have hp0 : 0 < S.p N := by linarith
-  have hp2 : 0 < S.p N ^ 2 := by positivity
-  have hX : 0 < S.p N ^ 2 *
-      Real.exp (-(1 + S.err N) * paperT S.p N) := by positivity
-  have hl' : S.B * (S.p N ^ 2 *
-      Real.exp (-(1 + S.err N) * paperT S.p N)) ≤
-        globalOddSmoothCount S.p (paperT S.p) S.err N := by
-    simpa only [mul_assoc] using hl
-  have hu' : globalOddSmoothCount S.p (paperT S.p) S.err N ≤
-      S.C * (S.p N ^ 2 *
-        Real.exp (-(1 + S.err N) * paperT S.p N)) := by
-    have h := (div_le_iff₀ hp2).mp hu
-    calc globalOddSmoothCount S.p (paperT S.p) S.err N
-        ≤ S.C * Real.exp (-(1 + S.err N) * paperT S.p N) * S.p N ^ 2 := h
-      _ = S.C * (S.p N ^ 2 *
-            Real.exp (-(1 + S.err N) * paperT S.p N)) := by ring
-  exact le_of_mul_le_mul_right (hl'.trans hu') hX
-
-/-- **The arithmetic obstruction of the parity upper bound.**  A leaf whose
-global lower constant is `1/8`, whose short count constant is at most `1/8`,
-and whose upper density is the parity bound `3/8` cannot exist: `B ≤ C`,
-`A B ≥ 4` and `A C ≤ c` force `A ≥ 32` and `A ≤ 1`.  Thus the parity upper
-density is not a substitute for the paper-scale upper density. -/
-theorem not_parity_eighth (hB : S.B = 1 / 8) (_hC : S.C ≤ 3 / 8)
-    (hc : S.c ≤ 1 / 8) : False := by
-  have hBC := S.B_le_C
-  have hA32 : 32 ≤ S.A := by
-    have h := S.AB_ge_four
-    rw [hB] at h
-    nlinarith
-  have hCge : (1 : ℝ) / 8 ≤ S.C := by
-    rw [← hB]
-    exact hBC
-  have hACle : S.A * S.C ≤ 1 / 8 := le_trans S.AC_le hc
-  have hA8 : S.A * (1 / 8) ≤ S.A * S.C :=
-    mul_le_mul_of_nonneg_left hCge S.A_pos.le
-  have hAle : S.A ≤ 1 := by nlinarith
-  linarith
-
-/-- The paper-scale central short count carried by the leaf. -/
-theorem paperShortCount :
-    EventuallyYounisOddPaperShortCount S.c S.p (paperT S.p) S.err :=
+/-- The sharp paper-scale central interval count carried by the leaf. -/
+theorem paperSharpIntervalCount :
+    YounisOddPaperSharpIntervalCount S.c S.p S.ε :=
   S.short_interval
 
-/-- The global odd upper density carried by the leaf. -/
+/-- The sharp global odd upper density carried by the leaf. -/
 theorem globalUpper :
-    EventuallyGlobalOddUpperDensity S.C S.p (paperT S.p) S.err :=
+    GlobalOddUpperDensitySharp S.C S.p S.ε :=
   S.global_upper
 
 /-- The global lower bound carried by the leaf. -/
@@ -745,52 +701,57 @@ theorem globalLower :
     EventuallyYounisOddGlobalLower S.B S.p (paperT S.p) S.err :=
   S.global_lower
 
-/-- The eventual relative short-interval density from the leaf's short count
-and upper density. -/
+/-- The eventual relative short-interval density from the leaf's sharp short
+count and sharp upper density, via `paperRelative_of_sharpUpper`. -/
 theorem younisRelative :
-    EventuallyYounisOddRelativeShortInterval S.A S.p (paperT S.p) S.err :=
-  eventually_paperRelative_of_eventuallyUpper S.A_pos.le S.AC_le
-    (eventually_paperIntervalCount_of_eventuallyPaperShortCount S.p_ge_two
-      S.short_interval)
-    S.global_upper
+    EventuallyYounisOddSharpRelativeShortInterval S.A S.p S.ε :=
+  paperRelative_of_sharpUpper S.A_pos.le S.AC_le
+    S.paperSharpIntervalCount S.global_upper
 
-/-- The eventual odd central count from the leaf's three counting fields. -/
-theorem younisCentralCount :
-    EventuallyYounisOddCentralCount S.p (paperT S.p) S.err :=
-  eventually_centralCount_of_eventuallyUpper_and_lower S.p_ge_two S.A_pos S.B_pos
-    S.AB_ge_four S.AC_le
-    (eventually_paperIntervalCount_of_eventuallyPaperShortCount S.p_ge_two
-      S.short_interval)
-    S.global_upper S.global_lower
+/-- The same relative density at the leaf's (sequence) error, obtained by
+rewriting with `err_eq`.  This is the form consumed by the older event-level
+interfaces. -/
+theorem younisRelativePaper :
+    EventuallyYounisOddRelativeShortInterval S.A S.p (paperT S.p) S.err := by
+  have h := S.younisRelative
+  simpa only [EventuallyYounisOddSharpRelativeShortInterval,
+    EventuallyYounisOddRelativeShortInterval, S.err_eq, paperError] using h
 
-/-- **The Wave-13 L30 counts from the eventual leaf.**  The eventual fields are
-made pointwise by shifting `p` and `err` by the common threshold.  The LPP
-fields are filled unconditionally with the canonical multiples family and the
-logarithmic loss. -/
+/-- **The Wave-13 L30 counts from the eventual leaf.**  The eventual sharp
+fields are made pointwise by shifting `p` by the common threshold; the paper
+error is the constant `paperError ε`.  The LPP fields are filled
+unconditionally with the canonical multiples family and the logarithmic loss. -/
 noncomputable def toWave13L30Counts : Wave13L30Counts := by
   classical
+  have hglobE : EventuallyYounisOddGlobalLower S.B S.p (paperT S.p)
+      (paperError S.ε) := by
+    simpa only [S.err_eq] using S.global_lower
   let h := S.p_ge_two.and (S.err_ge_neg_one.and
-    (S.short_interval.and (S.global_upper.and S.global_lower)))
+    (S.short_interval.and (S.global_upper.and hglobE)))
   let N := eventuallyShift h
   let P : ℕ → ℝ := fun n => S.p (n + N)
-  let E : ℕ → ℝ := fun n => S.err (n + N)
+  let E : ℕ → ℝ := paperError S.ε
   have hspec : ∀ n,
-      (2 ≤ S.p (n + N)) ∧ (-1 ≤ S.err (n + N)) ∧
-        (S.c * S.p (n + N) ^ ((3 : ℝ) / 2) *
-            Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-          centralOddSmoothCount S.p (paperT S.p) S.err (n + N)) ∧
-        (globalOddSmoothCount S.p (paperT S.p) S.err (n + N) /
+      (2 ≤ S.p (n + N)) ∧ (-1 ≤ S.ε) ∧
+        (S.c * ((centralOrderInterval S.p (n + N)).card : ℝ) *
+            Real.exp (-(paperDensityU S.p S.ε (n + N) *
+              Real.log (paperDensityU S.p S.ε (n + N)))) ≤
+          centralOddSmoothCount S.p (paperT S.p) (paperError S.ε) (n + N)) ∧
+        (globalOddSmoothCount S.p (paperT S.p) (paperError S.ε) (n + N) /
             S.p (n + N) ^ 2 ≤
-          S.C * Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N))) ∧
+          S.C * Real.exp (-(paperDensityU S.p S.ε (n + N) *
+            Real.log (paperDensityU S.p S.ε (n + N))))) ∧
         (S.B * S.p (n + N) ^ 2 *
-            Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-          globalOddSmoothCount S.p (paperT S.p) S.err (n + N)) := by
+            Real.exp (-(1 + S.ε) * paperT S.p (n + N)) ≤
+          globalOddSmoothCount S.p (paperT S.p) (paperError S.ε) (n + N)) := by
     intro n
     have h' := eventuallyShift_spec h n
-    simpa only [h] using h'
+    simpa only [h, N, S.err_eq, paperError] using h'
   refine
     { p := P
       err := E
+      ε := S.ε
+      err_eq := by simp only [E, paperError]
       p_ge_two := fun n => (hspec n).1
       fibreModels := fun n m => lppModelMultiples P n m
       Q := lppLogLoss P
@@ -802,29 +763,14 @@ noncomputable def toWave13L30Counts : Wave13L30Counts := by
       B_pos := S.B_pos
       AB_ge_four := S.AB_ge_four
       AC_le := S.AC_le
-      short_interval := ?_
-      global_upper := ?_
-      global_lower := ?_
+      short_interval := Filter.Eventually.of_forall fun n => ?_
+      global_upper := Filter.Eventually.of_forall fun n => ?_
+      global_lower := fun n => ?_
       lpp_normalization := ?_
       lpp_raw := ?_ }
-  · intro n
-    have hs := (hspec n).2.2.1
-    change S.c * S.p (n + N) ^ ((3 : ℝ) / 2) *
-        Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-      centralOddSmoothCount S.p (paperT S.p) S.err (n + N)
-    exact hs
-  · intro n
-    have hu := (hspec n).2.2.2.1
-    change globalOddSmoothCount S.p (paperT S.p) S.err (n + N) /
-        S.p (n + N) ^ 2 ≤
-      S.C * Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N))
-    exact hu
-  · intro n
-    have hl := (hspec n).2.2.2.2
-    change S.B * S.p (n + N) ^ 2 *
-        Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-      globalOddSmoothCount S.p (paperT S.p) S.err (n + N)
-    exact hl
+  · exact (hspec n).2.2.1
+  · exact (hspec n).2.2.2.1
+  · exact (hspec n).2.2.2.2
   · exact lpp_normalization_logLoss (p := P) (t := paperT P) (err := E)
       (fun n => (hspec n).1) (fun n => Real.sqrt_nonneg _)
       (fun n => (hspec n).2.1)
@@ -839,37 +785,41 @@ noncomputable def toWave14L30Counts
     (hbin : EventuallyGlobalOddBinomialCount S.B S.p (paperT S.p) S.err) :
     Wave14L30Counts := by
   classical
+  have hbinE : EventuallyGlobalOddBinomialCount S.B S.p (paperT S.p)
+      (paperError S.ε) := by
+    simpa only [S.err_eq] using hbin
   let h := S.p_ge_two.and (S.err_ge_neg_one.and
-    (S.short_interval.and (S.global_upper.and (S.global_lower.and hbin))))
+    (S.short_interval.and (S.global_upper.and hbinE)))
   let N := eventuallyShift h
   let P : ℕ → ℝ := fun n => S.p (n + N)
-  let E : ℕ → ℝ := fun n => S.err (n + N)
+  let E : ℕ → ℝ := paperError S.ε
   have hspec : ∀ n,
-      (2 ≤ S.p (n + N)) ∧ (-1 ≤ S.err (n + N)) ∧
-        (S.c * S.p (n + N) ^ ((3 : ℝ) / 2) *
-            Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-          centralOddSmoothCount S.p (paperT S.p) S.err (n + N)) ∧
-        (globalOddSmoothCount S.p (paperT S.p) S.err (n + N) /
+      (2 ≤ S.p (n + N)) ∧ (-1 ≤ S.ε) ∧
+        (S.c * ((centralOrderInterval S.p (n + N)).card : ℝ) *
+            Real.exp (-(paperDensityU S.p S.ε (n + N) *
+              Real.log (paperDensityU S.p S.ε (n + N)))) ≤
+          centralOddSmoothCount S.p (paperT S.p) (paperError S.ε) (n + N)) ∧
+        (globalOddSmoothCount S.p (paperT S.p) (paperError S.ε) (n + N) /
             S.p (n + N) ^ 2 ≤
-          S.C * Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N))) ∧
-        (S.B * S.p (n + N) ^ 2 *
-            Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-          globalOddSmoothCount S.p (paperT S.p) S.err (n + N)) ∧
-        (2 ≤ smoothCutoff (paperT S.p) S.err (n + N) ∧
+          S.C * Real.exp (-(paperDensityU S.p S.ε (n + N) *
+            Real.log (paperDensityU S.p S.ε (n + N))))) ∧
+        (2 ≤ smoothCutoff (paperT S.p) (paperError S.ε) (n + N) ∧
           ∃ (Pset : Finset ℕ) (k : ℕ),
             (∀ q ∈ Pset, q.Prime ∧ q ≠ 2 ∧
-              (q : ℝ) ≤ smoothCutoff (paperT S.p) S.err (n + N)) ∧
-            2 * (smoothCutoff (paperT S.p) S.err (n + N)) ^ k ≤
+              (q : ℝ) ≤ smoothCutoff (paperT S.p) (paperError S.ε) (n + N)) ∧
+            2 * (smoothCutoff (paperT S.p) (paperError S.ε) (n + N)) ^ k ≤
               S.p (n + N) ^ 2 ∧
             S.B * S.p (n + N) ^ 2 *
-              Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
+              Real.exp (-(1 + S.ε) * paperT S.p (n + N)) ≤
                 ((Pset.card.choose k : ℕ) : ℝ)) := by
     intro n
     have h' := eventuallyShift_spec h n
-    simpa only [h] using h'
+    simpa only [h, N, S.err_eq, paperError] using h'
   refine
     { p := P
       err := E
+      ε := S.ε
+      err_eq := by simp only [E, paperError]
       p_ge_two := fun n => (hspec n).1
       err_ge_neg_one := fun n => (hspec n).2.1
       fibreModels := fun n m => lppModelMultiples P n m
@@ -881,24 +831,13 @@ noncomputable def toWave14L30Counts
       B_pos := S.B_pos
       AB_ge_four := S.AB_ge_four
       AC_le := S.AC_le
-      short_interval := ?_
-      global_upper := ?_
-      global_binomial := ?_
+      short_interval := Filter.Eventually.of_forall fun n => ?_
+      global_upper := Filter.Eventually.of_forall fun n => ?_
+      global_binomial := fun n => ?_
       lpp_superset := fun n m hm => subset_rfl }
-  · intro n
-    have hs := (hspec n).2.2.1
-    change S.c * S.p (n + N) ^ ((3 : ℝ) / 2) *
-        Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N)) ≤
-      centralOddSmoothCount S.p (paperT S.p) S.err (n + N)
-    exact hs
-  · intro n
-    have hu := (hspec n).2.2.2.1
-    change globalOddSmoothCount S.p (paperT S.p) S.err (n + N) /
-        S.p (n + N) ^ 2 ≤
-      S.C * Real.exp (-(1 + S.err (n + N)) * paperT S.p (n + N))
-    exact hu
-  · intro n
-    exact (hspec n).2.2.2.2.2
+  · exact (hspec n).2.2.1
+  · exact (hspec n).2.2.2.1
+  · exact (hspec n).2.2.2.2
 
 /-- The reverse adapter: a pointwise Wave-13 counts record together with the
 eventual relative-error bound gives an eventual leaf.  This shows the eventual
@@ -908,6 +847,8 @@ noncomputable def ofWave13L30Counts (S : Wave13L30Counts)
     (herr : ∀ᶠ n in atTop, -1 ≤ S.err n) : EventuallyL30Counts where
   p := S.p
   err := S.err
+  ε := S.ε
+  err_eq := S.err_eq
   p_ge_two := Filter.Eventually.of_forall S.p_ge_two
   err_ge_neg_one := herr
   A := S.A
@@ -918,8 +859,8 @@ noncomputable def ofWave13L30Counts (S : Wave13L30Counts)
   B_pos := S.B_pos
   AB_ge_four := S.AB_ge_four
   AC_le := S.AC_le
-  short_interval := Filter.Eventually.of_forall S.short_interval
-  global_upper := Filter.Eventually.of_forall S.global_upper
+  short_interval := S.short_interval
+  global_upper := S.global_upper
   global_lower := Filter.Eventually.of_forall S.global_lower
 
 /-- The reverse adapter from a pointwise Wave-14 counts record.  The global
@@ -927,6 +868,8 @@ lower bound is obtained from the explicit binomial count. -/
 noncomputable def ofWave14L30Counts (S : Wave14L30Counts) : EventuallyL30Counts where
   p := S.p
   err := S.err
+  ε := S.ε
+  err_eq := S.err_eq
   p_ge_two := Filter.Eventually.of_forall S.p_ge_two
   err_ge_neg_one := Filter.Eventually.of_forall S.err_ge_neg_one
   A := S.A
@@ -937,8 +880,8 @@ noncomputable def ofWave14L30Counts (S : Wave14L30Counts) : EventuallyL30Counts 
   B_pos := S.B_pos
   AB_ge_four := S.AB_ge_four
   AC_le := S.AC_le
-  short_interval := Filter.Eventually.of_forall S.short_interval
-  global_upper := Filter.Eventually.of_forall S.global_upper
+  short_interval := S.short_interval
+  global_upper := S.global_upper
   global_lower := Filter.Eventually.of_forall
     (younisOddGlobalLower_of_binomialCount S.global_binomial)
 
@@ -1022,11 +965,13 @@ noncomputable def ofPaperGRH
     {ε : ℝ} (hε : 0 < ε)
     (A : ℝ) (hA : 0 < A) (hA32 : 32 ≤ A)
     (c C : ℝ) (hAC : A * C ≤ c)
-    (hshort : EventuallyYounisOddPaperShortCount c p (paperT p) (paperError ε))
-    (hupper : EventuallyGlobalOddUpperDensity C p (paperT p) (paperError ε)) :
+    (hshort : YounisOddPaperSharpIntervalCount c p ε)
+    (hupper : GlobalOddUpperDensitySharp C p ε) :
     EventuallyL30Counts where
   p := p
   err := paperError ε
+  ε := ε
+  err_eq := rfl
   p_ge_two := h.eventually_sixteen.mono (fun n hn => by linarith)
   err_ge_neg_one := Filter.Eventually.of_forall fun _ => by
     dsimp [paperError]
@@ -1049,11 +994,13 @@ noncomputable def ofPaperGRHWithB
     {ε B : ℝ} (hε : 0 < ε) (hB : 0 < B) (hBle : B ≤ 1 / 8)
     (A : ℝ) (hA : 0 < A) (hAB : 4 ≤ A * B)
     (c C : ℝ) (hAC : A * C ≤ c)
-    (hshort : EventuallyYounisOddPaperShortCount c p (paperT p) (paperError ε))
-    (hupper : EventuallyGlobalOddUpperDensity C p (paperT p) (paperError ε)) :
+    (hshort : YounisOddPaperSharpIntervalCount c p ε)
+    (hupper : GlobalOddUpperDensitySharp C p ε) :
     EventuallyL30Counts where
   p := p
   err := paperError ε
+  ε := ε
+  err_eq := rfl
   p_ge_two := h.eventually_sixteen.mono (fun n hn => by linarith)
   err_ge_neg_one := Filter.Eventually.of_forall fun _ => by
     dsimp [paperError]
@@ -1085,13 +1032,11 @@ end EventuallyL30Counts
 #print axioms not_eventually_paper_one_add_err_mul_nonpos
 #print axioms eventually_paperRelative_of_eventuallyUpper
 #print axioms eventually_centralCount_of_eventuallyUpper_and_lower
-#print axioms EventuallyL30Counts.B_le_C
-#print axioms EventuallyL30Counts.not_parity_eighth
-#print axioms EventuallyL30Counts.paperShortCount
+#print axioms EventuallyL30Counts.paperSharpIntervalCount
 #print axioms EventuallyL30Counts.globalUpper
 #print axioms EventuallyL30Counts.globalLower
 #print axioms EventuallyL30Counts.younisRelative
-#print axioms EventuallyL30Counts.younisCentralCount
+#print axioms EventuallyL30Counts.younisRelativePaper
 #print axioms EventuallyL30Counts.toWave13L30Counts
 #print axioms EventuallyL30Counts.toWave14L30Counts
 #print axioms EventuallyL30Inputs.toSubexpLeaf
