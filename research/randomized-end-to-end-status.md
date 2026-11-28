@@ -957,7 +957,11 @@ Two interface defects were found and are being repaired:
   statements about an empty hypothesis record and are not the algorithm. The
   valid shape is Wave 17, which quantifies over `E` and uses `E` in the
   conclusion; `RandomizedPaperEndpointWave24` rebuilds the reduced record in
-  that shape.
+  that shape. Its `concreteFamily` non-vacuity witness still uses the
+  placeholder `goodEpochOfLe`, whose `GlobalProductIdentity` is false, so that
+  witness is conditional on a false identity; the endpoint itself is unaffected
+  because `E` is universally quantified and `C1Inputs (E s)` is an explicit
+  field.
 - **The zero-sequence interface is vacuous.** `ZetaZeroSequence` has no
   completeness field, so `DedekindZeroFreeInput` can be satisfied by omitting
   every zero above `β₀`. `RandomizedL34ZeroFaithful` proves this
