@@ -308,8 +308,10 @@ theorem L18_4Inputs.eventually_supply_fit (I : L18_4Inputs) {K0 : ℝ} (hK0 : 0 
       nlinarith only [hdom, hscale, hTpos.le]
   have hd8 : ∀ᶠ n : ℕ in atTop, I.d n ≤ Real.exp ((1 / 8 : ℝ) * I.W n) := by
     have hcpos : 0 < 8 * I.cd + 1 := by linarith [I.cd_nonneg]
-    filter_upwards [Eventually.of_forall I.d_upper, I.W_dominates (8 * I.cd + 1) hcpos,
-      scale_grows.eventually (eventually_ge_atTop (0 : ℝ))] with n hdu hdom hscale0
+    filter_upwards [eventually_ge_atTop (3 : ℕ),
+      I.W_dominates (8 * I.cd + 1) hcpos,
+      scale_grows.eventually (eventually_ge_atTop (0 : ℝ))] with n hn hdom hscale0
+    have hdu : I.d n ≤ Real.exp (I.cd * scale n) := I.d_upper n hn
     have h8 : I.cd * scale n ≤ (1 / 8 : ℝ) * I.W n := by
       nlinarith only [hdom, hscale0]
     exact hdu.trans (Real.exp_le_exp.mpr h8)

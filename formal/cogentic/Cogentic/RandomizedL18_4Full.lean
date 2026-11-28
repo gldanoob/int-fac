@@ -21,7 +21,10 @@ discharged:
 
 The ambient scales, the explicit `D^{O(1)}` exponents, the upper bounds and the
 growth-rate domination `W_dominates` remain explicit fields, as allowed by the
-wave-7 brief (W43).  The three `LargeSieveCertificate`/`CellData`/`MassErrorInputs`
+wave-7 brief (W43).  The pointwise `D^{O(1)}` bounds are asserted only on the
+paper regime `3 ≤ n`; the guard is necessary because `scale 0 = scale 1 = 0`
+and `scale 2 < 0`, so an unguarded bound would contradict `CellData` at those
+indices.  The three `LargeSieveCertificate`/`CellData`/`MassErrorInputs`
 data are matched to the ambient data through the explicit adapter equalities
 `hS2` (`S2 = secondMoment`) and `hNcell` (`Ncell = CellData.Ncell`).
 
@@ -99,13 +102,16 @@ structure L18_4Ambient where
   cd_nonneg : 0 ≤ cd
   cell_nonneg : 0 ≤ cell
   cρ_nonneg : 0 ≤ cρ
-  W_upper : ∀ n, W n ≤ exp (cW * scale n)
-  C_upper : ∀ n, C n ≤ exp (cC * scale n)
-  M_upper : ∀ n, M n ≤ exp (cM * scale n)
-  Econv_upper : ∀ n, Econv n ≤ exp (cE * scale n)
-  d_upper : ∀ n, d n ≤ exp (cd * scale n)
-  ell_upper : ∀ n, ell n ≤ exp (cell * scale n)
-  rho_inv_upper : ∀ n, 1 / rho n ≤ exp (cρ * scale n)
+  W_upper : ∀ n, 3 ≤ n → W n ≤ exp (cW * scale n)
+  C_upper : ∀ n, 3 ≤ n → C n ≤ exp (cC * scale n)
+  M_upper : ∀ n, 3 ≤ n → M n ≤ exp (cM * scale n)
+  Econv_upper : ∀ n, 3 ≤ n → Econv n ≤ exp (cE * scale n)
+  d_upper : ∀ n, 3 ≤ n → d n ≤ exp (cd * scale n)
+  ell_upper : ∀ n, 3 ≤ n → ell n ≤ exp (cell * scale n)
+  rho_inv_upper : ∀ n, 3 ≤ n → 1 / rho n ≤ exp (cρ * scale n)
+  /-- `log V` eventually dominates every fixed multiple of `log D = scale n`.
+  This field is already asymptotic, so it needs no index guard (guarding it
+  with `3 ≤ n` would be logically equivalent to this statement). -/
   W_dominates : ∀ c : ℝ, 0 < c → ∀ᶠ n : ℕ in atTop, c * scale n ≤ W n
 
 /-- Assemble a literal `L18_4Inputs` from the ambient data and the four analytic

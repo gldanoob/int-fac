@@ -1169,19 +1169,29 @@ is now exactly the Buchstab short-interval estimate plus the parity fraction.
   `PaperDensityGrowth`.
 
 
-### Critical defect: L18.4 is inconsistent at `n = 0`
+### Repaired: L18.4 growth fields are guarded at the paper regime `3 ≤ n`
 
-`RandomizedL18_4Inhabitant` proves `L18_4Certificate → False`: the ambient
-growth bounds are unguarded `∀ n`, so at `n = 0` (`scale 0 = 0`) they give
-`W 0 ≤ 1`, while `CellData.width 0` and `CellData.B_le_V 0` force
-`1 ≤ exp(3W/4) ≤ B−A ≤ exp W − 2 < 1`. Since every endpoint record contains
-`l18_4 : L18_4Certificate`, the Wave 13–31 endpoints are vacuous until the
-certificate's growth fields are restricted to the paper regime `n ≥ 1` (the
-epoch uses `n ≥ 3`). A repair agent is propagating the guard through
-`L18_4Certificate.toInputs`, the leaf/loss bounds and the endpoint records.
-The same audit constructs the largest coherent sub-record (`iCore`) with all
-finite cell/mass/large-sieve/thin data and identifies `cellSupply` as the only
-remaining analytic input.
+The unguarded interface was inconsistent: at `n = 0` (`scale 0 = 0`) the
+`D^{O(1)}` bounds gave `W 0 ≤ 1` and `d 0 ≤ 1`, while `CellData.width 0` and
+`CellData.B_le_V 0` forced
+`1 ≤ exp(3W/4) ≤ B−A ≤ exp W − 2 < 1`.  The same contradiction occurred at
+`n = 1` (`scale 1 = 0`) and `n = 2` (`scale 2 < 0`), so the exact guard is
+`3 ≤ n`, not `1 ≤ n`.
+
+`L18_4Inputs`/`L18_4Ambient` now state `W_upper, C_upper, M_upper,
+Econv_upper, d_upper, ell_upper, rho_inv_upper` as `∀ n, 3 ≤ n → …`.
+`W_dominates` is already an eventual statement and needs no guard.  The
+positive-index content is unchanged: the eventual loss bounds supply `3 ≤ n`
+from `eventually_ge_atTop 3`, and the Wave 13–31 records consume
+`L18_4Certificate` only through `toInputs`, so their statements are unchanged.
+
+`RandomizedL18_4Inhabitant` now proves that `iCore` supplies all seven guarded
+bounds (`iCore_W_upper` … `iCore_rho_inv_upper`) and constructs an actual
+`L18_4Certificate` from exactly two remaining inputs (`iCertificate`): the
+critical-line prime-bin supply `cellSupply`, and `W_dominates`.  The toy core's
+constant `W = 4 log 5` provably does not dominate `scale`
+(`iCore_not_W_dominates`); a paper-regime witness takes `W = log V` and does.
+The old `no_L18_4Certificate` no-go is gone.
 
 ## What is not proved
 

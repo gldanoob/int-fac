@@ -179,20 +179,23 @@ structure L18_4Inputs where
   denominator cell and `O(K)` cell pairs in all; after normalization by the new
   mean the relative thin-pair fraction is at most `1/K`. -/
   thin_pair_fraction : ∀ n, thin n ≤ 1 / cellMesh W n
-  /-- `log V = D^{O(1)}`: an upper bound with the explicit exponent `cW`. -/
-  W_upper : ∀ n, W n ≤ exp (cW * scale n)
-  /-- `C = D^{O(1)}`. -/
-  C_upper : ∀ n, C n ≤ exp (cC * scale n)
-  /-- `M = D^{O(1)}`. -/
-  M_upper : ∀ n, M n ≤ exp (cM * scale n)
-  /-- `E_conv = D^{O(1)}`. -/
-  Econv_upper : ∀ n, Econv n ≤ exp (cE * scale n)
-  /-- `d = D^{O(1)}`. -/
-  d_upper : ∀ n, d n ≤ exp (cd * scale n)
-  /-- `ℓ = D^{O(1)}`. -/
-  ell_upper : ∀ n, ell n ≤ exp (cell * scale n)
-  /-- `1/ρ = D^{O(1)}`, i.e. `ρ ≥ D^{-O(1)}`. -/
-  rho_inv_upper : ∀ n, 1 / rho n ≤ exp (cρ * scale n)
+  /-- `log V = D^{O(1)}`: an upper bound with the explicit exponent `cW`.
+  The guard `3 ≤ n` is the paper's regime.  It is not cosmetic: `scale 1 = 0`
+  and `scale 2 < 0`, so an unguarded field at those indices forces the whole
+  data to be at most `1` and contradicts `CellData` exactly as at `n = 0`. -/
+  W_upper : ∀ n, 3 ≤ n → W n ≤ exp (cW * scale n)
+  /-- `C = D^{O(1)}` (paper regime `3 ≤ n`). -/
+  C_upper : ∀ n, 3 ≤ n → C n ≤ exp (cC * scale n)
+  /-- `M = D^{O(1)}` (paper regime `3 ≤ n`). -/
+  M_upper : ∀ n, 3 ≤ n → M n ≤ exp (cM * scale n)
+  /-- `E_conv = D^{O(1)}` (paper regime `3 ≤ n`). -/
+  Econv_upper : ∀ n, 3 ≤ n → Econv n ≤ exp (cE * scale n)
+  /-- `d = D^{O(1)}` (paper regime `3 ≤ n`). -/
+  d_upper : ∀ n, 3 ≤ n → d n ≤ exp (cd * scale n)
+  /-- `ℓ = D^{O(1)}` (paper regime `3 ≤ n`). -/
+  ell_upper : ∀ n, 3 ≤ n → ell n ≤ exp (cell * scale n)
+  /-- `1/ρ = D^{O(1)}`, i.e. `ρ ≥ D^{-O(1)}` (paper regime `3 ≤ n`). -/
+  rho_inv_upper : ∀ n, 3 ≤ n → 1 / rho n ≤ exp (cρ * scale n)
   /-- `log V` dominates every fixed multiple of `log D = scale n`.  This is the
   content of `log V = D^{O(1)}` with `D = exp (scale n)`: `exp (Ω (scale n))`
   beats `c · scale n` for every fixed `c`.  It is a growth-rate fact, not the
@@ -385,7 +388,8 @@ theorem loss_le (n : ℕ) :
 
 /-- Absorb the `(1 + log V)²` factor.  Since `log V ≥ 1` and
 `log V ≤ D^{cW}`, the product is at most `D^{1 + 2 cW}`. -/
-theorem one_add_W_sq_le {n : ℕ} (hW1 : 1 ≤ I.W n) (hH4 : Real.log 4 ≤ scale n) :
+theorem one_add_W_sq_le {n : ℕ} (hn : 3 ≤ n) (hW1 : 1 ≤ I.W n)
+    (hH4 : Real.log 4 ≤ scale n) :
     (1 + I.W n) ^ 2 ≤ exp ((1 + 2 * I.cW) * scale n) := by
   have hWpos : 0 < I.W n := lt_of_lt_of_le zero_lt_one hW1
   have hle : 1 + I.W n ≤ 2 * I.W n := by linarith
@@ -394,7 +398,7 @@ theorem one_add_W_sq_le {n : ℕ} (hW1 : 1 ≤ I.W n) (hH4 : Real.log 4 ≤ scal
   have hWsq : (I.W n) ^ 2 ≤ exp ((2 * I.cW) * scale n) := by
     calc
       (I.W n) ^ 2 ≤ (exp (I.cW * scale n)) ^ 2 :=
-        pow_le_pow_left₀ hWpos.le (I.W_upper n) 2
+        pow_le_pow_left₀ hWpos.le (I.W_upper n hn) 2
       _ = exp ((2 * I.cW) * scale n) := by
         rw [pow_two, ← exp_add]
         congr 1
@@ -414,7 +418,7 @@ theorem one_add_W_sq_le {n : ℕ} (hW1 : 1 ≤ I.W n) (hH4 : Real.log 4 ≤ scal
       ring
 
 /-- Each `D^{O(1)}` factor of `coeff` is absorbed into a single exponent. -/
-theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
+theorem coeff_le_exp (n : ℕ) (hn : 3 ≤ n) (hH1 : 1 ≤ scale n) :
     I.coeff n ≤
       exp ((Real.log 16 + I.cC + I.cM + I.cE + I.cd + 2 * I.cell + 2 * I.cρ) *
         scale n) := by
@@ -428,13 +432,13 @@ theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
   have hell2 : I.ell n ^ 2 ≤ exp ((2 * I.cell) * scale n) := by
     calc
       I.ell n ^ 2 ≤ (exp (I.cell * scale n)) ^ 2 :=
-        pow_le_pow_left₀ (I.ell_pos n).le (I.ell_upper n) 2
+        pow_le_pow_left₀ (I.ell_pos n).le (I.ell_upper n hn) 2
       _ = exp ((2 * I.cell) * scale n) := by
         rw [pow_two, ← exp_add]
         congr 1
         ring
   have hrho2 : 1 / I.rho n ^ 2 ≤ exp ((2 * I.cρ) * scale n) := by
-    have hsq := mul_le_mul (I.rho_inv_upper n) (I.rho_inv_upper n)
+    have hsq := mul_le_mul (I.rho_inv_upper n hn) (I.rho_inv_upper n hn)
       (div_nonneg zero_le_one (I.rho_pos n).le) (exp_pos _).le
     calc
       1 / I.rho n ^ 2 = (1 / I.rho n) * (1 / I.rho n) := by
@@ -447,14 +451,14 @@ theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
         ring
   unfold coeff
   have step1 : 16 * I.C n ≤ exp (Real.log 16 * scale n) * exp (I.cC * scale n) :=
-    mul_le_mul h16 (I.C_upper n) (I.C_pos n).le (exp_pos _).le
+    mul_le_mul h16 (I.C_upper n hn) (I.C_pos n).le (exp_pos _).le
   have step2 : 16 * I.C n * I.M n ≤
       exp (Real.log 16 * scale n) * exp (I.cC * scale n) * exp (I.cM * scale n) := by
     calc
       16 * I.C n * I.M n = (16 * I.C n) * I.M n := by ring
       _ ≤ (exp (Real.log 16 * scale n) * exp (I.cC * scale n)) *
             exp (I.cM * scale n) :=
-        mul_le_mul step1 (I.M_upper n) (I.M_pos n).le
+        mul_le_mul step1 (I.M_upper n hn) (I.M_pos n).le
           (mul_nonneg (exp_pos _).le (exp_pos _).le)
   have step3 : 16 * I.C n * I.M n * I.Econv n ≤
       exp (Real.log 16 * scale n) * exp (I.cC * scale n) * exp (I.cM * scale n) *
@@ -463,7 +467,7 @@ theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
       16 * I.C n * I.M n * I.Econv n = (16 * I.C n * I.M n) * I.Econv n := by ring
       _ ≤ (exp (Real.log 16 * scale n) * exp (I.cC * scale n) * exp (I.cM * scale n)) *
             exp (I.cE * scale n) :=
-        mul_le_mul step2 (I.Econv_upper n) (I.Econv_nonneg n)
+        mul_le_mul step2 (I.Econv_upper n hn) (I.Econv_nonneg n)
           (mul_nonneg (mul_nonneg (exp_pos _).le (exp_pos _).le) (exp_pos _).le)
   have step4 : 16 * I.C n * I.M n * I.Econv n * I.d n ≤
       exp (Real.log 16 * scale n) * exp (I.cC * scale n) * exp (I.cM * scale n) *
@@ -473,7 +477,7 @@ theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
           (16 * I.C n * I.M n * I.Econv n) * I.d n := by ring
       _ ≤ (exp (Real.log 16 * scale n) * exp (I.cC * scale n) * exp (I.cM * scale n) *
             exp (I.cE * scale n)) * exp (I.cd * scale n) :=
-        mul_le_mul step3 (I.d_upper n) (I.d_pos n).le
+        mul_le_mul step3 (I.d_upper n hn) (I.d_pos n).le
           (mul_nonneg (mul_nonneg (mul_nonneg (exp_pos _).le (exp_pos _).le)
             (exp_pos _).le) (exp_pos _).le)
   have step5 : 16 * I.C n * I.M n * I.Econv n * I.d n * I.ell n ^ 2 ≤
@@ -514,11 +518,11 @@ theorem coeff_le_exp (n : ℕ) (hH1 : 1 ≤ scale n) :
       ring
 
 /-- The full `D^{O(1)}` coefficient of the loss. -/
-theorem coeff_mul_le_exp (n : ℕ) (hW1 : 1 ≤ I.W n) (hH1 : 1 ≤ scale n)
-    (hH4 : Real.log 4 ≤ scale n) :
+theorem coeff_mul_le_exp (n : ℕ) (hn : 3 ≤ n) (hW1 : 1 ≤ I.W n)
+    (hH1 : 1 ≤ scale n) (hH4 : Real.log 4 ≤ scale n) :
     I.coeff n * (1 + I.W n) ^ 2 ≤ exp (I.csum * scale n) := by
-  have hc := I.coeff_le_exp n hH1
-  have hw := I.one_add_W_sq_le hW1 hH4
+  have hc := I.coeff_le_exp n hn hH1
+  have hw := I.one_add_W_sq_le hn hW1 hH4
   calc
     I.coeff n * (1 + I.W n) ^ 2 ≤
         exp ((Real.log 16 + I.cC + I.cM + I.cE + I.cd + 2 * I.cell + 2 * I.cρ) *
@@ -535,13 +539,14 @@ theorem coeff_mul_le_exp (n : ℕ) (hW1 : 1 ≤ I.W n) (hH1 : 1 ≤ scale n)
 theorem eventually_coeff_mul_le :
     ∀ᶠ n : ℕ in atTop,
       I.coeff n * (1 + I.W n) ^ 2 ≤ exp (I.csum * scale n) := by
-  filter_upwards [I.W_dominates 1 (by norm_num),
+  filter_upwards [eventually_ge_atTop (3 : ℕ),
+    I.W_dominates 1 (by norm_num),
     scale_grows.eventually_ge_atTop 1,
-    scale_grows.eventually_ge_atTop (Real.log 4)] with n hWbig hH1 hH4
+    scale_grows.eventually_ge_atTop (Real.log 4)] with n hn hWbig hH1 hH4
   have hW1 : 1 ≤ I.W n := by
     have h : (1 : ℝ) * scale n ≤ I.W n := hWbig
     linarith
-  exact I.coeff_mul_le_exp n hW1 hH1 hH4
+  exact I.coeff_mul_le_exp n hn hW1 hH1 hH4
 
 /-- **Main arithmetic step.**  With the mesh constant `c = 8B + 8 csum + 8`, the
 deficit is eventually at most `exp (-B log D)`. -/
