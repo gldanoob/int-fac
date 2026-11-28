@@ -50,6 +50,7 @@ import Cogentic.RandomizedL20_4Incoming
 import Cogentic.RandomizedL20_4ChildLower
 import Cogentic.RandomizedL20_4PairAlt
 import Cogentic.RandomizedL20_4LeafAssembly
+import Cogentic.RandomizedL20_4SourceWitness
 import Cogentic.RandomizedL20_4TopComparison
 import Cogentic.RandomizedL20_4Mean
 import Cogentic.RandomizedL20_4InteriorBase
@@ -372,6 +373,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2SourceWitness.source_paper
 #print axioms Cogentic.RandomizedL20_4LeafAssembly.top_subexp_of_paperComparison
 #print axioms Cogentic.RandomizedL20_4TopComparison.subexpLoss_via_paperTopComparison
+#print axioms Cogentic.RandomizedL20_4SourceWitness.sourcedLeafOfElliptic_loss_pos
+#print axioms Cogentic.RandomizedL20_4SourceWitness.nonempty_sourcedLeafInputs_of_L21_2
 #print axioms Cogentic.RandomizedL27Weighted.reduction_of_weighted
 #print axioms Cogentic.RandomizedL20_4BaseSource.baseConcentrationSource_paperG11BaseMass
 #print axioms Cogentic.RandomizedL27Siegel.L27SiegelInputs.toTraceClassInputs
