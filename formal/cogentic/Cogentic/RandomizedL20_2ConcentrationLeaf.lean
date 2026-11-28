@@ -1,5 +1,6 @@
 import Cogentic.RandomizedL20_2PaperMass
 import Cogentic.RandomizedL20_2PaperSmooth
+import Cogentic.RandomizedL20_2Sub
 
 set_option linter.style.haveILetI false
 
@@ -21,10 +22,11 @@ machinery of `Cogentic.RandomizedL20_2` and produces a `ConcentrationLeaf`:
 
 * `SaddleConcentrationSource` is the smallest remaining data bundle.  It keeps
   only the finite-cell concentration inputs (the actual cell, the one-point
-  comparison, the two-point estimate, the CRT and smooth-character budgets, and
-  the proxy bound).  The saddle scale and saddle mean are *not* fields: they are
+  comparison, the two-point estimate, the GRH smooth-character budget, and the
+  proxy bound).  The saddle scale and saddle mean are *not* fields: they are
   fixed to the paper-mass pair and proved from the existing count and mass
-  bounds.
+  bounds.  The truncated geometric CRT tail is also not a field: it is the
+  proved `RandomizedL20_2Sub.geometricCRTError`.
 * `SaddleConcentrationSource.toConcentrationLeaf` builds the leaf.  Its `loss`
   is the actual normalized discrepancy
   `|mean f - mean proxy| / smoothNumberMass`, never zero by fiat.
@@ -46,6 +48,9 @@ namespace Cogentic.RandomizedL20_2ConcentrationLeaf
 open Filter Real
 open scoped BigOperators
 open Cogentic.RandomizedL20_2
+open Cogentic.RandomizedL20_2.L20_2Inputs
+open Cogentic.RandomizedL20_2Sub
+open Cogentic.RandomizedL20_2Saddle
 open Cogentic.RandomizedL20_2PaperMass
 open Cogentic.RandomizedL20_2PaperSmooth
 open Cogentic.RandomizedPaperLeafStatements
@@ -224,7 +229,8 @@ concentration data that G.10 consumes:
 * the identification `mean f = smoothNumberMass` of the ideal mean;
 * the one-point comparison (G.8);
 * the off-diagonal two-point estimate (G.10);
-* the truncated CRT and GRH smooth-character budgets;
+* the GRH smooth-character budget (the truncated geometric CRT tail is the
+  proved `RandomizedL20_2Sub.geometricCRTError`);
 * the polynomial proxy bound on `L`.
 
 The `a` field is the manuscript exponent (`a = 1/48`). -/
@@ -235,12 +241,8 @@ structure SaddleConcentrationSource where
   a_eq : a = 1 / 48
   /-- The proxy score bound `L`. -/
   L : ℕ → ℝ
-  /-- The CRT error budget. -/
-  crtError : ℕ → ℝ
   /-- The smooth-character error budget. -/
   charError : ℕ → ℝ
-  /-- The CRT decay constant. -/
-  cCRT : ℝ
   /-- The smooth-character decay constant. -/
   cChar : ℝ
   /-- The polynomial exponent constant in `L ≤ exp (cL (log D)^5)`. -/
@@ -251,8 +253,6 @@ structure SaddleConcentrationSource where
   cL_nonneg : 0 ≤ cL
   /-- The G.10 proxy bound `L ≤ exp (cL (log D)^5)`. -/
   L_upper : ∀ n, L n ≤ exp (cL * (scale n) ^ 5)
-  /-- The truncated geometric CRT law. -/
-  crt_law : TruncatedGeometricCRTLaw crtError cCRT
   /-- The GRH smooth-character sum. -/
   char_sum : SmoothCharacterSumBound charError cChar
   /-- The finite interior cell at each ledger index. -/
@@ -263,9 +263,10 @@ structure SaddleConcentrationSource where
   /-- G.8 one-point comparison. -/
   one_point : OnePointProxyComparison
     (fun n => (cell n).mean (cell n).proxy) paperSaddleMass
-  /-- G.10 off-diagonal two-point estimate. -/
+  /-- G.10 off-diagonal two-point estimate, against the proved geometric CRT
+  tail and the GRH smooth-character error. -/
   two_point : TwoPointOffDiagonalBound
-    (fun n => (cell n).cross) paperSaddleMass crtError charError
+    (fun n => (cell n).cross) paperSaddleMass geometricCRTError charError
 
 namespace SaddleConcentrationSource
 
@@ -285,10 +286,10 @@ theorem a_lt_one : S.a < 1 := by
 `PaperExponentSaddleInequality` from the paper-mass constants. -/
 theorem saddle_inequality :
     PaperExponentSaddleInequality S.a S.cL paperMassEta paperMassCount
-      S.cCRT S.cChar :=
+      2 S.cChar :=
   paperExponentSaddleInequality S.a_lt_one S.cL_nonneg
     (by norm_num [paperMassEta]) (by norm_num [paperMassCount])
-    S.crt_law.1 S.char_sum.1
+    (by norm_num) S.char_sum.1
 
 /-- The source builds the decomposed `L20_2Inputs`; its saddle fields are the
 proved paper-mass bounds. -/
@@ -298,11 +299,11 @@ def toInputs : L20_2Inputs where
   Λ := paperSaddleScale
   μ := paperSaddleMass
   L := S.L
-  crtError := S.crtError
+  crtError := geometricCRTError
   charError := S.charError
   cLam := paperMassCount
   η := paperMassEta
-  cCRT := S.cCRT
+  cCRT := 2
   cChar := S.cChar
   cL := S.cL
   saddle_scale := paperSaddleScaleLower
@@ -310,7 +311,7 @@ def toInputs : L20_2Inputs where
   L_nonneg := S.L_nonneg
   cL_nonneg := S.cL_nonneg
   L_upper := S.L_upper
-  crt_law := S.crt_law
+  crt_law := truncatedGeometricCRTLaw
   char_sum := S.char_sum
   cell := S.cell
   μ_eq := S.mean_eq
@@ -345,6 +346,14 @@ theorem paper_bound :
   filter_upwards [S.toInputs.loss_le_paper] with n hn
   have hA : S.toInputs.A n = exp (S.a * scale n) := rfl
   rwa [hA] at hn
+
+/-- The `paper` field of the constructed leaf, stated with the leaf's own
+exponent (which is the manuscript `1/48`). -/
+theorem leaf_paper :
+    ∀ᶠ n : ℕ in atTop,
+      S.toConcentrationLeaf.loss n ≤
+        exp (-(2 : ℝ) * exp (S.toConcentrationLeaf.a * scale n) * scale n) :=
+  S.toConcentrationLeaf.paper
 
 /-- The paper statement implies the `B = 2` ledger slot. -/
 theorem slot_le :
@@ -402,6 +411,7 @@ end SaddleConcentrationSource
 #print axioms SaddleConcentrationSource.loss_eq
 #print axioms SaddleConcentrationSource.loss_nonneg
 #print axioms SaddleConcentrationSource.paper_bound
+#print axioms SaddleConcentrationSource.leaf_paper
 #print axioms SaddleConcentrationSource.slot_le
 #print axioms SaddleConcentrationSource.leaf_a_eq
 #print axioms SaddleConcentrationSource.toPaperLeaf

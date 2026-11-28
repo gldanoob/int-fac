@@ -428,7 +428,7 @@ theorem waterhouseWeighted_iff_modelCount (p : ℕ) (hp : p.Prime) (hurwitz : �
   letI : Fact p.Prime := ⟨hp⟩
   unfold WaterhouseWeightedFiberSum WaterhouseWeightedModelCount
   constructor <;> intro h t ht
-  · rw [weightedFiberSum_eq_modelFiberCount_div]
+  · rw [← weightedFiberSum_eq_modelFiberCount_div]
     exact h t ht
   · rw [weightedFiberSum_eq_modelFiberCount_div]
     exact h t ht
@@ -445,6 +445,158 @@ theorem waterhouseWeighted_of_modelCount {p : ℕ} {hp : p.Prime} {hurwitz : ℤ
     (h : WaterhouseWeightedModelCount p hp hurwitz) :
     WaterhouseWeighted p hp hurwitz :=
   (waterhouseWeighted_iff_modelCount p hp hurwitz).mpr h
+
+/-! ## 4. The bundled L27 input with the explicit finite identity -/
+
+/-- **The L27 Deuring input with the classical weighted identity replaced by
+the explicit finite model count.**
+
+Compared with `L27WaterhouseInputs`, the field `waterhouse` is replaced by
+`waterhouse_model`, which counts nonsingular Weierstrass equations with the
+prescribed trace and divides by the number of admissible variable changes.  The
+analytic Hurwitz leaves, the order-count domination, the `j`-line
+stratification, and the small-prime prepass are unchanged. -/
+structure L27WeightedInputs (I : L27_1Inputs) where
+  /-- The Hurwitz class number `H(-D)`. -/
+  hurwitz : ℤ → ℝ
+  /-- Siegel constant in `H(-D) ≥ c√D`. -/
+  c : ℝ
+  /-- Nondegeneracy fraction `D(p,j) ≥ θp` on smooth orders. -/
+  θ : ℝ
+  /-- The Siegel constant is positive. -/
+  c_pos : 0 < c
+  /-- The nondegeneracy fraction is positive. -/
+  θ_pos : 0 < θ
+  /-- The Hasse-scale constant is below the Siegel constant at scale `√θ`. -/
+  kappa_le : I.κ ≤ c * Real.sqrt θ
+  /-- Siegel's lower bound on Frobenius-trace discriminants. -/
+  siegel_lower : HurwitzSiegelLowerTrace I.p hurwitz c
+  /-- Smooth Frobenius discriminants retain a `θ`-fraction of the Hasse width. -/
+  disc_scale : HurwitzDiscriminantScale I.p I.smooth θ
+  /-- The target prime is prime, so the curve model is over a field. -/
+  p_prime : ∀ n, (I.p n).Prime
+  /-- The explicit finite raw equation-count form of Deuring/Waterhouse. -/
+  waterhouse_model : ∀ n,
+    WaterhouseWeightedModelCount (I.p n) (p_prime n) hurwitz
+  /-- The abstract order count dominates the raw finite curve count. -/
+  orderCount_dominates_raw : ∀ n j,
+    rawCurveOrderCount I.p p_prime n j ≤ I.orderCount n j
+  /-- The `j`-line stratification of the curves. -/
+  j_invariant_strata : JInvariantStratification I.p I.orderCount I.orderTop
+  /-- The target prime exceeds the two removed small primes. -/
+  p_ge_four : ∀ n, 4 ≤ I.p n
+
+namespace L27WeightedInputs
+
+variable {I : L27_1Inputs}
+
+/-- The classical weighted identity derived from the explicit finite model
+count. -/
+theorem waterhouse (D : L27WeightedInputs I) :
+    ∀ n, WaterhouseWeighted (I.p n) (D.p_prime n) D.hurwitz :=
+  fun n => waterhouseWeighted_of_modelCount (D.waterhouse_model n)
+
+/-- Reassemble the Waterhouse bundle with the classical weighted input derived
+rather than assumed. -/
+def toWaterhouseInputs (D : L27WeightedInputs I) : L27WaterhouseInputs I where
+  hurwitz := D.hurwitz
+  c := D.c
+  θ := D.θ
+  c_pos := D.c_pos
+  θ_pos := D.θ_pos
+  kappa_le := D.kappa_le
+  siegel_lower := D.siegel_lower
+  disc_scale := D.disc_scale
+  p_prime := D.p_prime
+  waterhouse := D.waterhouse
+  orderCount_dominates_raw := D.orderCount_dominates_raw
+  j_invariant_strata := D.j_invariant_strata
+  p_ge_four := D.p_ge_four
+
+/-- The one-sided Deuring trace count from the explicit finite identity. -/
+theorem deuringTraceCountLower (D : L27WeightedInputs I) :
+    DeuringTraceCountLower I.p I.orderCount D.hurwitz :=
+  D.toWaterhouseInputs.deuringTraceCountLower
+
+/-- Reassemble `L27TraceClassInputs` from the explicit finite identity. -/
+def toTraceClassInputs (D : L27WeightedInputs I) : L27TraceClassInputs I :=
+  D.toWaterhouseInputs.toTraceClassInputs
+
+/-- The bundled `DeuringLenstraCounts` hypothesis of `L27_1Sub`. -/
+theorem deuringLenstraCounts (D : L27WeightedInputs I) :
+    DeuringLenstraCounts I :=
+  D.toWaterhouseInputs.deuringLenstraCounts
+
+/-- The L27.1 ledger from the explicit finite identity. -/
+theorem reduced_ledger (D : L27WeightedInputs I)
+    (hhasse : HasseBound I.p I.orderCount)
+    (h0 : GCDExitNonneg I.gcdFail)
+    (h1 : GCDExitLeInv I.p I.gcdFail)
+    (h2 : GCDExitLeFailure I.gcdFail (fun n => 1 - I.success n))
+    (hstage : StageOneSuccess
+      (smoothFraction I.smooth I.orderCount I.orderTop) I.y I.success)
+    (hbudget : CurveBudget I.p I.y I.psi I.curves I.κ I.η)
+    (hlog : LogFactorSubexp I.cofactor) :
+    ∀ᶠ n : ℕ in atTop, I.loss n ≤ Real.exp (-(2 : ℝ) * scale n) :=
+  D.toWaterhouseInputs.reduced_ledger hhasse h0 h1 h2 hstage hbudget hlog
+
+/-- The manuscript-rate deficit bound from the explicit finite identity. -/
+theorem reduced_paper (D : L27WeightedInputs I)
+    (hhasse : HasseBound I.p I.orderCount)
+    (h0 : GCDExitNonneg I.gcdFail)
+    (h1 : GCDExitLeInv I.p I.gcdFail)
+    (h2 : GCDExitLeFailure I.gcdFail (fun n => 1 - I.success n))
+    (hstage : StageOneSuccess
+      (smoothFraction I.smooth I.orderCount I.orderTop) I.y I.success)
+    (hbudget : CurveBudget I.p I.y I.psi I.curves I.κ I.η)
+    (hlog : LogFactorSubexp I.cofactor) :
+    ∀ᶠ n : ℕ in atTop, I.loss n ≤ Real.exp (-((I.cRate / 2) * I.rate n)) :=
+  D.toWaterhouseInputs.reduced_paper hhasse h0 h1 h2 hstage hbudget hlog
+
+end L27WeightedInputs
+
+/-- **The full reduction from the explicit finite model count.**  The analytic
+Hurwitz leaves, the explicit finite Deuring/Waterhouse count, the order-count
+domination, the `j`-line stratification, and the small-prime prepass imply both
+bundled `L27_1Sub` hypotheses and both deficit conclusions. -/
+theorem reduction_of_weighted {I : L27_1Inputs}
+    (D : L27WeightedInputs I)
+    (hhasse : HasseBound I.p I.orderCount)
+    (h0 : GCDExitNonneg I.gcdFail)
+    (h1 : GCDExitLeInv I.p I.gcdFail)
+    (h2 : GCDExitLeFailure I.gcdFail (fun n => 1 - I.success n))
+    (hstage : StageOneSuccess
+      (smoothFraction I.smooth I.orderCount I.orderTop) I.y I.success)
+    (hbudget : CurveBudget I.p I.y I.psi I.curves I.κ I.η)
+    (hlog : LogFactorSubexp I.cofactor) :
+    DeuringLenstraCounts I ∧ EllipticCurveGroupLaw I ∧
+      (∀ᶠ n : ℕ in atTop, I.loss n ≤ Real.exp (-(2 : ℝ) * scale n)) ∧
+      (∀ᶠ n : ℕ in atTop,
+        I.loss n ≤ Real.exp (-((I.cRate / 2) * I.rate n))) :=
+  reduction_of_waterhouse D.toWaterhouseInputs hhasse h0 h1 h2 hstage hbudget hlog
+
+/-! ## Axiom audit and signatures -/
+
+#check sum_inv_card_stabilizer_eq_card_div_card_group
+#check sum_ite_invariant_eq_card_filter_div_card_group
+#check curvePointCount_smul
+#check weightedCurveCount_eq_fiberSum
+#check weightedFiberSum_eq_modelFiberCount_div
+#check waterhouseWeighted_iff_fiberSum
+#check waterhouseWeighted_iff_modelCount
+#check L27WeightedInputs.toWaterhouseInputs
+#check reduction_of_weighted
+
+#print axioms sum_inv_card_stabilizer_eq_card_div_card_group
+#print axioms sum_ite_invariant_eq_card_filter_div_card_group
+#print axioms curvePointCount_smul
+#print axioms weightedCurveCount_eq_fiberSum
+#print axioms weightedFiberSum_eq_modelFiberCount_div
+#print axioms waterhouseWeighted_iff_fiberSum
+#print axioms waterhouseWeighted_iff_modelCount
+#print axioms L27WeightedInputs.toWaterhouseInputs
+#print axioms L27WeightedInputs.deuringLenstraCounts
+#print axioms reduction_of_weighted
 
 end
 

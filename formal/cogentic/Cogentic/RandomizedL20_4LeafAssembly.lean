@@ -91,6 +91,23 @@ theorem toPairData_event_iff {Ω : Type*} [Fintype Ω] (S : TwoPointAltReducedDa
     PairAltConditionedData.toPairConditionedData, PairConditionedData.toPairData,
     pairEvent, pairEventAlt]
 
+/-- Pool losses agree when the underlying events are pointwise equivalent. -/
+theorem poolLoss_congr_event {Ω : Type*} [Fintype Ω] (dyadCard : ℕ → ℕ)
+    (μ : ℕ → PMF Ω) {E F : ℕ → Ω → Prop} (Z : ℕ → Ω → ℝ) (a : ℝ)
+    (poolSize : ℕ → ℕ) (h : ∀ n ω, E n ω ↔ F n ω) :
+    poolLoss dyadCard μ E Z a poolSize = poolLoss dyadCard μ F Z a poolSize := by
+  funext n
+  unfold Cogentic.RandomizedL20_4Sub.poolLoss Cogentic.RandomizedL20_4Sub.hitProb
+  have hnum : pmfProb (μ n) (fun ω => E n ω ∧ a / 2 ≤ Z n ω) =
+      pmfProb (μ n) (fun ω => F n ω ∧ a / 2 ≤ Z n ω) :=
+    pmfProb_congr_event (μ n) fun ω => by
+      constructor
+      · rintro ⟨hE, hZ⟩
+        exact ⟨(h n ω).mp hE, hZ⟩
+      · rintro ⟨hE, hZ⟩
+        exact ⟨(h n ω).mpr hE, hZ⟩
+  rw [hnum, pmfProb_congr_event (μ n) (h n)]
+
 /-- **The corrected pair loss is exactly the disjunction-event pool loss.**
 This is the formal check that the assembled leaf charges the pool miss mass of
 `g ∨ R_{q,s}` and not of the inconsistent conjunction `g ∧ R_{q,s}`. -/
@@ -100,24 +117,13 @@ theorem pairLoss_eq_poolLoss {Ω : Type*} [Fintype Ω]
       poolLoss S.dyadCard S.μ (fun m => pairEventAlt S.good S.childRoot m)
         S.Z S.a S.poolSize n := by
   unfold Cogentic.RandomizedL20_4Sub.PairData.loss
-    Cogentic.RandomizedL20_4Sub.poolLoss
-    Cogentic.RandomizedL20_4Sub.hitProb
-  have hnum : pmfProb (S.μ n)
-        (fun ω => pairEvent S.toPairData.good S.toPairData.childRoot n ω ∧
-          S.a / 2 ≤ S.Z n ω) =
-      pmfProb (S.μ n)
-        (fun ω => pairEventAlt S.good S.childRoot n ω ∧ S.a / 2 ≤ S.Z n ω) :=
-    pmfProb_congr_event (S.μ n) fun ω => by
-      constructor
-      · rintro ⟨hE, hZ⟩
-        exact ⟨(toPairData_event_iff S n ω).mp hE, hZ⟩
-      · rintro ⟨hE, hZ⟩
-        exact ⟨(toPairData_event_iff S n ω).mpr hE, hZ⟩
-  have hden : pmfProb (S.μ n)
-        (pairEvent S.toPairData.good S.toPairData.childRoot n) =
-      pmfProb (S.μ n) (pairEventAlt S.good S.childRoot n) :=
-    pmfProb_congr_event (S.μ n) (toPairData_event_iff S n)
-  rw [hnum, hden]
+  have h := congrFun (poolLoss_congr_event S.toPairData.dyadCard S.toPairData.μ
+    (E := fun m ω => pairEvent S.toPairData.good S.toPairData.childRoot m ω)
+    (F := fun m ω => pairEventAlt S.good S.childRoot m ω)
+    S.toPairData.Z S.toPairData.a S.toPairData.poolSize
+    (fun m ω => toPairData_event_iff S m ω)) n
+  rw [h]
+  rfl
 
 /-- The disjunction event is positive as soon as the child-root event is.  This
 records that `TwoPointAltReducedData.event_pos` is not a paper-level estimate:
@@ -435,6 +441,7 @@ theorem top_subexp_of_paperComparison (S : SourcedTopData)
 
 #print axioms pmfProb_congr_event
 #print axioms toPairData_event_iff
+#print axioms poolLoss_congr_event
 #print axioms pairLoss_eq_poolLoss
 #print axioms eventPos_of_childRootPositive
 #print axioms childRootPositive_of_massLower_all

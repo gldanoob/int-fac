@@ -26,6 +26,7 @@ import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_2SmoothLower
 import Cogentic.RandomizedL20_2SmoothMass
 import Cogentic.RandomizedL20_2PaperSmooth
+import Cogentic.RandomizedL20_2ConcentrationLeaf
 import Cogentic.RandomizedL20_2CoordinateEnergy
 import Cogentic.RandomizedL20_2Decay
 import Cogentic.RandomizedL20_2DecayNonempty
@@ -40,6 +41,7 @@ import Cogentic.RandomizedL20_4TwoPoint
 import Cogentic.RandomizedL20_4EventMass
 import Cogentic.RandomizedL20_4ChildLower
 import Cogentic.RandomizedL20_4PairAlt
+import Cogentic.RandomizedL20_4LeafAssembly
 import Cogentic.RandomizedL20_4Mean
 import Cogentic.RandomizedL20_4InteriorBase
 import Cogentic.RandomizedL20_4BaseSource
@@ -85,6 +87,7 @@ import Cogentic.RandomizedL27TraceClass
 import Cogentic.RandomizedL27Siegel
 import Cogentic.RandomizedL27ClassNumber
 import Cogentic.RandomizedL27Waterhouse
+import Cogentic.RandomizedL27Weighted
 import Cogentic.RandomizedL27StageOne
 import Cogentic.RandomizedL27GcdModel
 import Cogentic.RandomizedL27KillLaw
@@ -320,6 +323,9 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2SmoothMass.smoothNumberMassLogLower_selfSmooth
 #print axioms Cogentic.RandomizedL20_2PaperSmooth.paperSmoothNumberCountLower
+#print axioms Cogentic.RandomizedL20_2ConcentrationLeaf.SaddleConcentrationSource.toPaperLeaf
+#print axioms Cogentic.RandomizedL20_4LeafAssembly.top_subexp_of_paperComparison
+#print axioms Cogentic.RandomizedL27Weighted.reduction_of_weighted
 #print axioms Cogentic.RandomizedL20_4BaseSource.baseConcentrationSource_paperG11BaseMass
 #print axioms Cogentic.RandomizedL27Siegel.L27SiegelInputs.toTraceClassInputs
 #print axioms Cogentic.RandomizedL27ClassNumber.toSiegelInputs_of_classNumberFormula
