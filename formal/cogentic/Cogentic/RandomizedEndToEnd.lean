@@ -40,6 +40,7 @@ import Cogentic.RandomizedL20_2Width
 import Cogentic.RandomizedL20_2Fit
 import Cogentic.RandomizedL20_2BandScale
 import Cogentic.RandomizedL20_2CRTBudget
+import Cogentic.RandomizedL20_2BandNumeric
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
@@ -442,6 +443,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2BandScale.primeBinEnvelopeWidthCore_of_floorFreeCore
 #print axioms Cogentic.RandomizedL20_2CRTBudget.geometricCRTError_subexp
 #print axioms Cogentic.RandomizedL20_2CRTBudget.paperEpsRat_subexp_of_budgets
+#print axioms Cogentic.RandomizedL20_2BandNumeric.eventually_paperBandFloorFreeCore
 #print axioms Cogentic.RandomizedL20_4InteriorBase.InteriorBaseSources.toInteriorSourceData
 #print axioms Cogentic.RandomizedL20_4Top.TopG12ThreeData.toG12TopInputs
 #print axioms Cogentic.RandomizedL20_4Additive.G54G55ThreeTermComparisonData.toG12TopInputs
