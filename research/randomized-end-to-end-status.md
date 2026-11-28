@@ -1193,6 +1193,24 @@ constant `W = 4 log 5` provably does not dominate `scale`
 (`iCore_not_W_dominates`); a paper-regime witness takes `W = log V` and does.
 The old `no_L18_4Certificate` no-go is gone.
 
+
+### Wave 33: repaired L18.4 and zero-index audit
+
+The L18.4 growth fields are now guarded at the exact paper regime `3 ≤ n`
+(`scale 0 = scale 1 = 0`, `scale 2 < 0`, `scale 3 > 0`). The repaired
+`L18_4Certificate` is inhabited modulo exactly `L18_4CoreResidual`:
+`W_dominates` and `cellSupply (PrimeBinCellSupply)`; all finite cell, mass,
+large-sieve and thin data are constructed by `RandomizedL18_4Inhabitant`.
+`RandomizedZeroIndexAudit` re-audits every residual structure at `n = 0`:
+`PoissonQuotientInputs`, `EnergyScaleInputs`, `ZeroModeCertificate`,
+`LatticeThinInputs`, `Wave15L19Inputs`, `CellData`, `SaddleConcentrationSource`,
+`L20_2Inputs`, `DyadData`, `TopG12AdditiveData`, `L27_1Inputs`,
+`L27StageOneFinishInputs`, `HasseBound`, `CurveBudget`, `Wave28L34Inputs`,
+`L34ChebotarevSidesInputs` (no zero-index conflict), `FailureData` (guarded at
+`1 ≤ n`) and `SubexpPrepassInput` are all inhabited; no further `n = 0`
+structural repair is needed. The L34 witness quality caveat (vacuous zero-free
+field, placeholder `liX`/`liBetaY`) is recorded.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
