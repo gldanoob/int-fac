@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave27.serialized_assembled_balancedEnvelopeInfimum_from_wave27Inputs`:
+`RandomizedPaperEndpointWave29.serialized_assembled_balancedEnvelopeInfimum_from_wave29Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor27 (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor29 (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1030,6 +1030,23 @@ analytic input.
   `Wave28L34Inputs`.
 - A Wave-29 agent is merging the two reductions with the Wave-26 L30 record
   into one E-generic endpoint.
+
+
+### Wave 29: the combined E-generic endpoint
+
+`RandomizedPaperEndpointWave29` combines the Wave-27 L21 reduction (RH plus the
+central short count), the Wave-28 Stark replacement, and the Wave-26 L30
+reduction (a single sharp central count) into one record of **18 fields**. The
+endpoint stays `E`-generic. Its analytic residual names are:
+
+```
+zetaRH, localCount, short_interval,
+hurwitzClassNumber, siegelLower, hasse, waterhouseTrace,
+killMass, curveBudget,
+zeroFree, cheb, range, beta0_le_half,
+l18_4, l19, l20_2, l20_4,
+c1, c2, c3, c4, concrete, p1
+```
 
 ## What is not proved
 
