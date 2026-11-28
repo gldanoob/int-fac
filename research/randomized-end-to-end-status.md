@@ -1001,6 +1001,16 @@ agent is combining this with the Wave-25 derived upper density so that the
 generic L30 leaf has only the sharp central short-interval count as its
 analytic input.
 
+- **The C1 product identity is a real epoch property.** `GlobalProductIdentity`
+  is not a consequence of `ConcreteEpochData` (the solver is arbitrary), and the
+  placeholder `goodEpochOfLe` fails it at `N = 15`
+  (`not_globalProductIdentity_goodEpochOfLe`). `RandomizedConcreteC1` builds a
+  repaired concrete epoch with an explicit finite square-root search
+  (`concreteSolver`) and proves `concreteEpoch_globalProductIdentity` and
+  `c1Inputs_concreteEpoch`. The search is charged to stage `S0`, so this is a
+  genuine (costly) epoch, not a free oracle; it shows the C1 field is
+  inhabitable but does not by itself give the paper's cost bound.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
