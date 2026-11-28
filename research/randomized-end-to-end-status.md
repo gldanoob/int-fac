@@ -1168,6 +1168,21 @@ is now exactly the Buchstab short-interval estimate plus the parity fraction.
   c4`), and the fake `p=4` L30 witness is proved not to satisfy
   `PaperDensityGrowth`.
 
+
+### Critical defect: L18.4 is inconsistent at `n = 0`
+
+`RandomizedL18_4Inhabitant` proves `L18_4Certificate → False`: the ambient
+growth bounds are unguarded `∀ n`, so at `n = 0` (`scale 0 = 0`) they give
+`W 0 ≤ 1`, while `CellData.width 0` and `CellData.B_le_V 0` force
+`1 ≤ exp(3W/4) ≤ B−A ≤ exp W − 2 < 1`. Since every endpoint record contains
+`l18_4 : L18_4Certificate`, the Wave 13–31 endpoints are vacuous until the
+certificate's growth fields are restricted to the paper regime `n ≥ 1` (the
+epoch uses `n ≥ 3`). A repair agent is propagating the guard through
+`L18_4Certificate.toInputs`, the leaf/loss bounds and the endpoint records.
+The same audit constructs the largest coherent sub-record (`iCore`) with all
+finite cell/mass/large-sieve/thin data and identifies `cellSupply` as the only
+remaining analytic input.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
