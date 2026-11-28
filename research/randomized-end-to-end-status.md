@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave34.serialized_assembled_balancedEnvelopeInfimum_from_wave34Inputs`:
+`RandomizedPaperEndpointWave35.serialized_assembled_balancedEnvelopeInfimum_from_wave35Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor34 line K (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor35 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1262,6 +1262,17 @@ removed and the ledger uses the constructed certificate (loss `thin = 1/R > 0`).
 The endpoint is `serialized_assembled_balancedEnvelopeInfimum_from_wave34Inputs`
 (K- and E-generic). The residual list drops to **25** names; `l18_4`,
 `zeroFree`, `stark`, and the generic `short_interval` are all absent.
+
+
+### Wave 35: the Dedekind strip derived from GRH + factorization
+
+`RandomizedPaperEndpointWave35` removes `zeroStrip` from the L34 block: the
+strip packet is derived from `line : DirichletLZerosOnLine` and the explicit
+abelian factorization `ζ_K = ∏ χ L(·,χ)` plus the `β₀ ≥ 1/2` arithmetic.
+The endpoint is `serialized_assembled_balancedEnvelopeInfimum_from_wave35Inputs`,
+quantifying over `K`, the factorization data and `E`. The remaining L34
+residuals are the factorization, the zero sequence (`zeroSeq`,
+`zeroSeq_lt_one`), `cheb`, `range`, `half_le_beta0`, `beta0_le_half`.
 
 ## What is not proved
 
