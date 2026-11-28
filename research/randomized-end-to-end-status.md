@@ -766,6 +766,14 @@ The still-unproved statements are therefore concentrated in:
   statement but violates both. The missing content is exactly an upper bound on
   the factorial factor against the exponential gain.
 
+- **L21.2 concrete leaf.** `RandomizedL21_2ConcreteLeaf` builds an actual
+  `Wave17L21_2Inputs` on the elementary profile with the three-mode tent witness,
+  the proved Fourier band bounds, the unconditional vertical tail and the
+  elementary growth relations. Only two residual components remain: the zeta
+  side (`RiemannZetaZerosOnLine` plus the line estimate / `ZetaLineZeroFree`)
+  and the central `ShortIntervalSmoothCountLower`. RH is genuinely required: the
+  line condition alone does not exclude zeros off `Re s = 2/3`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
