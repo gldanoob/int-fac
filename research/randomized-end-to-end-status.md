@@ -6,17 +6,18 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave25.serialized_assembled_balancedEnvelopeInfimum_from_wave25Inputs`:
+`RandomizedPaperEndpointWave26.serialized_assembled_balancedEnvelopeInfimum_from_wave26Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor25 (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor26 (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
 (`RandomizedC1C2FromConcrete`: `2² ≠ 1` in `ZMod 15`); those records are empty
 and those endpoints are vacuous, retained only as reduction scaffolding.
-The sharp L30 upper-density field is already removed in Wave 25, because
-`RandomizedL30PrimeReciprocal.paperScaleSmoothUpperSharp_one_unconditional`
-proves it unconditionally from `PaperDensityGrowth` and `ε > 0`.
+Wave 26 leaves the L30 analytic residual exactly `YounisOddPaperSharpIntervalCount`:
+the sharp upper density is proved unconditionally from `PaperDensityGrowth` and
+`ε > 0`, the global lower bound is proved from GRH at constant `1/8`, and the
+finite-set binomial bound is no longer needed by any ledger consumer.
 
 The manuscript bound is still **not** proved unconditionally: the remaining
 inputs are the classical `L(1,χ)` lower bound, the zeta line zero-free/lower
