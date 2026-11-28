@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave36.serialized_assembled_balancedEnvelopeInfimum_from_wave36Inputs`:
+`RandomizedPaperEndpointWave37.serialized_assembled_balancedEnvelopeInfimum_from_wave37Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor36 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor37 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1284,6 +1284,14 @@ strip packet directly, deleting `zeroSeq`, `zeroSeq_realPart`, `zeroSeq_lt_one`
 `serialized_assembled_balancedEnvelopeInfimum_from_wave36Inputs`, with **24**
 residual names; `zeroFree`, `zeroStrip`, `zeroSeq`, `zeroSeq_lt_one`, `stark`
 and `l18_4` are all absent.
+
+
+### Wave 37: `β₀ = 1/2`
+
+`RandomizedPaperEndpointWave37` fixes `β₀ = 1/2` (the two former half-line
+fields forced it), derives `half_le_beta0`/`beta0_le_half` as theorems and
+deletes both. The residual list drops to **22**; only `paperBeta0_ge_half`
+remains as the arithmetic side condition for Stark.
 
 ## What is not proved
 
