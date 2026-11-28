@@ -658,6 +658,29 @@ The still-unproved statements are therefore concentrated in:
   energy identities and genuine nonzero losses; the thin certificate is wired
   into `L19FullCertificate.withThin`.
 
+### Wave 17: constant Perron reference and the last interface repairs
+
+- **Absolute constant Perron reference.** `RandomizedPaperEndpointWave17`
+  proves `referencePerronBound_of_errorBound_absolute`: the truncated Perron
+  error is `C(v log²v/T + log v) ≤ (2C+2)√v log²(2v)`, so the reference constant
+  can be an absolute `wave17KrefConst = 2C+2`. The earlier `X`-growing
+  `wave16Kref` made `Wave16L21_2Inputs.Ksum_le` unsatisfiable on unbounded `X`;
+  wave 17 derives `Ksum_le` from `Kline = max KlineRaw (π(Kref+Kcont+Ktail))`
+  and proves `lineBound` by monotonicity.
+- **`Wave17Inputs`** is the strongest endpoint; the conclusion is
+  `serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`, with the
+  perron reference/horizontal-remainder fields no longer assumed.
+- **Node-count interface.** `FailureData.nodes_pos` (and the copy in
+  `L30Inputs`) was `∀ n, 0 < nodes n`, which contradicted
+  `factor_tree_nodes : nodes n ≤ 2n` at `n = 0`. It is now
+  `∀ n, 1 ≤ n → 0 < nodes n`; the epoch regime is `n ≥ 3`, so nothing is lost
+  and the structure is inhabited.
+- **L19 zero mode and L34 zero-free arithmetic.** A concrete diagonal spectral
+  `ZeroModeCertificate` with positive retained/discarded energies and an
+  explicit elliptic-discard ratio; and the paper's `β₀ = 1 - 1/(4F log|Δ|)`
+  proved to lie in `(0,1)` and to satisfy the Stark/strip/classical-region
+  inequalities.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
