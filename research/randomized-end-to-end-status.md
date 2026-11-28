@@ -1067,6 +1067,15 @@ c1, c2, c3, c4, concrete, p1
   (it would force the conductor product to be `1`) and keeps Siegel's
   `L(1,χ)` input strictly separate.
 
+
+- `RandomizedL27ResidueFactorization` reduces the maximal-order residue
+  identification to the abelian factorization with one principal character
+  (`AbelianFactorizationWithRiemannZeta`) plus the explicit product identity
+  `∏_{i≠i₀} L(1,χ_i) = L1 D` (`QuadraticCharacterProduct`). Given the
+  factorization, the residue identity is *equivalent* to that product identity,
+  so the geometric/analytic residual is now precisely factored into
+  (i) the maximal-order field realization and (ii) the nonprincipal product.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
