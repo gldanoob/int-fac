@@ -1232,6 +1232,16 @@ endpoint remains `K`- and `E`-generic. `D = 3` and `D = 4` class-number
 formulas are now unconditional (only the isolated Kronecker values
 `π/(3√3)` and `π/4` remain).
 
+
+- `RandomizedL30BuchstabSubInterval` strengthens the Buchstab reduction: it
+  proves the exact windowed split, identifies the sub-interval statement with
+  `LargePrimeSmoothWindowLower`, and shows that the missing input is a
+  short-interval lower bound for smooth *cofactors* `a` in
+  `((p² − η p^{3/2})/P, p²/P]`, not a prime count near `p²` (primes near `p²`
+  contribute no Buchstab pair because the cutoff is `P ≤ y`). The sufficient
+  pair `WindowSmoothLower` + `WindowSqrtSmoothUpper` with `c + D ≤ C` is proved
+  to imply the target, and the sub-interval form is inhabited at `p = 9`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
