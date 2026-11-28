@@ -6,9 +6,9 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave35.serialized_assembled_balancedEnvelopeInfimum_from_wave35Inputs`:
+`RandomizedPaperEndpointWave36.serialized_assembled_balancedEnvelopeInfimum_from_wave36Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor35 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor36 line K ι N χ (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
@@ -1273,6 +1273,17 @@ The endpoint is `serialized_assembled_balancedEnvelopeInfimum_from_wave35Inputs`
 quantifying over `K`, the factorization data and `E`. The remaining L34
 residuals are the factorization, the zero sequence (`zeroSeq`,
 `zeroSeq_lt_one`), `cheb`, `range`, `half_le_beta0`, `beta0_le_half`.
+
+
+### Wave 36: no zero sequence, 24 residuals
+
+`RandomizedPaperEndpointWave36` refactors the L34 side to consume the all-zeros
+strip packet directly, deleting `zeroSeq`, `zeroSeq_realPart`, `zeroSeq_lt_one`
+(and `zeroRealPart`). `zeroStrip` is derived from the factorization and
+`Stark` from the half-line arithmetic. The endpoint is
+`serialized_assembled_balancedEnvelopeInfimum_from_wave36Inputs`, with **24**
+residual names; `zeroFree`, `zeroStrip`, `zeroSeq`, `zeroSeq_lt_one`, `stark`
+and `l18_4` are all absent.
 
 ## What is not proved
 
