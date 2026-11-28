@@ -37,6 +37,7 @@ import Cogentic.RandomizedL20_2DecayNonempty
 import Cogentic.RandomizedL20_2Width
 import Cogentic.RandomizedL20_2Fit
 import Cogentic.RandomizedL20_2BandScale
+import Cogentic.RandomizedL20_2CRTBudget
 import Cogentic.RandomizedL20_4
 import Cogentic.RandomizedL20_4Sub
 import Cogentic.RandomizedL20_4Conditioned
@@ -153,6 +154,7 @@ import Cogentic.RandomizedL18_4Full
 import Cogentic.RandomizedL18_4LargeSieve
 import Cogentic.RandomizedL18_4LargeSieveInputs
 import Cogentic.RandomizedL18_4LargeSieveResidual
+import Cogentic.RandomizedL18_4SieveFinish
 import Cogentic.RandomizedL18_4EnergyBudget
 import Cogentic.RandomizedL18_4ConvolutionEnergy
 import Cogentic.RandomizedL18_4LatticeCount
@@ -394,6 +396,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL18_4ThinFinish.ThinLatticeData.toLatticeThinInputs
 #print axioms Cogentic.RandomizedL18_4.L18_4CellFinish.cell_numerator_count
 #print axioms Cogentic.RandomizedL18_4.L18_4CellFinish.toCertificate
+#print axioms Cogentic.RandomizedL18_4.LargeSieveFinishData.large_sieve_with_nonzero_error
+#print axioms Cogentic.RandomizedL18_4.L18_4Certificate.toSubexpLeafWithLargeSieve
 #print axioms Cogentic.RandomizedL27Hurwitz.L27HurwitzInputs.hurwitzClassLower
 #print axioms Cogentic.RandomizedL27Scale.hurwitzDiscriminantScale_iff_centralTraceWindow
 #print axioms Cogentic.RandomizedL27Window.centralTraceWindow_paperSmooth
@@ -404,6 +408,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4ChildLower.eventMassLower_pairEvent_of_childRootMassLower
 #print axioms Cogentic.RandomizedL20_4PairAlt.TwoPointAltReducedData.toPairConditionedData
 #print axioms Cogentic.RandomizedL20_2BandScale.primeBinEnvelopeWidthCore_of_floorFreeCore
+#print axioms Cogentic.RandomizedL20_2CRTBudget.geometricCRTError_subexp
+#print axioms Cogentic.RandomizedL20_2CRTBudget.paperEpsRat_subexp_of_budgets
 #print axioms Cogentic.RandomizedL20_4InteriorBase.InteriorBaseSources.toInteriorSourceData
 #print axioms Cogentic.RandomizedL20_4Top.TopG12ThreeData.toG12TopInputs
 #print axioms Cogentic.RandomizedL20_4Additive.G54G55ThreeTermComparisonData.toG12TopInputs
