@@ -989,6 +989,18 @@ so the entire Rankin/Euler-product chain now has no hypotheses beyond the
 paper density growth and `ε > 0`. `Wave25` removes the `l30SharpUpper` field and
 derives it from the arithmetic condition `1 ≤ l30C` by monotonicity.
 
+### Wave 26: removing the L30 binomial and upper-density fields
+
+`RandomizedL30NoBinomial` defines `Wave14L30CountsNoBinomial`, replacing the
+finite-set binomial lower bound `GlobalOddBinomialCount` by the direct
+`global_lower : YounisOddGlobalLower` (which `RandomizedL30SmoothDensity`
+derives from GRH + density growth at constant `1/8`). No ledger consumer needs
+the binomial bound (`toWave13Counts` consumes `global_lower` directly), and the
+literal Wave-14 round trip only needs the binomial as an argument. A Wave-26
+agent is combining this with the Wave-25 derived upper density so that the
+generic L30 leaf has only the sharp central short-interval count as its
+analytic input.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
