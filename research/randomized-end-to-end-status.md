@@ -4,16 +4,19 @@ Branch `explore/randomized-one-third`, base commit `0bcb1db`, Lean
 `leanprover/lean4:v4.33.1`. This note records what the end-to-end pass actually
 proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
-and a chain of strengthened endpoints `Wave13`–`Wave17`. The strongest current
+and a chain of strengthened endpoints `Wave13`–`Wave18`. The strongest current
 theorem is
-`RandomizedPaperEndpointWave17.serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`.
-Its hypothesis record is *inhabited* (`RandomizedWave17Audit`) modulo exactly the
-ten analytic leaf records and C1–C4, so it is not vacuous. The manuscript bound
-itself is still **not** proved unconditionally: the remaining inputs are the
-classical `L(1,χ)` lower bound, the zeta line lower bound, the central
-short-interval smooth count, the Dedekind zero-free region plus zero-height
-bound, Stark, Chebotarev, and the subexponential prepass. The interface history
-below records the vacuity repairs that were needed to reach this state.
+`RandomizedPaperEndpointWave18.serialized_assembled_balancedEnvelopeInfimum_from_wave18Inputs`.
+Its hypothesis is a single named record `PaperResidualInputs` of 73 fields, and
+the record is inhabited by the standard one-point family modulo exactly the
+analytic leaf data (the `RandomizedWave17Audit` shows no field is structurally
+impossible). The manuscript bound itself is still **not** proved
+unconditionally: the remaining inputs are the classical `L(1,χ)` lower bound,
+the zeta line zero-free/lower bound, the central short-interval smooth count,
+the paper-scale smooth upper density, the Dedekind zero-free region plus
+zero-height bound, Stark, effective Chebotarev with the factorial log budgets,
+and the subexponential prepass. The interface history below records the vacuity
+repairs that were needed to reach this state.
 
 ## Reproduction
 
@@ -773,6 +776,38 @@ The still-unproved statements are therefore concentrated in:
   side (`RiemannZetaZerosOnLine` plus the line estimate / `ZetaLineZeroFree`)
   and the central `ShortIntervalSmoothCountLower`. RH is genuinely required: the
   line condition alone does not exclude zeros off `Re s = 2/3`.
+
+### Wave 18: the single residual bundle
+
+`RandomizedPaperEndpointWave18` defines `PaperResidualInputs D`, a 73-field
+named record, and proves
+
+```
+serialized_assembled_balancedEnvelopeInfimum_from_wave18Inputs
+  (R : ∀ D : ℝ, PaperResidualInputs D) :
+  ∃ k sound, 1.9839824118071388228 < balancedEnvelopeInfimum ∧
+    balancedEnvelopeInfimum < 1.9839824118071388230 ∧
+    (decoded factors are a permutation of the prime factors) ∧
+    (expected serialized cost ≤ exp ((infimum + ε) scale n))
+```
+
+through `toWave17Remaining` and `nonempty_wave17Inputs_of_remaining`. The field
+groups are:
+
+- **zeta/GRH**: `line : DirichletLZerosOnLine`, `zetaRH`;
+- **L21.2**: the profile and its elementary parameters, the Fourier band bounds,
+  the vertical tail, `ZetaLineZeroFree` plus the range-local log-derivative
+  bound, and the central `ShortIntervalSmoothCountLower`;
+- **L30**: `PaperDensityGrowth`, the paper-scale smooth upper density, the
+  central short count, the eventual binomial lower bound, the Cantor cost data
+  and the failure data;
+- **L27**: class-number formula, `SiegelLOneLower`, Hasse, the weighted
+  Deuring/Waterhouse model, the `j`-line fiber count, the central trace window,
+  the kill-mass law and the budget arithmetic;
+- **L34**: `L34EffectiveChebotarevInputs`, the Dedekind classical region plus
+  zero-height bound, and Stark;
+- **L18.4/L19/L20.2/L20.4**: the recomposed certificates and sources;
+- **prepass and control**: `SubexpPrepassInput` and C1–C4.
 
 ## What is not proved
 
