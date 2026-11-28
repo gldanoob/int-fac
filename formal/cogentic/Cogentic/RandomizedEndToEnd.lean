@@ -16,6 +16,7 @@ import Cogentic.RandomizedL19EnergyMass
 import Cogentic.RandomizedL19EnergyMassFinite
 import Cogentic.RandomizedL19ZeroMode
 import Cogentic.RandomizedL19ZeroModeFinite
+import Cogentic.RandomizedL19ZeroModeConcrete
 import Cogentic.RandomizedL19Thin
 import Cogentic.RandomizedL19PoissonEnergy
 import Cogentic.RandomizedL19ThinWiring
@@ -71,6 +72,7 @@ import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
 import Cogentic.RandomizedL34LogIntegral
+import Cogentic.RandomizedL34ZeroFreeArithmetic
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5HitMassFinish
 import Cogentic.RandomizedC5GoodIff

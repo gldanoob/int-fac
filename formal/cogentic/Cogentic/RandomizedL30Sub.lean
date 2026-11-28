@@ -321,8 +321,9 @@ structure FailureData where
   curve_trial_cap : CurveTrialCap k Lc Rcurve
   /-- The compressed factor-tree node count. -/
   nodes : ℕ → ℕ
-  /-- The tree is nonempty. -/
-  nodes_pos : ∀ n, 0 < nodes n
+  /-- The tree is nonempty at every positive input (the index `0` is
+  outside the epoch regime and is intentionally not constrained). -/
+  nodes_pos : ∀ n, 1 ≤ n → 0 < nodes n
   /-- **Factor-tree size.** -/
   factor_tree_nodes : FactorTreeNodes nodes
   /-- The failure probability. -/

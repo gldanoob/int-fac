@@ -195,8 +195,8 @@ structure L30Inputs where
   curve_trial_cap : CurveTrialCap k Lc Rcurve
   /-- The number of nodes in the compressed factor tree. -/
   nodes : ℕ → ℕ
-  /-- The factor tree has at least one node. -/
-  nodes_pos : ∀ n, 0 < nodes n
+  /-- The factor tree has at least one node at every positive input. -/
+  nodes_pos : ∀ n, 1 ≤ n → 0 < nodes n
   /-- **The factor-tree size bound.** -/
   factor_tree_nodes : FactorTreeNodes nodes
   /-- The FAIL probability of `Smooth (x, y, L_c)`. -/
