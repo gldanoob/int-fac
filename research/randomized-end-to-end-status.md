@@ -681,6 +681,29 @@ The still-unproved statements are therefore concentrated in:
   proved to lie in `(0,1)` and to satisfy the Stark/strip/classical-region
   inequalities.
 
+### Wave 18: non-vacuity and the C5 ledger repair
+
+- **L20.2 source witness** (`RandomizedL20_2SourceWitness`): an explicit
+  `SaddleConcentrationSource` built from the actual smooth-number cell, with
+  `a = 1/48`, positive saddle mass, and loss `(1/2)/mass > 0`. This makes the
+  Wave 17 `l20_2` field non-vacuous.
+- **L21.2 tent witness** (`RandomizedL21_2TentWitness`): an explicit
+  `TentProfile` with sharp finite Plancherel, nonzero low-band energy, the
+  three Fourier band bounds, and a bad-set fraction `≥ 1/3`.
+- **Factor-tree interface.** `FactorTreeNodes` is now guarded at `1 ≤ n`
+  (a factor tree at input `0` is outside the epoch regime), so
+  `FailureData` is inhabited: `RandomizedL30CountsNonvacuous` and
+  `RandomizedWave17Audit` both construct explicit witnesses
+  (`nodes = 1`, `k = 1200`, `pTrial = 1/2`, positive failure probability),
+  and `Nonempty Wave14L30Inputs` is proved.
+- **C5 placeholder repair.** `c5algebraOfCount` had three losses set to `1` for
+  the events `oddDegreeOk = True`, `valuationOk = True`, `henselOk = True`.
+  Those events have exact failure probability `0`, so the losses are now `0`
+  (with proofs from `pmfProb_not_true_eq_zero`). Consequently the C5 total is
+  `pool + survivor + descent + algebraMass + coupling`; the previous `+3`
+  made the Wave 15/16/17 `loss_le` adapter unsatisfiable (a constant `3` versus
+  a ledger total that is eventually `≤ 1`).
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
