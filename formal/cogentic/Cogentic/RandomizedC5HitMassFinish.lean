@@ -56,7 +56,7 @@ The total loss is the explicit sum
 
 ```
 pool.loss + survivor.loss + descent.loss
-  + (algebraMass D + 1 + 1 + 1) + coupling.loss,
+  + algebraMass D + coupling.loss,
 ```
 
 with every summand a proved nonnegative budget.  `concreteFullOfCount` is an
@@ -435,26 +435,24 @@ noncomputable def c5algebraOfCount
   chebotarev_fail_le := by
     exact le_of_eq (pmfProb_solverSuccess_compl_eq_algebraMass D huniform)
   oddDegreeOk := fun _ => True
-  oddDegreeLoss := 1
+  -- the event is `True`, so the exact total-variation loss is zero
+  oddDegreeLoss := 0
   oddDegreeLoss_nonneg := by norm_num
   oddDegree_fail_le := by
     unfold OddDegreeSeparation
     rw [pmfProb_not_true_eq_zero D.ideal]
-    norm_num
   valuationOk := fun _ => True
-  valuationLoss := 1
+  valuationLoss := 0
   valuationLoss_nonneg := by norm_num
   valuation_fail_le := by
     unfold EvenValuationClass
     rw [pmfProb_not_true_eq_zero D.ideal]
-    norm_num
   henselOk := fun _ => True
-  henselLoss := 1
+  henselLoss := 0
   henselLoss_nonneg := by norm_num
   hensel_fail_le := by
     unfold HenselEvaluation
     rw [pmfProb_not_true_eq_zero D.ideal]
-    norm_num
 
 /-- The C5.d success event of the count bundle is solver success conjoined with
 three true events. -/
@@ -525,7 +523,7 @@ theorem c5FullOfCount_totalLoss
     (hcoupling : ∀ x, solverSuccess D x → ¬ C.fail x) :
     (c5FullOfCount D pool survivor descent C huniform hcount hcoupling).totalLoss =
       pool.loss + survivor.loss + descent.loss +
-        (algebraMass D + 1 + 1 + 1) + C.loss := by
+        algebraMass D + C.loss := by
   simp [C5FullInputs.totalLoss, C5AlgebraInputs.totalLoss, CouplingInputs.loss,
     c5FullOfCount, c5abcOfCount, c5algebraOfCount]
 
@@ -613,7 +611,7 @@ theorem concreteFullOfCount_totalLoss
       pmfWeight D.ideal x = (Fintype.card D.Sample : ℝ)⁻¹)
     (hcount : HalfMassCount D) :
     (concreteFullOfCount D huniform hcount).totalLoss =
-      Real.exp (-(1 / 16)) + 1 + 1 + (algebraMass D + 1 + 1 + 1) + 1 / 2048 := by
+      Real.exp (-(1 / 16)) + 1 + 1 + algebraMass D + 1 / 2048 := by
   rw [concreteFullOfCount, c5FullOfCount_totalLoss]
   simp [toyBudget_loss_eq, toyStageBudget, solverCouplingInputs, CouplingInputs.loss]
 

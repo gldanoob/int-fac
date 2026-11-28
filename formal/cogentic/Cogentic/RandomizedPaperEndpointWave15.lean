@@ -292,8 +292,8 @@ zero-mass artifact. -/
 theorem toC5_totalLoss (C : Wave15C5Data concrete) (n : ℕ) (hN : 3 ≤ n) :
     c5TotalLoss hN (concrete n hN) (C.toC5 n hN) =
       (C.pool n hN).loss + (C.survivor n hN).loss + (C.descent n hN).loss +
-        (@algebraMass n (concrete n hN) (sampleFintype hN (concrete n hN)) +
-          1 + 1 + 1) + (C.coupling n hN).loss := by
+        @algebraMass n (concrete n hN) (sampleFintype hN (concrete n hN)) +
+          (C.coupling n hN).loss := by
   unfold c5TotalLoss
   simpa only [Wave15C5Data.toC5] using
     @c5FullOfCount_totalLoss n (concrete n hN) (sampleFintype hN (concrete n hN))
