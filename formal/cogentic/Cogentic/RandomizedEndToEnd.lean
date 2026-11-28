@@ -139,6 +139,7 @@ import Cogentic.RandomizedL30GlobalLower
 import Cogentic.RandomizedL30SplitBound
 import Cogentic.RandomizedL30SmoothDensity
 import Cogentic.RandomizedL30Sharp
+import Cogentic.RandomizedL30CentralCount
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
@@ -344,6 +345,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL30SmoothDensity.eventually_paperDensity_binCount
 #print axioms Cogentic.RandomizedL30SmoothDensity.eventually_younisOddGlobalLower_paper
 #print axioms Cogentic.RandomizedL30Sharp.paperRelative_of_sharpUpper
+#print axioms Cogentic.RandomizedL30CentralCount.not_centralWindowPrimeSupply
+#print axioms Cogentic.RandomizedL30CentralCount.sharpCentralOddSmoothCount_iff_interval
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
