@@ -881,6 +881,21 @@ The audit also provides a smaller final interface:
 `serialized_assembled_balancedEnvelopeInfimum_from_moduloInputs`, with the
 structural L21/L19/L20.2/P1/Cantor data already discharged.
 
+- **L34 factorial budgets discharged.** `RandomizedL34FactorialBudgets` proves
+  the error and discarded-ideal log budgets from the elementary Stirling bound
+  `log k! ≤ k log k` and the `T⁶` range plus `degree ≤ T`, with explicit
+  thresholds; the budgets are no longer extra assumptions once the range input
+  and effective statement are supplied.
+- **L19 finite energy bounds.** `RandomizedL19EnergyBounds` proves all five
+  residual `Prop`s (`EnvelopeGrowth₁/₂`, `MassLowerBound₁/₂`,
+  `DenominatorGrowth`) for an explicit finite Poisson model with positive
+  masses/energies and the same quotient as the concrete assembly.
+- **L27 `κ` scalar.** `RandomizedL27KappaBudget` shows `CurveBudget` gives
+  `θ ≤ 4`, hence the assembly bound `κ ≤ c√θ` implies the weakened `κ ≤ 2c`
+  (the converse is false, with counterexamples), and the only scalar content is
+  the equivalent squared inequality `(κ/c)² ≤ θ`. `CurveBudget` alone does not
+  bound `κ`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
