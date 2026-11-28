@@ -4,18 +4,21 @@ Branch `explore/randomized-one-third`, base commit `0bcb1db`, Lean
 `leanprover/lean4:v4.33.1`. This note records what the end-to-end pass actually
 proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
-and a chain of strengthened endpoints `Wave13`–`Wave18`. The strongest current
-theorem is
-`RandomizedPaperEndpointWave18.serialized_assembled_balancedEnvelopeInfimum_from_wave18Inputs`.
-Its hypothesis is a single named record `PaperResidualInputs` of 73 fields, and
-the record is inhabited by the standard one-point family modulo exactly the
-analytic leaf data (the `RandomizedWave17Audit` shows no field is structurally
-impossible). The manuscript bound itself is still **not** proved
+and a chain of strengthened endpoints `Wave13`–`Wave24`. The strongest
+*meaningful* theorem is
+`RandomizedPaperEndpointWave17.serialized_assembled_balancedEnvelopeInfimum_from_wave17Inputs`:
+it quantifies over the actual epoch family `E`, and its hypothesis
+`Wave17Inputs (E s) D` includes the genuine `C1Inputs (E s)`, `C2Inputs (E s)`,
+concrete adapters and C5 data. The later `Wave18`/`Wave22` endpoints specialize
+to a placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
+(`RandomizedC1C2FromConcrete`: `2² ≠ 1` in `ZMod 15`), so those records are
+empty and those endpoints are vacuous; they are retained only as reduction
+scaffolding. `RandomizedPaperEndpointWave24` rebuilds the reduced record in the
+`E`-generic Wave-17 shape. The manuscript bound itself is still **not** proved
 unconditionally: the remaining inputs are the classical `L(1,χ)` lower bound,
 the zeta line zero-free/lower bound, the central short-interval smooth count,
-the paper-scale smooth upper density, the Dedekind zero-free region plus
-zero-height bound, Stark, effective Chebotarev with the factorial log budgets,
-and the subexponential prepass. The interface history below records the vacuity
+the sharp smooth upper density (Rankin saddle), the faithful Dedekind strip,
+Stark, effective Chebotarev, and the subexponential prepass. The interface history below records the vacuity
 repairs that were needed to reach this state.
 
 ## Reproduction
@@ -938,6 +941,28 @@ fields) by the single two-component `ConcreteLeafResidual` from
 (`RiemannZetaZerosOnLine` plus the line estimate and `ZetaLineZeroFree`) and
 the central `ShortIntervalSmoothCountLower`. The endpoint
 `serialized_assembled_balancedEnvelopeInfimum_from_wave21Inputs` is proved.
+
+### Wave 24 (repair): the E-generic endpoint and two interface falsehoods
+
+Two interface defects were found and are being repaired:
+
+- **The `Egood` specialization is vacuous.** `RandomizedC1C2FromConcrete` proves
+  `¬ C1Inputs Egood` (the placeholder transcript has `publicRoot = 1` but a
+  hidden unit `2` with `2² ≠ 1` in `ZMod 15`), hence
+  `¬ Nonempty (PaperResidualInputsFinal D)`. `Wave18`/`Wave22` therefore prove
+  statements about an empty hypothesis record and are not the algorithm. The
+  valid shape is Wave 17, which quantifies over `E` and uses `E` in the
+  conclusion; `RandomizedPaperEndpointWave24` rebuilds the reduced record in
+  that shape.
+- **The zero-sequence interface is vacuous.** `ZetaZeroSequence` has no
+  completeness field, so `DedekindZeroFreeInput` can be satisfied by omitting
+  every zero above `β₀`. `RandomizedL34ZeroFaithful` proves this
+  (`zeroFunction_current_not_faithful`,
+  `dedekindZeroFreeInput_not_imp_complete`) and defines the faithful all-zeros
+  packet `DedekindZeroFreeInputComplete`, which for `ζ_K` is equivalent to
+  `DedekindZetaStripInput`. The packet is restricted to `Re < 1`, which also
+  excludes Mathlib's junk zero at `s = 1` (`LSeries` is a `tsum` and its value
+  at `1` is the junk value `0` when the defining series diverges).
 
 ## What is not proved
 
