@@ -73,6 +73,7 @@ import Cogentic.RandomizedL34ClassicalStark
 import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
+import Cogentic.RandomizedL34EffectiveChebotarev
 import Cogentic.RandomizedL34LogIntegral
 import Cogentic.RandomizedL34ZeroFreeArithmetic
 import Cogentic.RandomizedC5Full
@@ -415,6 +416,8 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL21_2Abel.L21_2AbelInputs.toFourierInputs
 #print axioms Cogentic.RandomizedL34Sides.L34SidesCore.ratedLeaf
 #print axioms Cogentic.RandomizedL34ChebotarevSides.L34ChebotarevSidesInputs.ratedLeaf_slot
+#print axioms Cogentic.RandomizedL34EffectiveChebotarev.errorLogBudget_not_implied_by_statement
+#print axioms Cogentic.RandomizedL34EffectiveChebotarev.L34EffectiveChebotarevInputs.toL34ChebotarevSidesInputs
 #print axioms Cogentic.RandomizedL34LogIntegral.logIntegralBracket_paper
 #print axioms Cogentic.RandomizedL4SquaringSelection.squaringPrimitiveSelection_of_odd
 #print axioms Cogentic.RandomizedL4Cox.faithfulCompositionCox
