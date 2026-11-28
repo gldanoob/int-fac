@@ -1076,6 +1076,22 @@ c1, c2, c3, c4, concrete, p1
   so the geometric/analytic residual is now precisely factored into
   (i) the maximal-order field realization and (ii) the nonprincipal product.
 
+
+- `RandomizedL30Dickman` formalizes the Dickman factor `exp(-u log u)` and an
+  exact Buchstab decomposition: the map `(P,a) ↦ aP` is bijective onto the
+  central smooth orders, and the count splits exactly into large-prime and
+  small-prime parts. It reduces the sharp odd central count to
+  `BuchstabLargePrimeShortIntervalLower` plus an odd-half parity fraction, and
+  gives an explicit non-vacuous witness at `p = 9`. The residual is now a
+  single short-interval Buchstab estimate, not a generic density assertion.
+- `RandomizedL27MaximalOrder` realizes the maximal orders for `D = 4` and
+  `D = 3` using `CyclotomicField 4` and `CyclotomicField 3`: it proves
+  `discr = -4/-3`, signature `(0,1)`, regulator `1`, class number `1`,
+  torsion order `4/6`, and the residues `π/4` and `π/(3√3)`. For general `D`
+  it isolates `QuadraticFieldGap` (the integral basis/discriminant computation
+  for `AdjoinRoot (X² + D)`) and proves the reduction to
+  `FundamentalOrderFieldRealization`.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
