@@ -45,6 +45,7 @@ import Cogentic.RandomizedL20_4Incoming
 import Cogentic.RandomizedL20_4ChildLower
 import Cogentic.RandomizedL20_4PairAlt
 import Cogentic.RandomizedL20_4LeafAssembly
+import Cogentic.RandomizedL20_4TopComparison
 import Cogentic.RandomizedL20_4Mean
 import Cogentic.RandomizedL20_4InteriorBase
 import Cogentic.RandomizedL20_4BaseSource
@@ -99,6 +100,7 @@ import Cogentic.RandomizedL27Weighted
 import Cogentic.RandomizedL27StageOne
 import Cogentic.RandomizedL27GcdModel
 import Cogentic.RandomizedL27KillLaw
+import Cogentic.RandomizedL27StageOneFinish
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
@@ -344,6 +346,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2PaperSmooth.paperSmoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2ConcentrationLeaf.SaddleConcentrationSource.toPaperLeaf
 #print axioms Cogentic.RandomizedL20_4LeafAssembly.top_subexp_of_paperComparison
+#print axioms Cogentic.RandomizedL20_4TopComparison.subexpLoss_via_paperTopComparison
 #print axioms Cogentic.RandomizedL27Weighted.reduction_of_weighted
 #print axioms Cogentic.RandomizedL20_4BaseSource.baseConcentrationSource_paperG11BaseMass
 #print axioms Cogentic.RandomizedL27Siegel.L27SiegelInputs.toTraceClassInputs
@@ -352,6 +355,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL30Interval.paperCentralCount_of_globalUpper
 #print axioms Cogentic.RandomizedL30ShortInterval.paperWitness_shortIntervalCount
 #print axioms Cogentic.RandomizedL27KillLaw.L27KillLawInputs.toStageOneInputs
+#print axioms Cogentic.RandomizedL27StageOneFinish.L27StageOneFinishInputs.reduction
 #print axioms Cogentic.RandomizedL34ClassicalStark.StarkExceptionalZeroInput.toStarkClassicalInput
 #print axioms Cogentic.RandomizedL27StageOne.L27StageOneInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL27GcdModel.L27GCDModelInputs.toStageOneInputs
