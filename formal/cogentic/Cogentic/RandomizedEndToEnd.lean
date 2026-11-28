@@ -76,6 +76,7 @@ import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
 import Cogentic.RandomizedL34EffectiveChebotarev
 import Cogentic.RandomizedL34LogIntegral
+import Cogentic.RandomizedL34FactorialBudgets
 import Cogentic.RandomizedL34ZeroFreeArithmetic
 import Cogentic.RandomizedC5Full
 import Cogentic.RandomizedC5HitMassFinish
@@ -422,6 +423,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL34EffectiveChebotarev.errorLogBudget_not_implied_by_statement
 #print axioms Cogentic.RandomizedL34EffectiveChebotarev.L34EffectiveChebotarevInputs.toL34ChebotarevSidesInputs
 #print axioms Cogentic.RandomizedL34LogIntegral.logIntegralBracket_paper
+#print axioms Cogentic.RandomizedL34FactorialBudgets.exists_threshold_budgets_of_rangeInput
 #print axioms Cogentic.RandomizedL4SquaringSelection.squaringPrimitiveSelection_of_odd
 #print axioms Cogentic.RandomizedL4Cox.faithfulCompositionCox
 #print axioms Cogentic.RandomizedL4Bands.realized_fullSplitBand
