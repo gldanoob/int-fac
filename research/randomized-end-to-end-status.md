@@ -6,15 +6,18 @@ proved. The short version: the conditional assembly is kernel-checked and is now
 composed with an explicit analytic-input ledger, a paper-assumption endpoint,
 and a chain of strengthened endpoints `Wave13`–`Wave25`. The strongest
 meaningful theorem is
-`RandomizedPaperEndpointWave26.serialized_assembled_balancedEnvelopeInfimum_from_wave26Inputs`:
+`RandomizedPaperEndpointWave27.serialized_assembled_balancedEnvelopeInfimum_from_wave27Inputs`:
 it quantifies over the actual epoch family `E`, uses `E` in the conclusion, and
-its record `PaperResidualFor26 (E s) D` contains the genuine `C1Inputs (E s)`,
+its record `PaperResidualFor27 (E s) D` contains the genuine `C1Inputs (E s)`,
 `C2Inputs (E s)`, concrete adapters and C5 data together with the reduced
 analytic leaves. The earlier `Wave18`/`Wave22` endpoints specialize to a
 placeholder epoch `Egood`, whose `C1Inputs` is *provably false*
 (`RandomizedC1C2FromConcrete`: `2² ≠ 1` in `ZMod 15`); those records are empty
 and those endpoints are vacuous, retained only as reduction scaffolding.
-Wave 26 leaves the L30 analytic residual exactly `YounisOddPaperSharpIntervalCount`:
+Wave 27 reduces the L21 input to `RiemannZetaZerosOnLine` plus the central
+short-interval count (the `ZetaSide` lower/upper sequences are replaced by the
+proved off-pole strip bound under RH), and the L30 analytic residual is exactly
+`YounisOddPaperSharpIntervalCount`:
 the sharp upper density is proved unconditionally from `PaperDensityGrowth` and
 `ε > 0`, the global lower bound is proved from GRH at constant `1/8`, and the
 finite-set binomial bound is no longer needed by any ledger consumer.
@@ -1011,6 +1014,22 @@ analytic input.
   `c1Inputs_concreteEpoch`. The search is charged to stage `S0`, so this is a
   genuine (costly) epoch, not a free oracle; it shows the C1 field is
   inhabitable but does not by itself give the paper's cost bound.
+
+
+### Wave 27-29: RH-only L21 and the arithmetic Stark content
+
+- `RandomizedPaperEndpointWave27` removes the entire `ZetaSide` bundle from
+  L21.2: `VerticalLineBound` is derived directly from
+  `stripZetaBoundOffPole_of_RH` and the vertical tail from
+  `verticalTailBound_of_RH`; the L21 residual is exactly
+  `RiemannZetaZerosOnLine ∧ ShortIntervalSmoothCountLower`.
+- `RandomizedPaperEndpointWave28` proves that
+  `StarkExceptionalZeroInput beta0 F discLog` is definitionally just
+  `0 < F`, `0 < log|Δ|` and `beta0 ≤ paperBeta0` — it stores no zero
+  information — and replaces it by that arithmetic content in
+  `Wave28L34Inputs`.
+- A Wave-29 agent is merging the two reductions with the Wave-26 L30 record
+  into one E-generic endpoint.
 
 ## What is not proved
 
