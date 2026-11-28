@@ -79,6 +79,7 @@ import Cogentic.RandomizedL21_2Vertical
 import Cogentic.RandomizedL21_2LineBound
 import Cogentic.RandomizedL21_2Remainder
 import Cogentic.RandomizedL21_2PaperLocal
+import Cogentic.RandomizedL21_2LeafAssembly
 import Cogentic.RandomizedL21_2Tent
 import Cogentic.RandomizedL21_2Abel
 import Cogentic.RandomizedL27_1
@@ -338,6 +339,7 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_4Incoming.not_incomingRootComplement_of_four_le_modulus
 #print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput
 #print axioms Cogentic.RandomizedL21_2PaperLocal.not_powTwoCountLower_of_paperRegime
+#print axioms Cogentic.RandomizedL21_2LeafAssembly.L21_2LeafData.ratedLeaf_loss_le_ledger
 #print axioms Cogentic.RandomizedL27Fiber.curveJ_image_card_le
 #print axioms Cogentic.RandomizedL20_2PaperSmooth.paperSmoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2ConcentrationLeaf.SaddleConcentrationSource.toPaperLeaf
