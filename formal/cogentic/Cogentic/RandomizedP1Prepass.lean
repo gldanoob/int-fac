@@ -46,6 +46,7 @@ No `sorry`, `admit`, `axiom`, or `native_decide` is used.
 namespace Cogentic.RandomizedP1Prepass
 
 open Filter Real
+open scoped Topology
 open Cogentic.RandomizedP1
 open Cogentic.RandomizedP1Sub
 open Cogentic.RandomizedP1Analytic
@@ -281,6 +282,12 @@ def genusTwoSubexpPrepassInput (I : L30Inputs) : SubexpPrepassInput where
 theorem genusTwoSubexpPrepassInput_cost (I : L30Inputs) :
     (genusTwoSubexpPrepassInput I).cost = I.totalCost := rfl
 
+/-- The genus-two input does not set the loss to zero: its miss probability is
+the actual positive H.3 failure probability. -/
+theorem genusTwoSubexpPrepassInput_loss_pos (I : L30Inputs) (n : ℕ) :
+    0 < (genusTwoSubexpPrepassInput I).miss n :=
+  I.loss_pos n
+
 /-- The genus-two input discharges the endpoint's prepass loss slot. -/
 theorem genusTwoPrepass_discharges_slot (I : L30Inputs) :
     ∀ᶠ n : ℕ in atTop,
@@ -412,6 +419,7 @@ theorem trialDivision_subexpGap :
 #print axioms subexpCostRateOfEnvelope
 #print axioms genusTwoSubexpPrepassInput
 #print axioms genusTwoSubexpPrepassInput_cost
+#print axioms genusTwoSubexpPrepassInput_loss_pos
 #print axioms genusTwoPrepass_discharges_slot
 #print axioms ecmSubexpPrepassInput
 #print axioms ecmPrepass_discharges_slot

@@ -135,9 +135,9 @@ theorem younisOddGlobalLower_of_primeSupply_binomial
     (globalOddBinomialCount_of_primeSupply hy2 hsupply hpow hchoose)
 
 /-- **Monotonicity in the constant.**  A binomial count proved at `B` also
-gives the bound at any smaller nonnegative constant. -/
+gives the bound at any smaller constant. -/
 theorem globalOddBinomialCount_mono {B B' : ℝ} {p t err : ℕ → ℝ}
-    (hBB' : B' ≤ B) (hB' : 0 ≤ B') (h : GlobalOddBinomialCount B p t err) :
+    (hBB' : B' ≤ B) (h : GlobalOddBinomialCount B p t err) :
     GlobalOddBinomialCount B' p t err := by
   intro n
   obtain ⟨hy2, P, k, hP, hpow, hchoose⟩ := h n
@@ -198,29 +198,54 @@ theorem globalOddBinomialCount_allSmooth (p : ℕ → ℝ) (hp : ∀ n, 2 ≤ p 
     subst q
     refine ⟨Nat.prime_three, by norm_num, ?_⟩
     rw [hcut]
-    nlinarith
+    norm_num
+    linarith
   · rw [hcut]
     norm_num
     nlinarith
-  · have hchoose : (({3} : Finset ℕ).card.choose 0 : ℕ) = 1 := by simp
-    rw [hchoose]
-    norm_num
+  · have hR : (({3} : Finset ℕ).card.choose 0 : ℝ) = 1 := by
+      rw [show ({3} : Finset ℕ).card = 1 by simp]
+      norm_num
+    rw [hR]
     have hT : Real.exp (-(1 + allSmoothErr n) * allSmoothT p n) =
         1 / (8 * p n ^ 2) := by
       have h1 : (1 + allSmoothErr n) = (1 : ℝ) := by simp [allSmoothErr]
-      rw [h1, one_mul, Real.exp_neg, exp_allSmoothT hp0, one_div]
+      rw [h1]
+      rw [show (-(1 : ℝ)) * allSmoothT p n = -allSmoothT p n by ring,
+        Real.exp_neg, exp_allSmoothT hp0, one_div]
     rw [hT]
     have hden : (8 * p n ^ 2) ≠ 0 := by positivity
     have hval : 8 * p n ^ 2 * (1 / (8 * p n ^ 2)) = 1 := by
       rw [mul_one_div, div_self hden]
     rw [hval]
-    norm_num
 
 /-- The all-smooth global lower bound, re-derived through the binomial count. -/
 theorem younisOddGlobalLower_allSmooth_binomial (p : ℕ → ℝ)
     (hp : ∀ n, 2 ≤ p n) :
     YounisOddGlobalLower 8 p (allSmoothT p) allSmoothErr :=
   younisOddGlobalLower_of_binomialCount (globalOddBinomialCount_allSmooth p hp)
+
+/-- **The all-smooth global odd count is strictly positive.**  The all-smooth
+lower bound `YounisOddGlobalLower 8` has right-hand side exactly `1`, so the
+count is nonempty; this is a second, count-level non-vacuity check independent
+of the binomial witness. -/
+theorem globalOddSmoothCount_allSmooth_pos (p : ℕ → ℝ)
+    (hp : ∀ n, 2 ≤ p n) (n : ℕ) :
+    0 < globalOddSmoothCount p (allSmoothT p) allSmoothErr n := by
+  have hp0 : 0 < p n := by linarith [hp n]
+  have hL := younisOddGlobalLower_allSmooth p hp n
+  have hT : Real.exp (-(1 + allSmoothErr n) * allSmoothT p n) =
+      1 / (8 * p n ^ 2) := by
+    have h1 : (1 + allSmoothErr n) = (1 : ℝ) := by simp [allSmoothErr]
+    rw [h1]
+    rw [show (-(1 : ℝ)) * allSmoothT p n = -allSmoothT p n by ring,
+      Real.exp_neg, exp_allSmoothT hp0, one_div]
+  have htarget : 8 * p n ^ 2 *
+      Real.exp (-(1 + allSmoothErr n) * allSmoothT p n) = 1 := by
+    rw [hT]
+    rw [mul_one_div, div_self (by positivity)]
+  rw [htarget] at hL
+  linarith
 
 /-! ## 2. The raw LPP count and its normalization -/
 
@@ -310,7 +335,10 @@ theorem h5TrialCost_pos {k polyFactor Lc : ℕ → ℝ} {n : ℕ}
     (hpoly : 0 < polyFactor n) (hLc : 0 < Lc n) :
     0 < h5TrialCost k polyFactor Lc n := by
   unfold h5TrialCost zOf cantorTrialCount
-  positivity
+  have h1 : (0 : ℝ) < Real.rpow 2 (k n) := Real.rpow_pos_of_pos (by norm_num) _
+  have h2 : (0 : ℝ) < (2 : ℝ) ^ Nat.ceil (((101 : ℝ) / 100) * k n) :=
+    pow_pos (by norm_num) _
+  exact mul_pos (mul_pos (mul_pos h1 h2) hpoly) hLc
 
 /-- **The elementary Cantor/H.5 bundle with the cost half discharged.**  The
 per-call cost is the literal H.5 expression, so `cantor_literal` is a theorem;
@@ -337,7 +365,8 @@ the cost half alone; it deliberately retains an arbitrary correctness
 proposition rather than asserting the Cantor/Jacobian input. -/
 theorem h5TrialCost_unit_pos (k : ℕ → ℝ) (n : ℕ) :
     0 < h5TrialCost k (fun _ => 1) (fun _ => 1) n :=
-  h5TrialCost_pos (by norm_num) (by norm_num)
+  h5TrialCost_pos (k := k) (polyFactor := fun _ => 1) (Lc := fun _ => 1) (n := n)
+    (by norm_num) (by norm_num)
 
 /-! ## 4. The bundled lower-bound inputs -/
 
@@ -449,7 +478,7 @@ theorem modelCount_lower (C : CantorCostInputs) (n : ℕ) :
     S.p n ^ (5 : ℝ) * Real.exp (-(2 * (1 + S.err n)) * S.t n) ≤
       (S.toPaperInputs C).smoothOrders n * (S.toPaperInputs C).fibrePerOrder n :=
   PaperInputs.modelCount_lower (S.toPaperInputs C) S.p_ge_two
-    (fun n => Nat.cast_nonneg _) n
+    (fun _ => Nat.cast_nonneg _) n
 
 end LowerBoundsInputs
 
@@ -516,6 +545,7 @@ theorem centralCount_paperT_of_intervalCount_binomial
 #print axioms globalOddSmoothCount_pos_of_binomialCount
 #print axioms globalOddBinomialCount_allSmooth
 #print axioms younisOddGlobalLower_allSmooth_binomial
+#print axioms globalOddSmoothCount_allSmooth_pos
 #print axioms LPPModelSuperset
 #print axioms lppRawLogModelCount_of_modelSuperset
 #print axioms lppModelSuperset_multiples
