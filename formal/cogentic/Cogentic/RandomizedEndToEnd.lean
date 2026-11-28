@@ -68,6 +68,7 @@ import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
 import Cogentic.RandomizedC5Full
+import Cogentic.RandomizedC5HitMassFinish
 import Cogentic.RandomizedC5GoodIff
 import Cogentic.RandomizedL21_2
 import Cogentic.RandomizedL21_2Sub
