@@ -77,6 +77,8 @@ import Cogentic.RandomizedL34Range
 import Cogentic.RandomizedL34Sides
 import Cogentic.RandomizedL34ChebotarevSides
 import Cogentic.RandomizedL34EffectiveChebotarev
+import Cogentic.RandomizedL34EffectiveInhabitant
+import Cogentic.RandomizedL34RangeArithmetic
 import Cogentic.RandomizedL34LogIntegral
 import Cogentic.RandomizedL34FactorialBudgets
 import Cogentic.RandomizedL34ZeroFreeArithmetic
@@ -128,6 +130,9 @@ import Cogentic.RandomizedL27LOneSiegel
 import Cogentic.RandomizedL27ClassNumberFormula
 import Cogentic.RandomizedL27ResidueFactorization
 import Cogentic.RandomizedL27MaximalOrder
+import Cogentic.RandomizedL27GaussianFactor
+import Cogentic.RandomizedL27HurwitzArithmetic
+import Cogentic.RandomizedL27QuadraticField
 import Cogentic.RandomizedL30
 import Cogentic.RandomizedL30Sub
 import Cogentic.RandomizedL30Analytic
@@ -143,7 +148,6 @@ import Cogentic.RandomizedL30SplitBound
 import Cogentic.RandomizedL30SmoothDensity
 import Cogentic.RandomizedL30Sharp
 import Cogentic.RandomizedL30CentralCount
-import Cogentic.RandomizedL30Dickman
 import Cogentic.RandomizedL4
 import Cogentic.RandomizedL4Sub
 import Cogentic.RandomizedL4Composition
@@ -351,8 +355,6 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL30Sharp.paperRelative_of_sharpUpper
 #print axioms Cogentic.RandomizedL30CentralCount.not_centralWindowPrimeSupply
 #print axioms Cogentic.RandomizedL30CentralCount.sharpCentralOddSmoothCount_iff_interval
-#print axioms Cogentic.RandomizedL30Dickman.sharpCentralOddSmoothIntervalCount_of_buchstabLargePrime_parity
-#print axioms Cogentic.RandomizedL30Dickman.buchstabOnePairs_card_eq_smoothCount
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.toRatedLeaf
 #print axioms Cogentic.RandomizedL21_2.L21_2Inputs.slot_le
 #print axioms Cogentic.RandomizedL20_4.L20_4Inputs.toSubexpLeaf
@@ -422,6 +424,13 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL27ClassNumberFormula.fieldRealizationAt_four
 #print axioms Cogentic.RandomizedL27ClassNumberFormula.fieldRealizationAt_three
 #print axioms Cogentic.RandomizedL27ClassNumberFormula.regulator_eq_one_of_imaginary_quadratic
+#print axioms Cogentic.RandomizedL27GaussianFactor.gaussianLocal_eq_zetaLocal_mul_chiLocal
+#print axioms Cogentic.RandomizedL27GaussianFactor.classNumberFormula_gaussian_of_eulerProduct_of_L1
+#print axioms Cogentic.RandomizedL27GaussianFactor.classNumberFormula_at_four_evaluates
+#print axioms Cogentic.RandomizedL27HurwitzArithmetic.orderConductorCover
+#print axioms Cogentic.RandomizedL27HurwitzArithmetic.conductorProductGeometric_of_chi
+#print axioms Cogentic.RandomizedL27ClassNumberFormula.discr_of_fundamental
+#print axioms Cogentic.RandomizedL27ClassNumberFormula.quadraticFieldGap_iff_arithmeticInput
 #print axioms Cogentic.RandomizedL34ClassicalStark.StarkExceptionalZeroInput.toStarkClassicalInput
 #print axioms Cogentic.RandomizedL27StageOne.L27StageOneInputs.toPaperInputs
 #print axioms Cogentic.RandomizedL27GcdModel.L27GCDModelInputs.toStageOneInputs
