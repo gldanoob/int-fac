@@ -25,7 +25,9 @@ import Cogentic.RandomizedL20_2Char
 import Cogentic.RandomizedL20_2Saddle
 import Cogentic.RandomizedL20_2SmoothLower
 import Cogentic.RandomizedL20_2SmoothMass
+import Cogentic.RandomizedL20_2PaperMass
 import Cogentic.RandomizedL20_2PaperSmooth
+import Cogentic.RandomizedL20_2ScalarWidth
 import Cogentic.RandomizedL20_2ConcentrationLeaf
 import Cogentic.RandomizedL20_2CoordinateEnergy
 import Cogentic.RandomizedL20_2Decay
@@ -39,6 +41,7 @@ import Cogentic.RandomizedL20_4Conditioned
 import Cogentic.RandomizedL20_4Interior
 import Cogentic.RandomizedL20_4TwoPoint
 import Cogentic.RandomizedL20_4EventMass
+import Cogentic.RandomizedL20_4Incoming
 import Cogentic.RandomizedL20_4ChildLower
 import Cogentic.RandomizedL20_4PairAlt
 import Cogentic.RandomizedL20_4LeafAssembly
@@ -73,7 +76,9 @@ import Cogentic.RandomizedL21_2LocalCount
 import Cogentic.RandomizedL21_2Shift
 import Cogentic.RandomizedL21_2Fourier
 import Cogentic.RandomizedL21_2Vertical
+import Cogentic.RandomizedL21_2LineBound
 import Cogentic.RandomizedL21_2Remainder
+import Cogentic.RandomizedL21_2PaperLocal
 import Cogentic.RandomizedL21_2Tent
 import Cogentic.RandomizedL21_2Abel
 import Cogentic.RandomizedL27_1
@@ -83,6 +88,7 @@ import Cogentic.RandomizedL27Deuring
 import Cogentic.RandomizedL27Stratification
 import Cogentic.RandomizedL27Hurwitz
 import Cogentic.RandomizedL27Scale
+import Cogentic.RandomizedL27Fiber
 import Cogentic.RandomizedL27Window
 import Cogentic.RandomizedL27TraceClass
 import Cogentic.RandomizedL27Siegel
@@ -327,6 +333,12 @@ theorem serialized_assembled_balancedEnvelopeInfimum_from_analyticInputs
 #print axioms Cogentic.RandomizedL20_2SmoothLower.smoothNumberCountLower_twoPow
 #print axioms Cogentic.RandomizedL20_2SmoothLower.exists_smoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2SmoothMass.smoothNumberMassLogLower_selfSmooth
+#print axioms Cogentic.RandomizedL20_2PaperMass.paperMassCountLower
+#print axioms Cogentic.RandomizedL20_2ScalarWidth.primeBinCharacterDecay_of_scaleInequality
+#print axioms Cogentic.RandomizedL20_4Incoming.not_incomingRootComplement_of_four_le_modulus
+#print axioms Cogentic.RandomizedL21_2LineBound.verticalLineBound_of_zetaStripInput
+#print axioms Cogentic.RandomizedL21_2PaperLocal.not_powTwoCountLower_of_paperRegime
+#print axioms Cogentic.RandomizedL27Fiber.curveJ_image_card_le
 #print axioms Cogentic.RandomizedL20_2PaperSmooth.paperSmoothNumberCountLower
 #print axioms Cogentic.RandomizedL20_2ConcentrationLeaf.SaddleConcentrationSource.toPaperLeaf
 #print axioms Cogentic.RandomizedL20_4LeafAssembly.top_subexp_of_paperComparison
