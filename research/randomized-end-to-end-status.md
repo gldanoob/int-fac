@@ -928,6 +928,17 @@ added scalar condition is the uniform threshold
 is a growth condition on `T`, not the budgets themselves (the Stirling proof
 only gives them eventually).
 
+### Wave 21: collapsing the L21.2 structural block
+
+`RandomizedPaperEndpointWave21` replaces the 24 L21.2-specific fields of
+`PaperResidualInputs` (the zeta-side bundle plus the 23 profile/Fourier/tail
+fields) by the single two-component `ConcreteLeafResidual` from
+`RandomizedL21_2ConcreteLeaf`. The new record has 50 fields, and the
+`l21*` hypotheses are gone; the only L21 content left is the zeta side
+(`RiemannZetaZerosOnLine` plus the line estimate and `ZetaLineZeroFree`) and
+the central `ShortIntervalSmoothCountLower`. The endpoint
+`serialized_assembled_balancedEnvelopeInfimum_from_wave21Inputs` is proved.
+
 ## What is not proved
 
 1. **The concrete epoch's analytic content.** Waves 2-5 supply the
